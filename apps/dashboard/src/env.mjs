@@ -14,7 +14,6 @@ export const env = createEnv({
    * built with invalid env vars.
    */
   server: {
-    PLAIN_API_KEY: z.string(),
     OPENAI_API_KEY: z.string(),
     SUPABASE_SERVICE_KEY: z.string(),
     UPSTASH_REDIS_REST_TOKEN: z.string(),
@@ -23,8 +22,6 @@ export const env = createEnv({
     LOOPS_API_KEY: z.string(),
     NOVU_API_KEY: z.string(),
     RESEND_API_KEY: z.string(),
-    BASELIME_SERVICE: z.string(),
-    BASELIME_API_KEY: z.string(),
     OPENPANEL_SECRET_KEY: z.string(),
   },
   /**
@@ -51,8 +48,6 @@ export const env = createEnv({
     PORT: process.env.PORT,
     LOOPS_ENDPOINT: process.env.LOOPS_ENDPOINT,
     LOOPS_API_KEY: process.env.LOOPS_API_KEY,
-    GOCARDLESS_SECRET_ID: process.env.GOCARDLESS_SECRET_ID,
-    GOCARDLESS_SECRET_KEY: process.env.GOCARDLESS_SECRET_KEY,
     NOVU_API_KEY: process.env.NOVU_API_KEY,
     UPSTASH_REDIS_REST_URL: process.env.UPSTASH_REDIS_REST_URL,
     UPSTASH_REDIS_REST_TOKEN: process.env.UPSTASH_REDIS_REST_TOKEN,
@@ -61,12 +56,6 @@ export const env = createEnv({
     NEXT_PUBLIC_TRIGGER_API_KEY: process.env.NEXT_PUBLIC_TRIGGER_API_KEY,
     SUPABASE_SERVICE_KEY: process.env.SUPABASE_SERVICE_KEY,
     OPENAI_API_KEY: process.env.OPENAI_API_KEY,
-    PLAIN_API_KEY: process.env.PLAIN_API_KEY,
-    GOOGLE_APPLICATION_INVOICE_PROCESSOR_ID: process.env.PLAIN_API_KEY,
-    GOOGLE_APPLICATION_EXPENSE_PROCESSOR_ID:
-      process.env.GOOGLE_APPLICATION_EXPENSE_PROCESSOR_ID,
-    BASELIME_SERVICE: process.env.BASELIME_SERVICE,
-    BASELIME_API_KEY: process.env.BASELIME_API_KEY,
     NEXT_PUBLIC_OPENPANEL_CLIENT_ID:
       process.env.NEXT_PUBLIC_OPENPANEL_CLIENT_ID,
     OPENPANEL_SECRET_KEY: process.env.OPENPANEL_SECRET_KEY,

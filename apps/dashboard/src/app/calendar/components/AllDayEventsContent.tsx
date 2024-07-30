@@ -1,3 +1,4 @@
+import type { ExtendedEvent } from "@/types/calendar";
 import {
   ContextMenu,
   ContextMenuContent,
@@ -7,7 +8,6 @@ import {
 import { DateTime, Interval } from "luxon";
 import type { FC } from "react";
 import { useCalendar } from "../contexts/CalendarContext";
-import type { ExtendedEvent } from "@/types/calendar";
 import { formatForDisplay, safeParseDate } from "../utils/dateUtils";
 
 interface AllDayEventsContentProps {

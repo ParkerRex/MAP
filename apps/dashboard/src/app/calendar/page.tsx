@@ -1,15 +1,15 @@
 // /app/calendar/page.tsx
-'use client';
+"use client";
 
-import CalendarGrid from './components/CalendarGrid';
-import CalendarToolbar from './components/CalendarToolbar';
-import { useCalendar } from './contexts/CalendarContext';
+import CalendarGrid from "./components/CalendarGrid";
+import CalendarToolbar from "./components/CalendarToolbar";
+import { useCalendar } from "./contexts/CalendarContext";
 
 export default function CalendarPage() {
   const { events, calendars, visibleCalendars } = useCalendar();
 
   const visibleEvents = events.filter((event) =>
-    visibleCalendars.has(event.organizer?.email ?? ''),
+    visibleCalendars.has(event.organizer?.email ?? ""),
   );
 
   return (

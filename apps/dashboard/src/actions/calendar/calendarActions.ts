@@ -13,7 +13,7 @@ import {
   getCurrentTimestamp,
   safeParseDate,
   safeToISOString,
-} from "./utils/dateUtils";
+} from "../../app/calendar/utils/dateUtils";
 
 const getCalendarClient = async (userId: string) => {
   const authManager = new AuthManager();

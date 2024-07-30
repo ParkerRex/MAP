@@ -1,14 +1,14 @@
-import { DateTime, type Zone } from 'luxon';
+import { DateTime, type Zone } from "luxon";
 
 export function safeParseDate(
   dateInput: string | Date | null | undefined,
   zone?: string | Zone,
 ): DateTime {
-  if (!dateInput) return DateTime.invalid('Invalid input');
+  if (!dateInput) return DateTime.invalid("Invalid input");
 
-  return typeof dateInput === 'string'
-    ? DateTime.fromISO(dateInput, { zone: zone || 'local' })
-    : DateTime.fromJSDate(dateInput, { zone: zone || 'local' });
+  return typeof dateInput === "string"
+    ? DateTime.fromISO(dateInput, { zone: zone || "local" })
+    : DateTime.fromJSDate(dateInput, { zone: zone || "local" });
 }
 
 export function safeToISOString(
@@ -31,11 +31,11 @@ export function formatForDatabase(
 
 export function formatForDisplay(
   dateInput: string | Date | null | undefined,
-  format = 'yyyy-MM-dd HH:mm:ss',
+  format = "yyyy-MM-dd HH:mm:ss",
   zone?: string | Zone,
 ): string {
   const dateTime = safeParseDate(dateInput, zone);
-  return dateTime.isValid ? dateTime.toLocal().toFormat(format) : '';
+  return dateTime.isValid ? dateTime.toLocal().toFormat(format) : "";
 }
 
 export function getCurrentTimestamp(): string {

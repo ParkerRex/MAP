@@ -18,7 +18,7 @@ interface CalendarEventProps {
 }
 
 const MINUTES_IN_HOUR = 60;
-const HOUR_HEIGHT = 64; // 4rem = 64px, matching the h-16 class in CalendarGrid
+const HOUR_HEIGHT = 64;
 
 const CalendarEventComponent: FC<CalendarEventProps> = ({
   events,

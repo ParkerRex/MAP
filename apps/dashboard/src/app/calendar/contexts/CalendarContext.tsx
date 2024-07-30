@@ -20,7 +20,7 @@ import {
   fetchCalendarEvents,
   fetchCalendars,
   updateCalendarEvent,
-} from "../calendarActions";
+} from "../../../actions/calendar/calendarActions";
 import { formatForDatabase, safeParseDate } from "../utils/dateUtils";
 
 export const CalendarContext = createContext<CalendarContextType | undefined>(

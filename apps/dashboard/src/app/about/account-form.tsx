@@ -5,7 +5,6 @@ import { Card } from "@map/ui/card";
 import { CardContent, CardFooter } from "@map/ui/card";
 import { Input } from "@map/ui/input";
 import { Label } from "@map/ui/label";
-import { Skeleton } from "@map/ui/skeleton";
 import type { User } from "@supabase/supabase-js";
 import { useCallback, useEffect, useState } from "react";
 import Avatar from "./avatar";
@@ -29,7 +28,7 @@ export default function AccountForm({
       const { data, error, status } = await supabase
         .from("profile")
         .select("full_name, username, website, avatar_url")
-        .eq("id", user?.id)
+        .eq("id", user?.id as string)
         .single();
 
       if (error && status !== 406) {

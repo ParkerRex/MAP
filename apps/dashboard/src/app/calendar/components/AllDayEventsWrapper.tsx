@@ -1,9 +1,9 @@
 "use client";
 
+import type { ExtendedEvent } from "@/types/calendar";
 import { Button } from "@map/ui/button";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { useState } from "react";
-import type { ExtendedEvent } from "@/types/calendar";
 import { safeParseDate } from "../utils/dateUtils";
 import AllDayEventsContent from "./AllDayEventsContent";
 
