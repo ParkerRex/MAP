@@ -1,4 +1,4 @@
-project_id = "map"
+project_id = "urxakpsnywfnqsanjjbu"
 
 [api]
 enabled = true
@@ -21,8 +21,8 @@ port = 54323
 [auth.external.google]
 # TODO: Replace with env variables
 enabled = true
-client_id = "1028007206790-paurv5r0810p7uu3poe3lmavi4lj37j9.apps.googleusercontent.com"
-secret = "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"
+client_id = "env(GOOGLE_CLIENT_ID)"
+secret = "env(GOOGLE_SECRET)"
 redirect_uri = "http://localhost:54321/auth/v1/callback"
 
 [auth.email]

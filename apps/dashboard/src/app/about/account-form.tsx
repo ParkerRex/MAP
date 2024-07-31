@@ -26,7 +26,7 @@ export default function AccountForm({
       setLoading(true);
 
       const { data, error, status } = await supabase
-        .from("profile")
+        .from("users")
         .select("full_name, username, website, avatar_url")
         .eq("id", user?.id as string)
         .single();
@@ -75,7 +75,7 @@ export default function AccountForm({
         updated_at: new Date().toISOString(),
       });
       if (error) throw error;
-      alert("Profile updated!");
+      alert("User updated!");
     } catch (error) {
       alert("Error updating the data!");
     } finally {

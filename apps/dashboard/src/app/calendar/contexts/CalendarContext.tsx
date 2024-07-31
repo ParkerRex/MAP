@@ -47,7 +47,7 @@ export const CalendarProvider: React.FC<{
     const fetchUserTimezone = async () => {
       const supabase = createClient();
       const { data, error } = await supabase
-        .from("profile")
+        .from("users")
         .select("timezone")
         .eq("id", userId)
         .single();

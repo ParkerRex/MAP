@@ -1,6 +1,6 @@
 # Turbo Repo Todo List
 
-- [ ] Create package.json for each package/app
+- [x] Create package.json for each package/app
 - [ ] Emails
   - [ ] Swap out the actual templates
     - [ ] Waitlist
@@ -27,3 +27,10 @@
 - [ ] Linking environment variables in a smart way 
 - [ ] Events
   - [ ] Adding instrumentation for the calendar and the server actions!
+
+### Getting Around
+#### For db
+1. make your sql changes in a new migration
+2. test them locally
+3. gen types --local 
+4. push your migration to prod `supabase db push --linked`
