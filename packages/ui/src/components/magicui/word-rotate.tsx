@@ -1,9 +1,8 @@
 "use client";
 
+import { cn } from "@map/ui/cn";
 import { AnimatePresence, type HTMLMotionProps, motion } from "framer-motion";
 import { useEffect, useState } from "react";
-
-import { cn } from "@map/ui/cn";
 
 interface WordRotateProps {
   words: string[];
@@ -40,7 +39,7 @@ export default function WordRotate({
   const applyGradient = (text: string) => {
     const wordArray = text.split(" ");
     return wordArray.map((word, index) => {
-      const uniqueKey = `${word}-${index}-${text}`; // Create a more unique key
+      const uniqueKey = `${word}-${index}-${text}`;
       if (gradientWords.includes(index + 1)) {
         return (
           <span
@@ -55,18 +54,22 @@ export default function WordRotate({
     });
   };
 
+  const currentWord = words[index];
+
   return (
-    <div className={`overflow-hidden py-2 ${className}`}>
+    <div className={cn("overflow-hidden py-2", className)}>
       <AnimatePresence mode="wait">
-        <motion.h1
-          key={words[index]}
-          className={cn(className)}
-          {...framerProps}
-        >
-          {applyGradient(words[index])}
-        </motion.h1>
+        {currentWord && (
+          <motion.h1
+            key={currentWord}
+            className={cn("gradient-text", className)}
+            {...framerProps}
+          >
+            {applyGradient(currentWord)}
+          </motion.h1>
+        )}
       </AnimatePresence>
-      <style jsx>{`
+      <style>{`
         .gradient-text {
           background: linear-gradient(90deg, #4CAF50, #2196F3);
           -webkit-background-clip: text;

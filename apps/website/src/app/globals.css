@@ -177,3 +177,12 @@ pre code {
 img::selection {
     background: transparent;
  }
+
+ @keyframes gradientFill {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}

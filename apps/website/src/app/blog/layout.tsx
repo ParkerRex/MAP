@@ -1,5 +1,5 @@
-import { type PostsBySection, getBlogPosts } from '@/lib/blog';
-import type { ReactNode } from 'react';
+import { type PostsBySection, getBlogPosts } from "@/lib/utils/blog";
+import type { ReactNode } from "react";
 
 interface BlogLayoutProps {
   children: ReactNode;

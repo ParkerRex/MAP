@@ -1,50 +1,58 @@
 import type { Metadata } from "next";
 import "./globals.css";
 
+import NavBar from "@/components/NavBar";
+import Footer from "@/components/marketing-footer";
 import { cn } from "@map/ui/cn";
 import { GeistMono } from "geist/font/mono";
 import { GeistSans } from "geist/font/sans";
+import { baseUrl } from "./sitemap";
 
 export const metadata: Metadata = {
   metadataBase: new URL(baseUrl),
   title: {
-    default: "Midday | Run your business smarter",
-    template: "%s | Midday",
+    default:
+      "Map: AI-Powered Health & Productivity Tools | Live Healthier, Work Smarter",
+    template: "%s | Map",
   },
   description:
-    "Midday provides you with greater insight into your business and automates the boring tasks, allowing you to focus on what you love to do instead.",
+    "Revolutionize your lifestyle with Map, the cutting-edge AI health-tech company. Our suite of intelligent tools helps you optimize your health and skyrocket your productivity. Experience personalized guidance, smart scheduling, and comprehensive health tracking - all designed to empower you to live healthier and work smarter. Start your journey to peak performance with Map today.",
   openGraph: {
-    title: "Midday | Run your business smarter",
-    description: "This is my portfolio.",
+    title:
+      "Map: AI-Powered Health & Productivity Tools | Live Healthier, Work Smarter",
+    description:
+      "Revolutionize your lifestyle with Map, the cutting-edge AI health-tech company. Our suite of intelligent tools helps you optimize your health and skyrocket your productivity. Experience personalized guidance, smart scheduling, and comprehensive health tracking - all designed to empower you to live healthier and work smarter. Start your journey to peak performance with Map today.",
     url: baseUrl,
     siteName:
-      "Midday provides you with greater insight into your business and automates the boring tasks, allowing you to focus on what you love to do instead.",
+      "Map: AI-Powered Health & Productivity Tools | Live Healthier, Work Smarter",
     locale: "en_US",
     type: "website",
     images: [
       {
-        url: "https://cdn.midday.ai/opengraph-image.jpg",
+        url: "@opengraph-image.jpg",
         width: 800,
         height: 600,
       },
       {
-        url: "https://cdn.midday.ai/opengraph-image.jpg",
+        url: "@opengraph-image-2.jpg",
         width: 1800,
         height: 1600,
       },
     ],
   },
   twitter: {
-    title: "Midday | Run your business smarter",
-    description: "This is my portfolio.",
+    title:
+      "Map: AI-Powered Health & Productivity Tools | Live Healthier, Work Smarter",
+    description:
+      "Revolutionize your lifestyle with Map, the cutting-edge AI health-tech company. Our suite of intelligent tools helps you optimize your health and skyrocket your productivity. Experience personalized guidance, smart scheduling, and comprehensive health tracking - all designed to empower you to live healthier and work smarter. Start your journey to peak performance with Map today.",
     images: [
       {
-        url: "https://cdn.midday.ai/opengraph-image.jpg",
+        url: "@opengraph-image.jpg",
         width: 800,
         height: 600,
       },
       {
-        url: "https://cdn.midday.ai/opengraph-image.jpg",
+        url: "@opengraph-image-2.jpg",
         width: 1800,
         height: 1600,
       },
@@ -69,7 +77,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
+      <NavBar tocItems={undefined} />
+
       <body
         className={cn(
           "font-sans antialiased dark:bg-black",
@@ -79,6 +89,7 @@ export default function RootLayout({
       >
         {children}
       </body>
+      <Footer />
     </html>
   );
 }

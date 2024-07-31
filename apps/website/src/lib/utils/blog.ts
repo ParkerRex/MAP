@@ -1,5 +1,5 @@
-import fs from 'node:fs/promises';
-import path from 'node:path';
+import fs from "node:fs/promises";
+import path from "node:path";
 
 export type OpenGraphMetadata = {
   type: string;
@@ -42,40 +42,40 @@ export type Post = {
 };
 
 export enum BlogSection {
-  Lists = 'lists',
-  Letters = 'letters',
-  Routines = 'routines',
-  Resources = 'resources',
+  Lists = "lists",
+  Letters = "letters",
+  Routines = "routines",
+  Resources = "resources",
 }
 
 export const BLOG_SECTIONS_DETAILS: Record<BlogSection, SectionDetails> = {
   [BlogSection.Lists]: {
-    title: 'Curated Lists',
-    description: 'Explore our curated lists of topics, tips, and tools.',
-    image: '/images/lists-section.jpg',
+    title: "Curated Lists",
+    description: "Explore our curated lists of topics, tips, and tools.",
+    image: "/images/lists-section.jpg",
   },
   [BlogSection.Letters]: {
-    title: 'Momentum Letters',
-    description: 'Read open letters from our community and team.',
-    image: '/images/letters-section.jpg',
+    title: "Momentum Letters",
+    description: "Read open letters from our community and team.",
+    image: "/images/letters-section.jpg",
   },
   [BlogSection.Routines]: {
-    title: 'Daily Routines',
-    description: 'Discover daily routines and habits for success.',
-    image: '/images/routines-section.jpg',
+    title: "Daily Routines",
+    description: "Discover daily routines and habits for success.",
+    image: "/images/routines-section.jpg",
   },
   [BlogSection.Resources]: {
-    title: 'Resources',
+    title: "Resources",
     description:
-      'Access a wealth of resources to fuel your growth and learning.',
-    image: '/images/resources-section.jpg',
+      "Access a wealth of resources to fuel your growth and learning.",
+    image: "/images/resources-section.jpg",
   },
 };
 
 export function formatDate(date: string) {
   const currentDate = new Date();
   let modifiedDate = date;
-  if (!date.includes('T')) {
+  if (!date.includes("T")) {
     modifiedDate = `${date}T00:00:00`;
   }
   const targetDate = new Date(modifiedDate);
@@ -84,7 +84,7 @@ export function formatDate(date: string) {
   const monthsAgo = currentDate.getMonth() - targetDate.getMonth();
   const daysAgo = currentDate.getDate() - targetDate.getDate();
 
-  let formattedDate = '';
+  let formattedDate = "";
 
   if (yearsAgo > 0) {
     formattedDate = `${yearsAgo}y ago`;
@@ -93,13 +93,13 @@ export function formatDate(date: string) {
   } else if (daysAgo > 0) {
     formattedDate = `${daysAgo}d ago`;
   } else {
-    formattedDate = 'Today';
+    formattedDate = "Today";
   }
 
-  const fullDate = targetDate.toLocaleString('en-us', {
-    month: 'long',
-    day: 'numeric',
-    year: 'numeric',
+  const fullDate = targetDate.toLocaleString("en-us", {
+    month: "long",
+    day: "numeric",
+    year: "numeric",
   });
 
   return `${fullDate} (${formattedDate})`;
@@ -108,21 +108,21 @@ export function formatDate(date: string) {
 function parseFrontmatter(fileContent: string) {
   const frontmatterRegex = /---\s*([\s\S]*?)\s*---/;
   const match = frontmatterRegex.exec(fileContent);
-  if (!match) throw new Error('Frontmatter not found');
+  if (!match) throw new Error("Frontmatter not found");
 
-  if (!match || !match[1]) throw new Error('Frontmatter block is undefined');
+  if (!match || !match[1]) throw new Error("Frontmatter block is undefined");
   const frontMatterBlock = match[1];
-  const content = fileContent.replace(frontmatterRegex, '').trim();
-  const frontMatterLines = frontMatterBlock.trim().split('\n');
+  const content = fileContent.replace(frontmatterRegex, "").trim();
+  const frontMatterLines = frontMatterBlock.trim().split("\n");
   const metadata: Partial<Metadata> = {};
 
   for (const line of frontMatterLines) {
-    const [key, ...valueArr] = line.split(': ');
+    const [key, ...valueArr] = line.split(": ");
     if (!key) continue;
     const value = valueArr
-      .join(': ')
+      .join(": ")
       .trim()
-      .replace(/^['"](.*)['"]$/, '$1');
+      .replace(/^['"](.*)['"]$/, "$1");
     metadata[key.trim() as keyof Metadata] = value;
   }
 
@@ -130,21 +130,21 @@ function parseFrontmatter(fileContent: string) {
 }
 
 async function readMDXFile(filePath: string) {
-  const rawContent = await fs.readFile(filePath, 'utf-8');
+  const rawContent = await fs.readFile(filePath, "utf-8");
   return parseFrontmatter(rawContent);
 }
 
 export async function getBlogPosts(): Promise<PostsBySection> {
-  const dir = path.join(process.cwd(), 'src', 'content');
+  const dir = path.join(process.cwd(), "src", "content");
 
   const mdxFiles = (await fs.readdir(dir)).filter(
-    (file) => path.extname(file) === '.mdx',
+    (file) => path.extname(file) === ".mdx",
   );
 
   const posts = await Promise.all(
     mdxFiles.map(async (file) => {
       const { metadata, content } = await readMDXFile(path.join(dir, file));
-      const slug = path.basename(file, '.mdx');
+      const slug = path.basename(file, ".mdx");
       return { metadata, slug, content };
     }),
   );
@@ -190,16 +190,16 @@ export async function getPostBySlug(
   targetSection: BlogSection,
   targetSlug: string,
 ): Promise<Post> {
-  const dir = path.join(process.cwd(), 'src', 'content');
+  const dir = path.join(process.cwd(), "src", "content");
 
   const mdxFiles = (await fs.readdir(dir)).filter(
-    (file) => path.extname(file) === '.mdx',
+    (file) => path.extname(file) === ".mdx",
   );
 
   const posts = await Promise.all(
     mdxFiles.map(async (file) => {
       const { metadata, content } = await readMDXFile(path.join(dir, file));
-      const slug = path.basename(file, '.mdx');
+      const slug = path.basename(file, ".mdx");
       return { metadata, slug, content };
     }),
   );
@@ -211,7 +211,7 @@ export async function getPostBySlug(
   );
 
   if (!post) {
-    throw new Error('Post not found');
+    throw new Error("Post not found");
   }
 
   return post;

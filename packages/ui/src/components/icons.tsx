@@ -1,4 +1,5 @@
 export const Icons = {
+  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   Logo: (props: any) => (
     <svg
       width="36"

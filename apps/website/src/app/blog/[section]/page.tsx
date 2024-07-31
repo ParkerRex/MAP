@@ -4,10 +4,10 @@ import {
   type Post,
   formatDate,
   getPostsBySection,
-} from '@/lib/blog';
-import { BLOG_SECTIONS_DETAILS } from '@/lib/blog';
-import Image from 'next/image';
-import Link from 'next/link';
+} from "@/lib/utils/blog";
+import { BLOG_SECTIONS_DETAILS } from "@/lib/utils/blog";
+import Image from "next/image";
+import Link from "next/link";
 
 type Props = {
   params: {
@@ -29,7 +29,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     description: sectionDetails.description,
     image: sectionDetails.image, // Assuming you have an image for the section
     openGraph: {
-      type: 'website',
+      type: "website",
       url: fullUrl,
       title: sectionDetails.title,
       description: sectionDetails.description,
@@ -43,8 +43,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       ],
     },
     twitter: {
-      cardType: 'summary_large_image',
-      site: '@mapdotcom',
+      cardType: "summary_large_image",
+      site: "@mapdotcom",
       title: sectionDetails.title,
       description: sectionDetails.description,
       image: sectionDetails.image,
@@ -59,10 +59,10 @@ export default async function SectionPage({ params }: Props) {
   return (
     <div className="mx-auto my-6 max-w-7xl px-4 sm:px-6 lg:px-8">
       <h1 className="mb-12 text-center text-4xl font-bold dark:text-white">
-        Map's{' '}
+        Map's{" "}
         <span className="underline">
           {section.charAt(0).toUpperCase() + section.slice(1)}
-        </span>{' '}
+        </span>{" "}
         Blog Posts
       </h1>
       <p className="mb-5 text-center dark:text-white">
@@ -80,7 +80,7 @@ export default async function SectionPage({ params }: Props) {
             >
               <div>
                 <Image
-                  src={post.metadata.image || '/images/default-blog-image.jpg'}
+                  src={post.metadata.image || "/images/default-blog-image.jpg"}
                   alt={post.metadata.title}
                   width={600}
                   height={400}

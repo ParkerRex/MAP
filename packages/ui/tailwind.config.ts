@@ -7,6 +7,7 @@ export default {
   theme: {
     extend: {
       colors: {
+        black: "#212121",
         fontFamily: {
           sans: "var(--font-geist-sans)",
           mono: "var(--font-geist-mono)",
@@ -144,10 +145,18 @@ export default {
         scroll:
           "scroll var(--animation-duration, 40s) var(--animation-direction, forwards) linear infinite",
       },
+      typography: {
+        quoteless: {
+          css: {
+            "blockquote p:first-of-type::before": { content: "none" },
+            "blockquote p:first-of-type::after": { content: "none" },
+          },
+        },
+      },
       screens: {
         "3xl": "1800px",
       },
     },
   },
-  plugins: [require("tailwindcss-animate")],
+  plugins: [require("tailwindcss-animate"), require("@tailwindcss/typography")],
 } satisfies Config;

@@ -3,14 +3,14 @@ import {
   BlogSection,
   type PostsBySection,
   getBlogPosts,
-} from '@/lib/blog';
-import Image from 'next/image';
-import Link from 'next/link';
+} from "@/lib/utils/blog";
+import Image from "next/image";
+import Link from "next/link";
 
 export const metadata = {
   title: "Map's Blog | Get Educated on Productivity, Health, and Happiness",
   description:
-    'Map delivers short, high value articles on productivity, health, and happiness. ',
+    "Map delivers short, high value articles on productivity, health, and happiness. ",
 };
 
 export default async function BlogPage() {
@@ -19,8 +19,8 @@ export default async function BlogPage() {
   // Custom sort function to prioritize 'Momentum Letters'
   const sortedSections = Object.entries(postsBySection).sort(
     ([sectionA], [sectionB]) => {
-      if (sectionA === 'letters') return -1;
-      if (sectionB === 'letters') return 1;
+      if (sectionA === "letters") return -1;
+      if (sectionB === "letters") return 1;
       return 0;
     },
   );
@@ -36,15 +36,15 @@ export default async function BlogPage() {
               Get Educated Now
             </h1>
             <p className="text-lg">
-              Looking to go deeper?{' '}
+              Looking to go deeper?{" "}
               <Link href="/blog/letters" className="underline">
                 The Momentum Letters.
-              </Link>{' '}
-              are for you. Want quick wins for the day? Check our{' '}
+              </Link>{" "}
+              are for you. Want quick wins for the day? Check our{" "}
               <Link href="/blog/routines" className="underline">
                 routines.
-              </Link>{' '}
-              Just a list of healthy habits, supplements or recipes? Check out{' '}
+              </Link>{" "}
+              Just a list of healthy habits, supplements or recipes? Check out{" "}
               <Link href="/blog/lists" className="underline">
                 lists.
               </Link>
@@ -106,10 +106,10 @@ export default async function BlogPage() {
                           {post.metadata.publishedAt &&
                             `Published on ${new Date(
                               post.metadata.publishedAt,
-                            ).toLocaleDateString('en-US', {
-                              month: 'long',
-                              day: 'numeric',
-                              year: 'numeric',
+                            ).toLocaleDateString("en-US", {
+                              month: "long",
+                              day: "numeric",
+                              year: "numeric",
                             })}`}
                         </p>
                       </div>

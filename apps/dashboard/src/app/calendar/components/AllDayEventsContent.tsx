@@ -35,6 +35,10 @@ const AllDayEventsContent: FC<AllDayEventsContentProps> = ({
     return event.start?.date !== undefined || event.all_day === true;
   };
 
+  const validDaysOfWeek = daysOfWeek.filter(
+    (day): day is Date => day instanceof Date,
+  );
+
   const getEventSpan = (event: ExtendedEvent) => {
     const startDate = safeParseDate(
       event.start?.date || event.start?.dateTime || "",
@@ -45,21 +49,19 @@ const AllDayEventsContent: FC<AllDayEventsContentProps> = ({
 
     if (!startDate || !endDate) return 0;
 
-    let span = 0;
-    for (let i = 0; i < daysOfWeek.length; i++) {
-      const dayDate = DateTime.fromJSDate(daysOfWeek[i]).setZone(userTimeZone);
-      if (Interval.fromDateTimes(startDate, endDate).contains(dayDate)) {
-        span++;
-      }
-    }
-    return span;
+    return validDaysOfWeek.reduce((span, day) => {
+      const dayDate = DateTime.fromJSDate(day).setZone(userTimeZone);
+      return Interval.fromDateTimes(startDate, endDate).contains(dayDate)
+        ? span + 1
+        : span;
+    }, 0);
   };
 
   return (
     <div className="flex border-b border-gray-200 min-h-[2rem]">
       <div className="w-16 flex-shrink-0" />
       <div className="flex-grow grid grid-cols-7">
-        {daysOfWeek.map((day) => (
+        {validDaysOfWeek.map((day) => (
           <div key={day.toString()} className="border-r border-gray-200 p-1">
             {events
               .filter(

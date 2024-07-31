@@ -1,13 +1,10 @@
 "use client";
-import NavBar from "@/components/NavBar";
-import Footer from "@/components/marketing-footer";
 import { Separator } from "@map/ui/separator";
 import React from "react";
 
 function Page() {
   return (
     <div className="flex flex-col min-h-screen w-full">
-      <NavBar tocItems={[]} />
       <main className="flex flex-col justify-between">
         <section className="relative w-full flex flex-col justify-center">
           <div className="px-4 py-8 md:h-[550px] md:flex md:items-center">
@@ -87,7 +84,6 @@ function Page() {
           </div>
         </section>
       </main>
-      <Footer />
     </div>
   );
 }

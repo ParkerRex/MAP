@@ -57,7 +57,7 @@ const SideBarEmailCapture = () => {
     <Card className="">
       <CardContent>
         <CardHeader>
-          <h3 className="font-bold">Get smarter weekly:</h3>
+          <h3 className="font-bold">Weekly Health & Productity Tips</h3>
           <span className="text-6xl">📨</span>
         </CardHeader>
 
@@ -76,7 +76,7 @@ const SideBarEmailCapture = () => {
             <Button
               type="submit"
               disabled={formState === "SUBMITTING"}
-              className="rounded-full px-4 py-2 font-bold  shadow-lg transition ease-in-out hover:-translate-y-1 hover:shadow-2xl "
+              variant="default"
             >
               {formState === "SUBMITTING" ? "Submitting..." : "Get It Now"}
             </Button>

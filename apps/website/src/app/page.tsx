@@ -1,14 +1,11 @@
 import GradientSeparator from "@/components/GradientSeparator";
-import NavBar from "@/components/NavBar";
-import { WaitlistInput } from "@/components/waitlist-input";
-import { Post, getBlogPosts } from "@/lib/blog";
-import WordRotate, { WORD_ROTATE_DURATION } from "@map/ui/magicui/word-rotate";
-import Link from "next/link";
-
 import HealthCrisis from "@/components/health-crisis";
-import Footer from "@/components/marketing-footer";
+import { WaitlistInput } from "@/components/waitlist-input";
+import { Post, getBlogPosts } from "@/lib/utils/blog";
 import { Button } from "@map/ui/button";
+import WordRotate, { WORD_ROTATE_DURATION } from "@map/ui/magicui/word-rotate";
 import dynamic from "next/dynamic";
+import Link from "next/link";
 
 const ClientCloudScene = dynamic(() => import("@/components/cloud-wrapper"), {
   ssr: false,
@@ -27,11 +24,10 @@ export default async function Page() {
 
   return (
     <div className="relative w-full min-h-screen flex flex-col">
-      <div className="absolute inset-0 z-0">
+      <div className="absolute inset-0 z-0 bg-sky-100 h-screen">
         <ClientCloudScene />
       </div>
       <div className="relative z-10 flex flex-col min-h-screen">
-        <NavBar tocItems={undefined} />
         {/* Hero Section - 900px high on desktop, full height on mobile */}
         <section className="min-h-screen md:h-[900px] flex flex-col container relative">
           {/* Mobile header - visible only on small screens */}
@@ -286,7 +282,6 @@ export default async function Page() {
             </div>
           </div>
         </section>
-        <Footer />
       </div>
     </div>
   );

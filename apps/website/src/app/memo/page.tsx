@@ -1,10 +1,10 @@
-import type { Metadata } from 'next';
-import Image from 'next/image';
-import NextScript from 'next/script';
-import parker from 'public/avatar.png';
+import type { Metadata } from "next";
+import Image from "next/image";
+import NextScript from "next/script";
+import parker from "public/avatar.png";
 
 export const metadata: Metadata = {
-  title: 'Master Plan',
+  title: "Master Plan",
 };
 
 export default function Page() {
@@ -14,7 +14,7 @@ export default function Page() {
         <div
           className="h-full bg-gradient-to-r from-slate-500 to-slate-800"
           id="readingProgress"
-          style={{ width: '0' }}
+          style={{ width: "0" }}
         />
       </div>
       <div className="container max-w-[750px]">
@@ -92,7 +92,7 @@ export default function Page() {
             <span className="font-bold">
               PART I: By Bundling and Gamifying Productivity and Health Apps, We
               Build a Generational Business.
-            </span>{' '}
+            </span>{" "}
             Being the comprehensive system for productivity and health is
             lucrative because of the platform power it provides. This allows us
             to offer a bundled pricing model.
@@ -101,7 +101,7 @@ export default function Page() {
             <span className="font-bold">
               PART II: We market our software through hard-hitting media,
               reaching a wide audience to attract new users at a low cost.
-            </span>{' '}
+            </span>{" "}
             We start with long-form content on the blog, then produce videos. We
             chop and distribute thousands of clips across hundreds of accounts
             to overwhelm algorithms. We'll build a young and cost-efficient
@@ -113,7 +113,7 @@ export default function Page() {
             <span className="font-bold">
               PART III: A conversational AI goal coach sets us apart as the
               system of record and coach for goals data.
-            </span>{' '}
+            </span>{" "}
             Map's coach will provide continuous tight feedback loops based on
             live behavior. For example, when you complete a walk, you can opt-in
             to text messages about the walk, how it compared to previous walks,
@@ -127,7 +127,7 @@ export default function Page() {
             <span className="font-bold">
               PART IV: We win consumer productivity and health by offering a
               comprehensive solution, rather than a point solution.
-            </span>{' '}
+            </span>{" "}
             Many consumer SaaS companies have come and gone with the idea of
             handling one area of an individual's goals. These do not work. We
             will offer a core feature set that includes a calendar, opinionated
@@ -143,7 +143,7 @@ export default function Page() {
           <h3 className="font-medium text-xl mb-2">Product Overview</h3>
           <p className="prose prose-lg prose-neutral dark:prose-invert lg:col-span-3 dark:text-white mb-12">
             The best way to understand our product is to see it in action. We're
-            currently in private beta. You can sign up by visiting{' '}
+            currently in private beta. You can sign up by visiting{" "}
             <span className="underline">
               <a href="https://app.mapthemap.com">this link</a>
             </span>

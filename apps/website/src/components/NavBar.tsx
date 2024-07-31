@@ -6,14 +6,30 @@ import { Icons } from "@map/ui/icons";
 import { Separator } from "@map/ui/separator";
 import { AnimatePresence, motion } from "framer-motion";
 import { Menu, X } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import React from "react";
 import { type TOCItem, TableOfContents } from "./TableOfContents";
 
-const DesktopNavBar = ({ isLocalhost, scrolled, pathname, navItems }) => (
+interface NavItem {
+  href: string;
+  label: string;
+}
+
+interface DesktopNavBarProps {
+  isLocalhost: boolean;
+  scrolled: boolean;
+  pathname: string;
+  navItems: NavItem[];
+}
+
+const DesktopNavBar: React.FC<DesktopNavBarProps> = ({
+  isLocalhost,
+  scrolled,
+  pathname,
+  navItems,
+}) => (
   <nav className="fixed top-16 left-10 flex items-center transition-all duration-300 z-50">
     <div className="flex items-center">
       <Link href="/">
@@ -25,7 +41,7 @@ const DesktopNavBar = ({ isLocalhost, scrolled, pathname, navItems }) => (
               : "opacity-0 -translate-x-full mr-0"
           }`}
         >
-          <Icons.Logo className="size-18" />
+          <Icons.Logo className="size-14" />
         </Button>
       </Link>
       <div
@@ -65,7 +81,17 @@ const DesktopNavBar = ({ isLocalhost, scrolled, pathname, navItems }) => (
   </nav>
 );
 
-const MobileNavBar = ({
+interface MobileNavBarProps {
+  isLocalhost: boolean;
+  navItems: NavItem[];
+  handleNavigation: (href: string) => void;
+  isMobileMenuOpen: boolean;
+  setIsMobileMenuOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  scrolled: boolean;
+  tocItems: TOCItem[];
+}
+
+const MobileNavBar: React.FC<MobileNavBarProps> = ({
   isLocalhost,
   navItems,
   handleNavigation,
@@ -77,13 +103,12 @@ const MobileNavBar = ({
   <>
     <nav className="fixed top-0 left-0 right-0 flex items-center justify-between px-4 py-2 z-50">
       <Button
-        variant="ghost"
-        className={`px-2 rounded-full shadow-md hover:shadow-lg transition-all duration-300 bg-white ${
+        className={`px-2 rounded-full shadow-md hover:shadow-lg transition-all duration-300 bg-white opacity-50 ${
           scrolled ? "opacity-100" : "opacity-0"
         }`}
         onClick={() => handleNavigation("/")}
       >
-        <Image src="/logo-light.svg" alt="Logo" width={63} height={18} />
+        <Icons.Logo className="size-4" />
       </Button>
       <Button
         variant="ghost"
@@ -94,14 +119,14 @@ const MobileNavBar = ({
       </Button>
     </nav>
 
-    {!isMobileMenuOpen && tocItems && tocItems.length > 0 && (
+    {tocItems && tocItems.length > 0 && (
       <TableOfContents items={tocItems} title={tocItems[0].title} />
     )}
 
     <AnimatePresence>
       {isMobileMenuOpen && (
         <motion.div
-          className="fixed inset-0 bg-background z-40 pt-16"
+          className="fixed inset-0 bg-white z-40 pt-16"
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -20 }}
@@ -140,7 +165,11 @@ const MobileNavBar = ({
   </>
 );
 
-export default function NavBar({ tocItems }) {
+interface NavBarProps {
+  tocItems?: TOCItem[] | undefined;
+}
+
+export default function NavBar({ tocItems }: NavBarProps) {
   const [isLocalhost, setIsLocalhost] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
@@ -161,7 +190,7 @@ export default function NavBar({ tocItems }) {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  const navItems = [
+  const navItems: NavItem[] = [
     { href: "/about-us", label: "About Us" },
     { href: "/master-plan", label: "Master Plan" },
     { href: "/culture", label: "Culture" },
@@ -181,7 +210,7 @@ export default function NavBar({ tocItems }) {
       isMobileMenuOpen={isMobileMenuOpen}
       setIsMobileMenuOpen={setIsMobileMenuOpen}
       scrolled={scrolled}
-      tocItems={tocItems}
+      tocItems={tocItems || []}
     />
   ) : (
     <DesktopNavBar

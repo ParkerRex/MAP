@@ -101,10 +101,11 @@ export const deleteAllGoalsForUser = async () => {
 
     revalidatePath("/home");
     return data;
-  } catch (err) {
+  } catch (err: unknown) {
     console.error("Unhandled error in deleteAllGoalsForUser:", err);
-    throw new Error(
-      `Unhandled exception: ${err.message || JSON.stringify(err)}`,
-    );
+    if (err instanceof Error) {
+      throw new Error(`Unhandled exception: ${err.message}`);
+    }
+    throw new Error(`Unhandled exception: ${JSON.stringify(err)}`);
   }
 };

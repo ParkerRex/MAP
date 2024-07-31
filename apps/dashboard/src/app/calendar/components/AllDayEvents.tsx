@@ -53,14 +53,12 @@ const CalendarAllDayEvents: FC<CalendarAllDayEventsProps> = ({
 
     if (!startDate.isValid || !endDate.isValid) return 0;
 
-    let span = 0;
-    for (let i = 0; i < daysOfWeek.length; i++) {
-      const dayDate = DateTime.fromJSDate(daysOfWeek[i]).setZone(userTimeZone);
-      if (Interval.fromDateTimes(startDate, endDate).contains(dayDate)) {
-        span++;
-      }
-    }
-    return span;
+    return daysOfWeek.reduce((span, day) => {
+      const dayDate = DateTime.fromJSDate(day).setZone(userTimeZone);
+      return Interval.fromDateTimes(startDate, endDate).contains(dayDate)
+        ? span + 1
+        : span;
+    }, 0);
   };
 
   return (

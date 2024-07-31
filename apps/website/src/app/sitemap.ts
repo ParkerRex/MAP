@@ -1,18 +1,29 @@
-import { getBlogPosts } from "@/lib/blog";
+import { BlogSection, PostsBySection, getBlogPosts } from "@/lib/utils/blog";
+import { BLOG_SECTIONS_DETAILS } from "@/lib/utils/blogconstants";
 import type { MetadataRoute } from "next";
 
-export const baseUrl = "https://midday.ai";
+export const baseUrl = "https://mapthemap.com";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const blogs = getBlogPosts().map((post) => ({
-    url: `${baseUrl}/blog/${post.slug}`,
-    lastModified: post.metadata.publishedAt,
+  const postsBySection = await getBlogPosts();
+
+  const blogSectionUrls = Object.keys(BLOG_SECTIONS_DETAILS).map((section) => ({
+    url: `${baseUrl}/blog/${section}`,
+    lastModified: new Date().toISOString().split("T")[0],
   }));
 
-  const routes = ["", "/updates"].map((route) => ({
+  const blogPostUrls = Object.entries(postsBySection).flatMap(
+    ([section, posts]) =>
+      posts.map((post) => ({
+        url: `${baseUrl}/blog/${section}/${post.slug}`,
+        lastModified: post.metadata.publishedAt,
+      })),
+  );
+
+  const mainRoutes = ["", "/updates", "/blog"].map((route) => ({
     url: `${baseUrl}${route}`,
     lastModified: new Date().toISOString().split("T")[0],
   }));
 
-  return [...routes, ...blogs];
+  return [...mainRoutes, ...blogSectionUrls, ...blogPostUrls];
 }

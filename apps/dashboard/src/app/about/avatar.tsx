@@ -49,13 +49,14 @@ export default function Avatar({
     try {
       setUploading(true);
 
-      if (!event.target.files || event.target.files.length === 0) {
+      const file = event.target.files?.[0];
+      if (!file) {
         throw new Error("You must select an image to upload.");
       }
 
-      const file = event.target.files[0];
       const fileExt = file.name.split(".").pop();
-      const filePath = `${uid}-${Math.random()}.${fileExt}`;
+      const fileName = `${uid}-${Math.random()}`;
+      const filePath = fileExt ? `${fileName}.${fileExt}` : fileName;
 
       const { error: uploadError } = await supabase.storage
         .from("avatars")
@@ -67,7 +68,11 @@ export default function Avatar({
 
       onUpload(filePath);
     } catch (error) {
-      alert("Error uploading avatar!");
+      if (error instanceof Error) {
+        alert(`Error uploading avatar: ${error.message}`);
+      } else {
+        alert("An unknown error occurred while uploading the avatar.");
+      }
     } finally {
       setUploading(false);
     }

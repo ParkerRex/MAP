@@ -1,11 +1,11 @@
-import { MDXRemote } from 'next-mdx-remote/rsc';
-import Image from 'next/image';
-import Link from 'next/link';
-import React from 'react';
-import { Suspense } from 'react';
-import ReactMarkdown from 'react-markdown';
-import { highlight } from 'sugar-high';
-import { TweetComponent } from './tweet';
+import { MDXRemote } from "next-mdx-remote/rsc";
+import Image from "next/image";
+import Link from "next/link";
+import React from "react";
+import { Suspense } from "react";
+import ReactMarkdown from "react-markdown";
+import { highlight } from "sugar-high";
+import { TweetComponent } from "./tweet";
 
 function YouTubeVideo({ src }: { src: string }) {
   return (
@@ -38,7 +38,7 @@ function Table({ data }: { data: { headers: string[]; rows: string[][] } }) {
   const headers = data.headers.map((header, index) => (
     <th
       key={`th-${crypto.randomUUID()}`}
-      style={{ whiteSpace: 'normal', wordWrap: 'break-word' }}
+      style={{ whiteSpace: "normal", wordWrap: "break-word" }}
     >
       {header}
     </th>
@@ -48,7 +48,7 @@ function Table({ data }: { data: { headers: string[]; rows: string[][] } }) {
       {row.map((cell, cellIndex) => (
         <td
           key={`td-${crypto.randomUUID()}`}
-          style={{ whiteSpace: 'normal', wordWrap: 'break-word' }}
+          style={{ whiteSpace: "normal", wordWrap: "break-word" }}
         >
           {cell}
         </td>
@@ -57,7 +57,7 @@ function Table({ data }: { data: { headers: string[]; rows: string[][] } }) {
   ));
 
   return (
-    <table style={{ tableLayout: 'fixed', width: '100%' }}>
+    <table style={{ tableLayout: "fixed", width: "100%" }}>
       <thead>
         <tr>{headers}</tr>
       </thead>
@@ -69,7 +69,7 @@ function Table({ data }: { data: { headers: string[]; rows: string[][] } }) {
 function CustomLink(props: any) {
   const href = props.href;
 
-  if (href.startsWith('/')) {
+  if (href.startsWith("/")) {
     return (
       <Link href={href} {...props}>
         {props.children}
@@ -77,7 +77,7 @@ function CustomLink(props: any) {
     );
   }
 
-  if (href.startsWith('#')) {
+  if (href.startsWith("#")) {
     return <a {...props} />;
   }
 
@@ -186,22 +186,22 @@ function slugify(str: string) {
   return str
     .toLowerCase()
     .trim() // Remove whitespace from both ends of a string
-    .replace(/\s+/g, '-') // Replace spaces with -
-    .replace(/&/g, '-and-') // Replace & with 'and'
-    .replace(/[^\w\-]+/g, '') // Remove all non-word characters except for -
-    .replace(/\-\-+/g, '-'); // Replace multiple - with single -
+    .replace(/\s+/g, "-") // Replace spaces with -
+    .replace(/&/g, "-and-") // Replace & with 'and'
+    .replace(/[^\w\-]+/g, "") // Remove all non-word characters except for -
+    .replace(/\-\-+/g, "-"); // Replace multiple - with single -
 }
 
 function createHeading(level: number) {
   const Heading = ({ children }: { children: React.ReactNode }) => {
-    const slug = slugify(React.Children.toArray(children).join(''));
+    const slug = slugify(React.Children.toArray(children).join(""));
     return React.createElement(
       `h${level}`,
       { id: slug },
-      React.createElement('a', {
+      React.createElement("a", {
         href: `#${slug}`,
         key: `link-${slug}`,
-        className: 'anchor',
+        className: "anchor",
       }),
       children,
     );

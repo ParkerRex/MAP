@@ -19,7 +19,15 @@ type Particle = {
   scale: number;
 };
 
-function Cloud({ name, floatOffset, ...props }) {
+// Define interface for Cloud props
+interface CloudProps {
+  name: string;
+  floatOffset: number;
+  position: [number, number, number];
+  scale: [number, number, number];
+}
+
+function Cloud({ name, floatOffset, ...props }: CloudProps) {
   const group = useRef<THREE.Group>(null);
   const [rotation, setRotation] = useState<[number, number, number]>([0, 0, 0]);
 
@@ -104,12 +112,20 @@ function SkyGradient() {
   );
 }
 
+// Define interface for CloudScene props
+interface CloudSceneProps {
+  width: number;
+  height: number;
+  animationSpeed?: number;
+  isMobile: boolean;
+}
+
 export default function CloudScene({
   width,
   height,
   animationSpeed = 1,
   isMobile,
-}) {
+}: CloudSceneProps) {
   const cloudPositions = useMemo(() => {
     if (isMobile) {
       // Mobile layout: 2 rows, 2 clouds on top, 3 on bottom

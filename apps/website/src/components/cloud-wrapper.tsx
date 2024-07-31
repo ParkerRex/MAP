@@ -12,7 +12,7 @@ export default function ClientCloudScene() {
       const width = window.innerWidth;
       const height = window.innerHeight;
       setDimensions({ width, height });
-      setIsMobile(width < 768); // Adjust this breakpoint as needed
+      setIsMobile(width < 768);
     }
 
     handleResize();
