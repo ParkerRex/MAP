@@ -1,8 +1,8 @@
-import Link from 'next/link';
-import React from 'react';
-import Logo from '../logo';
-import { Separator } from '../ui/separator';
-import { WaitlistInput } from './waitlist-input';
+import { Icons } from "@map/ui/icons";
+import { Separator } from "@map/ui/separator";
+import Link from "next/link";
+import React from "react";
+import { WaitlistInput } from "./waitlist-input";
 
 function MarketingFooter() {
   return (
@@ -10,7 +10,7 @@ function MarketingFooter() {
       <div className="container mx-auto px-4 xl:max-w-none xl:px-16">
         <div className="flex flex-col md:flex-row justify-between">
           <div className="w-full md:w-1/3 mb-12 md:mb-0">
-            <Logo className="size-30" />
+            <Icons.Logo className="size-30" />
             <div className="mb-6 mt-10">
               <h3 className="text-lg font-semibold mb-2">GET EARLY ACCESS</h3>
               <p className="text-sm mb-4">

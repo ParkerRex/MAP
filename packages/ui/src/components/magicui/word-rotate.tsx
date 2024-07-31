@@ -3,7 +3,7 @@
 import { AnimatePresence, type HTMLMotionProps, motion } from "framer-motion";
 import { useEffect, useState } from "react";
 
-import { cn } from "@/utils/cn";
+import { cn } from "@map/ui/cn";
 
 interface WordRotateProps {
   words: string[];

@@ -1,5 +1,5 @@
 "use client";
-import FirstTimeNavBar from "@/components/FirstTimeNavBar";
+import NavBar from "@/components/NavBar";
 import { type TOCItem, TableOfContents } from "@/components/TableOfContents";
 import MarketingFooter from "@/components/marketing-footer";
 import React from "react";
@@ -23,7 +23,7 @@ const tocItems: TOCItem[] = [
 function Page() {
   return (
     <div className="flex flex-col min-h-screen w-full">
-      <FirstTimeNavBar tocItems={tocItems} />
+      <NavBar tocItems={tocItems} />
       <main className="flex-grow">
         <section className="relative w-full h-[740px] flex flex-col justify-center bg-black text-white">
           <div className="px-4">

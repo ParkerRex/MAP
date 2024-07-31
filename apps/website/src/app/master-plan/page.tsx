@@ -1,5 +1,5 @@
 "use client";
-import FirstTimeNavBar from "@/components/FirstTimeNavBar";
+import NavBar from "@/components/NavBar";
 import { TableOfContents } from "@/components/TableOfContents";
 import MarketingFooter from "@/components/marketing-footer";
 
@@ -16,7 +16,7 @@ const tocItems = [
 function Page() {
   return (
     <div className="flex flex-col min-h-screen w-full">
-      <FirstTimeNavBar tocItems={tocItems} />
+      <NavBar tocItems={tocItems} />
       <main className="flex-grow">
         <section className="relative w-full min-h-screen md:h-[900px] flex flex-col pt-16 md:pt-32 bg-black text-white">
           <div className="px-4 flex flex-col justify-center h-full">

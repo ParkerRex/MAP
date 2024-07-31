@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { toast } from 'sonner';
-import { subscribeAction } from './actions/subscribe-action';
+import { useState } from "react";
+import { toast } from "sonner";
+import { subscribeAction } from "../actions/subscribe-action";
 
 interface WaitlistInputProps {
   placeholder?: string;
@@ -11,38 +11,38 @@ interface WaitlistInputProps {
 }
 
 export function WaitlistInput({
-  placeholder = 'Email Address*',
-  buttonText = 'Sign Up',
+  placeholder = "Email Address*",
+  buttonText = "Sign Up",
   onSubmit,
 }: WaitlistInputProps) {
-  const [email, setEmail] = useState('');
-  const [error, setError] = useState('');
+  const [email, setEmail] = useState("");
+  const [error, setError] = useState("");
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setError('');
+    setError("");
     if (email) {
       console.log(`Submitting email: ${email}`);
       const formData = new FormData();
-      formData.append('email', email);
-      const result = await subscribeAction(formData, 'waitlist');
-      console.log('subscribeAction result:', result);
+      formData.append("email", email);
+      const result = await subscribeAction(formData, "waitlist");
+      console.log("subscribeAction result:", result);
 
       if (result.success) {
-        console.log('Subscription successful');
+        console.log("Subscription successful");
         toast.success("You've been added to the waitlist!");
         if (onSubmit) {
           onSubmit(email);
         }
-        setEmail('');
+        setEmail("");
       } else {
-        console.error('Subscription failed:', result.error);
-        setError(result.error || 'Failed to subscribe. Please try again.');
-        toast.error(result.error || 'Failed to subscribe. Please try again.');
+        console.error("Subscription failed:", result.error);
+        setError(result.error || "Failed to subscribe. Please try again.");
+        toast.error(result.error || "Failed to subscribe. Please try again.");
       }
     } else {
-      setError('Please enter a valid email address.');
-      toast.error('Please enter a valid email address.');
+      setError("Please enter a valid email address.");
+      toast.error("Please enter a valid email address.");
     }
   };
 

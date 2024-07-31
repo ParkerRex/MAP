@@ -1,5 +1,5 @@
-import FirstTimeNavBar from "@/components/FirstTimeNavBar";
 import GradientSeparator from "@/components/GradientSeparator";
+import NavBar from "@/components/NavBar";
 import { WaitlistInput } from "@/components/waitlist-input";
 import { Post, getBlogPosts } from "@/lib/blog";
 import WordRotate, { WORD_ROTATE_DURATION } from "@map/ui/magicui/word-rotate";
@@ -31,7 +31,7 @@ export default async function Page() {
         <ClientCloudScene />
       </div>
       <div className="relative z-10 flex flex-col min-h-screen">
-        <FirstTimeNavBar tocItems={undefined} />
+        <NavBar tocItems={undefined} />
         {/* Hero Section - 900px high on desktop, full height on mobile */}
         <section className="min-h-screen md:h-[900px] flex flex-col container relative">
           {/* Mobile header - visible only on small screens */}

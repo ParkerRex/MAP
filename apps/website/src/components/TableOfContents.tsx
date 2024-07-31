@@ -1,8 +1,8 @@
-'use client';
-import { ChevronDown, ChevronUp } from 'lucide-react';
-import type React from 'react';
-import { useEffect, useState } from 'react';
-import { Button } from './ui/button';
+"use client";
+import { Button } from "@map/ui/button";
+import { ChevronDown, ChevronUp } from "lucide-react";
+import type React from "react";
+import { useEffect, useState } from "react";
 
 export interface TOCItem {
   id: string;
@@ -21,7 +21,7 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({
 }) => {
   if (items.length === 0) return null;
 
-  const [activeId, setActiveId] = useState<string>('');
+  const [activeId, setActiveId] = useState<string>("");
   const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
@@ -35,7 +35,7 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({
     };
 
     const observerOptions = {
-      rootMargin: '-10% 0px -85% 0px',
+      rootMargin: "-10% 0px -85% 0px",
       threshold: 0,
     };
 
@@ -61,7 +61,7 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({
   const toggleOpen = () => setIsOpen(!isOpen);
 
   const currentTitle =
-    items.find((item) => item.id === activeId)?.title || title || 'Contents';
+    items.find((item) => item.id === activeId)?.title || title || "Contents";
 
   return (
     <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50">
@@ -83,8 +83,8 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({
                     href={`#${item.id}`}
                     className={`block py-1 px-2 rounded ${
                       activeId === item.id
-                        ? 'bg-gray-100 font-semibold'
-                        : 'text-gray-600'
+                        ? "bg-gray-100 font-semibold"
+                        : "text-gray-600"
                     }`}
                     onClick={() => setIsOpen(false)}
                   >

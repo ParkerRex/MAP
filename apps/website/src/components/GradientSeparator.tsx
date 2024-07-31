@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import type React from 'react';
-import { useEffect, useState } from 'react';
+import type React from "react";
+import { useEffect, useState } from "react";
 
 const GradientSeparator: React.FC = () => {
   const [key, setKey] = useState(0);
@@ -20,9 +20,9 @@ const GradientSeparator: React.FC = () => {
         key={key}
         className="absolute inset-0 animate-gradientFill"
         style={{
-          background: 'linear-gradient(to right, #4ade80, #60a5fa)',
-          maskImage: 'linear-gradient(to right, transparent, black)',
-          WebkitMaskImage: 'linear-gradient(to right, transparent, black)',
+          background: "linear-gradient(to right, #4ade80, #60a5fa)",
+          maskImage: "linear-gradient(to right, transparent, black)",
+          WebkitMaskImage: "linear-gradient(to right, transparent, black)",
         }}
       />
     </div>

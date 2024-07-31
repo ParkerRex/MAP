@@ -29,6 +29,7 @@
     "./carousel": "./src/components/carousel.tsx",
     "./checkbox": "./src/components/checkbox.tsx",
     "./chart": "./src/components/chart.tsx",
+    "./cn": "./src/utils/cn.ts",
     "./collapsible": "./src/components/collapsible.tsx",
     "./combobox": "./src/components/combobox.tsx",
     "./combobox-dropdown": "./src/components/combobox-dropdown.tsx",
@@ -45,7 +46,9 @@
     "./input": "./src/components/input.tsx",
     "./input-otp": "./src/components/input-otp.tsx",
     "./label": "./src/components/label.tsx",
+    "./magicui/word-rotate": "./src/components/magicui/word-rotate.tsx",
     "./month-range-picker": "./src/components/month-range-picker.tsx",
+    "./number-ticker": "./src/components/magicui/number-ticker.tsx",
     "./navigation-menu": "./src/components/navigation-menu.tsx",
     "./popover": "./src/components/popover.tsx",
     "./postcss": "./postcss.config.js",
@@ -65,10 +68,7 @@
     "./toast": "./src/components/toast.tsx",
     "./toaster": "./src/components/toaster.tsx",
     "./tooltip": "./src/components/tooltip.tsx",
-    "./use-toast": "./src/components/use-toast.tsx",
-    "./cn": "./src/utils/cn.ts",
-    "./magicui/word-rotate": "./src/components/magicui/word-rotate.tsx",
-    "./number-ticker": "./src/components/magicui/number-ticker.tsx"
+    "./use-toast": "./src/components/use-toast.tsx"
   },
   "dependencies": {
     "@mui/icons-material": "^5.16.5",

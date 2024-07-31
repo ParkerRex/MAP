@@ -1,17 +1,17 @@
-'use client';
-import { Center, GradientTexture, Text } from '@react-three/drei';
-import { Canvas, extend, useFrame } from '@react-three/fiber';
-import type { ThreeEvent } from '@react-three/fiber';
-import type React from 'react';
-import { Suspense, useEffect, useMemo, useRef, useState } from 'react';
-import { createNoise3D } from 'simplex-noise';
-import type * as THREE from 'three';
-import { Vector3 } from 'three';
+"use client";
+import { Center, GradientTexture, Text } from "@react-three/drei";
+import { Canvas, extend, useFrame } from "@react-three/fiber";
+import type { ThreeEvent } from "@react-three/fiber";
+import type React from "react";
+import { Suspense, useEffect, useMemo, useRef, useState } from "react";
+import { createNoise3D } from "simplex-noise";
+import type * as THREE from "three";
+import { Vector3 } from "three";
 
 extend({ GradientTexture });
 
 const noise3D = createNoise3D(Math.random);
-const names = ['Notes', 'Tasks', 'Health', 'Chats', 'Calendar'];
+const names = ["Notes", "Tasks", "Health", "Chats", "Calendar"];
 
 // Define a type for the particle object
 type Particle = {
@@ -60,7 +60,7 @@ function Cloud({ name, floatOffset, ...props }) {
     <group ref={group} {...props} onClick={handleClick} scale={[0.8, 0.8, 0.8]}>
       {particles.map((particle, index) => (
         <mesh
-          key={`particle-${particle.position.join('-')}-${particle.scale}`}
+          key={`particle-${particle.position.join("-")}-${particle.scale}`}
           position={particle.position}
           scale={particle.scale}
         >
@@ -96,7 +96,7 @@ function SkyGradient() {
       <meshBasicMaterial>
         <GradientTexture
           stops={[0, 0.3, 1]}
-          colors={['#237697', '#5ab8dd', '#d0f8f7']}
+          colors={["#237697", "#5ab8dd", "#d0f8f7"]}
           size={1024}
         />
       </meshBasicMaterial>
