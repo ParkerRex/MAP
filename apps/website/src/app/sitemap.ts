@@ -1,23 +1,18 @@
-import { getBlogPosts } from "@/utils/blog";
+import { getBlogPosts } from "@/lib/blog";
+import type { MetadataRoute } from "next";
 
-export default async function sitemap() {
-	const blogPosts = await getBlogPosts();
-	if (!blogPosts) {
-		// Return an empty array or handle the error as appropriate
-		return [];
-	}
+export const baseUrl = "https://midday.ai";
 
-	const blogs = Object.entries(blogPosts).flatMap(([section, posts]) =>
-		posts.map((post) => ({
-			url: `https://mapthemap.com/blog/${section}/${post.slug}`,
-			lastModified: post.metadata.publishedAt,
-		})),
-	);
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const blogs = getBlogPosts().map((post) => ({
+    url: `${baseUrl}/blog/${post.slug}`,
+    lastModified: post.metadata.publishedAt,
+  }));
 
-	const routes = ["", "/blog"].map((route) => ({
-		url: `https://mapthemap.com${route}`,
-		lastModified: new Date().toISOString().split("T")[0],
-	}));
+  const routes = ["", "/updates"].map((route) => ({
+    url: `${baseUrl}${route}`,
+    lastModified: new Date().toISOString().split("T")[0],
+  }));
 
-	return [...routes, ...blogs];
+  return [...routes, ...blogs];
 }

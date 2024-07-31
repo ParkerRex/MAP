@@ -4,9 +4,9 @@ import Link from "next/link";
 import React from "react";
 import { WaitlistInput } from "./waitlist-input";
 
-function MarketingFooter() {
+function Footer() {
   return (
-    <footer className="w-full bg-white py-16">
+    <footer className="flex w-full bg-white py-16">
       <div className="container mx-auto px-4 xl:max-w-none xl:px-16">
         <div className="flex flex-col md:flex-row justify-between">
           <div className="w-full md:w-1/3 mb-12 md:mb-0">
@@ -136,4 +136,4 @@ function MarketingFooter() {
   );
 }
 
-export default MarketingFooter;
+export default Footer;

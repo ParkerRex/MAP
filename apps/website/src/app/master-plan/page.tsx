@@ -1,7 +1,7 @@
 "use client";
 import NavBar from "@/components/NavBar";
 import { TableOfContents } from "@/components/TableOfContents";
-import MarketingFooter from "@/components/marketing-footer";
+import Footer from "@/components/marketing-footer";
 
 const tocItems = [
   { id: "our-mission", title: "OUR MISSION", level: 1 },
@@ -318,7 +318,7 @@ function Page() {
           </div>
         </section>
       </main>
-      <MarketingFooter />
+      <Footer />
       <TableOfContents items={tocItems} title="Master Plan" />
     </div>
   );

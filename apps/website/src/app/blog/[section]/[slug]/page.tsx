@@ -12,7 +12,7 @@ import { formatDate } from "@/lib/blog";
 import { notFound } from "next/navigation";
 import NextScript from "next/script";
 
-import MarketingFooter from "@/components/marketing-footer";
+import Footer from "@/components/marketing-footer";
 import { validateBlogSection } from "@/lib/blog";
 
 type Props = {
@@ -108,11 +108,8 @@ export default async function BlogListingPage({
     notFound();
   }
 
-  const shareUrl = `https://mapthemap.com/blog/${section}/${post.slug}`;
-  const shareTitle = post.metadata.title;
-
   return (
-    <section className="flex flex-col items-center justify-center py-6 lg:py-10">
+    <div className="flex flex-col min-h-screen">
       <script
         type="application/ld+json"
         suppressHydrationWarning
@@ -127,7 +124,7 @@ export default async function BlogListingPage({
             image: post.metadata.image
               ? `https://mapthemap.com${post.metadata.image}`
               : `https://mapthemap.com/og?title=${post.metadata.title}`,
-            url: shareUrl,
+
             author: {
               name: "Parker",
             },
@@ -141,31 +138,32 @@ export default async function BlogListingPage({
           style={{ width: "0" }}
         />
       </div>
-      <hr className="my-8" />
-      <div className="container w-full max-w-4xl py-12">
-        <h1 className="mb-4 text-5xl font-extrabold tracking-tighter md:text-6xl dark:text-white">
-          {post.metadata.title}
-        </h1>
-        <div className="mb-8 mt-2 flex items-center justify-between text-sm">
-          <p className="text-sm text-neutral-600 dark:text-white">
-            {formatDate(post.metadata.publishedAt)}
-          </p>
+      <main className="flex-grow">
+        <div className="container max-w-[1140px] mx-auto">
+          <hr className="my-8" />
+          <div className="w-full max-w-4xl py-12 mx-auto">
+            <h1 className="mb-4 text-5xl font-extrabold tracking-tighter md:text-6xl dark:text-white">
+              {post.metadata.title}
+            </h1>
+            <div className="mb-8 mt-2 flex items-center justify-between text-sm">
+              <p className="text-sm text-neutral-600 dark:text-white">
+                {formatDate(post.metadata.publishedAt)}
+              </p>
+            </div>
+            <div className="gap-8 lg:grid lg:grid-cols-4">
+              <article className="max-w-[680px] pt-[80px] md:pt-[150px] w-full">
+                <CustomMDX source={post.content} />
+              </article>
+            </div>
+          </div>
         </div>
-        <div className="gap-8 lg:grid lg:grid-cols-4">
-          <article className="prose prose-lg prose-neutral dark:prose-invert lg:col-span-3 dark:text-white">
-            <CustomMDX source={post.content} />
-          </article>
-          <aside className="sticky top-[65px] hidden max-h-[calc(100vh-65px)] space-y-20 overflow-y-auto border-l border-neutral-200 dark:border-neutral-700 pl-4 lg:col-span-1 lg:block">
-            <SideBarEmailCapture />
-          </aside>
-        </div>
-      </div>
+      </main>
+      <Footer />
       <NextScript
         id="reading-progress-script"
         strategy="afterInteractive"
         src="/scripts/reading-progress.js"
       />
-      <MarketingFooter />
-    </section>
+    </div>
   );
 }

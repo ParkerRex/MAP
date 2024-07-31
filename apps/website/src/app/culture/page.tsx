@@ -1,7 +1,7 @@
 "use client";
 import NavBar from "@/components/NavBar";
 import { type TOCItem, TableOfContents } from "@/components/TableOfContents";
-import MarketingFooter from "@/components/marketing-footer";
+import Footer from "@/components/marketing-footer";
 import React from "react";
 
 import {
@@ -287,7 +287,7 @@ function Page() {
           </div>
         </section>
       </main>
-      <MarketingFooter />
+      <Footer />
       <TableOfContents items={tocItems} title="Culture at Map" />
     </div>
   );

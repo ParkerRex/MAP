@@ -1,4 +1,4 @@
-import { cn } from "@midday/ui/cn";
+import { cn } from "@map/ui/cn";
 import {
   Body,
   Button,

@@ -1,6 +1,6 @@
 "use client";
 import NavBar from "@/components/NavBar";
-import MarketingFooter from "@/components/marketing-footer";
+import Footer from "@/components/marketing-footer";
 import { Separator } from "@map/ui/separator";
 import React from "react";
 
@@ -87,7 +87,7 @@ function Page() {
           </div>
         </section>
       </main>
-      <MarketingFooter />
+      <Footer />
     </div>
   );
 }

@@ -6,7 +6,7 @@ import WordRotate, { WORD_ROTATE_DURATION } from "@map/ui/magicui/word-rotate";
 import Link from "next/link";
 
 import HealthCrisis from "@/components/health-crisis";
-import MarketingFooter from "@/components/marketing-footer";
+import Footer from "@/components/marketing-footer";
 import { Button } from "@map/ui/button";
 import dynamic from "next/dynamic";
 
@@ -286,7 +286,7 @@ export default async function Page() {
             </div>
           </div>
         </section>
-        <MarketingFooter />
+        <Footer />
       </div>
     </div>
   );
