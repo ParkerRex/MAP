@@ -34,3 +34,9 @@
 2. test them locally
 3. gen types --local 
 4. push your migration to prod `supabase db push --linked`
+
+
+
+#### Log
+- [x] Merge pull request #208 from midday-ai/feature/inbox-ocr-provider
+- 
