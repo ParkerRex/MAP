@@ -1,20 +1,10 @@
 "use server";
 
-import {
-  formatForDatabase,
-  formatForDisplay,
-  getCurrentTimestamp,
-  safeParseDate,
-  safeToISOString,
-} from "@/app/calendar/utils/dateUtils";
 import { AuthManager } from "@/lib/integrations/auth";
-import { CalendarClient } from "@/lib/integrations/calendar";
-import { CalendarSyncService } from "@/services/CalendarSyncService";
-import type { Calendar } from "@/types/calendar";
+
 import { createClient } from "@map/supabase/server";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { calendar_v3 } from "googleapis";
-import { DateTime } from "luxon";
 
 export async function checkGoogleIntegration(userId: string) {
   const authManager = new AuthManager();
@@ -22,8 +12,8 @@ export async function checkGoogleIntegration(userId: string) {
 }
 
 export async function syncCalendar(userId: string) {
-  const calendarSyncService = new CalendarSyncService();
-  return await calendarSyncService.syncCalendar(userId);
+  // TODO: Implement calendar sync logic without CalendarSyncService
+  throw new Error("Calendar sync not implemented");
 }
 
 async function upsertCalendars(
@@ -70,8 +60,8 @@ export async function initiateGoogleAuth() {
 }
 
 export async function refreshCalendarData(userId: string) {
-  const calendarSyncService = new CalendarSyncService();
-  return await calendarSyncService.syncCalendar(userId);
+  // TODO: Implement calendar refresh logic without CalendarSyncService
+  throw new Error("Calendar refresh not implemented");
 }
 
 export async function refreshAllCalendarData() {
@@ -81,12 +71,15 @@ export async function refreshAllCalendarData() {
     console.error("Error fetching users:", error);
     throw error;
   }
-  const calendarSyncService = new CalendarSyncService();
-  let totalChanges = 0;
+  const totalChanges = 0;
   for (const user of users) {
     try {
-      const result = await calendarSyncService.syncCalendar(user.id);
-      totalChanges += result.events_synced;
+      // TODO: Implement calendar sync logic without CalendarSyncService
+      // For now, we'll just log a message
+      console.log(`Refreshing calendar data for user ${user.id}`);
+      // Placeholder for actual sync logic
+      // const result = await someFunction(user.id);
+      // totalChanges += result.events_synced;
     } catch (error) {
       console.error(
         `Error refreshing calendar data for user ${user.id}:`,
@@ -95,22 +88,4 @@ export async function refreshAllCalendarData() {
     }
   }
   return totalChanges;
-}
-
-export async function getSyncStatus(userId: string) {
-  const supabase = createClient();
-  const { data, error } = await supabase
-    .from("sync_job")
-    .select("*")
-    .eq("user_id", userId)
-    .order("created_at", { ascending: false })
-    .limit(1)
-    .single();
-
-  if (error) {
-    console.error("Error fetching sync status:", error);
-    return { status: "error" };
-  }
-
-  return data;
 }
