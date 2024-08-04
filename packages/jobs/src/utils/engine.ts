@@ -1,4 +1,4 @@
-import Midday from "@midday-ai/engine";
+import MapEngine from "@map/engine";
 
 export const engine = new Midday({
   environment: process.env.MIDDAY_ENGINE_ENVIRONMENT as
