@@ -19,6 +19,7 @@ CREATE TABLE IF NOT EXISTS "public"."users" (
   "avatar_url" TEXT,
   "website" TEXT,
   "timezone" TEXT,
+  "week_starts_on_monday" BOOLEAN DEFAULT false,
   "updated_at" TIMESTAMPTZ
 );
 CREATE TABLE IF NOT EXISTS "public"."calendars" (

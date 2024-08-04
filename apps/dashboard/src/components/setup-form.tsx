@@ -3,7 +3,7 @@
 import { setupUserSchema } from "@/actions/schema";
 import { setupUserAction } from "@/actions/setup-user-action";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Button } from "@midday/ui/button";
+import { Button } from "@map/ui/button";
 import {
   Form,
   FormControl,
@@ -12,9 +12,9 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@midday/ui/form";
-import { Input } from "@midday/ui/input";
-import { useToast } from "@midday/ui/use-toast";
+} from "@map/ui/form";
+import { Input } from "@map/ui/input";
+import { useToast } from "@map/ui/use-toast";
 import { Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import { useForm } from "react-hook-form";
@@ -37,7 +37,6 @@ export function SetupForm() {
     resolver: zodResolver(setupUserSchema),
     defaultValues: {
       full_name: "",
-      team_name: "",
     },
   });
 
@@ -66,22 +65,6 @@ export function SetupForm() {
             </FormItem>
           )}
         />
-
-        <FormField
-          control={form.control}
-          name="team_name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Team name</FormLabel>
-              <FormControl>
-                <Input placeholder="Team name" {...field} />
-              </FormControl>
-              <FormDescription>This is your team name.</FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
         <Button type="submit" className="w-full" disabled={isSubmitting}>
           {isSubmitting ? (
             <Loader2 className="h-4 w-4 animate-spin" />

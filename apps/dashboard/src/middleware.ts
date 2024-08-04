@@ -57,6 +57,8 @@ export async function middleware(request: NextRequest) {
   ) {
     return NextResponse.redirect(`${url.origin}/setup`);
   }
+
+  return response;
 }
 
 export const config = {

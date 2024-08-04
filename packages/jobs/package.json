@@ -14,7 +14,7 @@
     "@fast-csv/format": "5.0.0",
     "@langchain/community": "^0.2.20",
     "@langchain/core": "^0.2.18",
-    "@midday-ai/engine": "^0.1.0-alpha.19",
+    "@map/engine": "workspace:*",
     "@trigger.dev/react": "2.3.19",
     "@trigger.dev/resend": "2.3.19",
     "@trigger.dev/sdk": "2.3.19",
