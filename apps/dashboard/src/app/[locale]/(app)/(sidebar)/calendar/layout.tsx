@@ -1,8 +1,8 @@
+import ContextPanel from "@/components/calendar/calendar-context-panel";
+import CalendarMenu from "@/components/calendar/calendar-menu";
+import { CalendarProvider } from "@/store/calendar-context";
 import { createClient } from "@map/supabase/server";
 import { redirect } from "next/navigation";
-import CalendarMenu from "./components/CalendarMenu";
-import ContextPanel from "./components/ContextPanel";
-import { CalendarProvider } from "./contexts/CalendarContext";
 
 export default async function CalendarLayout({
   children,

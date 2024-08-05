@@ -1,9 +1,8 @@
-// /app/calendar/page.tsx
 "use client";
 
-import CalendarGrid from "./components/CalendarGrid";
-import CalendarToolbar from "./components/CalendarToolbar";
-import { useCalendar } from "./contexts/CalendarContext";
+import CalendarGrid from "@/components/calendar/calendar-grid";
+import CalendarToolbar from "@/components/calendar/calendar-toolbar";
+import { useCalendar } from "@/store/calendar-context";
 
 export default function CalendarPage() {
   const { events, calendars, visibleCalendars } = useCalendar();

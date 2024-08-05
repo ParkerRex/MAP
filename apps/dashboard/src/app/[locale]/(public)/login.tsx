@@ -1,3 +1,4 @@
+// TODO: Set up login auth ids and swap out copy
 import { ConsentBanner } from "@/components/consent-banner";
 import { DesktopCommandMenuSignIn } from "@/components/desktop-command-menu-sign-in";
 import { GithubSignIn } from "@/components/github-sign-in";

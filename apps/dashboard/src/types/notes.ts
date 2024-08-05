@@ -1,4 +1,4 @@
-import type { LucideIcon } from 'lucide-react';
+import type { LucideIcon } from "lucide-react";
 
 export type Note = {
   id: string;
@@ -23,7 +23,6 @@ export type Folder = {
 export interface FolderBarProps {
   folders: FolderType[];
   notes: Note[];
-  sharedNotes: Note[];
 }
 
 export interface FolderType {
