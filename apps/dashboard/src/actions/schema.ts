@@ -1,3 +1,4 @@
+// TODO: Update to fit our schema
 import { z } from "zod";
 
 export const updateUserSchema = z.object({

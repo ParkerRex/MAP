@@ -1,7 +1,6 @@
-import React from 'react';
-import { ProgressDemo } from './Progress';
-import SpotifyPlayer from './SpotifyPlayer';
-import WeatherMiniBar from './Weather';
+import React from "react";
+import { ProgressDemo } from "./Progress";
+import WeatherMiniBar from "./Weather";
 
 export default function Minibar() {
   return (
@@ -10,7 +9,6 @@ export default function Minibar() {
         <WeatherMiniBar />
       </div>
       <div className="hidden md:flex pr-2">
-        {/* <SpotifyPlayer /> */}
         <ProgressDemo />
       </div>
     </div>

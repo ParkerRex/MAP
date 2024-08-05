@@ -349,4 +349,7 @@ export const Icons = {
   Settings: MdOutlineSettings,
   Inbox: ArchiveIcon,
   Inbox2: MdOutlineInbox,
+  Overview: MdBarChart,
+  Transactions: MdOutlineListAlt,
+  Invoice: MdOutlineDescription,
 };

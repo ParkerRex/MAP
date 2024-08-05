@@ -2,9 +2,10 @@
 
 import { Button } from "@map/ui/button";
 import * as Sentry from "@sentry/nextjs";
+import Link from "next/link";
 import { useEffect } from "react";
 
-export default function GlobalError({
+export default function ErrorPage({
   reset,
   error,
 }: { reset: () => void; error: Error & { digest?: string } }) {
@@ -28,13 +29,9 @@ export default function GlobalError({
             Try again
           </Button>
 
-          <a
-            href="https://mapthemap.com/support"
-            target="_blank"
-            rel="noreferrer"
-          >
+          <Link href="/account/support">
             <Button>Contact us</Button>
-          </a>
+          </Link>
         </div>
       </div>
     </div>
