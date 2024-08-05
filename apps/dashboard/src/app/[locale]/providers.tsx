@@ -1,4 +1,5 @@
 "use client";
+// TODO: Add Trigger provider back once I get a v2 project setup
 
 import { ThemeProvider } from "@/components/theme-provider";
 import { I18nProviderClient } from "@/locales/client";
@@ -20,19 +21,19 @@ type ProviderProps = {
 export function Providers({ locale, children }: ProviderProps) {
   return (
     <I18nProviderClient locale={locale}>
-      <TriggerProvider
+      {/* <TriggerProvider
         publicApiKey={process.env.NEXT_PUBLIC_TRIGGER_API_KEY!}
         apiUrl={process.env.NEXT_PUBLIC_TRIGGER_API_URL}
+      > */}
+      <ThemeProvider
+        attribute="class"
+        defaultTheme="system"
+        enableSystem
+        disableTransitionOnChange
       >
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          {children}
-        </ThemeProvider>
-      </TriggerProvider>
+        {children}
+      </ThemeProvider>
+      {/* </TriggerProvider> */}
     </I18nProviderClient>
   );
 }

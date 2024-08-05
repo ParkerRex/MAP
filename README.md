@@ -39,10 +39,13 @@
 
 ### Getting Around
 #### For db
-1. make your sql changes in a new migration
-2. test them locally
-3. gen types --local 
-4. push your migration to prod `supabase db push --linked`
+1. Make your sql changes in a new migration (`src/apps/api/migrations/`)
+2. Reset your local DB 
+   1. Navigate to `src/apps/api`
+   2. Run `supabase db reset`
+3. Test them locally
+4. Gen types --local 
+5. push your migration to prod `supabase db push --linked`
 
 
 ### How AI Assistant Works
