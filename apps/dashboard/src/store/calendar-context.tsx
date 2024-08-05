@@ -1,11 +1,4 @@
 "use client";
-import {
-  createCalendarEvent,
-  deleteCalendarEvent,
-  fetchCalendarEvents,
-  fetchCalendars,
-  updateCalendarEvent,
-} from "@/actions/calendar/calendarActions";
 import type {
   ExtendedCalendarListEntry,
   ExtendedEvent,
@@ -13,7 +6,6 @@ import type {
 import type { CalendarContextType } from "@/types/calendar";
 import { safeParseDate } from "@/utils/date-utils";
 import { createClient } from "@map/supabase/client";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { createContext, useContext, useEffect, useState } from "react";
 
@@ -36,6 +28,8 @@ export const CalendarProvider: React.FC<{
   );
   const [selectedCalendar, setSelectedCalendar] = useState<string | null>(null);
   const [userTimeZone, setUserTimeZone] = useState<string>("UTC");
+  const [calendars, setCalendars] = useState<ExtendedCalendarListEntry[]>([]);
+  const [events, setEvents] = useState<ExtendedEvent[]>([]);
 
   useEffect(() => {
     const fetchUserTimezone = async () => {
@@ -56,42 +50,15 @@ export const CalendarProvider: React.FC<{
     fetchUserTimezone();
   }, [userId]);
 
-  const queryClient = useQueryClient();
+  useEffect(() => {
+    // TODO: Implement server action: fetchCalendars in dashboard/actions/calendar/fetch-calendars.ts
+    // Fetch calendars and update state
+  }, [userId]);
 
-  const { data: calendars = [] } = useQuery<
-    ExtendedCalendarListEntry[],
-    Error,
-    ExtendedCalendarListEntry[]
-  >({
-    queryKey: ["calendars", userId],
-    queryFn: () => fetchCalendars(userId),
-  });
-
-  const { data: events = [], refetch: refetchEvents } = useQuery<
-    ExtendedEvent[],
-    Error
-  >({
-    queryKey: ["events", userId, currentWeekStartDate],
-    queryFn: async () => {
-      const startDate = safeParseDate(currentWeekStartDate)
-        ?.startOf("week")
-        .minus({ weeks: 1 });
-      const endDate = safeParseDate(currentWeekStartDate)
-        ?.endOf("week")
-        .plus({ weeks: 1 });
-      console.log("Fetching events for date range:", startDate, endDate);
-      const fetchedEvents = await fetchCalendarEvents(
-        userId,
-        startDate?.toJSDate() || new Date(),
-        endDate?.toJSDate() || new Date(),
-        userTimeZone,
-      );
-      console.log("Fetched events:", fetchedEvents);
-      return fetchedEvents;
-    },
-    refetchInterval: 60000,
-    staleTime: 30000,
-  });
+  useEffect(() => {
+    // TODO: Implement server action: fetchCalendarEvents in dashboard/actions/calendar/fetch-calendar-events.ts
+    // Fetch events and update state
+  }, [userId, currentWeekStartDate, userTimeZone]);
 
   useEffect(() => {
     const supabase = createClient();
@@ -107,7 +74,8 @@ export const CalendarProvider: React.FC<{
         },
         (payload) => {
           console.log("Real-time update received:", payload);
-          refetchEvents();
+          // TODO: Implement server action: refetchEvents in dashboard/actions/calendar/refetch-events.ts
+          // Refetch events and update state
         },
       )
       .subscribe();
@@ -115,45 +83,22 @@ export const CalendarProvider: React.FC<{
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [userId, refetchEvents]);
+  }, [userId]);
 
-  const createEvent = useMutation({
-    mutationFn: (newEvent: Partial<ExtendedEvent>) =>
-      createCalendarEvent(userId, newEvent as unknown as FormData),
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["events", userId, currentWeekStartDate],
-      });
-    },
-  });
+  const createEvent = async (newEvent: Partial<ExtendedEvent>) => {
+    // TODO: Implement server action: createCalendarEvent in dashboard/actions/calendar/create-calendar-event.ts
+    // Create event and update state
+  };
 
-  const updateEvent = useMutation({
-    mutationFn: (updatedEvent: Partial<ExtendedEvent>) =>
-      updateCalendarEvent(
-        userId,
-        updatedEvent.id as string,
-        updatedEvent as unknown as FormData,
-      ),
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["events", userId, currentWeekStartDate],
-      });
-    },
-  });
+  const updateEvent = async (updatedEvent: Partial<ExtendedEvent>) => {
+    // TODO: Implement server action: updateCalendarEvent in dashboard/actions/calendar/update-calendar-event.ts
+    // Update event and update state
+  };
 
-  const deleteEvent = useMutation({
-    mutationFn: (event: ExtendedEvent) =>
-      deleteCalendarEvent(
-        userId,
-        event.id as string,
-        event.calendarId as string,
-      ),
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["events", userId, currentWeekStartDate],
-      });
-    },
-  });
+  const deleteEvent = async (event: ExtendedEvent) => {
+    // TODO: Implement server action: deleteCalendarEvent in dashboard/actions/calendar/delete-calendar-event.ts
+    // Delete event and update state
+  };
 
   const contextValue: CalendarContextType = {
     calendars,
@@ -175,9 +120,9 @@ export const CalendarProvider: React.FC<{
     setSelectedCalendar,
     currentWeekStartDate,
     setCurrentWeekStartDate,
-    createEvent: (event: Partial<ExtendedEvent>) => createEvent.mutate(event),
-    updateEvent: updateEvent.mutate,
-    deleteEvent: (event: ExtendedEvent) => deleteEvent.mutate(event),
+    createEvent,
+    updateEvent,
+    deleteEvent,
     userId,
     userTimeZone,
   };

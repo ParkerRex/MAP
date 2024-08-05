@@ -1,20 +1,7 @@
 "use client";
 
-import {
-  useCreateTag,
-  useCreateTask,
-  useDeleteTag,
-  useDeleteTask,
-  useFetchTags,
-  useFetchTasks,
-  useToggleTask,
-  useUpdateTag,
-  useUpdateTaskDueDate,
-  useUpdateTaskTags,
-} from "@/actions/tasks/clientActions";
 import type { Task } from "@/types";
 import type { Tag as TagType } from "@/types";
-import { useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import TagFilter from "./tag-filter";
 import TaskListHeader from "./task-header";
@@ -31,26 +18,49 @@ const TaskList: React.FC<TaskListProps> = ({ initialTasks, initialTags }) => {
   const [newTagTitle, setNewTagTitle] = useState("");
   const [isEditingTag, setIsEditingTag] = useState<string | null>(null);
   const [editTagTitle, setEditTagTitle] = useState<string>("");
-  const queryClient = useQueryClient();
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
 
-  const { data: tasks = initialTasks, refetch: refetchTasks } = useFetchTasks();
-  const { data: tags = initialTags, refetch: refetchTags } = useFetchTags();
+  const [tasks, setTasks] = useState(initialTasks);
+  const [tags, setTags] = useState(initialTags);
 
-  const createTaskMutation = useCreateTask();
-  const deleteTaskMutation = useDeleteTask();
-  const toggleTaskMutation = useToggleTask();
-  const createTagMutation = useCreateTag();
-  const deleteTagMutation = useDeleteTag();
-  const updateTagMutation = useUpdateTag();
-  const updateTaskDueDateMutation = useUpdateTaskDueDate();
-  const updateTaskTagsMutation = useUpdateTaskTags();
+  // TODO: Implement server action: createTask in dashboard/actions/tasks/create-task.ts
+  const handleCreateTask = async (formData: FormData) => {
+    // Implement create task logic
+  };
 
+  // TODO: Implement server action: deleteTask in dashboard/actions/tasks/delete-task.ts
+  const handleDeleteTask = async (taskId: string) => {
+    // Implement delete task logic
+  };
+
+  // TODO: Implement server action: toggleTask in dashboard/actions/tasks/toggle-task.ts
+  const handleToggleTask = async (task: Task) => {
+    // Implement toggle task logic
+  };
+
+  // TODO: Implement server action: createTag in dashboard/actions/tasks/create-tag.ts
   const handleCreateTag = async () => {
-    if (newTagTitle.trim() === "") return;
-    await createTagMutation.mutateAsync(newTagTitle);
-    setNewTagTitle("");
-    refetchTags();
+    // Implement create tag logic
+  };
+
+  // TODO: Implement server action: deleteTag in dashboard/actions/tasks/delete-tag.ts
+  const handleDeleteTag = async (tagId: string) => {
+    // Implement delete tag logic
+  };
+
+  // TODO: Implement server action: updateTag in dashboard/actions/tasks/update-tag.ts
+  const handleUpdateTag = async (tagId: string, newTitle: string) => {
+    // Implement update tag logic
+  };
+
+  // TODO: Implement server action: updateTaskDueDate in dashboard/actions/tasks/update-task-due-date.ts
+  const handleUpdateTaskDueDate = async (taskId: string, dueDate: string) => {
+    // Implement update task due date logic
+  };
+
+  // TODO: Implement server action: updateTaskTags in dashboard/actions/tasks/update-task-tags.ts
+  const handleUpdateTaskTags = async (taskId: string, tags: string[]) => {
+    // Implement update task tags logic
   };
 
   const handleTagSelect = async (tag: string) => {
@@ -61,27 +71,15 @@ const TaskList: React.FC<TaskListProps> = ({ initialTasks, initialTags }) => {
     console.log("Selected tags updated:", updatedSelectedTags);
 
     if (selectedTask?.id) {
-      await updateTaskTagsMutation.mutateAsync({
-        taskId: selectedTask.id,
-        tags: updatedSelectedTags,
-      });
+      await handleUpdateTaskTags(selectedTask.id, updatedSelectedTags);
       console.log(`Tags updated for task ${selectedTask.id}`);
-      refetchTasks();
+      // TODO: Implement server action: fetchTasks in dashboard/actions/tasks/fetch-tasks.ts
+      // Refresh tasks after updating
     }
   };
 
   const handleTaskSelection = (task: Task) => {
     setSelectedTask(task);
-  };
-
-  const handleTaskCreated = async (formData: FormData) => {
-    await createTaskMutation.mutateAsync(formData);
-    refetchTasks();
-  };
-
-  const handleDeleteTag = async (tagId: string) => {
-    await deleteTagMutation.mutateAsync(tagId);
-    refetchTags();
   };
 
   const handleEditTag = (tag: TagType) => {
@@ -90,24 +88,10 @@ const TaskList: React.FC<TaskListProps> = ({ initialTasks, initialTags }) => {
   };
 
   const handleSaveTag = async (tagId: string) => {
-    await updateTagMutation.mutateAsync({ id: tagId, title: editTagTitle });
+    await handleUpdateTag(tagId, editTagTitle);
     setIsEditingTag(null);
-    refetchTags();
-  };
-
-  const handleDelete = async (taskId: string) => {
-    await deleteTaskMutation.mutateAsync(taskId);
-    refetchTasks();
-  };
-
-  const handleToggle = async (task: Task) => {
-    if (task.id) {
-      await toggleTaskMutation.mutateAsync({
-        taskId: task.id,
-        completed_at: task.completed_at ? null : new Date().toISOString(),
-      });
-      refetchTasks();
-    }
+    // TODO: Implement server action: fetchTags in dashboard/actions/tasks/fetch-tags.ts
+    // Refresh tags after updating
   };
 
   const filteredTasks = useMemo(() => {
@@ -127,7 +111,7 @@ const TaskList: React.FC<TaskListProps> = ({ initialTasks, initialTags }) => {
       <TaskListHeader
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
-        handleTaskCreated={handleTaskCreated}
+        handleTaskCreated={handleCreateTask}
         tags={tags}
         selectedTags={selectedTags}
         handleTagSelect={handleTagSelect}
@@ -156,22 +140,17 @@ const TaskList: React.FC<TaskListProps> = ({ initialTasks, initialTags }) => {
         handleTaskClick={handleTaskSelection}
         handleTaskDoubleClick={() => {}}
         setSelectedTask={setSelectedTask}
-        setTasks={() => {}}
-        handleDelete={handleDelete}
-        toggleTaskCompletion={handleToggle}
-        updateTaskDueDate={async (taskId, dueDate) => {
-          await updateTaskDueDateMutation.mutateAsync({ taskId, dueDate });
-          refetchTasks();
-        }}
+        setTasks={setTasks}
+        handleDelete={handleDeleteTask}
+        toggleTaskCompletion={handleToggleTask}
+        updateTaskDueDate={handleUpdateTaskDueDate}
         getAllTags={async () => {
-          const result = await refetchTags();
-          return result.data || [];
+          // TODO: Implement server action: fetchTags in dashboard/actions/tasks/fetch-tags.ts
+          // Fetch and return tags
+          return [];
         }}
-        createTag={createTagMutation.mutateAsync}
-        updateTaskTags={async (taskId, tags) => {
-          await updateTaskTagsMutation.mutateAsync({ taskId, tags });
-          refetchTasks();
-        }}
+        createTag={handleCreateTag}
+        updateTaskTags={handleUpdateTaskTags}
       />
     </div>
   );

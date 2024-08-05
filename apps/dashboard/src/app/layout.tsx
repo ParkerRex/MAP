@@ -44,7 +44,10 @@ export const viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
-  themeColor: { media: "(prefers-color-scheme: light)" },
+  themeColor: [
+    { media: "(prefers-color-scheme: light)" },
+    { media: "(prefers-color-scheme: dark)" },
+  ],
 };
 
 export const preferredRegion = ["sfo1", "iad1"];
@@ -65,6 +68,7 @@ export default function Layout({
           "whitespace-pre-line overscroll-none",
         )}
       >
+        {/* <SystemBanner /> */}
         {children}
         <Toaster />
         <Analytics />

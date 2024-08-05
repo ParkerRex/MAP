@@ -1,4 +1,4 @@
-import Midday from "@midday-ai/engine";
+import MapEngine from "@map/engine";
 import { eventTrigger } from "@trigger.dev/sdk";
 import { revalidateTag } from "next/cache";
 import { z } from "zod";

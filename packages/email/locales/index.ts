@@ -1,3 +1,4 @@
+// TODO: Write these for words that actually get used in the app
 type Options = {
   locale?: string;
 };

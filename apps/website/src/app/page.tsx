@@ -7,10 +7,6 @@ import WordRotate, { WORD_ROTATE_DURATION } from "@map/ui/magicui/word-rotate";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 
-const ClientCloudScene = dynamic(() => import("@/components/cloud-wrapper"), {
-  ssr: false,
-});
-
 export default async function Page() {
   const postsBySection = await getBlogPosts();
   const letterPosts = postsBySection.letters || [];
@@ -24,9 +20,7 @@ export default async function Page() {
 
   return (
     <div className="relative w-full min-h-screen flex flex-col">
-      <div className="absolute inset-0 z-0 bg-sky-100 h-screen">
-        <ClientCloudScene />
-      </div>
+      {/* TODO: ADD A SPLINE ANIMATION HERe https://spline.design/ai-generate */}
       <div className="relative z-10 flex flex-col min-h-screen">
         {/* Hero Section - 900px high on desktop, full height on mobile */}
         <section className="min-h-screen md:h-[900px] flex flex-col container relative">

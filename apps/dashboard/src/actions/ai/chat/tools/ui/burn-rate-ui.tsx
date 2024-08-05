@@ -23,7 +23,7 @@ export function BurnRateUI({ avarageBurnRate, currency, months, data }: Props) {
   return (
     <BotCard className="font-sans space-y-4">
       <p className="font-mono">
-        Based on your historical data, your avarage burn rate is{" "}
+        Based on your historical data, your average burn rate is{" "}
         <FormatAmount amount={avarageBurnRate} currency={currency} /> per month.
         Your expected runway is {months} months, ending in{" "}
         {format(addMonths(new Date(), months), "PP")}.

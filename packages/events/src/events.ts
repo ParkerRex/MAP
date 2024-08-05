@@ -1,3 +1,5 @@
+// TODO: Swap these with our actual events
+
 export const LogEvents = {
   Waitlist: {
     name: "User Joined Waitlist",
