@@ -1,67 +1,68 @@
-import { AuthManager } from "@/lib/integrations/auth";
-import { CalendarSyncService } from "@/services/CalendarSyncService";
+import { Cookies } from "@/utils/constants";
+import { LogEvents } from "@map/events/events";
+import { setupAnalytics } from "@map/events/server";
+import { getSession } from "@map/supabase/cached-queries";
 import { createClient } from "@map/supabase/server";
+import { addYears } from "date-fns";
+import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 
-export async function GET(request: Request) {
-  try {
-    const { searchParams, origin } = new URL(request.url);
-    const code = searchParams.get("code");
-    const next = searchParams.get("next") ?? "/";
+export const preferredRegion = ["fra1", "sfo1", "iad1"];
 
-    if (!code) {
-      console.error("No code provided in callback");
-      return NextResponse.redirect(`${origin}/auth/auth-code-error`);
-    }
+export async function GET(req: NextRequest) {
+  const cookieStore = cookies();
+  const requestUrl = new URL(req.url);
+  const code = requestUrl.searchParams.get("code");
+  const client = requestUrl.searchParams.get("client");
+  const returnTo = requestUrl.searchParams.get("return_to");
+  const provider = requestUrl.searchParams.get("provider");
+  const mfaSetupVisited = cookieStore.has(Cookies.MfaSetupVisited);
 
-    const supabase = createClient();
-
-    const { data, error } = await supabase.auth.exchangeCodeForSession(code);
-
-    if (error || !data.session) {
-      console.error("Failed to exchange code for session", { error });
-      return NextResponse.redirect(`${origin}/auth/auth-code-error`);
-    }
-
-    const authManager = new AuthManager();
-
-    // Store the integration details
-    if (data.session.provider_token && data.session.provider_refresh_token) {
-      try {
-        await authManager.storeToken("GOOGLE", data.user.id, {
-          access_token: data.session.provider_token,
-          refresh_token: data.session.provider_refresh_token,
-          expires_in: 3600, // Assuming 1 hour expiration, adjust as needed
-        });
-
-        try {
-          const calendarSyncService = new CalendarSyncService();
-          await calendarSyncService.syncCalendar(data.user.id);
-        } catch (syncError) {
-          console.error("Error during initial sync:", syncError);
-          // Consider redirecting to an error page or showing an error message
-          return NextResponse.redirect(
-            `${origin}/error?message=${encodeURIComponent("Initial calendar sync failed. Please try again later.")}`,
-          );
-        }
-      } catch (error) {
-        console.error("Error during token storage or initial sync:", error);
-        return NextResponse.redirect(
-          `${origin}/error?message=${encodeURIComponent((error as Error).message)}`,
-        );
-      }
-    } else {
-      console.error("Missing provider tokens in session data");
-      return NextResponse.redirect(`${origin}/login`);
-    }
-
-    return NextResponse.redirect(`${origin}${next}`);
-  } catch (error) {
-    console.error("Error in auth callback:", error);
-    return NextResponse.redirect(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/error?message=${encodeURIComponent(
-        `Authentication failed: ${error instanceof Error ? error.message : "Unknown error"}`,
-      )}`,
-    );
+  if (client === "desktop") {
+    return NextResponse.redirect(`${requestUrl.origin}/verify?code=${code}`);
   }
+
+  if (provider) {
+    cookieStore.set(Cookies.PreferredSignInProvider, provider, {
+      expires: addYears(new Date(), 1),
+    });
+  }
+
+  if (code) {
+    const supabase = createClient(cookieStore);
+    await supabase.auth.exchangeCodeForSession(code);
+
+    const {
+      data: { session },
+    } = await getSession();
+
+    if (session) {
+      const userId = session.user.id;
+
+      const analytics = await setupAnalytics({
+        userId,
+        fullName: session?.user?.user_metadata?.full_name,
+      });
+
+      await analytics.track({
+        event: LogEvents.SignIn.name,
+        channel: LogEvents.SignIn.channel,
+      });
+    }
+  }
+
+  if (!mfaSetupVisited) {
+    cookieStore.set(Cookies.MfaSetupVisited, "true", {
+      expires: addYears(new Date(), 1),
+    });
+
+    return NextResponse.redirect(`${requestUrl.origin}/mfa/setup`);
+  }
+
+  if (returnTo) {
+    return NextResponse.redirect(`${requestUrl.origin}/${returnTo}`);
+  }
+
+  return NextResponse.redirect(requestUrl.origin);
 }

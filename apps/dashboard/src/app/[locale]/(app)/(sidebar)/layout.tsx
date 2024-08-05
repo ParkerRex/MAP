@@ -20,15 +20,15 @@ const AssistantModal = dynamic(
   },
 );
 
-const SelectBankAccountsModal = dynamic(
-  () =>
-    import("@/components/modals/select-bank-accounts").then(
-      (mod) => mod.SelectBankAccountsModal,
-    ),
-  {
-    ssr: false,
-  },
-);
+// const SelectBankAccountsModal = dynamic(
+//   () =>
+//     import("@/components/modals/select-bank-accounts").then(
+//       (mod) => mod.SelectBankAccountsModal,
+//     ),
+//   {
+//     ssr: false,
+//   },
+// );
 
 const HotKeys = dynamic(
   () => import("@/components/hot-keys").then((mod) => mod.HotKeys),
@@ -37,15 +37,15 @@ const HotKeys = dynamic(
   },
 );
 
-const ConnectTransactionsModal = dynamic(
-  () =>
-    import("@/components/modals/connect-transactions-modal").then(
-      (mod) => mod.ConnectTransactionsModal,
-    ),
-  {
-    ssr: false,
-  },
-);
+// const ConnectTransactionsModal = dynamic(
+//   () =>
+//     import("@/components/modals/connect-transactions-modal").then(
+//       (mod) => mod.ConnectTransactionsModal,
+//     ),
+//   {
+//     ssr: false,
+//   },
+// );
 
 export default async function Layout({
   children,
@@ -73,13 +73,13 @@ export default async function Layout({
         </div>
 
         <AssistantModal />
-        <ConnectTransactionsModal countryCode={countryCode} />
-        <SelectBankAccountsModal />
-        <ImportCSVModal
+        {/* <ConnectTransactionsModal countryCode={countryCode} /> */}
+        {/* <SelectBankAccountsModal /> */}
+        {/* <ImportCSVModal
           currencies={uniqueCurrencies}
           defaultCurrency={uniqueCurrencies[countryCode]}
         />
-        <ExportStatus />
+        <ExportStatus /> */}
         <HotKeys />
       </AI>
     </div>

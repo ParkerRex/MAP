@@ -1,0 +1,20 @@
+import { ChartPeriod } from "@/components/charts/chart-period";
+import { ChartType } from "@/components/charts/chart-type";
+import { Cookies } from "@/utils/constants";
+import { cookies } from "next/headers";
+
+export async function ChartSelectors({ defaultValue, currency }) {
+  const chartType = cookies().get(Cookies.ChartType)?.value ?? "profit";
+
+  return (
+    <div className="flex justify-between mt-6 space-x-2">
+      <div className="flex space-x-2">
+        <ChartType initialValue={chartType} />
+      </div>
+
+      <div className="flex space-x-2">
+        <ChartPeriod defaultValue={defaultValue} />
+      </div>
+    </div>
+  );
+}
