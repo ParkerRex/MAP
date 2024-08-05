@@ -134,13 +134,6 @@ export default async function BlogListingPage({
           }),
         }}
       />
-      <div className="fixed top-0 left-0 w-full h-1 bg-slate-100">
-        <div
-          className="h-full bg-gradient-to-r from-slate-500 to-slate-800"
-          id="readingProgress"
-          style={{ width: "0" }}
-        />
-      </div>
       <hr className="my-8" />
       <div className="container w-full max-w-4xl py-12">
         <h1 className="mb-4 text-5xl font-extrabold tracking-tighter md:text-6xl dark:text-white">
@@ -160,11 +153,6 @@ export default async function BlogListingPage({
           </aside>
         </div>
       </div>
-      <NextScript
-        id="reading-progress-script"
-        strategy="afterInteractive"
-        src="/scripts/reading-progress.js"
-      />
     </section>
   );
 }

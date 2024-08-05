@@ -1,10 +1,10 @@
-import GradientSeparator from "@/components/GradientSeparator";
+import GradientSeparator from "@/components/gradient-separator";
 import HealthCrisis from "@/components/health-crisis";
 import { WaitlistInput } from "@/components/waitlist-input";
-import { Post, getBlogPosts } from "@/lib/utils/blog";
+import { getBlogPosts } from "@/lib/utils/blog";
 import { Button } from "@map/ui/button";
 import WordRotate, { WORD_ROTATE_DURATION } from "@map/ui/magicui/word-rotate";
-import dynamic from "next/dynamic";
+
 import Link from "next/link";
 
 export default async function Page() {

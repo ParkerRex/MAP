@@ -1,6 +1,6 @@
 "use client";
-import NavBar from "@/components/NavBar";
 import { TableOfContents } from "@/components/TableOfContents";
+import NavBar from "@/components/header";
 import Footer from "@/components/marketing-footer";
 
 const tocItems = [

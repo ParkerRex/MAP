@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import "@/styles/globals.css";
 
-import NavBar from "@/components/NavBar";
+import NavBar from "@/components/header";
 import Footer from "@/components/marketing-footer";
 import { cn } from "@map/ui/cn";
 import { GeistMono } from "geist/font/mono";

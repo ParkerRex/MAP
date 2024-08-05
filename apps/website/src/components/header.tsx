@@ -17,14 +17,14 @@ interface NavItem {
   label: string;
 }
 
-interface DesktopNavBarProps {
+interface DesktopHeaderProps {
   isLocalhost: boolean;
   scrolled: boolean;
   pathname: string;
   navItems: NavItem[];
 }
 
-const DesktopNavBar: React.FC<DesktopNavBarProps> = ({
+const DesktopHeader: React.FC<DesktopHeaderProps> = ({
   isLocalhost,
   scrolled,
   pathname,
@@ -70,7 +70,7 @@ const DesktopNavBar: React.FC<DesktopNavBarProps> = ({
           </Link>
         ))}
         {isLocalhost && (
-          <Link href="/login">
+          <Link href="https://app.mapthemap.com">
             <Button variant="secondary" className="ml-6">
               Login
             </Button>
@@ -81,7 +81,7 @@ const DesktopNavBar: React.FC<DesktopNavBarProps> = ({
   </nav>
 );
 
-interface MobileNavBarProps {
+interface MobileHeaderProps {
   isLocalhost: boolean;
   navItems: NavItem[];
   handleNavigation: (href: string) => void;
@@ -91,7 +91,7 @@ interface MobileNavBarProps {
   tocItems: TOCItem[];
 }
 
-const MobileNavBar: React.FC<MobileNavBarProps> = ({
+const MobileHeader: React.FC<MobileHeaderProps> = ({
   isLocalhost,
   navItems,
   handleNavigation,
@@ -165,11 +165,11 @@ const MobileNavBar: React.FC<MobileNavBarProps> = ({
   </>
 );
 
-interface NavBarProps {
+interface HeaderProps {
   tocItems?: TOCItem[] | undefined;
 }
 
-export default function NavBar({ tocItems }: NavBarProps) {
+export default function Header({ tocItems }: HeaderProps) {
   const [isLocalhost, setIsLocalhost] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
@@ -203,7 +203,7 @@ export default function NavBar({ tocItems }: NavBarProps) {
   };
 
   return isMobile ? (
-    <MobileNavBar
+    <MobileHeader
       isLocalhost={isLocalhost}
       navItems={navItems}
       handleNavigation={handleNavigation}
@@ -213,7 +213,7 @@ export default function NavBar({ tocItems }: NavBarProps) {
       tocItems={tocItems || []}
     />
   ) : (
-    <DesktopNavBar
+    <DesktopHeader
       isLocalhost={isLocalhost}
       scrolled={scrolled}
       pathname={pathname}

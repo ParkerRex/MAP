@@ -10,13 +10,6 @@ export const metadata: Metadata = {
 export default function Page() {
   return (
     <section>
-      <div className="fixed top-0 left-0 w-full h-1 bg-slate-100">
-        <div
-          className="h-full bg-gradient-to-r from-slate-500 to-slate-800"
-          id="readingProgress"
-          style={{ width: "0" }}
-        />
-      </div>
       <div className="container max-w-[750px]">
         <article className="prose prose-lg prose-neutral dark:prose-invert lg:col-span-3 dark:text-white">
           <h1 className="mt-24 mb-4 text-5xl font-extrabold tracking-tighter md:text-6xl dark:text-white">
@@ -229,12 +222,6 @@ export default function Page() {
             alt="Parker Rex"
           />
         </div>
-
-        <NextScript
-          id="reading-progress-script"
-          strategy="afterInteractive"
-          src="/scripts/reading-progress.js"
-        />
       </div>
     </section>
   );

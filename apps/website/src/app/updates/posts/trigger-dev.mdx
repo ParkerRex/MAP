@@ -1,0 +1,72 @@
+---
+title: "How we are keeping our Calendars in Sync"
+publishedAt: "2024-09-05"
+summary: "Syncing Calendars at Map: Our Approach to Real-Time User Data"
+image: "/images/supabase.png"
+tag: "Engineering"
+---
+
+At Map, we use background jobs extensively to keep our users' calendars in sync. Here's an in-depth exploration of our approach.
+
+<br />
+### 1.  Calendar Connection
+
+When a user successfully authenticates their calendar service (such as Google Calendar, Apple Calendar, or Outlook), we initiate the creation of a **`calendar_connection`** record. This record contains essential data and provider information, facilitating subsequent retrieval and synchronization of calendar events. Additionally, we store individual calendars in **`calendar_accounts`**, complete with an enable/disable flag. This allows users to control which calendars they want to sync with Map.
+
+<br />
+### Initial Sync
+
+Once the **`calendar_connection`** and calendar_accounts are securely stored in our database, we trigger the initial sync process. This is where things get interesting.
+
+We use trigger.dev to manage our background jobs. Our initial sync covers a two-year span: one year into the past and one year into the future. To handle this efficiently, we implement a batching strategy:
+1. We divide the two-year period into monthly chunks.
+2. For each chunk and each calendar, we create a separate trigger.dev job.
+3. We prioritize syncing the most recent data first (the last 30 days) to improve the initial user experience.
+
+This approach allows us to process large amounts of calendar data without overwhelming our systems or the calendar providers' APIs.
+
+<br />
+### Ongoing Sync Strategy
+
+After the initial sync, we move to a hybrid approach for ongoing synchronization:
+
+1. For calendar providers that support webhooks (like Google Calendar), we set these up to receive real-time updates.
+2. For providers without webhook support, we use intelligent polling:
+- We schedule periodic sync jobs with trigger.dev.
+- We adjust the frequency based on calendar activity - more frequent for active calendars, less so for dormant ones.
+
+
+We also implement a "sync on demand" feature, allowing users to manually trigger a sync when they need the most up-to-date information.
+
+<br />
+### **Two-Way Sync**
+
+Keeping calendars in sync isn't just about pulling data from providers - we also need to push updates from Map back to the original calendars. Here's how we handle this:
+
+1. Provider to Map: We process incoming webhooks or polling results to update our database.
+2. Map to Provider: We use Supabase Realtime to detect changes in our database. When a change is detected, we queue a job in trigger.dev to sync this change back to the provider.
+
+To optimize this process, we implement a change log system. This allows us to track modifications and sync only the changes (delta syncing) when possible, reducing unnecessary data transfer.
+
+<br />
+### Handling Edge Cases
+
+Calendar syncing can get complicated, especially when dealing with conflicts or errors. Here's how we address these challenges:
+
+1. Conflict Resolution: We use a timestamp-based resolution for most conflicts. For more complex conflicts, we flag them for user resolution.
+2. Error Handling: We leverage trigger.dev's built-in retry mechanisms and implement comprehensive error logging. We also provide users with a manual sync option for troubleshooting.
+
+
+<br />
+### Privacy and Performance
+
+We take our users' privacy seriously. All calendar data is encrypted at rest, and we implement proper authentication for our webhook endpoints. We also respect the privacy settings from the original calendar providers.
+
+To optimize performance, we implement "lazy" syncing for inactive users or calendars and use caching strategies to minimize repeated data fetches.
+
+<br />
+### Continuous Improvement
+
+Our calendar sync system is not static. We've implemented basic monitoring for our sync jobs and are collecting usage data. This information will guide our future optimizations, ensuring that our calendar sync becomes even more efficient and reliable over time.
+
+By focusing on core functionality and employing smart strategies like batching and hybrid syncing, we've created a robust calendar sync system that provides real-time updates while respecting system resources and API limits. As we continue to iterate on this system, we're excited to see how it will evolve to meet our users' needs even better.
