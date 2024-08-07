@@ -1,0 +1,94 @@
+"use client";
+
+// TODO: Implement createProjectAction
+// import { createProjectAction } from "@/actions/project/create-project-action";
+// TODO: Implement cached queries
+// import { createClient } from "@map/supabase/client";
+// import { getTrackerProjectsQuery } from "@map/supabase/queries";
+import { Combobox, type Option } from "@map/ui/combobox";
+import { useToast } from "@map/ui/use-toast";
+// TODO: Implement useAction
+// import { useAction } from "next-safe-action/hooks";
+import { useEffect, useState } from "react";
+
+export function TrackerSelectProject({
+  setParams,
+  teamId,
+}: {
+  setParams: (params: { projectId: string | null }) => void;
+  teamId: string;
+}) {
+  const { toast } = useToast();
+  // TODO: Implement cached queries
+  // const supabase = createClient();
+  const [value, setValue] = useState<Option | undefined>(undefined);
+  const [data, setData] = useState<Option[]>([]);
+  const [isLoading, setLoading] = useState(false);
+
+  // TODO: Implement createProjectAction
+  // const action = useAction(createProjectAction, {
+  //   onSuccess: ({ data: project }) => {
+  //     setParams({ projectId: project?.id || null });
+  //   },
+  //   onError: () => {
+  //     toast({
+  //       duration: 3500,
+  //       variant: "error",
+  //       title: "Something went wrong please try again.",
+  //     });
+  //   },
+  // });
+
+  const onChangeValue = async (query: string) => {
+    setValue({ id: query, name: query });
+    setLoading(true);
+
+    // TODO: Implement cached queries
+    // const { data: projectsData } = await getTrackerProjectsQuery(supabase, {
+    //   teamId,
+    //   query,
+    //   search: {
+    //     query: value,
+    //     fuzzy: true,
+    //   },
+    // });
+
+    // Simulating API call with setTimeout
+    setTimeout(() => {
+      const fakeProjectsData = [
+        { id: "1", name: "Project A" },
+        { id: "2", name: "Project B" },
+        { id: "3", name: "Project C" },
+      ].filter((project) =>
+        project.name.toLowerCase().includes(query.toLowerCase()),
+      );
+
+      setLoading(false);
+      setData(fakeProjectsData);
+    }, 500);
+  };
+
+  const onSelect = (project: Option) => {
+    setParams({ projectId: project.id });
+  };
+
+  // Initial load of fake data
+  useEffect(() => {
+    onChangeValue("");
+  }, []);
+
+  return (
+    <Combobox
+      placeholder="Search or create project"
+      classNameList="-top-[4px] border-t-0 rounded-none rounded-b-md"
+      className="w-full bg-transparent px-12 border py-3"
+      value={value}
+      onValueChange={onChangeValue}
+      onSelect={onSelect}
+      options={data}
+      isLoading={isLoading}
+      // TODO: Implement createProjectAction
+      // onCreate={(name) => action.execute({ name })}
+    />
+  );
+}

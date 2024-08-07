@@ -1,10 +1,10 @@
 "use server";
-
+// TODO: add in our tools.
 import { BotMessage, SpinnerMessage } from "@/components/chat/messages";
 import { openai } from "@ai-sdk/openai";
 import { client as RedisClient } from "@map/kv";
 import {
-  getBankAccountsCurrencies,
+  // getBankAccountsCurrencies,
   getUser,
 } from "@map/supabase/cached-queries";
 import { Ratelimit } from "@upstash/ratelimit";
@@ -19,15 +19,15 @@ import { nanoid } from "nanoid";
 import { headers } from "next/headers";
 import { getAssistantSettings, saveChat } from "../storage";
 import type { AIState, Chat, ClientMessage, UIState } from "../types";
-import { getBurnRateTool } from "./tools/burn-rate";
-import { getForecastTool } from "./tools/forecast";
-import { getDocumentsTool } from "./tools/get-documents";
-import { getTransactionsTool } from "./tools/get-transactions";
-import { getProfitTool } from "./tools/profit";
-import { createReport } from "./tools/report";
-import { getRevenueTool } from "./tools/revenue";
-import { getRunwayTool } from "./tools/runway";
-import { getSpendingTool } from "./tools/spending";
+// import { getBurnRateTool } from "./tools/burn-rate";
+// import { getForecastTool } from "./tools/forecast";
+// import { getDocumentsTool } from "./tools/get-documents";
+// import { getTransactionsTool } from "./tools/get-transactions";
+// import { getProfitTool } from "./tools/profit";
+// import { createReport } from "./tools/report";
+// import { getRevenueTool } from "./tools/revenue";
+// import { getRunwayTool } from "./tools/runway";
+// import { getSpendingTool } from "./tools/spending";
 
 const ratelimit = new Ratelimit({
   limiter: Ratelimit.fixedWindow(10, "10s"),

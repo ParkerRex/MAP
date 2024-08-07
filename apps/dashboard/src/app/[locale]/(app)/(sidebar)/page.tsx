@@ -4,10 +4,10 @@ import { Charts } from "@/components/charts/charts";
 import { OverviewModal } from "@/components/modals/overview-modal";
 import { Widgets } from "@/components/widgets";
 import { Cookies } from "@/utils/constants";
-import {
-  getBankAccountsCurrencies,
-  getTeamBankAccounts,
-} from "@map/supabase/cached-queries";
+// import {
+//   getBankAccountsCurrencies,
+//   getTeamBankAccounts,
+// } from "@map/supabase/cached-queries";
 import { cn } from "@map/ui/cn";
 import { startOfMonth, startOfYear, subMonths } from "date-fns";
 import type { Metadata } from "next";
@@ -30,21 +30,25 @@ const defaultValue = {
 };
 
 // Main component for the Overview page
-export default async function Overview({ searchParams }) {
-  // Fetch team bank accounts
-  const accounts = await getTeamBankAccounts();
+export default async function Overview({
+  searchParams,
+}: { searchParams: any }) {
+  // TODO: Implement getTeamBankAccounts
+  // const accounts = await getTeamBankAccounts();
+  const accounts = { data: [{ id: "fake-account" }] }; // Stub data
 
   // Get chart type from cookies or use default "profit"
   const chartType = cookies().get(Cookies.ChartType)?.value ?? "profit";
 
-  // Get currency from cookies or fetch from bank accounts
-  const currency = cookies().has(Cookies.ChartCurrency)
-    ? cookies().get(Cookies.ChartCurrency)?.value
-    : (await getBankAccountsCurrencies())?.data?.at(0)?.currency || "USD";
+  // TODO: Implement getBankAccountsCurrencies
+  // const currency = cookies().has(Cookies.ChartCurrency)
+  //   ? cookies().get(Cookies.ChartCurrency)?.value
+  //   : (await getBankAccountsCurrencies())?.data?.at(0)?.currency || "USD";
+  const currency = cookies().get(Cookies.ChartCurrency)?.value ?? "USD"; // Fallback to USD
 
   // Get initial period from cookies or use default
   const initialPeriod = cookies().has(Cookies.SpendingPeriod)
-    ? JSON.parse(cookies().get(Cookies.SpendingPeriod)?.value)
+    ? JSON.parse(cookies().get(Cookies.SpendingPeriod)?.value ?? "{}")
     : {
         id: "this_year",
         from: startOfMonth(new Date()).toISOString(),

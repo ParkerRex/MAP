@@ -1,27 +1,61 @@
--- Enable necessary extensions
+SET statement_timeout = 0;
+SET lock_timeout = 0;
+SET idle_in_transaction_session_timeout = 0;
+SET client_encoding = 'UTF8';
+SET standard_conforming_strings = on;
+SELECT pg_catalog.set_config('search_path', '', false);
+SET check_function_bodies = false;
+SET xmloption = content;
+SET client_min_messages = warning;
+SET row_security = off;
 CREATE EXTENSION IF NOT EXISTS "pg_net" WITH SCHEMA "extensions";
 CREATE EXTENSION IF NOT EXISTS "pgsodium" WITH SCHEMA "pgsodium";
-CREATE EXTENSION IF NOT EXISTS "moddatetime" WITH SCHEMA "public";
-CREATE EXTENSION IF NOT EXISTS "pg_graphql" WITH SCHEMA "graphql";
+CREATE SCHEMA IF NOT EXISTS "public";
+CREATE SCHEMA IF NOT EXISTS "private";
+ALTER SCHEMA "private" OWNER TO "postgres";
+COMMENT ON SCHEMA "public" IS 'standard public schema';
 CREATE EXTENSION IF NOT EXISTS "pg_stat_statements" WITH SCHEMA "extensions";
+CREATE EXTENSION IF NOT EXISTS "pg_trgm" WITH SCHEMA "public";
 CREATE EXTENSION IF NOT EXISTS "pgcrypto" WITH SCHEMA "extensions";
 CREATE EXTENSION IF NOT EXISTS "pgjwt" WITH SCHEMA "extensions";
 CREATE EXTENSION IF NOT EXISTS "supabase_vault" WITH SCHEMA "vault";
+CREATE EXTENSION IF NOT EXISTS "unaccent" WITH SCHEMA "public";
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp" WITH SCHEMA "extensions";
-CREATE EXTENSION IF NOT EXISTS "vector" WITH SCHEMA "public";
+CREATE EXTENSION IF NOT EXISTS "vector" WITH SCHEMA "extensions";
 -- Create custom types
 CREATE TYPE "public"."integration_provider" AS ENUM ('WHOOP', 'GOOGLE');
+ALTER TYPE "public"."integration_provider" OWNER TO "postgres";
 CREATE TYPE "public"."source" AS ENUM ('agent', 'user');
+ALTER TYPE "public"."source" OWNER TO "postgres";
+CREATE TYPE "public"."task_status" AS ENUM ('pending', 'in_progress', 'completed');
+ALTER TYPE "public"."task_status" OWNER TO "postgres";
+CREATE TYPE "public"."goal_status" AS ENUM ('pending', 'in_progress', 'completed');
+ALTER TYPE "public"."goal_status" OWNER TO "postgres";
+CREATE TYPE "public"."goal_categories" AS ENUM (
+  'health',
+  'work',
+  'personal',
+  'family',
+  'spiritual'
+);
+ALTER TYPE "public"."goal_categories" OWNER TO "postgres";
 -- Create tables
 CREATE TABLE IF NOT EXISTS "public"."users" (
-  "id" UUID PRIMARY KEY,
-  "full_name" TEXT,
-  "avatar_url" TEXT,
-  "website" TEXT,
-  "timezone" TEXT,
-  "week_starts_on_monday" BOOLEAN DEFAULT false,
-  "updated_at" TIMESTAMPTZ
+  "id" "uuid" NOT NULL,
+  "full_name" "text",
+  "avatar_url" "text",
+  "email" "text",
+  "created_at" timestamp with time zone DEFAULT "now"(),
+  "locale" "text" DEFAULT 'en'::"text",
+  "week_starts_on_monday" boolean DEFAULT false
 );
+ALTER TABLE "public"."users" OWNER TO "postgres";
+ALTER TABLE ONLY "public"."users"
+ADD CONSTRAINT "profiles_pkey" PRIMARY KEY ("id");
+ALTER TABLE ONLY "public"."users"
+ADD CONSTRAINT "users_id_fkey" FOREIGN KEY ("id") REFERENCES "auth"."users"("id") ON DELETE CASCADE;
+SET default_tablespace = '';
+SET default_table_access_method = "heap";
 CREATE TABLE IF NOT EXISTS "public"."calendars" (
   "id" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   "google_calendar_id" TEXT NOT NULL,
@@ -46,6 +80,7 @@ CREATE TABLE IF NOT EXISTS "public"."calendars" (
   "updated_at" TIMESTAMPTZ DEFAULT now(),
   CONSTRAINT "unique_google_calendar_id_user_id" UNIQUE (google_calendar_id, user_id)
 );
+ALTER TABLE "public"."calendars" OWNER TO "postgres";
 CREATE TABLE IF NOT EXISTS "public"."calendar_events" (
   "id" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   "google_event_id" TEXT NOT NULL,
@@ -91,6 +126,7 @@ CREATE TABLE IF NOT EXISTS "public"."calendar_events" (
   "updated_at" TIMESTAMPTZ DEFAULT now(),
   CONSTRAINT "unique_google_event_id_user_id" UNIQUE (google_event_id, user_id)
 );
+ALTER TABLE "public"."calendar_events" OWNER TO "postgres";
 CREATE TABLE IF NOT EXISTS "public"."folder" (
   "id" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   "name" VARCHAR(255) NOT NULL,
@@ -98,17 +134,20 @@ CREATE TABLE IF NOT EXISTS "public"."folder" (
   "created_at" TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
   "updated_at" TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
+ALTER TABLE "public"."folder" OWNER TO "postgres";
 CREATE TABLE IF NOT EXISTS "public"."goals" (
   "id" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   "user_id" UUID DEFAULT auth.uid() NOT NULL,
+  "goal_category" public.goal_categories DEFAULT 'personal'::public.goal_categories NOT NULL,
+  "goal_status" public.goal_status DEFAULT 'pending'::public.goal_status NOT NULL,
   "title" TEXT,
   "completed" BOOLEAN DEFAULT false,
   "due_at" TIMESTAMPTZ NOT NULL,
-  "source" public.source DEFAULT 'user'::public.source NOT NULL,
   "created_at" TIMESTAMPTZ DEFAULT now() NOT NULL,
   "updated_at" TIMESTAMPTZ DEFAULT now(),
   CONSTRAINT "goals_due_date_check" CHECK (due_at > now())
 );
+ALTER TABLE "public"."goals" OWNER TO "postgres";
 CREATE TABLE IF NOT EXISTS "public"."headers" (
   "id" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   "title" VARCHAR(255) NOT NULL,
@@ -117,6 +156,7 @@ CREATE TABLE IF NOT EXISTS "public"."headers" (
   "updated_at" TIMESTAMPTZ DEFAULT now(),
   "deleted_at" TIMESTAMPTZ
 );
+ALTER TABLE "public"."headers" OWNER TO "postgres";
 CREATE TABLE IF NOT EXISTS "public"."integrations" (
   "id" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   "user_id" UUID NOT NULL,
@@ -128,16 +168,17 @@ CREATE TABLE IF NOT EXISTS "public"."integrations" (
   "updated_at" TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
   UNIQUE (user_id, provider)
 );
+ALTER TABLE "public"."integrations" OWNER TO "postgres";
 CREATE TABLE IF NOT EXISTS "public"."notes" (
   "id" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   "title" VARCHAR,
   "content" TEXT,
   "user_id" UUID NOT NULL,
   "folder_id" UUID NOT NULL,
-  "shared" BOOLEAN DEFAULT false,
   "created_at" TIMESTAMPTZ DEFAULT now() NOT NULL,
   "updated_at" TIMESTAMPTZ DEFAULT now()
 );
+ALTER TABLE "public"."notes" OWNER TO "postgres";
 CREATE TABLE IF NOT EXISTS "public"."projects" (
   "id" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   "name" TEXT,
@@ -148,11 +189,13 @@ CREATE TABLE IF NOT EXISTS "public"."projects" (
   "updated_at" TIMESTAMPTZ DEFAULT now(),
   "deleted_at" TIMESTAMPTZ
 );
+ALTER TABLE "public"."projects" OWNER TO "postgres";
 CREATE TABLE IF NOT EXISTS "public"."tags" (
   "id" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   "title" TEXT NOT NULL UNIQUE,
   "user_id" UUID DEFAULT auth.uid()
 );
+ALTER TABLE "public"."tags" OWNER TO "postgres";
 CREATE TABLE IF NOT EXISTS "public"."tag_tasks" (
   "tag_id" UUID NOT NULL,
   "task_id" UUID NOT NULL,
@@ -160,14 +203,11 @@ CREATE TABLE IF NOT EXISTS "public"."tag_tasks" (
   PRIMARY KEY (tag_id, task_id),
   UNIQUE (tag_id, task_id)
 );
+ALTER TABLE "public"."tag_tasks" OWNER TO "postgres";
 CREATE TABLE IF NOT EXISTS "public"."tasks" (
   "id" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   "title" TEXT NOT NULL,
   "body" TEXT,
-  "resources" TEXT [],
-  "source_type" public.source DEFAULT 'user'::public.source NOT NULL,
-  "proposal" TEXT,
-  "cognitive_load" SMALLINT,
   "result" TEXT,
   "blocked_by" UUID,
   "contact_id" UUID,
@@ -178,6 +218,7 @@ CREATE TABLE IF NOT EXISTS "public"."tasks" (
   "assigned_to" UUID DEFAULT auth.uid(),
   "project_id" UUID,
   "header_id" UUID,
+  "task_status" public.task_status DEFAULT 'pending'::public.task_status NOT NULL,
   "task_position" BIGINT,
   "created_at" TIMESTAMPTZ DEFAULT now() NOT NULL,
   "updated_at" TIMESTAMPTZ DEFAULT now() NOT NULL,
@@ -188,6 +229,7 @@ CREATE TABLE IF NOT EXISTS "public"."tasks" (
   "estimated_duration" INTERVAL,
   "actual_duration" INTERVAL
 );
+ALTER TABLE "public"."tasks" OWNER TO "postgres";
 -- Create indexes
 CREATE INDEX IF NOT EXISTS "idx_calendar_event_calendar_id" ON "public"."calendar_events" USING btree ("calendar_id");
 CREATE INDEX IF NOT EXISTS "idx_calendar_event_end_time" ON "public"."calendar_events" USING btree ("end_time");
@@ -232,27 +274,24 @@ INSERT INTO calendars (
     user_id
   )
 VALUES (
-    COALESCE(
-      (v_calendar->>'id')::TEXT,
-      gen_random_uuid()::TEXT
-    ),
-    (v_calendar->>'id')::TEXT,
-    (v_calendar->>'summary')::TEXT,
-    (v_calendar->>'description')::TEXT,
-    (v_calendar->>'timeZone')::TEXT,
-    (v_calendar->>'colorId')::TEXT,
-    (v_calendar->>'backgroundColor')::TEXT,
-    (v_calendar->>'foregroundColor')::TEXT,
-    (v_calendar->>'etag')::TEXT,
-    (v_calendar->>'summaryOverride')::TEXT,
-    (v_calendar->>'hidden')::BOOLEAN,
-    (v_calendar->>'selected')::BOOLEAN,
-    (v_calendar->>'accessRole')::TEXT,
-    (v_calendar->>'defaultReminders')::JSONB,
-    (v_calendar->>'notificationSettings')::JSONB,
-    (v_calendar->>'primary')::BOOLEAN,
-    (v_calendar->>'deleted')::BOOLEAN,
-    (v_calendar->>'conferenceProperties')::JSONB,
+    COALESCE((v_calendar->>'id')::UUID, gen_random_uuid()),
+    v_calendar->>'id',
+    v_calendar->>'summary',
+    v_calendar->>'description',
+    v_calendar->>'timeZone',
+    v_calendar->>'colorId',
+    v_calendar->>'backgroundColor',
+    v_calendar->>'foregroundColor',
+    v_calendar->>'summaryOverride',
+    v_calendar->>'etag',
+    v_calendar->>'hidden'::BOOLEAN,
+    v_calendar->>'selected'::BOOLEAN,
+    v_calendar->>'accessRole',
+    v_calendar->>'defaultReminders'::JSONB,
+    v_calendar->>'notificationSettings'::JSONB,
+    v_calendar->>'primary'::BOOLEAN,
+    v_calendar->>'deleted'::BOOLEAN,
+    v_calendar->>'conferenceProperties'::JSONB,
     p_user_id
   ) ON CONFLICT (id) DO
 UPDATE
@@ -283,7 +322,8 @@ INSERT INTO calendar_events (
     id,
     google_event_id,
     calendar_id,
-    user_id summary,
+    user_id,
+    summary,
     description,
     start_time,
     end_time,
@@ -318,85 +358,86 @@ INSERT INTO calendar_events (
     etag,
     is_locked,
     source,
-    attachments,
+    attachments
   )
 VALUES (
-    COALESCE((v_event->>'id')::TEXT, gen_random_uuid()::TEXT),
-    (v_event->>'id')::TEXT,
-    (v_event->>'calendarId')::TEXT,
-    (v_event->>'etag')::TEXT,
-    (v_event->>'status')::TEXT,
-    (v_event->>'htmlLink')::TEXT,
-    (v_event->>'created')::TIMESTAMP,
-    (v_event->>'updated')::TIMESTAMP,
-    (v_event->>'summary')::TEXT,
-    (v_event->>'description')::TEXT,
-    (v_event->>'location')::TEXT,
-    (v_event->>'colorId')::TEXT,
-    (v_event->>'creator')::JSONB,
-    (v_event->>'organizer')::JSONB,
+    COALESCE((v_event->>'id')::UUID, gen_random_uuid()),
+    v_event->>'id',
+    v_event->>'calendarId',
+    p_user_id,
+    v_event->>'summary',
+    v_event->>'description',
     COALESCE(
-      (v_event->'start'->>'dateTime')::TIMESTAMP,
-      (v_event->'start'->>'date')::TIMESTAMP
+      (v_event->'start'->>'dateTime')::TIMESTAMPTZ,
+      (v_event->'start'->>'date')::DATE
     ),
     COALESCE(
-      (v_event->'end'->>'dateTime')::TIMESTAMP,
-      (v_event->'end'->>'date')::TIMESTAMP
+      (v_event->'end'->>'dateTime')::TIMESTAMPTZ,
+      (v_event->'end'->>'date')::DATE
     ),
     (v_event->'start'->>'date') IS NOT NULL,
+    v_event->>'recurringEventId',
     (
       SELECT ARRAY(
           SELECT jsonb_array_elements_text(v_event->'recurrence')
         )
     ),
-    (v_event->>'recurringEventId')::TEXT,
-    (v_event->>'originalStartTime')::JSONB,
-    (v_event->>'transparency')::TEXT,
-    (v_event->>'visibility')::TEXT,
-    (v_event->>'iCalUID')::TEXT,
-    (v_event->>'sequence')::INT,
+    v_event->>'location',
+    (v_event->>'creator')::JSONB,
+    (v_event->>'organizer')::JSONB,
     (v_event->>'attendees')::JSONB,
+    (v_event->>'reminders')::JSONB,
+    v_event->>'colorId',
+    v_event->>'visibility',
+    v_event->>'status',
+    v_event->>'transparency',
+    v_event->>'iCalUID',
+    (v_event->>'sequence')::INT,
+    v_event->>'htmlLink',
+    v_event->>'eventType',
+    (v_event->>'created')::TIMESTAMPTZ,
+    (v_event->>'updated')::TIMESTAMPTZ,
+    (v_event->>'originalStartTime')::JSONB,
     (v_event->>'attendeesOmitted')::BOOLEAN,
     (v_event->>'extendedProperties')::JSONB,
-    (v_event->>'hangoutLink')::TEXT,
+    v_event->>'hangoutLink',
     (v_event->>'conferenceData')::JSONB,
     (v_event->>'anyoneCanAddSelf')::BOOLEAN,
     (v_event->>'guestsCanInviteOthers')::BOOLEAN,
     (v_event->>'guestsCanModify')::BOOLEAN,
     (v_event->>'guestsCanSeeOtherGuests')::BOOLEAN,
     (v_event->>'privateCopy')::BOOLEAN,
+    v_event->>'etag',
     (v_event->>'locked')::BOOLEAN,
-    (v_event->>'reminders')::JSONB,
     (v_event->>'source')::JSONB,
-    (v_event->>'attachments')::JSONB,
-    (v_event->>'eventType')::TEXT,
-    p_user_id
+    (v_event->>'attachments')::JSONB
   ) ON CONFLICT (id) DO
 UPDATE
 SET google_event_id = EXCLUDED.google_event_id,
   calendar_id = EXCLUDED.calendar_id,
-  etag = EXCLUDED.etag,
-  status = EXCLUDED.status,
-  html_link = EXCLUDED.html_link,
-  created = EXCLUDED.created,
-  updated = EXCLUDED.updated,
   summary = EXCLUDED.summary,
   description = EXCLUDED.description,
-  location = EXCLUDED.location,
-  color_id = EXCLUDED.color_id,
-  creator = EXCLUDED.creator,
-  organizer = EXCLUDED.organizer,
   start_time = EXCLUDED.start_time,
   end_time = EXCLUDED.end_time,
   all_day = EXCLUDED.all_day,
-  recurrence = EXCLUDED.recurrence,
   recurring_event_id = EXCLUDED.recurring_event_id,
-  original_start_time = EXCLUDED.original_start_time,
-  transparency = EXCLUDED.transparency,
+  recurrence = EXCLUDED.recurrence,
+  location = EXCLUDED.location,
+  creator = EXCLUDED.creator,
+  organizer = EXCLUDED.organizer,
+  attendees = EXCLUDED.attendees,
+  reminders = EXCLUDED.reminders,
+  color_id = EXCLUDED.color_id,
   visibility = EXCLUDED.visibility,
+  status = EXCLUDED.status,
+  transparency = EXCLUDED.transparency,
   ical_uid = EXCLUDED.ical_uid,
   sequence = EXCLUDED.sequence,
-  attendees = EXCLUDED.attendees,
+  html_link = EXCLUDED.html_link,
+  event_type = EXCLUDED.event_type,
+  created = EXCLUDED.created,
+  updated = EXCLUDED.updated,
+  original_start_time = EXCLUDED.original_start_time,
   attendees_omitted = EXCLUDED.attendees_omitted,
   extended_properties = EXCLUDED.extended_properties,
   hangout_link = EXCLUDED.hangout_link,
@@ -406,11 +447,10 @@ SET google_event_id = EXCLUDED.google_event_id,
   guests_can_modify = EXCLUDED.guests_can_modify,
   guests_can_see_other_guests = EXCLUDED.guests_can_see_other_guests,
   private_copy = EXCLUDED.private_copy,
+  etag = EXCLUDED.etag,
   is_locked = EXCLUDED.is_locked,
-  reminders = EXCLUDED.reminders,
   source = EXCLUDED.source,
-  attachments = EXCLUDED.attachments,
-  event_type = EXCLUDED.event_type;
+  attachments = EXCLUDED.attachments;
 v_events_synced := v_events_synced + 1;
 END LOOP;
 RETURN jsonb_build_object(
@@ -437,25 +477,31 @@ INSERT INTO public.users (
     id,
     full_name,
     avatar_url,
-    website,
     email,
-    timezone
+    created_at,
+    locale,
+    week_starts_on_monday
   )
 VALUES (
     NEW.id,
     NEW.raw_user_meta_data->>'full_name',
     NEW.raw_user_meta_data->>'avatar_url',
-    NEW.raw_user_meta_data->>'website',
     NEW.email,
-    NEW.raw_user_meta_data->>'timezone'
+    NEW.created_at,
+    COALESCE(NEW.raw_user_meta_data->>'locale', 'en'),
+    COALESCE(
+      (NEW.raw_user_meta_data->>'week_starts_on_monday')::boolean,
+      false
+    )
   );
 RETURN NEW;
 END;
 $$;
+ALTER FUNCTION "public"."handle_new_user"() OWNER TO "postgres";
 -- Create triggers
-CREATE TRIGGER "goal_updated_at" BEFORE CREATE TRIGGER "on_auth_user_created"
+CREATE TRIGGER on_auth_user_created
 AFTER
-INSERT ON "auth"."users" FOR EACH ROW EXECUTE FUNCTION "public"."handle_new_user"();
+INSERT ON auth.users FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
 -- Set up RLS policies
 ALTER TABLE "public"."goals" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "public"."headers" ENABLE ROW LEVEL SECURITY;
@@ -465,12 +511,12 @@ ALTER TABLE "public"."integrations" ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Allow authenticated user to view & modify their own data" ON "public"."goals" TO authenticated USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
 CREATE POLICY "Allow authenticated user to view & modify their own data" ON "public"."headers" TO authenticated USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
 CREATE POLICY "Allow authenticated user to view & modify their own data" ON "public"."projects" TO authenticated USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
-CREATE POLICY "Public users are viewable by everyone." ON "public"."users" FOR
-SELECT USING (true);
-CREATE POLICY "Users can insert their own user." ON "public"."users" FOR
-INSERT WITH CHECK ((auth.uid() = id));
-CREATE POLICY "Users can update own user." ON "public"."users" FOR
-UPDATE USING ((auth.uid() = id));
+CREATE POLICY "Users can select their own profile." ON "public"."users" FOR
+SELECT USING (("auth"."uid"() = "id"));
+CREATE POLICY "Users can insert their own profile." ON "public"."users" FOR
+INSERT WITH CHECK (("auth"."uid"() = "id"));
+CREATE POLICY "Users can update own profile." ON "public"."users" FOR
+UPDATE USING (("auth"."uid"() = "id"));
 CREATE POLICY "Users can view their own integrations" ON "public"."integrations" FOR
 SELECT USING (auth.uid() = user_id);
 CREATE POLICY "Users can insert their own integrations" ON "public"."integrations" FOR
@@ -501,9 +547,6 @@ ADD CONSTRAINT "project_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "auth".
 ALTER TABLE "public"."tasks"
 ADD CONSTRAINT "task_header_id_fkey" FOREIGN KEY ("header_id") REFERENCES "public"."headers"("id") ON DELETE CASCADE,
   ADD CONSTRAINT "task_project_id_fkey" FOREIGN KEY ("project_id") REFERENCES "public"."projects"("id") ON DELETE CASCADE;
-ALTER TABLE "public".""
-ADD CONSTRAINT "shared_note_note_id_fkey" FOREIGN KEY ("note_id") REFERENCES "public"."notes"("id") ON DELETE CASCADE,
-  ADD CONSTRAINT "shared_note_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "auth"."users"("id") ON DELETE CASCADE;
 ALTER TABLE "public"."tag_tasks"
 ADD CONSTRAINT "tag_task_parent_id_fkey" FOREIGN KEY ("parent_id") REFERENCES "public"."tags"("id"),
   ADD CONSTRAINT "tag_task_tag_id_fkey" FOREIGN KEY ("tag_id") REFERENCES "public"."tags"("id"),
@@ -518,6 +561,9 @@ ADD CONSTRAINT "task_assigned_to_fkey" FOREIGN KEY ("assigned_to") REFERENCES "a
   ADD CONSTRAINT "task_deleted_by_fkey" FOREIGN KEY ("deleted_by") REFERENCES "auth"."users"("id"),
   ADD CONSTRAINT "task_updated_by_fkey" FOREIGN KEY ("updated_by") REFERENCES "auth"."users"("id");
 -- Grant necessary permissions
+GRANT ALL ON TABLE "public"."users" TO "anon";
+GRANT ALL ON TABLE "public"."users" TO "authenticated";
+GRANT ALL ON TABLE "public"."users" TO "service_role";
 GRANT USAGE ON SCHEMA "public" TO "postgres",
   "anon",
   "authenticated",
@@ -551,3 +597,6 @@ GRANT ALL ON SEQUENCES TO "postgres",
   "authenticated",
   "service_role";
 COMMENT ON SCHEMA "public" IS 'standard public schema';
+GRANT ALL ON FUNCTION "public"."handle_new_user"() TO "anon";
+GRANT ALL ON FUNCTION "public"."handle_new_user"() TO "authenticated";
+GRANT ALL ON FUNCTION "public"."handle_new_user"() TO "service_role";
