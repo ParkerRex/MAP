@@ -332,6 +332,7 @@ export const Icons = {
   ArrowRight: MdArrowRight,
   ArrowDown: MdOutlineArrowDownward,
   ArrowUp: MdArrowUpward,
+  Files: MdOutlineInventory2,
   ArrowBack: MdArrowBack,
   KeyboardArrowDown: MdKeyboardArrowDown,
   KeyboardArrowUp: MdKeyboardArrowUp,

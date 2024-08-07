@@ -1,5 +1,5 @@
 export const chatExamples = [
-  `What's my burn rate`,
+  `Set a goal`,
   `What's my runway`,
   "Show transactions without receipts",
   "What is my spending on Software",

@@ -58,13 +58,16 @@ export default async function Layout({
 
   // Setup analytics if user exists
   if (user) {
-    await setupAnalytics({ userId: user.data.id });
+    await setupAnalytics({ userId: user.id });
   }
 
-  // Render the layout with sidebar, header, and various modals
+  if (!user) {
+    redirect("/login");
+  }
+
   return (
     <div className="relative">
-      <AI initialAIState={{ user: user.data, messages: [], chatId: nanoid() }}>
+      <AI initialAIState={{ user, messages: [], chatId: nanoid() }}>
         <Sidebar />
 
         <div className="mx-4 md:ml-[95px] md:mr-10 pb-8">
@@ -73,13 +76,8 @@ export default async function Layout({
         </div>
 
         <AssistantModal />
-        {/* <ConnectTransactionsModal countryCode={countryCode} /> */}
         {/* <SelectBankAccountsModal /> */}
-        {/* <ImportCSVModal
-          currencies={uniqueCurrencies}
-          defaultCurrency={uniqueCurrencies[countryCode]}
-        />
-        <ExportStatus /> */}
+
         <HotKeys />
       </AI>
     </div>

@@ -32,7 +32,7 @@ const defaultValue = {
 // Main component for the Overview page
 export default async function Overview({
   searchParams,
-}: { searchParams: any }) {
+}: { searchParams: Record<string, string | string[] | undefined> }) {
   // TODO: Implement getTeamBankAccounts
   // const accounts = await getTeamBankAccounts();
   const accounts = { data: [{ id: "fake-account" }] }; // Stub data

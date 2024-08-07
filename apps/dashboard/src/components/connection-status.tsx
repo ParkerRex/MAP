@@ -1,6 +1,5 @@
-// TODO: Replace with getConnectionsbyUserId
+// TODO: Replace with getConnections
 import { getConnectionsStatus } from "@/utils/connection-status";
-import { getBankConnectionsByTeamId } from "@map/supabase/cached-queries";
 import { Button } from "@map/ui/button";
 import { cn } from "@map/ui/cn";
 import { Icons } from "@map/ui/icons";
@@ -11,6 +10,18 @@ import {
   TooltipTrigger,
 } from "@map/ui/tooltip";
 import Link from "next/link";
+
+// TODO: Implement getConnections to check status of Google Calendar, Oura, Whoop, Apple Health Kit
+async function getBankConnectionsByTeamId() {
+  // Stub function returning fake data
+  return {
+    data: [
+      { status: "connected", expires_at: "2023-12-31" },
+      { status: "connected", expires_at: "2024-01-15" },
+      { status: "disconnected", expires_at: "2023-11-30" },
+    ],
+  };
+}
 
 export async function ConnectionStatus() {
   const bankConnections = await getBankConnectionsByTeamId();

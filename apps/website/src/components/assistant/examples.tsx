@@ -31,7 +31,7 @@ export const chatExamples = [
       "Based on the period from Jun 1, 2022 and Jun 1, 2023 your current profit is $18,933.33. In the previous period, your profit was $3,422.33",
   },
   {
-    title: `What's my revenue`,
+    title: `Set a goal`,
     content:
       "Based on the period from Jun 1, 2023 and Jun 5, 2024 your revenue is $18,933.33. In the previous period, your profit was $20,933.33.",
   },
