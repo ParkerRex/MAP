@@ -1,34 +1,26 @@
 import { useCalendar } from "@/store/calendar-context";
-import { safeParseDate } from "@/utils/date-utils";
-import { DateTime } from "luxon";
+import { addWeeks, startOfWeek, subWeeks } from "date-fns";
 
 export const useWeekNavigation = () => {
   const { currentWeekStartDate, setCurrentWeekStartDate } = useCalendar();
 
   const handleNextWeek = () => {
-    const currentDate = safeParseDate(currentWeekStartDate);
-    if (currentDate) {
-      const newDate = currentDate.plus({ weeks: 1 });
-      setCurrentWeekStartDate(newDate.startOf("week").toJSDate());
-    }
+    const newDate = addWeeks(currentWeekStartDate, 1);
+    setCurrentWeekStartDate(startOfWeek(newDate, { weekStartsOn: 1 }));
   };
 
   const handleCurrentWeek = () => {
-    const today = DateTime.now();
-    setCurrentWeekStartDate(today.startOf("week").toJSDate());
+    const today = new Date();
+    setCurrentWeekStartDate(startOfWeek(today, { weekStartsOn: 1 }));
   };
 
   const handlePreviousWeek = () => {
-    const currentDate = safeParseDate(currentWeekStartDate);
-    if (currentDate) {
-      const newDate = currentDate.minus({ weeks: 1 });
-      setCurrentWeekStartDate(newDate.startOf("week").toJSDate());
-    }
+    const newDate = subWeeks(currentWeekStartDate, 1);
+    setCurrentWeekStartDate(startOfWeek(newDate, { weekStartsOn: 1 }));
   };
 
   const handleSetWeek = (date: Date) => {
-    const luxonDate = DateTime.fromJSDate(date);
-    setCurrentWeekStartDate(luxonDate.startOf("week").toJSDate());
+    setCurrentWeekStartDate(startOfWeek(date, { weekStartsOn: 1 }));
   };
 
   return {

@@ -1,0 +1,4480 @@
+{
+  "kind": "calendar#events",
+  "etag": "\"p32gf327eubh8e0o\"",
+  "summary": "Work Blocks",
+  "description": "",
+  "updated": "2024-08-07T12:37:52.676Z",
+  "timeZone": "America/New_York",
+  "accessRole": "owner",
+  "defaultReminders": [],
+  "nextSyncToken": "CKDxiO7y4ocDEKDxiO7y4ocDGAUg4qK0ugIo4qK0ugI=",
+  "items": [
+    {
+      "kind": "calendar#event",
+      "etag": "\"3410834033406000\"",
+      "id": "0isvevgv71gpp5ovr5esr8plbv",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=MGlzdmV2Z3Y3MWdwcDVvdnI1ZXNyOHBsYnZfMjAyNDAxMjNUMTE0NTAwWiBjX2I4NmYxN2QzYzAyNzdmNzE3NWUxYTc4MzVmYjk3ZjljNzg1NWUyMjJjMzQ2YjdiMDBjYTQ4OTkxM2Q3NjIyMTVAZw",
+      "created": "2024-01-16T14:51:53.000Z",
+      "updated": "2024-01-16T14:56:56.703Z",
+      "summary": "⛑️ Mobility Circuit to Reduce Injury",
+      "description": "5-7 movements that I would go through 2-3 times\u003cbr\u003e\u003col\u003e\u003cli\u003e\u003cspan\u003esquat-to-stands\u003c/span\u003e\u003c/li\u003e\u003cli\u003edead-bugs, spidermans,\u003c/li\u003e\u003cli\u003ebowler squats\u003c/li\u003e\u003cli\u003ecouch stretch\u003c/li\u003e\u003cli\u003eyoga pushups\u003c/li\u003e\u003cli\u003e90/90 hip stretch\u003c/li\u003e\u003cli\u003ereverse lunge with reach\u003c/li\u003e\u003c/ol\u003e",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "Training",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2024-01-23T06:45:00-05:00",
+        "timeZone": "America/New_York"
+      },
+      "end": {
+        "dateTime": "2024-01-23T07:00:00-05:00",
+        "timeZone": "America/New_York"
+      },
+      "recurrence": ["RRULE:FREQ=DAILY;UNTIL=20240130T045959Z"],
+      "iCalUID": "0isvevgv71gpp5ovr5esr8plbv@google.com",
+      "sequence": 3,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3412398931490000\"",
+      "id": "0isvevgv71gpp5ovr5esr8plbv_20240125T114500Z",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=MGlzdmV2Z3Y3MWdwcDVvdnI1ZXNyOHBsYnZfMjAyNDAxMjVUMTE0NTAwWiBjX2I4NmYxN2QzYzAyNzdmNzE3NWUxYTc4MzVmYjk3ZjljNzg1NWUyMjJjMzQ2YjdiMDBjYTQ4OTkxM2Q3NjIyMTVAZw",
+      "created": "2024-01-16T14:51:53.000Z",
+      "updated": "2024-01-25T16:17:45.745Z",
+      "summary": "⛑️ Mobility Circuit to Reduce Injury",
+      "description": "5-7 movements that I would go through 2-3 times\u003cbr\u003e\u003col\u003e\u003cli\u003e\u003cspan\u003esquat-to-stands\u003c/span\u003e\u003c/li\u003e\u003cli\u003edead-bugs, spidermans,\u003c/li\u003e\u003cli\u003ebowler squats\u003c/li\u003e\u003cli\u003ecouch stretch\u003c/li\u003e\u003cli\u003eyoga pushups\u003c/li\u003e\u003cli\u003e90/90 hip stretch\u003c/li\u003e\u003cli\u003ereverse lunge with reach\u003c/li\u003e\u003c/ol\u003e",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "Training",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2024-01-25T06:45:00-05:00",
+        "timeZone": "America/New_York"
+      },
+      "end": {
+        "dateTime": "2024-01-25T07:00:00-05:00",
+        "timeZone": "America/New_York"
+      },
+      "recurringEventId": "0isvevgv71gpp5ovr5esr8plbv",
+      "originalStartTime": {
+        "dateTime": "2024-01-25T06:45:00-05:00",
+        "timeZone": "America/New_York"
+      },
+      "iCalUID": "0isvevgv71gpp5ovr5esr8plbv@google.com",
+      "sequence": 3,
+      "extendedProperties": {
+        "private": {
+          "doneAt": "2024-01-25T11:17:22.158-05:00",
+          "doneBy": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com"
+        }
+      },
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3413819887906000\"",
+      "id": "7jfg9dcejo61kbvq8v4dstsk4k",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=N2pmZzlkY2VqbzYxa2J2cTh2NGRzdHNrNGtfMjAyNDAxMTRUMTIwMDAwWiBjX2I4NmYxN2QzYzAyNzdmNzE3NWUxYTc4MzVmYjk3ZjljNzg1NWUyMjJjMzQ2YjdiMDBjYTQ4OTkxM2Q3NjIyMTVAZw",
+      "created": "2024-01-12T16:39:34.000Z",
+      "updated": "2024-02-02T21:39:03.953Z",
+      "summary": "🌞 AM: Get Cold, Robbins Priming, Get Sun, Stretch",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "Training",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2024-01-14T07:00:00-05:00",
+        "timeZone": "America/New_York"
+      },
+      "end": {
+        "dateTime": "2024-01-14T08:00:00-05:00",
+        "timeZone": "America/New_York"
+      },
+      "recurrence": ["RRULE:FREQ=DAILY;UNTIL=20240121T045959Z"],
+      "iCalUID": "7jfg9dcejo61kbvq8v4dstsk4k@google.com",
+      "sequence": 0,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3413819887906000\"",
+      "id": "7jfg9dcejo61kbvq8v4dstsk4k_20240117T120000Z",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=N2pmZzlkY2VqbzYxa2J2cTh2NGRzdHNrNGtfMjAyNDAxMTdUMTIwMDAwWiBjX2I4NmYxN2QzYzAyNzdmNzE3NWUxYTc4MzVmYjk3ZjljNzg1NWUyMjJjMzQ2YjdiMDBjYTQ4OTkxM2Q3NjIyMTVAZw",
+      "created": "2024-01-12T16:39:34.000Z",
+      "updated": "2024-02-02T21:39:03.953Z",
+      "summary": "🌞 AM: Get Cold, Robbins Priming, Get Sun, Stretch",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "Training",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2024-01-17T06:15:00-05:00",
+        "timeZone": "America/New_York"
+      },
+      "end": {
+        "dateTime": "2024-01-17T07:15:00-05:00",
+        "timeZone": "America/New_York"
+      },
+      "recurringEventId": "7jfg9dcejo61kbvq8v4dstsk4k",
+      "originalStartTime": {
+        "dateTime": "2024-01-17T07:00:00-05:00",
+        "timeZone": "America/New_York"
+      },
+      "iCalUID": "7jfg9dcejo61kbvq8v4dstsk4k@google.com",
+      "sequence": 1,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3413819887906000\"",
+      "id": "7jfg9dcejo61kbvq8v4dstsk4k_20240125T120000Z",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=N2pmZzlkY2VqbzYxa2J2cTh2NGRzdHNrNGtfMjAyNDAxMjVUMTIwMDAwWiBjX2I4NmYxN2QzYzAyNzdmNzE3NWUxYTc4MzVmYjk3ZjljNzg1NWUyMjJjMzQ2YjdiMDBjYTQ4OTkxM2Q3NjIyMTVAZw",
+      "created": "2024-01-12T16:39:34.000Z",
+      "updated": "2024-02-02T21:39:03.953Z",
+      "summary": "🌞 AM: Get Cold, Priming, Get Sun, Stretch, Supps",
+      "description": "\u003cul\u003e\u003cli\u003eFish Oil\u003c/li\u003e\u003cli\u003eVitamin D\u003c/li\u003e\u003cli\u003eCreatine (5g)\u003c/li\u003e\u003cli\u003eLMNT\u003c/li\u003e\u003cli\u003eWhey Protein\u003c/li\u003e\u003cli\u003e\u003cbr\u003e\u003c/li\u003e\u003c/ul\u003e",
+      "colorId": "3",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "Training",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2024-01-25T07:00:00-05:00",
+        "timeZone": "America/New_York"
+      },
+      "end": {
+        "dateTime": "2024-01-25T08:00:00-05:00",
+        "timeZone": "America/New_York"
+      },
+      "recurringEventId": "7jfg9dcejo61kbvq8v4dstsk4k_R20240122T120000",
+      "originalStartTime": {
+        "dateTime": "2024-01-25T07:00:00-05:00",
+        "timeZone": "America/New_York"
+      },
+      "iCalUID": "7jfg9dcejo61kbvq8v4dstsk4k_R20240122T120000@google.com",
+      "sequence": 0,
+      "extendedProperties": {
+        "private": {
+          "doneAt": "2024-01-25T11:17:17.410-05:00",
+          "doneBy": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com"
+        }
+      },
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3413819887906000\"",
+      "id": "7jfg9dcejo61kbvq8v4dstsk4k_20240131T120000Z",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=N2pmZzlkY2VqbzYxa2J2cTh2NGRzdHNrNGtfMjAyNDAxMzFUMTIwMDAwWiBjX2I4NmYxN2QzYzAyNzdmNzE3NWUxYTc4MzVmYjk3ZjljNzg1NWUyMjJjMzQ2YjdiMDBjYTQ4OTkxM2Q3NjIyMTVAZw",
+      "created": "2024-01-12T16:39:34.000Z",
+      "updated": "2024-02-02T21:39:03.953Z",
+      "summary": "🌞 AM: Get Cold, Priming, Get Sun, Stretch, Supps",
+      "description": "\u003cul\u003e\u003cli\u003eFish Oil\u003c/li\u003e\u003cli\u003eVitamin D\u003c/li\u003e\u003cli\u003eCreatine (5g)\u003c/li\u003e\u003cli\u003eLMNT\u003c/li\u003e\u003cli\u003eWhey Protein\u003c/li\u003e\u003cli\u003e\u003cbr\u003e\u003c/li\u003e\u003c/ul\u003e",
+      "colorId": "3",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "Training",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2024-01-31T07:00:00-05:00",
+        "timeZone": "America/New_York"
+      },
+      "end": {
+        "dateTime": "2024-01-31T07:30:00-05:00",
+        "timeZone": "America/New_York"
+      },
+      "recurringEventId": "7jfg9dcejo61kbvq8v4dstsk4k_R20240122T120000",
+      "originalStartTime": {
+        "dateTime": "2024-01-31T07:00:00-05:00",
+        "timeZone": "America/New_York"
+      },
+      "iCalUID": "7jfg9dcejo61kbvq8v4dstsk4k_R20240122T120000@google.com",
+      "sequence": 0,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3413819887906000\"",
+      "id": "7jfg9dcejo61kbvq8v4dstsk4k_R20240121T120000",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=N2pmZzlkY2VqbzYxa2J2cTh2NGRzdHNrNGtfMjAyNDAxMjFUMTIwMDAwWiBjX2I4NmYxN2QzYzAyNzdmNzE3NWUxYTc4MzVmYjk3ZjljNzg1NWUyMjJjMzQ2YjdiMDBjYTQ4OTkxM2Q3NjIyMTVAZw",
+      "created": "2024-01-12T16:39:34.000Z",
+      "updated": "2024-02-02T21:39:03.953Z",
+      "summary": "🌞 AM: Get Cold, Priming, Get Sun, Stretch",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "Training",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2024-01-21T07:00:00-05:00",
+        "timeZone": "America/New_York"
+      },
+      "end": {
+        "dateTime": "2024-01-21T08:00:00-05:00",
+        "timeZone": "America/New_York"
+      },
+      "recurrence": ["RRULE:FREQ=DAILY;UNTIL=20240122T045959Z"],
+      "iCalUID": "7jfg9dcejo61kbvq8v4dstsk4k_R20240121T120000@google.com",
+      "sequence": 0,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3414344518340000\"",
+      "id": "7jfg9dcejo61kbvq8v4dstsk4k_R20240122T120000",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=N2pmZzlkY2VqbzYxa2J2cTh2NGRzdHNrNGtfMjAyNDAxMjJUMTIwMDAwWiBjX2I4NmYxN2QzYzAyNzdmNzE3NWUxYTc4MzVmYjk3ZjljNzg1NWUyMjJjMzQ2YjdiMDBjYTQ4OTkxM2Q3NjIyMTVAZw",
+      "created": "2024-01-12T16:39:34.000Z",
+      "updated": "2024-02-05T22:30:59.170Z",
+      "summary": "🌞 AM: Get Cold, Priming, Get Sun, Stretch, Supps",
+      "description": "\u003cul\u003e\u003cli\u003eFish Oil\u003c/li\u003e\u003cli\u003eVitamin D\u003c/li\u003e\u003cli\u003eCreatine (5g)\u003c/li\u003e\u003cli\u003eLMNT\u003c/li\u003e\u003cli\u003eWhey Protein\u003c/li\u003e\u003cli\u003e\u003cbr\u003e\u003c/li\u003e\u003c/ul\u003e",
+      "colorId": "3",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "Training",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2024-01-22T07:00:00-05:00",
+        "timeZone": "America/New_York"
+      },
+      "end": {
+        "dateTime": "2024-01-22T08:00:00-05:00",
+        "timeZone": "America/New_York"
+      },
+      "recurrence": ["RRULE:FREQ=DAILY;UNTIL=20240206T045959Z"],
+      "iCalUID": "7jfg9dcejo61kbvq8v4dstsk4k_R20240122T120000@google.com",
+      "sequence": 0,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3414344518340000\"",
+      "id": "7jfg9dcejo61kbvq8v4dstsk4k_R20240206T120000",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=N2pmZzlkY2VqbzYxa2J2cTh2NGRzdHNrNGtfMjAyNDAyMDZUMTIwMDAwWiBjX2I4NmYxN2QzYzAyNzdmNzE3NWUxYTc4MzVmYjk3ZjljNzg1NWUyMjJjMzQ2YjdiMDBjYTQ4OTkxM2Q3NjIyMTVAZw",
+      "created": "2024-01-12T16:39:34.000Z",
+      "updated": "2024-02-05T22:30:59.170Z",
+      "summary": "🌞 AM: Get Cold, Priming, Get Sun, Stretch, Supps",
+      "description": "\u003cul\u003e\u003cli\u003eFish Oil\u003c/li\u003e\u003cli\u003eVitamin D\u003c/li\u003e\u003cli\u003eCreatine (5g)\u003c/li\u003e\u003cli\u003eLMNT\u003c/li\u003e\u003cli\u003eWhey Protein\u003c/li\u003e\u003cli\u003e\u003cbr\u003e\u003c/li\u003e\u003c/ul\u003e",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "Training",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2024-02-06T07:00:00-05:00",
+        "timeZone": "America/New_York"
+      },
+      "end": {
+        "dateTime": "2024-02-06T08:00:00-05:00",
+        "timeZone": "America/New_York"
+      },
+      "recurrence": ["RRULE:FREQ=DAILY;UNTIL=20240211T045959Z"],
+      "iCalUID": "7jfg9dcejo61kbvq8v4dstsk4k_R20240206T120000@google.com",
+      "sequence": 0,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3414715526112000\"",
+      "id": "076cmdddpdc8ikib01aq871k9i",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=MDc2Y21kZGRwZGM4aWtpYjAxYXE4NzFrOWlfMjAyNDAxMThUMTEwMDAwWiBjX2I4NmYxN2QzYzAyNzdmNzE3NWUxYTc4MzVmYjk3ZjljNzg1NWUyMjJjMzQ2YjdiMDBjYTQ4OTkxM2Q3NjIyMTVAZw",
+      "created": "2024-01-16T14:38:05.000Z",
+      "updated": "2024-02-08T02:02:43.056Z",
+      "summary": "🏃\u200d♂️2 mile easy run",
+      "colorId": "3",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "Training",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2024-01-18T06:00:00-05:00",
+        "timeZone": "America/New_York"
+      },
+      "end": {
+        "dateTime": "2024-01-18T07:00:00-05:00",
+        "timeZone": "America/New_York"
+      },
+      "recurrence": ["RRULE:FREQ=WEEKLY;UNTIL=20240208T045959Z;BYDAY=TH"],
+      "iCalUID": "076cmdddpdc8ikib01aq871k9i@google.com",
+      "sequence": 3,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3414715533902000\"",
+      "id": "0si5vq5j3aj2e02lm92lafbb97",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=MHNpNXZxNWozYWoyZTAybG05MmxhZmJiOTdfMjAyNDAxMTdUMDMzMDAwWiBjX2I4NmYxN2QzYzAyNzdmNzE3NWUxYTc4MzVmYjk3ZjljNzg1NWUyMjJjMzQ2YjdiMDBjYTQ4OTkxM2Q3NjIyMTVAZw",
+      "created": "2024-01-16T14:40:51.000Z",
+      "updated": "2024-02-08T02:02:46.951Z",
+      "summary": "🌚 Recovery",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "Training",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2024-01-16T22:30:00-05:00",
+        "timeZone": "America/New_York"
+      },
+      "end": {
+        "dateTime": "2024-01-17T05:30:00-05:00",
+        "timeZone": "America/New_York"
+      },
+      "recurrence": ["RRULE:FREQ=DAILY;UNTIL=20240207T045959Z"],
+      "iCalUID": "0si5vq5j3aj2e02lm92lafbb97@google.com",
+      "sequence": 2,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3414823942716000\"",
+      "id": "48kro8gtt72cq6a66empcreh5n",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=NDhrcm84Z3R0NzJjcTZhNjZlbXBjcmVoNW5fMjAyNDAxMTlUMTEwMDAwWiBjX2I4NmYxN2QzYzAyNzdmNzE3NWUxYTc4MzVmYjk3ZjljNzg1NWUyMjJjMzQ2YjdiMDBjYTQ4OTkxM2Q3NjIyMTVAZw",
+      "created": "2024-01-16T14:38:13.000Z",
+      "updated": "2024-02-08T17:06:11.358Z",
+      "summary": "🏃\u200d♂️ 5 mile tempo run",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "Training",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2024-01-19T06:00:00-05:00",
+        "timeZone": "America/New_York"
+      },
+      "end": {
+        "dateTime": "2024-01-19T07:00:00-05:00",
+        "timeZone": "America/New_York"
+      },
+      "recurrence": ["RRULE:FREQ=WEEKLY;UNTIL=20240209T045959Z;BYDAY=FR"],
+      "iCalUID": "48kro8gtt72cq6a66empcreh5n@google.com",
+      "sequence": 3,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3414823952376000\"",
+      "id": "3ku7d66lof1nrrdig8lqp6i7vb",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=M2t1N2Q2NmxvZjFucnJkaWc4bHFwNmk3dmJfMjAyNDAxMzBUMTMwMDAwWiBjX2I4NmYxN2QzYzAyNzdmNzE3NWUxYTc4MzVmYjk3ZjljNzg1NWUyMjJjMzQ2YjdiMDBjYTQ4OTkxM2Q3NjIyMTVAZw",
+      "created": "2024-01-16T14:51:53.000Z",
+      "updated": "2024-02-08T17:06:16.188Z",
+      "summary": "⛑️ Mobility Circuit to Reduce Injury",
+      "description": "5-7 movements that I would go through 2-3 times\u003cbr\u003e\u003col\u003e\u003cli\u003e\u003cspan\u003esquat-to-stands\u003c/span\u003e\u003c/li\u003e\u003cli\u003edead-bugs, spidermans,\u003c/li\u003e\u003cli\u003ebowler squats\u003c/li\u003e\u003cli\u003ecouch stretch\u003c/li\u003e\u003cli\u003eyoga pushups\u003c/li\u003e\u003cli\u003e90/90 hip stretch\u003c/li\u003e\u003cli\u003ereverse lunge with reach\u003c/li\u003e\u003c/ol\u003e",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "Training",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2024-01-30T08:00:00-05:00",
+        "timeZone": "America/New_York"
+      },
+      "end": {
+        "dateTime": "2024-01-30T08:30:00-05:00",
+        "timeZone": "America/New_York"
+      },
+      "recurrence": ["RRULE:FREQ=DAILY;UNTIL=20240209T045959Z"],
+      "iCalUID": "3ku7d66lof1nrrdig8lqp6i7vb@google.com",
+      "sequence": 4,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3414823958984000\"",
+      "id": "7bik7rn23rrgf0mko85h626b89",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=N2JpazdybjIzcnJnZjBta284NWg2MjZiODlfMjAyNDAxMTlUMTcwMDAwWiBjX2I4NmYxN2QzYzAyNzdmNzE3NWUxYTc4MzVmYjk3ZjljNzg1NWUyMjJjMzQ2YjdiMDBjYTQ4OTkxM2Q3NjIyMTVAZw",
+      "created": "2024-01-16T14:39:20.000Z",
+      "updated": "2024-02-08T17:06:19.492Z",
+      "summary": "🏋️\u200d♀️ Lower Body 2",
+      "description": "\u003cul\u003e\u003cli\u003eBarbell Front Squat 4 sets x 5 reps \u003c/li\u003e\u003cli\u003eDumbell Reverse Lunges 3 x 8\u003c/li\u003e\u003cli\u003eAlternating Side Lunges + Calf Raises 3 x 10 \u003c/li\u003e\u003cli\u003eHanging Leg Raises Ab Wheel Rollouts 3 x 15\u003c/li\u003e\u003c/ul\u003e",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "Training",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2024-01-19T12:00:00-05:00",
+        "timeZone": "America/New_York"
+      },
+      "end": {
+        "dateTime": "2024-01-19T13:00:00-05:00",
+        "timeZone": "America/New_York"
+      },
+      "recurrence": ["RRULE:FREQ=WEEKLY;UNTIL=20240209T045959Z;BYDAY=FR"],
+      "iCalUID": "7bik7rn23rrgf0mko85h626b89@google.com",
+      "sequence": 4,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3414823958984000\"",
+      "id": "7bik7rn23rrgf0mko85h626b89_20240126T170000Z",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=N2JpazdybjIzcnJnZjBta284NWg2MjZiODlfMjAyNDAxMjZUMTcwMDAwWiBjX2I4NmYxN2QzYzAyNzdmNzE3NWUxYTc4MzVmYjk3ZjljNzg1NWUyMjJjMzQ2YjdiMDBjYTQ4OTkxM2Q3NjIyMTVAZw",
+      "created": "2024-01-16T14:39:20.000Z",
+      "updated": "2024-02-08T17:06:19.492Z",
+      "summary": "🏋️\u200d♀️ Lower Body 2",
+      "description": "\u003cul\u003e\u003cli\u003eBarbell Front Squat 4 sets x 5 reps \u003c/li\u003e\u003cli\u003eDumbell Reverse Lunges 3 x 8\u003c/li\u003e\u003cli\u003eAlternating Side Lunges + Calf Raises 3 x 10 \u003c/li\u003e\u003cli\u003eHanging Leg Raises Ab Wheel Rollouts 3 x 15\u003c/li\u003e\u003c/ul\u003e",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "Training",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2024-01-26T12:00:00-05:00",
+        "timeZone": "America/New_York"
+      },
+      "end": {
+        "dateTime": "2024-01-26T13:00:00-05:00",
+        "timeZone": "America/New_York"
+      },
+      "recurringEventId": "7bik7rn23rrgf0mko85h626b89",
+      "originalStartTime": {
+        "dateTime": "2024-01-26T12:00:00-05:00",
+        "timeZone": "America/New_York"
+      },
+      "iCalUID": "7bik7rn23rrgf0mko85h626b89@google.com",
+      "sequence": 4,
+      "extendedProperties": {
+        "private": {
+          "doneAt": "2024-01-26T18:55:56Z",
+          "doneBy": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com"
+        }
+      },
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3415486403758000\"",
+      "id": "5q2u8m85dr5omh3h0kh52q303a",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=NXEydThtODVkcjVvbWgzaDBraDUycTMwM2FfMjAyNDAxMjJUMTEwMDAwWiBjX2I4NmYxN2QzYzAyNzdmNzE3NWUxYTc4MzVmYjk3ZjljNzg1NWUyMjJjMzQ2YjdiMDBjYTQ4OTkxM2Q3NjIyMTVAZw",
+      "created": "2024-01-16T14:36:53.000Z",
+      "updated": "2024-02-12T13:06:41.879Z",
+      "summary": "🏃\u200d♂️ 2 mile easy run",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "Training",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2024-01-22T06:00:00-05:00",
+        "timeZone": "America/New_York"
+      },
+      "end": {
+        "dateTime": "2024-01-22T07:00:00-05:00",
+        "timeZone": "America/New_York"
+      },
+      "recurrence": ["RRULE:FREQ=WEEKLY;UNTIL=20240211T110000Z;BYDAY=MO"],
+      "iCalUID": "5q2u8m85dr5omh3h0kh52q303a@google.com",
+      "sequence": 4,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3415486412502000\"",
+      "id": "58iu74aulsgbu6vbc332h8meha",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=NThpdTc0YXVsc2didTZ2YmMzMzJoOG1laGFfMjAyNDAxMjNUMTEwMDAwWiBjX2I4NmYxN2QzYzAyNzdmNzE3NWUxYTc4MzVmYjk3ZjljNzg1NWUyMjJjMzQ2YjdiMDBjYTQ4OTkxM2Q3NjIyMTVAZw",
+      "created": "2024-01-16T14:37:26.000Z",
+      "updated": "2024-02-12T13:06:46.251Z",
+      "summary": "🏃\u200d♂️ 5 mile track speed workout",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "Training",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2024-01-23T06:00:00-05:00",
+        "timeZone": "America/New_York"
+      },
+      "end": {
+        "dateTime": "2024-01-23T07:00:00-05:00",
+        "timeZone": "America/New_York"
+      },
+      "recurrence": ["RRULE:FREQ=WEEKLY;UNTIL=20240212T110000Z;BYDAY=TU"],
+      "iCalUID": "58iu74aulsgbu6vbc332h8meha@google.com",
+      "sequence": 2,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3415486419380000\"",
+      "id": "2mbbph1i8p0c32u9bi1tq4d687",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=Mm1iYnBoMWk4cDBjMzJ1OWJpMXRxNGQ2ODdfMjAyNDAxMjRUMTEwMDAwWiBjX2I4NmYxN2QzYzAyNzdmNzE3NWUxYTc4MzVmYjk3ZjljNzg1NWUyMjJjMzQ2YjdiMDBjYTQ4OTkxM2Q3NjIyMTVAZw",
+      "created": "2024-01-16T14:37:49.000Z",
+      "updated": "2024-02-12T13:06:49.690Z",
+      "summary": "🏃\u200d♂️ 5 mile easy run",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "Training",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2024-01-24T06:00:00-05:00",
+        "timeZone": "America/New_York"
+      },
+      "end": {
+        "dateTime": "2024-01-24T07:00:00-05:00",
+        "timeZone": "America/New_York"
+      },
+      "recurrence": ["RRULE:FREQ=WEEKLY;UNTIL=20240213T110000Z;BYDAY=WE"],
+      "iCalUID": "2mbbph1i8p0c32u9bi1tq4d687@google.com",
+      "sequence": 2,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3415567953230000\"",
+      "id": "0iuti4nkl13el9toikr67n6ipv",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=MGl1dGk0bmtsMTNlbDl0b2lrcjY3bjZpcHZfMjAyNDAxMjNUMTcwMDAwWiBjX2I4NmYxN2QzYzAyNzdmNzE3NWUxYTc4MzVmYjk3ZjljNzg1NWUyMjJjMzQ2YjdiMDBjYTQ4OTkxM2Q3NjIyMTVAZw",
+      "created": "2024-01-16T14:39:07.000Z",
+      "updated": "2024-02-13T00:26:16.615Z",
+      "summary": "🏋️\u200d♀️ Lower Body 1",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "Training",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2024-01-23T12:00:00-05:00",
+        "timeZone": "America/New_York"
+      },
+      "end": {
+        "dateTime": "2024-01-23T13:00:00-05:00",
+        "timeZone": "America/New_York"
+      },
+      "recurrence": ["RRULE:FREQ=WEEKLY;UNTIL=20240213T045959Z;BYDAY=TU"],
+      "iCalUID": "0iuti4nkl13el9toikr67n6ipv@google.com",
+      "sequence": 2,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3415746274070000\"",
+      "id": "23dcv8epvpnkekc916jogmu26s",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=MjNkY3Y4ZXB2cG5rZWtjOTE2am9nbXUyNnNfMjAyNDAyMTFUMTIwMDAwWiBjX2I4NmYxN2QzYzAyNzdmNzE3NWUxYTc4MzVmYjk3ZjljNzg1NWUyMjJjMzQ2YjdiMDBjYTQ4OTkxM2Q3NjIyMTVAZw",
+      "created": "2024-02-02T21:39:49.000Z",
+      "updated": "2024-02-14T01:12:17.035Z",
+      "summary": "Exercise Therapy in correction of pectus excavatum",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "🎽 Training",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2024-02-11T07:00:00-05:00",
+        "timeZone": "America/New_York"
+      },
+      "end": {
+        "dateTime": "2024-02-11T07:30:00-05:00",
+        "timeZone": "America/New_York"
+      },
+      "recurrence": ["RRULE:FREQ=DAILY;UNTIL=20240214T045959Z"],
+      "iCalUID": "23dcv8epvpnkekc916jogmu26s@google.com",
+      "sequence": 1,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3415746316714000\"",
+      "id": "594hhc5f264etl93fbsl5vphui",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=NTk0aGhjNWYyNjRldGw5M2Zic2w1dnBodWlfMjAyNDAxMjRUMTcwMDAwWiBjX2I4NmYxN2QzYzAyNzdmNzE3NWUxYTc4MzVmYjk3ZjljNzg1NWUyMjJjMzQ2YjdiMDBjYTQ4OTkxM2Q3NjIyMTVAZw",
+      "created": "2024-01-16T14:39:30.000Z",
+      "updated": "2024-02-14T01:12:38.357Z",
+      "summary": "💪 Upper Body 1",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "Training",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2024-01-24T12:00:00-05:00",
+        "timeZone": "America/New_York"
+      },
+      "end": {
+        "dateTime": "2024-01-24T13:00:00-05:00",
+        "timeZone": "America/New_York"
+      },
+      "recurrence": ["RRULE:FREQ=WEEKLY;UNTIL=20240214T045959Z;BYDAY=WE"],
+      "iCalUID": "594hhc5f264etl93fbsl5vphui@google.com",
+      "sequence": 2,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3415746316714000\"",
+      "id": "594hhc5f264etl93fbsl5vphui_20240207T170000Z",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=NTk0aGhjNWYyNjRldGw5M2Zic2w1dnBodWlfMjAyNDAyMDdUMTcwMDAwWiBjX2I4NmYxN2QzYzAyNzdmNzE3NWUxYTc4MzVmYjk3ZjljNzg1NWUyMjJjMzQ2YjdiMDBjYTQ4OTkxM2Q3NjIyMTVAZw",
+      "created": "2024-01-16T14:39:30.000Z",
+      "updated": "2024-02-14T01:12:38.357Z",
+      "summary": "💪 Upper Body 1",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "Training",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2024-02-07T19:00:00-05:00",
+        "timeZone": "America/New_York"
+      },
+      "end": {
+        "dateTime": "2024-02-07T20:00:00-05:00",
+        "timeZone": "America/New_York"
+      },
+      "recurringEventId": "594hhc5f264etl93fbsl5vphui",
+      "originalStartTime": {
+        "dateTime": "2024-02-07T12:00:00-05:00",
+        "timeZone": "America/New_York"
+      },
+      "iCalUID": "594hhc5f264etl93fbsl5vphui@google.com",
+      "sequence": 3,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3415746330848000\"",
+      "id": "gj0iuak8ejdutj0ffrsebm0v1n",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=Z2owaXVhazhlamR1dGowZmZyc2VibTB2MW5fMjAyNDAyMTFUMTIzMDAwWiBjX2I4NmYxN2QzYzAyNzdmNzE3NWUxYTc4MzVmYjk3ZjljNzg1NWUyMjJjMzQ2YjdiMDBjYTQ4OTkxM2Q3NjIyMTVAZw",
+      "created": "2024-01-12T16:39:34.000Z",
+      "updated": "2024-02-14T01:12:45.424Z",
+      "summary": "🌞 AM: Get Cold, Priming, Get Sun, Supps",
+      "description": "\u003cul\u003e\u003cli\u003eFish Oil\u003c/li\u003e\u003cli\u003eVitamin D\u003c/li\u003e\u003cli\u003eCreatine (5g)\u003c/li\u003e\u003cli\u003eLMNT\u003c/li\u003e\u003cli\u003eWhey Protein\u003c/li\u003e\u003cli\u003e\u003cbr\u003e\u003c/li\u003e\u003c/ul\u003e",
+      "colorId": "3",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "Training",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2024-02-11T07:30:00-05:00",
+        "timeZone": "America/New_York"
+      },
+      "end": {
+        "dateTime": "2024-02-11T08:00:00-05:00",
+        "timeZone": "America/New_York"
+      },
+      "recurrence": ["RRULE:FREQ=DAILY;UNTIL=20240214T045959Z"],
+      "iCalUID": "gj0iuak8ejdutj0ffrsebm0v1n@google.com",
+      "sequence": 1,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3415746330848000\"",
+      "id": "gj0iuak8ejdutj0ffrsebm0v1n_20240212T123000Z",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=Z2owaXVhazhlamR1dGowZmZyc2VibTB2MW5fMjAyNDAyMTJUMTIzMDAwWiBjX2I4NmYxN2QzYzAyNzdmNzE3NWUxYTc4MzVmYjk3ZjljNzg1NWUyMjJjMzQ2YjdiMDBjYTQ4OTkxM2Q3NjIyMTVAZw",
+      "created": "2024-01-12T16:39:34.000Z",
+      "updated": "2024-02-14T01:12:45.424Z",
+      "summary": "🌞 AM: Get Cold, Priming, Get Sun, Supps",
+      "description": "\u003cul\u003e\u003cli\u003eFish Oil\u003c/li\u003e\u003cli\u003eVitamin D\u003c/li\u003e\u003cli\u003eCreatine (5g)\u003c/li\u003e\u003cli\u003eLMNT\u003c/li\u003e\u003cli\u003eWhey Protein\u003c/li\u003e\u003cli\u003e\u003cbr\u003e\u003c/li\u003e\u003c/ul\u003e",
+      "colorId": "3",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "Training",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2024-02-12T07:30:00-05:00",
+        "timeZone": "America/New_York"
+      },
+      "end": {
+        "dateTime": "2024-02-12T08:00:00-05:00",
+        "timeZone": "America/New_York"
+      },
+      "recurringEventId": "gj0iuak8ejdutj0ffrsebm0v1n",
+      "originalStartTime": {
+        "dateTime": "2024-02-12T07:30:00-05:00",
+        "timeZone": "America/New_York"
+      },
+      "iCalUID": "gj0iuak8ejdutj0ffrsebm0v1n@google.com",
+      "sequence": 1,
+      "extendedProperties": {
+        "private": {
+          "doneAt": "2024-02-12T08:06:56.683-05:00",
+          "doneBy": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com"
+        }
+      },
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3415746355296000\"",
+      "id": "34n23ukqke4nmqgse9djii99sc",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=MzRuMjN1a3FrZTRubXFnc2U5ZGppaTk5c2NfMjAyNDAxMjBUMTcwMDAwWiBjX2I4NmYxN2QzYzAyNzdmNzE3NWUxYTc4MzVmYjk3ZjljNzg1NWUyMjJjMzQ2YjdiMDBjYTQ4OTkxM2Q3NjIyMTVAZw",
+      "created": "2024-01-16T14:39:36.000Z",
+      "updated": "2024-02-14T01:12:57.648Z",
+      "summary": "💪Upper Body 2",
+      "description": "\u003cp\u003e- Barbell Bench Press 4 sets x 5 reps\u003c/p\u003e\u003cp\u003e- 1-Arm Dumbbell Rows 3 x 8\u003c/p\u003e\u003cp\u003e- Dumbell Curls + Tricep Extension 3 x 10\u003c/p\u003e\u003cp\u003e- Ab Wheel Rollouts + Reverse Crunches 3 x 15\u003c/p\u003e",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "Training",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2024-01-20T12:00:00-05:00",
+        "timeZone": "America/New_York"
+      },
+      "end": {
+        "dateTime": "2024-01-20T13:00:00-05:00",
+        "timeZone": "America/New_York"
+      },
+      "recurrence": ["RRULE:FREQ=WEEKLY;UNTIL=20240217T045959Z;BYDAY=SA"],
+      "iCalUID": "34n23ukqke4nmqgse9djii99sc@google.com",
+      "sequence": 4,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3415746355296000\"",
+      "id": "34n23ukqke4nmqgse9djii99sc_20240120T170000Z",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=MzRuMjN1a3FrZTRubXFnc2U5ZGppaTk5c2NfMjAyNDAxMjBUMTcwMDAwWiBjX2I4NmYxN2QzYzAyNzdmNzE3NWUxYTc4MzVmYjk3ZjljNzg1NWUyMjJjMzQ2YjdiMDBjYTQ4OTkxM2Q3NjIyMTVAZw",
+      "created": "2024-01-16T14:39:36.000Z",
+      "updated": "2024-02-14T01:12:57.648Z",
+      "summary": "💪Upper Body 2",
+      "description": "\u003cp\u003e- Barbell Bench Press 4 sets x 5 reps\u003c/p\u003e\u003cp\u003e- 1-Arm Dumbbell Rows 3 x 8\u003c/p\u003e\u003cp\u003e- Dumbell Curls + Tricep Extension 3 x 10\u003c/p\u003e\u003cp\u003e- Ab Wheel Rollouts + Reverse Crunches 3 x 15\u003c/p\u003e",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "Training",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2024-01-20T09:15:00-05:00",
+        "timeZone": "America/New_York"
+      },
+      "end": {
+        "dateTime": "2024-01-20T10:15:00-05:00",
+        "timeZone": "America/New_York"
+      },
+      "recurringEventId": "34n23ukqke4nmqgse9djii99sc",
+      "originalStartTime": {
+        "dateTime": "2024-01-20T12:00:00-05:00",
+        "timeZone": "America/New_York"
+      },
+      "iCalUID": "34n23ukqke4nmqgse9djii99sc@google.com",
+      "sequence": 5,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3415746693806000\"",
+      "id": "5n4kisldnhadkv8er1oqksoipj",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=NW40a2lzbGRuaGFka3Y4ZXIxb3Frc29pcGpfMjAyNDAxMjFUMTEwMDAwWiBjX2I4NmYxN2QzYzAyNzdmNzE3NWUxYTc4MzVmYjk3ZjljNzg1NWUyMjJjMzQ2YjdiMDBjYTQ4OTkxM2Q3NjIyMTVAZw",
+      "created": "2024-01-16T14:55:12.000Z",
+      "updated": "2024-02-14T01:15:46.903Z",
+      "summary": "🏃\u200d♂️8 Mile Long Run ",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "Training",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2024-01-21T06:00:00-05:00",
+        "timeZone": "America/New_York"
+      },
+      "end": {
+        "dateTime": "2024-01-21T07:00:00-05:00",
+        "timeZone": "America/New_York"
+      },
+      "recurrence": ["RRULE:FREQ=WEEKLY;UNTIL=20240218T045959Z;BYDAY=SU"],
+      "iCalUID": "5n4kisldnhadkv8er1oqksoipj@google.com",
+      "sequence": 1,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3415746698022000\"",
+      "id": "4vgffjev52hcruhv93ie56j2oe",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=NHZnZmZqZXY1MmhjcnVodjkzaWU1Nmoyb2VfMjAyNDAxMjFUMTcwMDAwWiBjX2I4NmYxN2QzYzAyNzdmNzE3NWUxYTc4MzVmYjk3ZjljNzg1NWUyMjJjMzQ2YjdiMDBjYTQ4OTkxM2Q3NjIyMTVAZw",
+      "created": "2024-01-16T15:00:41.000Z",
+      "updated": "2024-02-14T01:15:49.011Z",
+      "summary": "💪Show Lift (Arms or Abs)",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "Training",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2024-01-21T12:00:00-05:00",
+        "timeZone": "America/New_York"
+      },
+      "end": {
+        "dateTime": "2024-01-21T13:00:00-05:00",
+        "timeZone": "America/New_York"
+      },
+      "recurrence": ["RRULE:FREQ=WEEKLY;UNTIL=20240218T045959Z;BYDAY=SU"],
+      "iCalUID": "4vgffjev52hcruhv93ie56j2oe@google.com",
+      "sequence": 0,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3416532813496000\"",
+      "id": "48kro8gtt72cq6a66empcreh5n_20240119T110000Z",
+      "status": "cancelled",
+      "recurringEventId": "48kro8gtt72cq6a66empcreh5n",
+      "originalStartTime": {
+        "dateTime": "2024-01-19T06:00:00-05:00",
+        "timeZone": "America/New_York"
+      }
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3416556944240000\"",
+      "id": "7bik7rn23rrgf0mko85h626b89_20240119T170000Z",
+      "status": "cancelled",
+      "recurringEventId": "7bik7rn23rrgf0mko85h626b89",
+      "originalStartTime": {
+        "dateTime": "2024-01-19T12:00:00-05:00",
+        "timeZone": "America/New_York"
+      }
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3416871791854000\"",
+      "id": "5n4kisldnhadkv8er1oqksoipj_20240121T110000Z",
+      "status": "cancelled",
+      "recurringEventId": "5n4kisldnhadkv8er1oqksoipj",
+      "originalStartTime": {
+        "dateTime": "2024-01-21T06:00:00-05:00",
+        "timeZone": "America/New_York"
+      }
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3417279453226000\"",
+      "id": "0iuti4nkl13el9toikr67n6ipv_20240123T170000Z",
+      "status": "cancelled",
+      "recurringEventId": "0iuti4nkl13el9toikr67n6ipv",
+      "originalStartTime": {
+        "dateTime": "2024-01-23T12:00:00-05:00",
+        "timeZone": "America/New_York"
+      }
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3418469478458000\"",
+      "id": "0iuti4nkl13el9toikr67n6ipv_20240130T170000Z",
+      "status": "cancelled",
+      "recurringEventId": "0iuti4nkl13el9toikr67n6ipv",
+      "originalStartTime": {
+        "dateTime": "2024-01-30T12:00:00-05:00",
+        "timeZone": "America/New_York"
+      }
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3418996179552000\"",
+      "id": "7bik7rn23rrgf0mko85h626b89_20240202T170000Z",
+      "status": "cancelled",
+      "recurringEventId": "7bik7rn23rrgf0mko85h626b89",
+      "originalStartTime": {
+        "dateTime": "2024-02-02T12:00:00-05:00",
+        "timeZone": "America/New_York"
+      }
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3420347821084000\"",
+      "id": "34n23ukqke4nmqgse9djii99sc_20240210T170000Z",
+      "status": "cancelled",
+      "recurringEventId": "34n23ukqke4nmqgse9djii99sc",
+      "originalStartTime": {
+        "dateTime": "2024-02-10T12:00:00-05:00",
+        "timeZone": "America/New_York"
+      }
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3432995282296000\"",
+      "id": "8f8vmkinmm1nr3b27vselkqg8s",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=OGY4dm1raW5tbTFucjNiMjd2c2Vsa3FnOHMgY19iODZmMTdkM2MwMjc3ZjcxNzVlMWE3ODM1ZmI5N2Y5Yzc4NTVlMjIyYzM0NmI3YjAwY2E0ODk5MTNkNzYyMjE1QGc",
+      "created": "2024-05-23T20:54:01.000Z",
+      "updated": "2024-05-23T20:54:01.148Z",
+      "summary": "run",
+      "description": "run",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "🎽 Training",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2024-05-23T17:00:57-04:00",
+        "timeZone": "America/New_York"
+      },
+      "end": {
+        "dateTime": "2024-05-23T17:45:36-04:00",
+        "timeZone": "America/New_York"
+      },
+      "iCalUID": "8f8vmkinmm1nr3b27vselkqg8s@google.com",
+      "sequence": 0,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3435010665740000\"",
+      "id": "1mlun11p4rva1om1dqj1vsph0r",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=MW1sdW4xMXA0cnZhMW9tMWRxajF2c3BoMHIgY19iODZmMTdkM2MwMjc3ZjcxNzVlMWE3ODM1ZmI5N2Y5Yzc4NTVlMjIyYzM0NmI3YjAwY2E0ODk5MTNkNzYyMjE1QGc",
+      "created": "2024-06-04T12:48:52.000Z",
+      "updated": "2024-06-04T12:48:52.870Z",
+      "summary": "Golf & Dinner ",
+      "location": "Ocean Course at The Breakers, One S County Rd, Palm Beach, FL 33480, USA",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "❤️ Health and Wellness",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2024-06-04T17:00:00-04:00",
+        "timeZone": "America/New_York"
+      },
+      "end": {
+        "dateTime": "2024-06-04T20:30:00-04:00",
+        "timeZone": "America/New_York"
+      },
+      "iCalUID": "1mlun11p4rva1om1dqj1vsph0r@google.com",
+      "sequence": 0,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3436078622448000\"",
+      "id": "3dl1adlfi8ks96n7noatdco7ki",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=M2RsMWFkbGZpOGtzOTZuN25vYXRkY283a2lfMjAyNDA1MjlUMDEwMDAwWiBjX2I4NmYxN2QzYzAyNzdmNzE3NWUxYTc4MzVmYjk3ZjljNzg1NWUyMjJjMzQ2YjdiMDBjYTQ4OTkxM2Q3NjIyMTVAZw",
+      "created": "2024-05-27T12:15:32.000Z",
+      "updated": "2024-06-10T17:08:31.224Z",
+      "summary": "🌙 Nighttime Routine + 🛌 Get into Bed and 📖Read",
+      "description": "\u003cb\u003eActivity Options:\u003c/b\u003e\u003cbr\u003e\u003col\u003e\u003cli\u003eRead\u003c/li\u003e\u003cli\u003eFlashcards\u003c/li\u003e\u003cli\u003ePlan tomorrow\u003c/li\u003e\u003c/ol\u003e\u003cbr\u003e\u003cb\u003eFor Day Planning\u003c/b\u003e\u003cbr\u003e\u003col\u003e\u003cli\u003eVerify that your next day is exactly what you need.\u003c/li\u003e\u003cli\u003eReverse engineer your weekly goals into daily milestones.\u003c/li\u003e\u003cli\u003eTime block and fix your calendar accordingly\u003c/li\u003e\u003c/ol\u003e",
+      "colorId": "1",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "❤️ Health and Wellness",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2024-05-28T21:00:00-04:00",
+        "timeZone": "America/New_York"
+      },
+      "end": {
+        "dateTime": "2024-05-28T22:00:00-04:00",
+        "timeZone": "America/New_York"
+      },
+      "recurrence": ["RRULE:FREQ=DAILY;UNTIL=20240610T035959Z"],
+      "iCalUID": "3dl1adlfi8ks96n7noatdco7ki@google.com",
+      "sequence": 3,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3436254833074000\"",
+      "id": "5hr38afent4pvqtsdv0cli33ll",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=NWhyMzhhZmVudDRwdnF0c2R2MGNsaTMzbGxfMjAyNDA1MjhUMTcwMDAwWiBjX2I4NmYxN2QzYzAyNzdmNzE3NWUxYTc4MzVmYjk3ZjljNzg1NWUyMjJjMzQ2YjdiMDBjYTQ4OTkxM2Q3NjIyMTVAZw",
+      "created": "2024-05-27T15:11:07.000Z",
+      "updated": "2024-06-11T17:36:56.537Z",
+      "summary": "🥗 Lunch Block",
+      "colorId": "2",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "❤️ Health and Wellness",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2024-05-28T13:00:00-04:00",
+        "timeZone": "America/New_York"
+      },
+      "end": {
+        "dateTime": "2024-05-28T14:00:00-04:00",
+        "timeZone": "America/New_York"
+      },
+      "recurrence": [
+        "RRULE:FREQ=WEEKLY;UNTIL=20240611T035959Z;BYDAY=FR,MO,TH,TU,WE"
+      ],
+      "iCalUID": "5hr38afent4pvqtsdv0cli33ll@google.com",
+      "sequence": 1,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3436254839714000\"",
+      "id": "19ldkq7gm7t077aq2v5if88n8d",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=MTlsZGtxN2dtN3QwNzdhcTJ2NWlmODhuOGRfMjAyNDA1MjdUMDk0NTAwWiBjX2I4NmYxN2QzYzAyNzdmNzE3NWUxYTc4MzVmYjk3ZjljNzg1NWUyMjJjMzQ2YjdiMDBjYTQ4OTkxM2Q3NjIyMTVAZw",
+      "created": "2024-05-27T15:03:42.000Z",
+      "updated": "2024-06-11T17:36:59.857Z",
+      "summary": "Wakup",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "❤️ Health and Wellness",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2024-05-27T05:45:00-04:00",
+        "timeZone": "America/New_York"
+      },
+      "end": {
+        "dateTime": "2024-05-27T06:00:00-04:00",
+        "timeZone": "America/New_York"
+      },
+      "recurrence": ["RRULE:FREQ=DAILY;UNTIL=20240528T035959Z"],
+      "iCalUID": "19ldkq7gm7t077aq2v5if88n8d@google.com",
+      "sequence": 3,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3436254839714000\"",
+      "id": "19ldkq7gm7t077aq2v5if88n8d_R20240528T094500",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=MTlsZGtxN2dtN3QwNzdhcTJ2NWlmODhuOGRfMjAyNDA1MjhUMDk0NTAwWiBjX2I4NmYxN2QzYzAyNzdmNzE3NWUxYTc4MzVmYjk3ZjljNzg1NWUyMjJjMzQ2YjdiMDBjYTQ4OTkxM2Q3NjIyMTVAZw",
+      "created": "2024-05-27T15:03:42.000Z",
+      "updated": "2024-06-11T17:36:59.857Z",
+      "summary": "🚀 Wake up, 25 Pushups, 🦸\u200d♂️ Chest Stretches,🦿 5 Air Squats",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "❤️ Health and Wellness",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2024-05-28T05:45:00-04:00",
+        "timeZone": "America/New_York"
+      },
+      "end": {
+        "dateTime": "2024-05-28T06:00:00-04:00",
+        "timeZone": "America/New_York"
+      },
+      "recurrence": ["RRULE:FREQ=DAILY;UNTIL=20240612T035959Z"],
+      "iCalUID": "19ldkq7gm7t077aq2v5if88n8d_R20240528T094500@google.com",
+      "sequence": 3,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3436254840720000\"",
+      "id": "7uaqkn0h069osptj3ruo0r962b",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=N3VhcWtuMGgwNjlvc3B0ajNydW8wcjk2MmJfMjAyNDA1MjlUMTAwMDAwWiBjX2I4NmYxN2QzYzAyNzdmNzE3NWUxYTc4MzVmYjk3ZjljNzg1NWUyMjJjMzQ2YjdiMDBjYTQ4OTkxM2Q3NjIyMTVAZw",
+      "created": "2024-05-27T12:15:14.000Z",
+      "updated": "2024-06-11T17:37:00.360Z",
+      "summary": "🏋️\u200d♀️ Strength Train @ Gym",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "🎽 Training",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2024-05-29T06:00:00-04:00",
+        "timeZone": "America/New_York"
+      },
+      "end": {
+        "dateTime": "2024-05-29T06:45:00-04:00",
+        "timeZone": "America/New_York"
+      },
+      "recurrence": [
+        "RRULE:FREQ=WEEKLY;WKST=SU;UNTIL=20240612T035959Z;BYDAY=WE,FR,MO"
+      ],
+      "iCalUID": "7uaqkn0h069osptj3ruo0r962b@google.com",
+      "sequence": 3,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3436254840720000\"",
+      "id": "7uaqkn0h069osptj3ruo0r962b_20240603T100000Z",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=N3VhcWtuMGgwNjlvc3B0ajNydW8wcjk2MmJfMjAyNDA2MDNUMTAwMDAwWiBjX2I4NmYxN2QzYzAyNzdmNzE3NWUxYTc4MzVmYjk3ZjljNzg1NWUyMjJjMzQ2YjdiMDBjYTQ4OTkxM2Q3NjIyMTVAZw",
+      "created": "2024-05-27T12:15:14.000Z",
+      "updated": "2024-06-11T17:37:00.360Z",
+      "summary": "🏋️\u200d♀️ Strength Train @ Gym",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "🎽 Training",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2024-06-03T13:15:00-04:00",
+        "timeZone": "America/New_York"
+      },
+      "end": {
+        "dateTime": "2024-06-03T14:00:00-04:00",
+        "timeZone": "America/New_York"
+      },
+      "recurringEventId": "7uaqkn0h069osptj3ruo0r962b",
+      "originalStartTime": {
+        "dateTime": "2024-06-03T06:00:00-04:00",
+        "timeZone": "America/New_York"
+      },
+      "iCalUID": "7uaqkn0h069osptj3ruo0r962b@google.com",
+      "sequence": 5,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3436254841782000\"",
+      "id": "5vsjild4v084o3lioe5f3v3hq5",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=NXZzamlsZDR2MDg0bzNsaW9lNWYzdjNocTVfMjAyNDA1MjhUMTA0NTAwWiBjX2I4NmYxN2QzYzAyNzdmNzE3NWUxYTc4MzVmYjk3ZjljNzg1NWUyMjJjMzQ2YjdiMDBjYTQ4OTkxM2Q3NjIyMTVAZw",
+      "created": "2024-05-27T15:09:19.000Z",
+      "updated": "2024-06-11T17:37:00.891Z",
+      "summary": "☕️ Breakfast + ✍️ Journaling +/- 🚶 Morning Walk",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "❤️ Health and Wellness",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2024-05-28T06:45:00-04:00",
+        "timeZone": "America/New_York"
+      },
+      "end": {
+        "dateTime": "2024-05-28T07:30:00-04:00",
+        "timeZone": "America/New_York"
+      },
+      "recurrence": ["RRULE:FREQ=DAILY;UNTIL=20240612T035959Z"],
+      "iCalUID": "5vsjild4v084o3lioe5f3v3hq5@google.com",
+      "sequence": 2,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3436670037702000\"",
+      "id": "ucjbpgserkhgkaesr25in1qp02",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=dWNqYnBnc2Vya2hna2Flc3IyNWluMXFwMDJfMjAyNDA2MTFUMDQwMDAwWiBjX2I4NmYxN2QzYzAyNzdmNzE3NWUxYTc4MzVmYjk3ZjljNzg1NWUyMjJjMzQ2YjdiMDBjYTQ4OTkxM2Q3NjIyMTVAZw",
+      "created": "2024-05-27T12:15:32.000Z",
+      "updated": "2024-06-14T03:16:58.851Z",
+      "summary": "🌙 Nighttime Routine + 🛌 Get into Bed and 📖Read",
+      "description": "\u003cb\u003eActivity Options:\u003c/b\u003e\u003cbr\u003e\u003col\u003e\u003cli\u003eRead\u003c/li\u003e\u003cli\u003eFlashcards\u003c/li\u003e\u003cli\u003ePlan tomorrow\u003c/li\u003e\u003c/ol\u003e\u003cbr\u003e\u003cb\u003eFor Day Planning\u003c/b\u003e\u003cbr\u003e\u003col\u003e\u003cli\u003eVerify that your next day is exactly what you need.\u003c/li\u003e\u003cli\u003eReverse engineer your weekly goals into daily milestones.\u003c/li\u003e\u003cli\u003eTime block and fix your calendar accordingly\u003c/li\u003e\u003c/ol\u003e",
+      "colorId": "1",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "❤️ Health and Wellness",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2024-06-11T00:00:00-04:00",
+        "timeZone": "America/New_York"
+      },
+      "end": {
+        "dateTime": "2024-06-11T01:00:00-04:00",
+        "timeZone": "America/New_York"
+      },
+      "recurrence": ["RRULE:FREQ=DAILY;UNTIL=20240615T035959Z"],
+      "iCalUID": "ucjbpgserkhgkaesr25in1qp02@google.com",
+      "sequence": 4,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3437449274750000\"",
+      "id": "32802563e467469b96220f71375e42e6",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=MzI4MDI1NjNlNDY3NDY5Yjk2MjIwZjcxMzc1ZTQyZTYgY19iODZmMTdkM2MwMjc3ZjcxNzVlMWE3ODM1ZmI5N2Y5Yzc4NTVlMjIyYzM0NmI3YjAwY2E0ODk5MTNkNzYyMjE1QGc",
+      "created": "2024-06-18T15:30:37.000Z",
+      "updated": "2024-06-18T15:30:37.375Z",
+      "summary": "Code Block",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "❤️ Health and Wellness",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2024-06-18T11:15:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "end": {
+        "dateTime": "2024-06-18T13:30:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "iCalUID": "32802563e467469b96220f71375e42e6@google.com",
+      "sequence": 0,
+      "guestsCanModify": true,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3437450066082000\"",
+      "id": "7dab334878d0412882015e06dd210293",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=N2RhYjMzNDg3OGQwNDEyODgyMDE1ZTA2ZGQyMTAyOTMgY19iODZmMTdkM2MwMjc3ZjcxNzVlMWE3ODM1ZmI5N2Y5Yzc4NTVlMjIyYzM0NmI3YjAwY2E0ODk5MTNkNzYyMjE1QGc",
+      "created": "2024-06-18T15:37:13.000Z",
+      "updated": "2024-06-18T15:37:13.041Z",
+      "summary": "Find a place to cowork",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "❤️ Health and Wellness",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2024-06-18T14:15:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "end": {
+        "dateTime": "2024-06-18T15:00:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "iCalUID": "7dab334878d0412882015e06dd210293@google.com",
+      "sequence": 0,
+      "guestsCanModify": true,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3437472105816000\"",
+      "id": "c479ef0ef9f345689d67b73843926d06",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=YzQ3OWVmMGVmOWYzNDU2ODlkNjdiNzM4NDM5MjZkMDYgY19iODZmMTdkM2MwMjc3ZjcxNzVlMWE3ODM1ZmI5N2Y5Yzc4NTVlMjIyYzM0NmI3YjAwY2E0ODk5MTNkNzYyMjE1QGc",
+      "created": "2024-06-18T18:40:52.000Z",
+      "updated": "2024-06-18T18:40:52.908Z",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "❤️ Health and Wellness",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2024-06-18T15:00:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "end": {
+        "dateTime": "2024-06-18T15:30:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "iCalUID": "c479ef0ef9f345689d67b73843926d06@google.com",
+      "sequence": 0,
+      "guestsCanModify": true,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3438337923132000\"",
+      "id": "2jmsgvcu9kk06jnbssf58035ea",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=Mmptc2d2Y3U5a2swNmpuYnNzZjU4MDM1ZWFfMjAyNDA1MjhUMTAwMDAwWiBjX2I4NmYxN2QzYzAyNzdmNzE3NWUxYTc4MzVmYjk3ZjljNzg1NWUyMjJjMzQ2YjdiMDBjYTQ4OTkxM2Q3NjIyMTVAZw",
+      "created": "2024-05-27T12:15:18.000Z",
+      "updated": "2024-06-23T18:56:01.566Z",
+      "summary": "❤️ Run or Bike",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "🎽 Training",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2024-05-28T06:00:00-04:00",
+        "timeZone": "America/New_York"
+      },
+      "end": {
+        "dateTime": "2024-05-28T06:45:00-04:00",
+        "timeZone": "America/New_York"
+      },
+      "recurrence": [
+        "RRULE:FREQ=WEEKLY;WKST=SU;UNTIL=20240625T035959Z;BYDAY=TU,TH"
+      ],
+      "iCalUID": "2jmsgvcu9kk06jnbssf58035ea@google.com",
+      "sequence": 4,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3438860570484000\"",
+      "id": "b2a6f3233ea04d05a7290c004f4d95a9",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=YjJhNmYzMjMzZWEwNGQwNWE3MjkwYzAwNGY0ZDk1YTkgY19iODZmMTdkM2MwMjc3ZjcxNzVlMWE3ODM1ZmI5N2Y5Yzc4NTVlMjIyYzM0NmI3YjAwY2E0ODk5MTNkNzYyMjE1QGc",
+      "created": "2024-06-26T19:31:05.000Z",
+      "updated": "2024-06-26T19:31:25.242Z",
+      "summary": "Deck Updates",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "Work Blocks",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2024-06-26T15:30:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "end": {
+        "dateTime": "2024-06-26T16:30:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "iCalUID": "b2a6f3233ea04d05a7290c004f4d95a9@google.com",
+      "sequence": 1,
+      "guestsCanModify": true,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3438861611264000\"",
+      "id": "dee643698bfa4fd084935f7bd10cab06",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=ZGVlNjQzNjk4YmZhNGZkMDg0OTM1ZjdiZDEwY2FiMDYgY19iODZmMTdkM2MwMjc3ZjcxNzVlMWE3ODM1ZmI5N2Y5Yzc4NTVlMjIyYzM0NmI3YjAwY2E0ODk5MTNkNzYyMjE1QGc",
+      "created": "2024-06-26T19:40:05.000Z",
+      "updated": "2024-06-26T19:40:05.632Z",
+      "summary": "Read Brand it like Serhant",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "Work Blocks",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2024-06-26T21:00:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "end": {
+        "dateTime": "2024-06-26T21:45:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "iCalUID": "dee643698bfa4fd084935f7bd10cab06@google.com",
+      "sequence": 0,
+      "guestsCanModify": true,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3438861628382000\"",
+      "id": "465311e24e2b476f9110b3dd2a9756f5",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=NDY1MzExZTI0ZTJiNDc2ZjkxMTBiM2RkMmE5NzU2ZjUgY19iODZmMTdkM2MwMjc3ZjcxNzVlMWE3ODM1ZmI5N2Y5Yzc4NTVlMjIyYzM0NmI3YjAwY2E0ODk5MTNkNzYyMjE1QGc",
+      "created": "2024-06-24T19:06:24.000Z",
+      "updated": "2024-06-26T19:40:14.191Z",
+      "summary": "Influencer Partnership Project",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "Work Blocks",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2024-06-26T22:00:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "end": {
+        "dateTime": "2024-06-27T00:15:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "iCalUID": "465311e24e2b476f9110b3dd2a9756f5@google.com",
+      "sequence": 1,
+      "guestsCanModify": true,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3438933045434000\"",
+      "id": "2i25f5didmcn3qcdtscvl60sa6",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=MmkyNWY1ZGlkbWNuM3FjZHRzY3ZsNjBzYTZfMjAyNDA2MjZUMTgwMDAwWiBjX2I4NmYxN2QzYzAyNzdmNzE3NWUxYTc4MzVmYjk3ZjljNzg1NWUyMjJjMzQ2YjdiMDBjYTQ4OTkxM2Q3NjIyMTVAZw",
+      "created": "2024-06-25T21:03:19.000Z",
+      "updated": "2024-06-27T05:35:22.717Z",
+      "summary": "Pitch",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "Work Blocks",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2024-06-26T14:00:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "end": {
+        "dateTime": "2024-06-26T15:00:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "recurrence": [
+        "RRULE:FREQ=DAILY;WKST=MO;UNTIL=20240627T065959Z;INTERVAL=1"
+      ],
+      "iCalUID": "2i25f5didmcn3qcdtscvl60sa6@google.com",
+      "sequence": 5,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3438999650358000\"",
+      "id": "5068e7533f914118a8bc889be0d418bd",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=NTA2OGU3NTMzZjkxNDExOGE4YmM4ODliZTBkNDE4YmQgY19iODZmMTdkM2MwMjc3ZjcxNzVlMWE3ODM1ZmI5N2Y5Yzc4NTVlMjIyYzM0NmI3YjAwY2E0ODk5MTNkNzYyMjE1QGc",
+      "created": "2024-06-26T19:31:42.000Z",
+      "updated": "2024-06-27T14:50:25.179Z",
+      "summary": "Send a few emails to potential investors and leave for office",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "Work Blocks",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2024-06-27T11:30:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "end": {
+        "dateTime": "2024-06-27T12:15:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "iCalUID": "5068e7533f914118a8bc889be0d418bd@google.com",
+      "sequence": 3,
+      "guestsCanModify": true,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3439010059774000\"",
+      "id": "f634813de7204d2aae0d59df6c804e32",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=ZjYzNDgxM2RlNzIwNGQyYWFlMGQ1OWRmNmM4MDRlMzIgY19iODZmMTdkM2MwMjc3ZjcxNzVlMWE3ODM1ZmI5N2Y5Yzc4NTVlMjIyYzM0NmI3YjAwY2E0ODk5MTNkNzYyMjE1QGc",
+      "created": "2024-06-27T14:59:54.000Z",
+      "updated": "2024-06-27T16:17:09.887Z",
+      "summary": "Brand Work",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "Work Blocks",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2024-06-27T12:15:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "end": {
+        "dateTime": "2024-06-27T13:15:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "iCalUID": "f634813de7204d2aae0d59df6c804e32@google.com",
+      "sequence": 1,
+      "guestsCanModify": true,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3439023359328000\"",
+      "id": "b7bee3959d2c47fe9fbffd1834550d61",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=YjdiZWUzOTU5ZDJjNDdmZTlmYmZmZDE4MzQ1NTBkNjEgY19iODZmMTdkM2MwMjc3ZjcxNzVlMWE3ODM1ZmI5N2Y5Yzc4NTVlMjIyYzM0NmI3YjAwY2E0ODk5MTNkNzYyMjE1QGc",
+      "created": "2024-06-27T05:31:06.000Z",
+      "updated": "2024-06-27T18:07:59.664Z",
+      "summary": "Draft New Email",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "Work Blocks",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2024-06-27T13:15:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "end": {
+        "dateTime": "2024-06-27T14:15:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "iCalUID": "b7bee3959d2c47fe9fbffd1834550d61@google.com",
+      "sequence": 2,
+      "guestsCanModify": true,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3439027556380000\"",
+      "id": "007f9c8ae0194437b620c4277c432417",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=MDA3ZjljOGFlMDE5NDQzN2I2MjBjNDI3N2M0MzI0MTcgY19iODZmMTdkM2MwMjc3ZjcxNzVlMWE3ODM1ZmI5N2Y5Yzc4NTVlMjIyYzM0NmI3YjAwY2E0ODk5MTNkNzYyMjE1QGc",
+      "created": "2024-06-27T18:08:28.000Z",
+      "updated": "2024-06-27T18:42:58.190Z",
+      "summary": "Scratch Sheet / X Folks",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "Work Blocks",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2024-06-27T14:15:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "end": {
+        "dateTime": "2024-06-27T15:00:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "iCalUID": "007f9c8ae0194437b620c4277c432417@google.com",
+      "sequence": 0,
+      "guestsCanModify": true,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3439042242718000\"",
+      "id": "2i25f5didmcn3qcdtscvl60sa6_20240626T180000Z",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=MmkyNWY1ZGlkbWNuM3FjZHRzY3ZsNjBzYTZfMjAyNDA2MjZUMTgwMDAwWiBjX2I4NmYxN2QzYzAyNzdmNzE3NWUxYTc4MzVmYjk3ZjljNzg1NWUyMjJjMzQ2YjdiMDBjYTQ4OTkxM2Q3NjIyMTVAZw",
+      "created": "2024-06-25T21:03:19.000Z",
+      "updated": "2024-06-27T20:45:21.359Z",
+      "summary": "Whoop Seed Investors",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "Work Blocks",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2024-06-27T17:15:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "end": {
+        "dateTime": "2024-06-27T18:00:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "recurringEventId": "2i25f5didmcn3qcdtscvl60sa6",
+      "originalStartTime": {
+        "dateTime": "2024-06-26T14:00:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "iCalUID": "2i25f5didmcn3qcdtscvl60sa6@google.com",
+      "sequence": 14,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3439066887854000\"",
+      "id": "0f7547def70a44d7b1f73d809f4a0882",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=MGY3NTQ3ZGVmNzBhNDRkN2IxZjczZDgwOWY0YTA4ODIgY19iODZmMTdkM2MwMjc3ZjcxNzVlMWE3ODM1ZmI5N2Y5Yzc4NTVlMjIyYzM0NmI3YjAwY2E0ODk5MTNkNzYyMjE1QGc",
+      "created": "2024-06-27T05:37:56.000Z",
+      "updated": "2024-06-28T00:10:43.927Z",
+      "summary": "1 Meaningful Update",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "Work Blocks",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2024-06-27T21:00:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "end": {
+        "dateTime": "2024-06-27T22:30:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "iCalUID": "0f7547def70a44d7b1f73d809f4a0882@google.com",
+      "sequence": 3,
+      "guestsCanModify": true,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3439068934840000\"",
+      "id": "f0f212694eb84a4ca2691fb71e5ae31b",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=ZjBmMjEyNjk0ZWI4NGE0Y2EyNjkxZmI3MWU1YWUzMWIgY19iODZmMTdkM2MwMjc3ZjcxNzVlMWE3ODM1ZmI5N2Y5Yzc4NTVlMjIyYzM0NmI3YjAwY2E0ODk5MTNkNzYyMjE1QGc",
+      "created": "2024-06-28T00:27:32.000Z",
+      "updated": "2024-06-28T00:27:47.420Z",
+      "summary": "Head to Blue Bottle Coffee",
+      "description": "315 Linden St, San Francisco, CA 94102\n",
+      "location": "315 Linden St, San Francisco, CA 94102",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "Work Blocks",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2024-06-28T09:45:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "end": {
+        "dateTime": "2024-06-28T11:15:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "iCalUID": "f0f212694eb84a4ca2691fb71e5ae31b@google.com",
+      "sequence": 0,
+      "guestsCanModify": true,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3439207449966000\"",
+      "id": "10db5bc351de47f3ae3f44087c0d6ab3",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=MTBkYjViYzM1MWRlNDdmM2FlM2Y0NDA4N2MwZDZhYjMgY19iODZmMTdkM2MwMjc3ZjcxNzVlMWE3ODM1ZmI5N2Y5Yzc4NTVlMjIyYzM0NmI3YjAwY2E0ODk5MTNkNzYyMjE1QGc",
+      "created": "2024-06-28T15:42:07.000Z",
+      "updated": "2024-06-28T19:42:04.983Z",
+      "summary": "DOER",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "Work Blocks",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2024-06-28T12:00:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "end": {
+        "dateTime": "2024-06-28T15:45:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "iCalUID": "10db5bc351de47f3ae3f44087c0d6ab3@google.com",
+      "sequence": 1,
+      "guestsCanModify": true,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3439207461872000\"",
+      "id": "5ae113c1659742098269871e91009adc",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=NWFlMTEzYzE2NTk3NDIwOTgyNjk4NzFlOTEwMDlhZGMgY19iODZmMTdkM2MwMjc3ZjcxNzVlMWE3ODM1ZmI5N2Y5Yzc4NTVlMjIyYzM0NmI3YjAwY2E0ODk5MTNkNzYyMjE1QGc",
+      "created": "2024-06-28T15:42:17.000Z",
+      "updated": "2024-06-28T19:42:10.936Z",
+      "summary": "Stripe roadmap v Map",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "Work Blocks",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2024-06-28T15:30:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "end": {
+        "dateTime": "2024-06-28T16:00:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "iCalUID": "5ae113c1659742098269871e91009adc@google.com",
+      "sequence": 1,
+      "guestsCanModify": true,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3439207466728000\"",
+      "id": "bca7d6f8ea5c4f119f3c423ce97da06f",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=YmNhN2Q2ZjhlYTVjNGYxMTlmM2M0MjNjZTk3ZGEwNmYgY19iODZmMTdkM2MwMjc3ZjcxNzVlMWE3ODM1ZmI5N2Y5Yzc4NTVlMjIyYzM0NmI3YjAwY2E0ODk5MTNkNzYyMjE1QGc",
+      "created": "2024-06-28T15:42:01.000Z",
+      "updated": "2024-06-28T19:42:13.364Z",
+      "summary": "FINDER",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "Work Blocks",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2024-06-28T20:15:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "end": {
+        "dateTime": "2024-06-28T22:15:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "iCalUID": "bca7d6f8ea5c4f119f3c423ce97da06f@google.com",
+      "sequence": 2,
+      "guestsCanModify": true,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3439687823606000\"",
+      "id": "01466e5ef8114d7490ba2bf1797b8c27",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=MDE0NjZlNWVmODExNGQ3NDkwYmEyYmYxNzk3YjhjMjcgY19iODZmMTdkM2MwMjc3ZjcxNzVlMWE3ODM1ZmI5N2Y5Yzc4NTVlMjIyYzM0NmI3YjAwY2E0ODk5MTNkNzYyMjE1QGc",
+      "created": "2024-07-01T14:25:07.000Z",
+      "updated": "2024-07-01T14:25:11.803Z",
+      "summary": "Read Hacker News",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "Work Blocks",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2024-07-01T10:30:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "end": {
+        "dateTime": "2024-07-01T10:45:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "iCalUID": "01466e5ef8114d7490ba2bf1797b8c27@google.com",
+      "sequence": 1,
+      "guestsCanModify": true,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3439689961970000\"",
+      "id": "d560c1c7007549f6ad19a455ff8d0c7f",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=ZDU2MGMxYzcwMDc1NDlmNmFkMTlhNDU1ZmY4ZDBjN2ZfMjAyNDA3MDJUMDMwMDAwWiBjX2I4NmYxN2QzYzAyNzdmNzE3NWUxYTc4MzVmYjk3ZjljNzg1NWUyMjJjMzQ2YjdiMDBjYTQ4OTkxM2Q3NjIyMTVAZw",
+      "created": "2024-07-01T14:32:42.000Z",
+      "updated": "2024-07-01T14:43:00.985Z",
+      "summary": "BuildSpace Update \\\\ FounderU Update",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "Work Blocks",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2024-07-01T23:00:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "end": {
+        "dateTime": "2024-07-02T00:00:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "recurrence": ["RRULE:FREQ=WEEKLY;BYDAY=MO"],
+      "iCalUID": "d560c1c7007549f6ad19a455ff8d0c7f@google.com",
+      "sequence": 1,
+      "guestsCanModify": true,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3439689974172000\"",
+      "id": "ec7599a62dc6444482ed9a664328c00d",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=ZWM3NTk5YTYyZGM2NDQ0NDgyZWQ5YTY2NDMyOGMwMGQgY19iODZmMTdkM2MwMjc3ZjcxNzVlMWE3ODM1ZmI5N2Y5Yzc4NTVlMjIyYzM0NmI3YjAwY2E0ODk5MTNkNzYyMjE1QGc",
+      "created": "2024-07-01T14:43:03.000Z",
+      "updated": "2024-07-01T14:43:07.086Z",
+      "summary": "Pay Rent",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "Work Blocks",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2024-07-01T18:00:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "end": {
+        "dateTime": "2024-07-01T18:15:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "iCalUID": "ec7599a62dc6444482ed9a664328c00d@google.com",
+      "sequence": 0,
+      "guestsCanModify": true,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3439700977888000\"",
+      "id": "a161e3ecd39d4e02ab12181e891b63e7",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=YTE2MWUzZWNkMzlkNGUwMmFiMTIxODFlODkxYjYzZTcgY19iODZmMTdkM2MwMjc3ZjcxNzVlMWE3ODM1ZmI5N2Y5Yzc4NTVlMjIyYzM0NmI3YjAwY2E0ODk5MTNkNzYyMjE1QGc",
+      "created": "2024-07-01T14:24:08.000Z",
+      "updated": "2024-07-01T16:14:48.944Z",
+      "summary": "Investor Update",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "Work Blocks",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2024-07-01T11:45:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "end": {
+        "dateTime": "2024-07-01T12:15:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "iCalUID": "a161e3ecd39d4e02ab12181e891b63e7@google.com",
+      "sequence": 3,
+      "guestsCanModify": true,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3439701048558000\"",
+      "id": "4502ca0be5334fad9adfaeabe44ef898",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=NDUwMmNhMGJlNTMzNGZhZDlhZGZhZWFiZTQ0ZWY4OTggY19iODZmMTdkM2MwMjc3ZjcxNzVlMWE3ODM1ZmI5N2Y5Yzc4NTVlMjIyYzM0NmI3YjAwY2E0ODk5MTNkNzYyMjE1QGc",
+      "created": "2024-07-01T16:15:09.000Z",
+      "updated": "2024-07-01T16:15:24.279Z",
+      "summary": "Finder Hr \u003e\u003e How can I expand my rolodex today? ",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "Work Blocks",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2024-07-01T12:15:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "end": {
+        "dateTime": "2024-07-01T13:15:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "iCalUID": "4502ca0be5334fad9adfaeabe44ef898@google.com",
+      "sequence": 3,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3439872799058000\"",
+      "id": "3r48f6ipt1pfg3ac1kiig4sps2",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=M3I0OGY2aXB0MXBmZzNhYzFraWlnNHNwczJfMjAyNDA2MjdUMjAwMDAwWiBjX2I4NmYxN2QzYzAyNzdmNzE3NWUxYTc4MzVmYjk3ZjljNzg1NWUyMjJjMzQ2YjdiMDBjYTQ4OTkxM2Q3NjIyMTVAZw",
+      "created": "2024-06-27T18:39:19.000Z",
+      "updated": "2024-07-02T16:06:39.529Z",
+      "summary": "Post 1 Blog Article Natively to Medium, X, LinkedIn",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "Work Blocks",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2024-06-27T16:00:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "end": {
+        "dateTime": "2024-06-27T17:15:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "recurrence": [
+        "RRULE:FREQ=DAILY;WKST=MO;UNTIL=20240702T065959Z;INTERVAL=1"
+      ],
+      "iCalUID": "3r48f6ipt1pfg3ac1kiig4sps2@google.com",
+      "sequence": 0,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3439872799058000\"",
+      "id": "3r48f6ipt1pfg3ac1kiig4sps2_20240627T200000Z",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=M3I0OGY2aXB0MXBmZzNhYzFraWlnNHNwczJfMjAyNDA2MjdUMjAwMDAwWiBjX2I4NmYxN2QzYzAyNzdmNzE3NWUxYTc4MzVmYjk3ZjljNzg1NWUyMjJjMzQ2YjdiMDBjYTQ4OTkxM2Q3NjIyMTVAZw",
+      "created": "2024-06-27T18:39:19.000Z",
+      "updated": "2024-07-02T16:06:39.529Z",
+      "summary": "Post 1 Blog Article Natively to Medium, X, LinkedIn",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "Work Blocks",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2024-06-27T19:45:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "end": {
+        "dateTime": "2024-06-27T21:00:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "recurringEventId": "3r48f6ipt1pfg3ac1kiig4sps2",
+      "originalStartTime": {
+        "dateTime": "2024-06-27T16:00:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "iCalUID": "3r48f6ipt1pfg3ac1kiig4sps2@google.com",
+      "sequence": 1,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3439872850632000\"",
+      "id": "dr3hgjh0ctmdt4jkstigf61eft",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=ZHIzaGdqaDBjdG1kdDRqa3N0aWdmNjFlZnRfMjAyNDA2MjVUMTMwMDAwWiBjX2I4NmYxN2QzYzAyNzdmNzE3NWUxYTc4MzVmYjk3ZjljNzg1NWUyMjJjMzQ2YjdiMDBjYTQ4OTkxM2Q3NjIyMTVAZw",
+      "created": "2024-05-27T12:15:18.000Z",
+      "updated": "2024-07-02T16:07:05.316Z",
+      "summary": "❤️ Run or Bike",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "🎽 Training",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2024-06-25T09:00:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "end": {
+        "dateTime": "2024-06-25T09:45:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "recurrence": [
+        "RRULE:FREQ=WEEKLY;WKST=SU;UNTIL=20240702T065959Z;INTERVAL=1;BYDAY=TU,TH"
+      ],
+      "iCalUID": "dr3hgjh0ctmdt4jkstigf61eft@google.com",
+      "sequence": 5,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3439872850632000\"",
+      "id": "dr3hgjh0ctmdt4jkstigf61eft_20240627T130000Z",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=ZHIzaGdqaDBjdG1kdDRqa3N0aWdmNjFlZnRfMjAyNDA2MjdUMTMwMDAwWiBjX2I4NmYxN2QzYzAyNzdmNzE3NWUxYTc4MzVmYjk3ZjljNzg1NWUyMjJjMzQ2YjdiMDBjYTQ4OTkxM2Q3NjIyMTVAZw",
+      "created": "2024-05-27T12:15:18.000Z",
+      "updated": "2024-07-02T16:07:05.316Z",
+      "summary": "Run the canyon",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "🎽 Training",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2024-06-27T09:00:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "end": {
+        "dateTime": "2024-06-27T09:45:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "recurringEventId": "dr3hgjh0ctmdt4jkstigf61eft",
+      "originalStartTime": {
+        "dateTime": "2024-06-27T09:00:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "iCalUID": "dr3hgjh0ctmdt4jkstigf61eft@google.com",
+      "sequence": 5,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3439880893206000\"",
+      "id": "30dda62b143c43658f8cca01c0b921dc",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=MzBkZGE2MmIxNDNjNDM2NThmOGNjYTAxYzBiOTIxZGMgY19iODZmMTdkM2MwMjc3ZjcxNzVlMWE3ODM1ZmI5N2Y5Yzc4NTVlMjIyYzM0NmI3YjAwY2E0ODk5MTNkNzYyMjE1QGc",
+      "created": "2024-07-02T16:08:04.000Z",
+      "updated": "2024-07-02T17:14:06.603Z",
+      "summary": "Expand Rolodex",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "Work Blocks",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2024-07-02T12:30:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "end": {
+        "dateTime": "2024-07-02T13:15:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "iCalUID": "30dda62b143c43658f8cca01c0b921dc@google.com",
+      "sequence": 2,
+      "guestsCanModify": true,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3439884447850000\"",
+      "id": "bfa18bda88034c028ed660285059c8a0",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=YmZhMThiZGE4ODAzNGMwMjhlZDY2MDI4NTA1OWM4YTAgY19iODZmMTdkM2MwMjc3ZjcxNzVlMWE3ODM1ZmI5N2Y5Yzc4NTVlMjIyYzM0NmI3YjAwY2E0ODk5MTNkNzYyMjE1QGc",
+      "created": "2024-07-02T16:35:18.000Z",
+      "updated": "2024-07-02T17:43:43.925Z",
+      "summary": "GTFO LOcal",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "Work Blocks",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2024-07-02T13:15:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "end": {
+        "dateTime": "2024-07-02T13:45:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "iCalUID": "bfa18bda88034c028ed660285059c8a0@google.com",
+      "sequence": 2,
+      "guestsCanModify": true,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3439884481206000\"",
+      "id": "57bt76a5aq3euc107ctgkp1q5u",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=NTdidDc2YTVhcTNldWMxMDdjdGdrcDFxNXUgY19iODZmMTdkM2MwMjc3ZjcxNzVlMWE3ODM1ZmI5N2Y5Yzc4NTVlMjIyYzM0NmI3YjAwY2E0ODk5MTNkNzYyMjE1QGc",
+      "created": "2024-07-02T17:44:00.000Z",
+      "updated": "2024-07-02T17:44:00.603Z",
+      "summary": "Expand Rolodex",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "Work Blocks",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2024-07-02T13:45:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "end": {
+        "dateTime": "2024-07-02T14:45:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "iCalUID": "57bt76a5aq3euc107ctgkp1q5u@google.com",
+      "sequence": 0,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3439884484226000\"",
+      "id": "6402b6a6d68846e590368ab432cfce61",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=NjQwMmI2YTZkNjg4NDZlNTkwMzY4YWI0MzJjZmNlNjEgY19iODZmMTdkM2MwMjc3ZjcxNzVlMWE3ODM1ZmI5N2Y5Yzc4NTVlMjIyYzM0NmI3YjAwY2E0ODk5MTNkNzYyMjE1QGc",
+      "created": "2024-07-02T15:53:45.000Z",
+      "updated": "2024-07-02T17:44:02.113Z",
+      "summary": "Code 1 Feature to Prod",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "Work Blocks",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2024-07-02T14:45:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "end": {
+        "dateTime": "2024-07-02T16:45:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "iCalUID": "6402b6a6d68846e590368ab432cfce61@google.com",
+      "sequence": 2,
+      "guestsCanModify": true,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3439922046272000\"",
+      "id": "025ce255275a47d0bf1f97507dbef98c",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=MDI1Y2UyNTUyNzVhNDdkMGJmMWY5NzUwN2RiZWY5OGMgY19iODZmMTdkM2MwMjc3ZjcxNzVlMWE3ODM1ZmI5N2Y5Yzc4NTVlMjIyYzM0NmI3YjAwY2E0ODk5MTNkNzYyMjE1QGc",
+      "created": "2024-07-02T22:57:01.000Z",
+      "updated": "2024-07-02T22:57:03.136Z",
+      "summary": "Expand Rolodex",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "Work Blocks",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2024-07-02T16:45:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "end": {
+        "dateTime": "2024-07-02T19:00:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "iCalUID": "025ce255275a47d0bf1f97507dbef98c@google.com",
+      "sequence": 2,
+      "guestsCanModify": true,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3439926829614000\"",
+      "id": "299f6e072cf1441f96b12ca754a1d0c8",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=Mjk5ZjZlMDcyY2YxNDQxZjk2YjEyY2E3NTRhMWQwYzggY19iODZmMTdkM2MwMjc3ZjcxNzVlMWE3ODM1ZmI5N2Y5Yzc4NTVlMjIyYzM0NmI3YjAwY2E0ODk5MTNkNzYyMjE1QGc",
+      "created": "2024-07-02T23:36:52.000Z",
+      "updated": "2024-07-02T23:36:54.807Z",
+      "summary": "GoAhead Video PItch",
+      "description": "https://www.goaheadvc.com/\n",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "Work Blocks",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2024-07-03T12:00:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "end": {
+        "dateTime": "2024-07-03T12:45:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "iCalUID": "299f6e072cf1441f96b12ca754a1d0c8@google.com",
+      "sequence": 0,
+      "guestsCanModify": true,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3440057314580000\"",
+      "id": "08c3c0cfd0914453928ea0a21548cd1e",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=MDhjM2MwY2ZkMDkxNDQ1MzkyOGVhMGEyMTU0OGNkMWUgY19iODZmMTdkM2MwMjc3ZjcxNzVlMWE3ODM1ZmI5N2Y5Yzc4NTVlMjIyYzM0NmI3YjAwY2E0ODk5MTNkNzYyMjE1QGc",
+      "created": "2024-07-03T03:28:10.000Z",
+      "updated": "2024-07-03T17:44:17.290Z",
+      "summary": "Unshackled Email from Nitin Fomr",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "Work Blocks",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2024-07-03T14:45:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "end": {
+        "dateTime": "2024-07-03T15:15:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "iCalUID": "08c3c0cfd0914453928ea0a21548cd1e@google.com",
+      "sequence": 1,
+      "guestsCanModify": true,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3440124912754000\"",
+      "id": "7076d9e708ce43fa9d4f72abd519f8e6",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=NzA3NmQ5ZTcwOGNlNDNmYTlkNGY3MmFiZDUxOWY4ZTYgY19iODZmMTdkM2MwMjc3ZjcxNzVlMWE3ODM1ZmI5N2Y5Yzc4NTVlMjIyYzM0NmI3YjAwY2E0ODk5MTNkNzYyMjE1QGc",
+      "created": "2024-07-04T03:07:36.000Z",
+      "updated": "2024-07-04T03:07:36.377Z",
+      "summary": "Lunch Walk with Consumer Founder Martyn",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "Work Blocks",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2024-07-04T15:00:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "end": {
+        "dateTime": "2024-07-04T16:00:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "iCalUID": "7076d9e708ce43fa9d4f72abd519f8e6@google.com",
+      "sequence": 0,
+      "guestsCanModify": true,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3440124943240000\"",
+      "id": "2ba23b0febb947e58ae1e57087ff29e9",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=MmJhMjNiMGZlYmI5NDdlNThhZTFlNTcwODdmZjI5ZTkgY19iODZmMTdkM2MwMjc3ZjcxNzVlMWE3ODM1ZmI5N2Y5Yzc4NTVlMjIyYzM0NmI3YjAwY2E0ODk5MTNkNzYyMjE1QGc",
+      "created": "2024-07-04T03:07:51.000Z",
+      "updated": "2024-07-04T03:07:51.620Z",
+      "summary": "Deck Work from FFV Comments & Reply",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "Work Blocks",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2024-07-04T12:00:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "end": {
+        "dateTime": "2024-07-04T13:00:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "iCalUID": "2ba23b0febb947e58ae1e57087ff29e9@google.com",
+      "sequence": 0,
+      "guestsCanModify": true,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3440627126320000\"",
+      "id": "d25f2ad5ba5e4eb0a98c6e4050e12ce6",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=ZDI1ZjJhZDViYTVlNGViMGE5OGM2ZTQwNTBlMTJjZTYgY19iODZmMTdkM2MwMjc3ZjcxNzVlMWE3ODM1ZmI5N2Y5Yzc4NTVlMjIyYzM0NmI3YjAwY2E0ODk5MTNkNzYyMjE1QGc",
+      "created": "2024-07-07T00:52:43.000Z",
+      "updated": "2024-07-07T00:52:43.160Z",
+      "summary": "AI Grant Application",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "Work Blocks",
+        "self": true
+      },
+      "start": {
+        "date": "2024-07-16"
+      },
+      "end": {
+        "date": "2024-07-17"
+      },
+      "transparency": "transparent",
+      "iCalUID": "d25f2ad5ba5e4eb0a98c6e4050e12ce6@google.com",
+      "sequence": 0,
+      "guestsCanModify": true,
+      "reminders": {
+        "useDefault": false
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3441249990264000\"",
+      "id": "dda2c90cf7af4a928a6d0814dc99071f",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=ZGRhMmM5MGNmN2FmNGE5MjhhNmQwODE0ZGM5OTA3MWYgY19iODZmMTdkM2MwMjc3ZjcxNzVlMWE3ODM1ZmI5N2Y5Yzc4NTVlMjIyYzM0NmI3YjAwY2E0ODk5MTNkNzYyMjE1QGc",
+      "created": "2024-07-10T15:23:15.000Z",
+      "updated": "2024-07-10T15:23:15.132Z",
+      "summary": "Get the Agent Scheduler Working",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "Work Blocks",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2024-07-10T13:15:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "end": {
+        "dateTime": "2024-07-10T14:45:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "iCalUID": "dda2c90cf7af4a928a6d0814dc99071f@google.com",
+      "sequence": 0,
+      "guestsCanModify": true,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3441260387776000\"",
+      "id": "0768772329b649b8a307b0b8aeaf41d6",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=MDc2ODc3MjMyOWI2NDliOGEzMDdiMGI4YWVhZjQxZDYgY19iODZmMTdkM2MwMjc3ZjcxNzVlMWE3ODM1ZmI5N2Y5Yzc4NTVlMjIyYzM0NmI3YjAwY2E0ODk5MTNkNzYyMjE1QGc",
+      "created": "2024-07-10T15:22:54.000Z",
+      "updated": "2024-07-10T16:49:53.888Z",
+      "summary": "Get the Sync Working",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "Work Blocks",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2024-07-10T11:30:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "end": {
+        "dateTime": "2024-07-10T13:15:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "iCalUID": "0768772329b649b8a307b0b8aeaf41d6@google.com",
+      "sequence": 0,
+      "guestsCanModify": true,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3441436395438000\"",
+      "id": "a3df04abbe0f48f0a47b893feda82474",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=YTNkZjA0YWJiZTBmNDhmMGE0N2I4OTNmZWRhODI0NzQgY19iODZmMTdkM2MwMjc3ZjcxNzVlMWE3ODM1ZmI5N2Y5Yzc4NTVlMjIyYzM0NmI3YjAwY2E0ODk5MTNkNzYyMjE1QGc",
+      "created": "2024-07-11T17:16:37.000Z",
+      "updated": "2024-07-11T17:16:37.719Z",
+      "summary": "Leave for meeting",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "Work Blocks",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2024-07-11T13:45:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "end": {
+        "dateTime": "2024-07-11T14:00:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "iCalUID": "a3df04abbe0f48f0a47b893feda82474@google.com",
+      "sequence": 0,
+      "guestsCanModify": true,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3441439134876000\"",
+      "id": "3f0d62268bd645c39e53a7f43ba05a8b",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=M2YwZDYyMjY4YmQ2NDVjMzllNTNhN2Y0M2JhMDVhOGJfMjAyNDA3MDJUMjAwMDAwWiBjX2I4NmYxN2QzYzAyNzdmNzE3NWUxYTc4MzVmYjk3ZjljNzg1NWUyMjJjMzQ2YjdiMDBjYTQ4OTkxM2Q3NjIyMTVAZw",
+      "created": "2024-07-02T16:06:39.000Z",
+      "updated": "2024-07-11T17:39:27.438Z",
+      "summary": "Post 1 Blog Article Natively to Medium, X, LinkedIn",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "Work Blocks",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2024-07-02T16:00:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "end": {
+        "dateTime": "2024-07-02T17:30:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "recurrence": ["RRULE:FREQ=DAILY;WKST=MO;COUNT=11;INTERVAL=1"],
+      "iCalUID": "3f0d62268bd645c39e53a7f43ba05a8b@google.com",
+      "sequence": 0,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3441439134876000\"",
+      "id": "3f0d62268bd645c39e53a7f43ba05a8b_20240702T200000Z",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=M2YwZDYyMjY4YmQ2NDVjMzllNTNhN2Y0M2JhMDVhOGJfMjAyNDA3MDJUMjAwMDAwWiBjX2I4NmYxN2QzYzAyNzdmNzE3NWUxYTc4MzVmYjk3ZjljNzg1NWUyMjJjMzQ2YjdiMDBjYTQ4OTkxM2Q3NjIyMTVAZw",
+      "created": "2024-07-02T16:06:39.000Z",
+      "updated": "2024-07-11T17:39:27.438Z",
+      "summary": "Post 1 Blog Article Natively to Medium, X, LinkedIn",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "Work Blocks",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2024-07-02T20:15:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "end": {
+        "dateTime": "2024-07-02T21:45:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "recurringEventId": "3f0d62268bd645c39e53a7f43ba05a8b",
+      "originalStartTime": {
+        "dateTime": "2024-07-02T16:00:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "iCalUID": "3f0d62268bd645c39e53a7f43ba05a8b@google.com",
+      "sequence": 1,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3441453395224000\"",
+      "id": "3f0d62268bd645c39e53a7f43ba05a8b_20240711T200000Z",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=M2YwZDYyMjY4YmQ2NDVjMzllNTNhN2Y0M2JhMDVhOGJfMjAyNDA3MTFUMjAwMDAwWiBjX2I4NmYxN2QzYzAyNzdmNzE3NWUxYTc4MzVmYjk3ZjljNzg1NWUyMjJjMzQ2YjdiMDBjYTQ4OTkxM2Q3NjIyMTVAZw",
+      "created": "2024-07-02T16:06:39.000Z",
+      "updated": "2024-07-11T19:38:17.612Z",
+      "summary": "Post 1 Blog Article Natively to Medium, X, LinkedIn",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "Work Blocks",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2024-07-11T22:00:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "end": {
+        "dateTime": "2024-07-11T23:30:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "recurringEventId": "3f0d62268bd645c39e53a7f43ba05a8b",
+      "originalStartTime": {
+        "dateTime": "2024-07-11T16:00:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "iCalUID": "3f0d62268bd645c39e53a7f43ba05a8b@google.com",
+      "sequence": 2,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3441455613010000\"",
+      "id": "238bf89a91fc4218b425bd99bf4d3347",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=MjM4YmY4OWE5MWZjNDIxOGI0MjViZDk5YmY0ZDMzNDcgY19iODZmMTdkM2MwMjc3ZjcxNzVlMWE3ODM1ZmI5N2Y5Yzc4NTVlMjIyYzM0NmI3YjAwY2E0ODk5MTNkNzYyMjE1QGc",
+      "created": "2024-07-11T19:38:33.000Z",
+      "updated": "2024-07-11T19:56:46.505Z",
+      "summary": "Record Demo",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "Work Blocks",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2024-07-11T18:00:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "end": {
+        "dateTime": "2024-07-11T18:30:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "iCalUID": "238bf89a91fc4218b425bd99bf4d3347@google.com",
+      "sequence": 1,
+      "guestsCanModify": true,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3441458078640000\"",
+      "id": "ff5f2a30479b4853be22e8c6bffb6705",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=ZmY1ZjJhMzA0NzliNDg1M2JlMjJlOGM2YmZmYjY3MDUgY19iODZmMTdkM2MwMjc3ZjcxNzVlMWE3ODM1ZmI5N2Y5Yzc4NTVlMjIyYzM0NmI3YjAwY2E0ODk5MTNkNzYyMjE1QGc",
+      "created": "2024-07-11T19:38:22.000Z",
+      "updated": "2024-07-11T20:17:19.320Z",
+      "summary": "Deck Work",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "Work Blocks",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2024-07-11T17:00:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "end": {
+        "dateTime": "2024-07-11T18:00:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "iCalUID": "ff5f2a30479b4853be22e8c6bffb6705@google.com",
+      "sequence": 1,
+      "guestsCanModify": true,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3442115344690000\"",
+      "id": "97fe441a815245458222b7c97b6e8609",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=OTdmZTQ0MWE4MTUyNDU0NTgyMjJiN2M5N2I2ZTg2MDlfMjAyNDA3MTFUMTYwMDAwWiBjX2I4NmYxN2QzYzAyNzdmNzE3NWUxYTc4MzVmYjk3ZjljNzg1NWUyMjJjMzQ2YjdiMDBjYTQ4OTkxM2Q3NjIyMTVAZw",
+      "created": "2024-07-11T17:39:53.000Z",
+      "updated": "2024-07-15T15:34:32.345Z",
+      "summary": "1 Meaningful Feature",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "Work Blocks",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2024-07-11T12:00:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "end": {
+        "dateTime": "2024-07-11T13:30:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "recurrence": [
+        "RRULE:FREQ=WEEKLY;WKST=MO;UNTIL=20240715T065959Z;INTERVAL=1;BYDAY=MO,TU,WE,TH,FR"
+      ],
+      "iCalUID": "97fe441a815245458222b7c97b6e8609@google.com",
+      "sequence": 1,
+      "guestsCanModify": true,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3442115351210000\"",
+      "id": "4190829ecb904383975a0d9873001170",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=NDE5MDgyOWVjYjkwNDM4Mzk3NWEwZDk4NzMwMDExNzBfMjAyNDA3MTFUMjIxNTAwWiBjX2I4NmYxN2QzYzAyNzdmNzE3NWUxYTc4MzVmYjk3ZjljNzg1NWUyMjJjMzQ2YjdiMDBjYTQ4OTkxM2Q3NjIyMTVAZw",
+      "created": "2024-07-11T17:39:45.000Z",
+      "updated": "2024-07-15T15:34:35.605Z",
+      "summary": "1 Meaningful Feature",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "Work Blocks",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2024-07-11T18:15:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "end": {
+        "dateTime": "2024-07-11T19:45:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "recurrence": [
+        "RRULE:FREQ=WEEKLY;WKST=MO;UNTIL=20240715T065959Z;INTERVAL=1;BYDAY=MO,TU,WE,TH,FR"
+      ],
+      "iCalUID": "4190829ecb904383975a0d9873001170@google.com",
+      "sequence": 1,
+      "guestsCanModify": true,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3442115351210000\"",
+      "id": "4190829ecb904383975a0d9873001170_20240711T221500Z",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=NDE5MDgyOWVjYjkwNDM4Mzk3NWEwZDk4NzMwMDExNzBfMjAyNDA3MTFUMjIxNTAwWiBjX2I4NmYxN2QzYzAyNzdmNzE3NWUxYTc4MzVmYjk3ZjljNzg1NWUyMjJjMzQ2YjdiMDBjYTQ4OTkxM2Q3NjIyMTVAZw",
+      "created": "2024-07-11T17:39:45.000Z",
+      "updated": "2024-07-15T15:34:35.605Z",
+      "summary": "1 Meaningful Feature",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "Work Blocks",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2024-07-11T23:30:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "end": {
+        "dateTime": "2024-07-12T01:00:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "recurringEventId": "4190829ecb904383975a0d9873001170",
+      "originalStartTime": {
+        "dateTime": "2024-07-11T18:15:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "iCalUID": "4190829ecb904383975a0d9873001170@google.com",
+      "sequence": 2,
+      "guestsCanModify": true,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3442115418842000\"",
+      "id": "6e06f0e5684a4c59b7df0d0812d51c80",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=NmUwNmYwZTU2ODRhNGM1OWI3ZGYwZDA4MTJkNTFjODAgY19iODZmMTdkM2MwMjc3ZjcxNzVlMWE3ODM1ZmI5N2Y5Yzc4NTVlMjIyYzM0NmI3YjAwY2E0ODk5MTNkNzYyMjE1QGc",
+      "created": "2024-07-15T15:35:09.000Z",
+      "updated": "2024-07-15T15:35:09.421Z",
+      "summary": "Marketing",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "Work Blocks",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2024-07-15T20:15:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "end": {
+        "dateTime": "2024-07-16T00:00:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "iCalUID": "6e06f0e5684a4c59b7df0d0812d51c80@google.com",
+      "sequence": 0,
+      "guestsCanModify": true,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3442215228374000\"",
+      "id": "ae89359d84b24b17a1b041f5d1286e58",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=YWU4OTM1OWQ4NGIyNGIxN2ExYjA0MWY1ZDEyODZlNTggY19iODZmMTdkM2MwMjc3ZjcxNzVlMWE3ODM1ZmI5N2Y5Yzc4NTVlMjIyYzM0NmI3YjAwY2E0ODk5MTNkNzYyMjE1QGc",
+      "created": "2024-07-16T05:26:54.000Z",
+      "updated": "2024-07-16T05:26:54.187Z",
+      "summary": "Ship",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "Work Blocks",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2024-07-16T16:00:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "end": {
+        "dateTime": "2024-07-16T16:15:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "iCalUID": "ae89359d84b24b17a1b041f5d1286e58@google.com",
+      "sequence": 0,
+      "guestsCanModify": true,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3442215267732000\"",
+      "id": "ea0a3589aef641b3968119e7b4620b1c",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=ZWEwYTM1ODlhZWY2NDFiMzk2ODExOWU3YjQ2MjBiMWMgY19iODZmMTdkM2MwMjc3ZjcxNzVlMWE3ODM1ZmI5N2Y5Yzc4NTVlMjIyYzM0NmI3YjAwY2E0ODk5MTNkNzYyMjE1QGc",
+      "created": "2024-07-16T05:27:13.000Z",
+      "updated": "2024-07-16T05:27:13.866Z",
+      "summary": "Marketing",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "Work Blocks",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2024-07-16T20:15:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "end": {
+        "dateTime": "2024-07-17T00:00:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "iCalUID": "ea0a3589aef641b3968119e7b4620b1c@google.com",
+      "sequence": 0,
+      "guestsCanModify": true,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3442215495024000\"",
+      "id": "371bd7dfdbd741a283c5c7bc45bf4558",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=MzcxYmQ3ZGZkYmQ3NDFhMjgzYzVjN2JjNDViZjQ1NTggY19iODZmMTdkM2MwMjc3ZjcxNzVlMWE3ODM1ZmI5N2Y5Yzc4NTVlMjIyYzM0NmI3YjAwY2E0ODk5MTNkNzYyMjE1QGc",
+      "created": "2024-07-16T05:29:07.000Z",
+      "updated": "2024-07-16T05:29:07.512Z",
+      "summary": "AI GRANt",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "Work Blocks",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2024-07-16T19:00:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "end": {
+        "dateTime": "2024-07-16T20:00:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "iCalUID": "371bd7dfdbd741a283c5c7bc45bf4558@google.com",
+      "sequence": 0,
+      "guestsCanModify": true,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3442305032480000\"",
+      "id": "aad99d6da7a94f70aef7550517de94a7",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=YWFkOTlkNmRhN2E5NGY3MGFlZjc1NTA1MTdkZTk0YTcgY19iODZmMTdkM2MwMjc3ZjcxNzVlMWE3ODM1ZmI5N2Y5Yzc4NTVlMjIyYzM0NmI3YjAwY2E0ODk5MTNkNzYyMjE1QGc",
+      "created": "2024-07-16T17:55:16.000Z",
+      "updated": "2024-07-16T17:55:16.240Z",
+      "summary": "Outdoor Walk ",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "Work Blocks",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2024-07-16T13:30:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "end": {
+        "dateTime": "2024-07-16T14:00:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "iCalUID": "aad99d6da7a94f70aef7550517de94a7@google.com",
+      "sequence": 0,
+      "guestsCanModify": true,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3442316494752000\"",
+      "id": "40276521e5b346f5bdbf463448996d4e",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=NDAyNzY1MjFlNWIzNDZmNWJkYmY0NjM0NDg5OTZkNGUgY19iODZmMTdkM2MwMjc3ZjcxNzVlMWE3ODM1ZmI5N2Y5Yzc4NTVlMjIyYzM0NmI3YjAwY2E0ODk5MTNkNzYyMjE1QGc",
+      "created": "2024-07-16T19:30:34.000Z",
+      "updated": "2024-07-16T19:30:47.376Z",
+      "summary": "CRM Work (Notion)",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "Work Blocks",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2024-07-16T14:00:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "end": {
+        "dateTime": "2024-07-16T15:15:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "iCalUID": "40276521e5b346f5bdbf463448996d4e@google.com",
+      "sequence": 0,
+      "guestsCanModify": true,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3442317247726000\"",
+      "id": "f8a397ce17c94be282c3fa71173029bd",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=ZjhhMzk3Y2UxN2M5NGJlMjgyYzNmYTcxMTczMDI5YmQgY19iODZmMTdkM2MwMjc3ZjcxNzVlMWE3ODM1ZmI5N2Y5Yzc4NTVlMjIyYzM0NmI3YjAwY2E0ODk5MTNkNzYyMjE1QGc",
+      "created": "2024-07-16T19:36:59.000Z",
+      "updated": "2024-07-16T19:37:03.863Z",
+      "summary": "Commute: Office to Home",
+      "colorId": "3",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "Work Blocks",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2024-07-16T15:45:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "end": {
+        "dateTime": "2024-07-16T16:00:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "iCalUID": "f8a397ce17c94be282c3fa71173029bd@google.com",
+      "sequence": 0,
+      "guestsCanModify": true,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3442354205042000\"",
+      "id": "90b1ad63e82d4429a60b9c3422ceb788",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=OTBiMWFkNjNlODJkNDQyOWE2MGI5YzM0MjJjZWI3ODggY19iODZmMTdkM2MwMjc3ZjcxNzVlMWE3ODM1ZmI5N2Y5Yzc4NTVlMjIyYzM0NmI3YjAwY2E0ODk5MTNkNzYyMjE1QGc",
+      "created": "2024-07-17T00:45:02.000Z",
+      "updated": "2024-07-17T00:45:02.521Z",
+      "summary": "AI Grant Due",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "Work Blocks",
+        "self": true
+      },
+      "start": {
+        "date": "2024-08-09"
+      },
+      "end": {
+        "date": "2024-08-10"
+      },
+      "transparency": "transparent",
+      "iCalUID": "90b1ad63e82d4429a60b9c3422ceb788@google.com",
+      "sequence": 0,
+      "guestsCanModify": true,
+      "reminders": {
+        "useDefault": false
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3442385673458000\"",
+      "id": "913886736ef24d9fabdece3f261d0c3a",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=OTEzODg2NzM2ZWYyNGQ5ZmFiZGVjZTNmMjYxZDBjM2EgY19iODZmMTdkM2MwMjc3ZjcxNzVlMWE3ODM1ZmI5N2Y5Yzc4NTVlMjIyYzM0NmI3YjAwY2E0ODk5MTNkNzYyMjE1QGc",
+      "created": "2024-07-17T05:07:12.000Z",
+      "updated": "2024-07-17T05:07:16.729Z",
+      "summary": "FAQS",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "Work Blocks",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2024-07-17T16:45:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "end": {
+        "dateTime": "2024-07-17T18:00:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "iCalUID": "913886736ef24d9fabdece3f261d0c3a@google.com",
+      "sequence": 1,
+      "guestsCanModify": true,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3442488412924000\"",
+      "id": "e15a286d6c454e2aaddc638d22e1e396",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=ZTE1YTI4NmQ2YzQ1NGUyYWFkZGM2MzhkMjJlMWUzOTYgY19iODZmMTdkM2MwMjc3ZjcxNzVlMWE3ODM1ZmI5N2Y5Yzc4NTVlMjIyYzM0NmI3YjAwY2E0ODk5MTNkNzYyMjE1QGc",
+      "created": "2024-07-16T05:26:51.000Z",
+      "updated": "2024-07-17T19:23:26.462Z",
+      "summary": "Design Session - Updates Screens ",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "Work Blocks",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2024-07-17T14:00:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "end": {
+        "dateTime": "2024-07-17T15:15:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "iCalUID": "e15a286d6c454e2aaddc638d22e1e396@google.com",
+      "sequence": 5,
+      "guestsCanModify": true,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3442488417226000\"",
+      "id": "ce2dcafbc7794a7cab622ba6dc23a726",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=Y2UyZGNhZmJjNzc5NGE3Y2FiNjIyYmE2ZGMyM2E3MjYgY19iODZmMTdkM2MwMjc3ZjcxNzVlMWE3ODM1ZmI5N2Y5Yzc4NTVlMjIyYzM0NmI3YjAwY2E0ODk5MTNkNzYyMjE1QGc",
+      "created": "2024-07-17T05:07:25.000Z",
+      "updated": "2024-07-17T19:23:28.613Z",
+      "summary": "DECK WORK",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "Work Blocks",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2024-07-17T18:00:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "end": {
+        "dateTime": "2024-07-17T19:30:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "iCalUID": "ce2dcafbc7794a7cab622ba6dc23a726@google.com",
+      "sequence": 1,
+      "guestsCanModify": true,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3442488442078000\"",
+      "id": "0tdevjcaiaqflaj5jv91dg66cn",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=MHRkZXZqY2FpYXFmbGFqNWp2OTFkZzY2Y24gY19iODZmMTdkM2MwMjc3ZjcxNzVlMWE3ODM1ZmI5N2Y5Yzc4NTVlMjIyYzM0NmI3YjAwY2E0ODk5MTNkNzYyMjE1QGc",
+      "created": "2024-07-17T19:23:41.000Z",
+      "updated": "2024-07-17T19:23:41.039Z",
+      "summary": "Project Gotham Planning",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "Work Blocks",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2024-07-17T15:30:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "end": {
+        "dateTime": "2024-07-17T16:45:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "iCalUID": "0tdevjcaiaqflaj5jv91dg66cn@google.com",
+      "sequence": 0,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3442578702778000\"",
+      "id": "2jmsgvcu9kk06jnbssf58035ea_20240618T100000Z",
+      "status": "cancelled",
+      "recurringEventId": "2jmsgvcu9kk06jnbssf58035ea",
+      "originalStartTime": {
+        "dateTime": "2024-06-18T06:00:00-04:00",
+        "timeZone": "America/New_York"
+      }
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3442662407144000\"",
+      "id": "2ba0c72616694209b35f9578df607fe5",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=MmJhMGM3MjYxNjY5NDIwOWIzNWY5NTc4ZGY2MDdmZTUgY19iODZmMTdkM2MwMjc3ZjcxNzVlMWE3ODM1ZmI5N2Y5Yzc4NTVlMjIyYzM0NmI3YjAwY2E0ODk5MTNkNzYyMjE1QGc",
+      "created": "2024-07-18T18:53:47.000Z",
+      "updated": "2024-07-18T19:33:23.572Z",
+      "summary": "Schedule the Builds",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "Work Blocks",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2024-07-18T15:00:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "end": {
+        "dateTime": "2024-07-18T15:30:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "iCalUID": "2ba0c72616694209b35f9578df607fe5@google.com",
+      "sequence": 0,
+      "guestsCanModify": true,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3442671397726000\"",
+      "id": "f4150e345e66475f8903f7e18f1a1cd9",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=ZjQxNTBlMzQ1ZTY2NDc1Zjg5MDNmN2UxOGYxYTFjZDlfMjAyNDA3MTVUMTUzMDAwWiBjX2I4NmYxN2QzYzAyNzdmNzE3NWUxYTc4MzVmYjk3ZjljNzg1NWUyMjJjMzQ2YjdiMDBjYTQ4OTkxM2Q3NjIyMTVAZw",
+      "created": "2024-07-15T15:36:44.000Z",
+      "updated": "2024-07-18T20:48:18.863Z",
+      "summary": "Daily Plan",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "Work Blocks",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2024-07-15T11:30:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "end": {
+        "dateTime": "2024-07-15T12:00:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "recurrence": ["RRULE:FREQ=DAILY;UNTIL=20240719T065959Z"],
+      "iCalUID": "f4150e345e66475f8903f7e18f1a1cd9@google.com",
+      "sequence": 1,
+      "guestsCanModify": true,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3442671397726000\"",
+      "id": "f4150e345e66475f8903f7e18f1a1cd9_20240716T153000Z",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=ZjQxNTBlMzQ1ZTY2NDc1Zjg5MDNmN2UxOGYxYTFjZDlfMjAyNDA3MTZUMTUzMDAwWiBjX2I4NmYxN2QzYzAyNzdmNzE3NWUxYTc4MzVmYjk3ZjljNzg1NWUyMjJjMzQ2YjdiMDBjYTQ4OTkxM2Q3NjIyMTVAZw",
+      "created": "2024-07-15T15:36:44.000Z",
+      "updated": "2024-07-18T20:48:18.863Z",
+      "summary": "Daily Plan",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "Work Blocks",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2024-07-16T14:00:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "end": {
+        "dateTime": "2024-07-16T14:30:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "recurringEventId": "f4150e345e66475f8903f7e18f1a1cd9",
+      "originalStartTime": {
+        "dateTime": "2024-07-16T11:30:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "iCalUID": "f4150e345e66475f8903f7e18f1a1cd9@google.com",
+      "sequence": 2,
+      "guestsCanModify": true,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3442673704452000\"",
+      "id": "e2b2bfd0d5b44cf7b453d6b62b9381af",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=ZTJiMmJmZDBkNWI0NGNmN2I0NTNkNmI2MmI5MzgxYWYgY19iODZmMTdkM2MwMjc3ZjcxNzVlMWE3ODM1ZmI5N2Y5Yzc4NTVlMjIyYzM0NmI3YjAwY2E0ODk5MTNkNzYyMjE1QGc",
+      "created": "2024-07-18T19:33:52.000Z",
+      "updated": "2024-07-18T21:07:32.226Z",
+      "summary": "Vision, Mission, Values",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "Work Blocks",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2024-07-18T18:15:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "end": {
+        "dateTime": "2024-07-18T19:15:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "iCalUID": "e2b2bfd0d5b44cf7b453d6b62b9381af@google.com",
+      "sequence": 1,
+      "guestsCanModify": true,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3442673708378000\"",
+      "id": "06dc3996c4054a8ab0d485961196fb6c",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=MDZkYzM5OTZjNDA1NGE4YWIwZDQ4NTk2MTE5NmZiNmMgY19iODZmMTdkM2MwMjc3ZjcxNzVlMWE3ODM1ZmI5N2Y5Yzc4NTVlMjIyYzM0NmI3YjAwY2E0ODk5MTNkNzYyMjE1QGc",
+      "created": "2024-07-18T19:33:40.000Z",
+      "updated": "2024-07-18T21:07:34.189Z",
+      "summary": "Org Chart & Team Building",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "Work Blocks",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2024-07-18T17:30:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "end": {
+        "dateTime": "2024-07-18T18:30:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "iCalUID": "06dc3996c4054a8ab0d485961196fb6c@google.com",
+      "sequence": 1,
+      "guestsCanModify": true,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3443155823566000\"",
+      "id": "q424nmbn85c6h5u4to2q9m4vcd",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=cTQyNG5tYm44NWM2aDV1NHRvMnE5bTR2Y2RfMjAyNDA3MTlUMTYwMDAwWiBjX2I4NmYxN2QzYzAyNzdmNzE3NWUxYTc4MzVmYjk3ZjljNzg1NWUyMjJjMzQ2YjdiMDBjYTQ4OTkxM2Q3NjIyMTVAZw",
+      "created": "2024-07-15T15:36:44.000Z",
+      "updated": "2024-07-21T16:05:11.783Z",
+      "summary": "Daily Standup",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "Work Blocks",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2024-07-19T12:00:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "end": {
+        "dateTime": "2024-07-19T12:30:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "recurrence": [
+        "RRULE:FREQ=DAILY;WKST=MO;UNTIL=20240721T035959Z;INTERVAL=1"
+      ],
+      "iCalUID": "q424nmbn85c6h5u4to2q9m4vcd@google.com",
+      "sequence": 2,
+      "guestsCanModify": true,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3443159209178000\"",
+      "id": "55486388f07946d5b8c236b618a03a9b",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=NTU0ODYzODhmMDc5NDZkNWI4YzIzNmI2MThhMDNhOWIgY19iODZmMTdkM2MwMjc3ZjcxNzVlMWE3ODM1ZmI5N2Y5Yzc4NTVlMjIyYzM0NmI3YjAwY2E0ODk5MTNkNzYyMjE1QGc",
+      "created": "2024-07-21T16:07:05.000Z",
+      "updated": "2024-07-21T16:33:24.589Z",
+      "summary": "GTM",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "Work Blocks",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2024-07-21T12:00:00-04:00",
+        "timeZone": "America/New_York"
+      },
+      "end": {
+        "dateTime": "2024-07-21T13:00:00-04:00",
+        "timeZone": "America/New_York"
+      },
+      "iCalUID": "55486388f07946d5b8c236b618a03a9b@google.com",
+      "sequence": 0,
+      "guestsCanModify": true,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3443164971014000\"",
+      "id": "dc43b3c5a5fc4dda86ab6c36906b4500",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=ZGM0M2IzYzVhNWZjNGRkYTg2YWI2YzM2OTA2YjQ1MDAgY19iODZmMTdkM2MwMjc3ZjcxNzVlMWE3ODM1ZmI5N2Y5Yzc4NTVlMjIyYzM0NmI3YjAwY2E0ODk5MTNkNzYyMjE1QGc",
+      "created": "2024-07-21T17:21:16.000Z",
+      "updated": "2024-07-21T17:21:25.507Z",
+      "summary": "New Landing Page Designs",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "Work Blocks",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2024-07-21T13:00:00-04:00",
+        "timeZone": "America/New_York"
+      },
+      "end": {
+        "dateTime": "2024-07-21T13:30:00-04:00",
+        "timeZone": "America/New_York"
+      },
+      "iCalUID": "dc43b3c5a5fc4dda86ab6c36906b4500@google.com",
+      "sequence": 0,
+      "guestsCanModify": true,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3443183234010000\"",
+      "id": "c746d5224434493899c57c638b3313f8",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=Yzc0NmQ1MjI0NDM0NDkzODk5YzU3YzYzOGIzMzEzZjggY19iODZmMTdkM2MwMjc3ZjcxNzVlMWE3ODM1ZmI5N2Y5Yzc4NTVlMjIyYzM0NmI3YjAwY2E0ODk5MTNkNzYyMjE1QGc",
+      "created": "2024-07-21T17:21:32.000Z",
+      "updated": "2024-07-21T19:53:37.005Z",
+      "summary": "Implement Hero Designs",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "Work Blocks",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2024-07-21T13:30:00-04:00",
+        "timeZone": "America/New_York"
+      },
+      "end": {
+        "dateTime": "2024-07-21T17:00:00-04:00",
+        "timeZone": "America/New_York"
+      },
+      "iCalUID": "c746d5224434493899c57c638b3313f8@google.com",
+      "sequence": 0,
+      "guestsCanModify": true,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3443221754466000\"",
+      "id": "9cd9d255dfa24bacbad95c563f04de74",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=OWNkOWQyNTVkZmEyNGJhY2JhZDk1YzU2M2YwNGRlNzQgY19iODZmMTdkM2MwMjc3ZjcxNzVlMWE3ODM1ZmI5N2Y5Yzc4NTVlMjIyYzM0NmI3YjAwY2E0ODk5MTNkNzYyMjE1QGc",
+      "created": "2024-07-22T01:14:37.000Z",
+      "updated": "2024-07-22T01:14:37.233Z",
+      "summary": "Grocery",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "Work Blocks",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2024-07-22T09:30:00-04:00",
+        "timeZone": "America/New_York"
+      },
+      "end": {
+        "dateTime": "2024-07-22T10:30:00-04:00",
+        "timeZone": "America/New_York"
+      },
+      "iCalUID": "9cd9d255dfa24bacbad95c563f04de74@google.com",
+      "sequence": 0,
+      "guestsCanModify": true,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3443221769546000\"",
+      "id": "c1bf3650e97242cca41a686a63ea7e38",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=YzFiZjM2NTBlOTcyNDJjY2E0MWE2ODZhNjNlYTdlMzggY19iODZmMTdkM2MwMjc3ZjcxNzVlMWE3ODM1ZmI5N2Y5Yzc4NTVlMjIyYzM0NmI3YjAwY2E0ODk5MTNkNzYyMjE1QGc",
+      "created": "2024-07-22T01:14:44.000Z",
+      "updated": "2024-07-22T01:14:44.773Z",
+      "summary": "Landing Page Build",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "Work Blocks",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2024-07-22T10:30:00-04:00",
+        "timeZone": "America/New_York"
+      },
+      "end": {
+        "dateTime": "2024-07-22T16:00:00-04:00",
+        "timeZone": "America/New_York"
+      },
+      "iCalUID": "c1bf3650e97242cca41a686a63ea7e38@google.com",
+      "sequence": 0,
+      "guestsCanModify": true,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3443221791178000\"",
+      "id": "f3cd16776c624e36991e497bf1ec291f",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=ZjNjZDE2Nzc2YzYyNGUzNjk5MWU0OTdiZjFlYzI5MWZfMjAyNDA3MjFUMjEwMDAwWiBjX2I4NmYxN2QzYzAyNzdmNzE3NWUxYTc4MzVmYjk3ZjljNzg1NWUyMjJjMzQ2YjdiMDBjYTQ4OTkxM2Q3NjIyMTVAZw",
+      "created": "2024-07-18T20:39:18.000Z",
+      "updated": "2024-07-22T01:14:55.589Z",
+      "summary": "Craft and Schedule Weekly AI and Health Developments, copying Bret Adcock",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "Work Blocks",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2024-07-21T17:00:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "end": {
+        "dateTime": "2024-07-21T19:00:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "recurrence": ["RRULE:FREQ=WEEKLY;BYDAY=SU"],
+      "iCalUID": "f3cd16776c624e36991e497bf1ec291f@google.com",
+      "sequence": 1,
+      "guestsCanModify": true,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3443221791178000\"",
+      "id": "f3cd16776c624e36991e497bf1ec291f_20240721T210000Z",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=ZjNjZDE2Nzc2YzYyNGUzNjk5MWU0OTdiZjFlYzI5MWZfMjAyNDA3MjFUMjEwMDAwWiBjX2I4NmYxN2QzYzAyNzdmNzE3NWUxYTc4MzVmYjk3ZjljNzg1NWUyMjJjMzQ2YjdiMDBjYTQ4OTkxM2Q3NjIyMTVAZw",
+      "created": "2024-07-18T20:39:18.000Z",
+      "updated": "2024-07-22T01:14:55.589Z",
+      "summary": "Craft and Schedule Weekly AI and Health Developments, copying Bret Adcock",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "Work Blocks",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2024-07-22T16:30:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "end": {
+        "dateTime": "2024-07-22T18:30:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "recurringEventId": "f3cd16776c624e36991e497bf1ec291f",
+      "originalStartTime": {
+        "dateTime": "2024-07-21T17:00:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "iCalUID": "f3cd16776c624e36991e497bf1ec291f@google.com",
+      "sequence": 2,
+      "guestsCanModify": true,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3443861576848000\"",
+      "id": "dr3hgjh0ctmdt4jkstigf61eft_20240625T130000Z",
+      "status": "cancelled",
+      "recurringEventId": "dr3hgjh0ctmdt4jkstigf61eft",
+      "originalStartTime": {
+        "dateTime": "2024-06-25T09:00:00-04:00",
+        "timeZone": "America/Los_Angeles"
+      }
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3444686245470000\"",
+      "id": "830f6c09201b4cfd9a121a455e019736",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=ODMwZjZjMDkyMDFiNGNmZDlhMTIxYTQ1NWUwMTk3MzYgY19iODZmMTdkM2MwMjc3ZjcxNzVlMWE3ODM1ZmI5N2Y5Yzc4NTVlMjIyYzM0NmI3YjAwY2E0ODk5MTNkNzYyMjE1QGc",
+      "created": "2024-07-30T12:38:42.000Z",
+      "updated": "2024-07-30T12:38:42.735Z",
+      "summary": "Attempt to get SyncManager working",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "Work Blocks",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2024-07-30T08:45:00-04:00",
+        "timeZone": "America/New_York"
+      },
+      "end": {
+        "dateTime": "2024-07-30T09:30:00-04:00",
+        "timeZone": "America/New_York"
+      },
+      "iCalUID": "830f6c09201b4cfd9a121a455e019736@google.com",
+      "sequence": 0,
+      "guestsCanModify": true,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3444860862470000\"",
+      "id": "5e8b03ae28364cfc9b915cfadbcdea6e",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=NWU4YjAzYWUyODM2NGNmYzliOTE1Y2ZhZGJjZGVhNmUgY19iODZmMTdkM2MwMjc3ZjcxNzVlMWE3ODM1ZmI5N2Y5Yzc4NTVlMjIyYzM0NmI3YjAwY2E0ODk5MTNkNzYyMjE1QGc",
+      "created": "2024-07-31T12:53:51.000Z",
+      "updated": "2024-07-31T12:53:51.235Z",
+      "summary": "Edit Vlog",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "Work Blocks",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2024-07-31T17:00:00-04:00",
+        "timeZone": "America/New_York"
+      },
+      "end": {
+        "dateTime": "2024-07-31T18:00:00-04:00",
+        "timeZone": "America/New_York"
+      },
+      "iCalUID": "5e8b03ae28364cfc9b915cfadbcdea6e@google.com",
+      "sequence": 0,
+      "guestsCanModify": true,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3444955661410000\"",
+      "id": "d3746fbf63c24b78adf05092056b838a",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=ZDM3NDZmYmY2M2MyNGI3OGFkZjA1MDkyMDU2YjgzOGEgY19iODZmMTdkM2MwMjc3ZjcxNzVlMWE3ODM1ZmI5N2Y5Yzc4NTVlMjIyYzM0NmI3YjAwY2E0ODk5MTNkNzYyMjE1QGc",
+      "created": "2024-08-01T02:03:50.000Z",
+      "updated": "2024-08-01T02:03:50.705Z",
+      "summary": "Thumnail, schedule for 12pm ",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "Work Blocks",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2024-08-01T09:45:00-04:00",
+        "timeZone": "America/New_York"
+      },
+      "end": {
+        "dateTime": "2024-08-01T10:00:00-04:00",
+        "timeZone": "America/New_York"
+      },
+      "iCalUID": "d3746fbf63c24b78adf05092056b838a@google.com",
+      "sequence": 0,
+      "guestsCanModify": true,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3444955682298000\"",
+      "id": "98b54c0dcc3349149f84c22305020a30",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=OThiNTRjMGRjYzMzNDkxNDlmODRjMjIzMDUwMjBhMzBfMjAyNDA3MjFUMTMwMDAwWiBjX2I4NmYxN2QzYzAyNzdmNzE3NWUxYTc4MzVmYjk3ZjljNzg1NWUyMjJjMzQ2YjdiMDBjYTQ4OTkxM2Q3NjIyMTVAZw",
+      "created": "2024-07-21T16:05:11.000Z",
+      "updated": "2024-08-01T02:04:01.149Z",
+      "summary": "Daily Standup",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "Work Blocks",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2024-07-21T09:00:00-04:00",
+        "timeZone": "America/New_York"
+      },
+      "end": {
+        "dateTime": "2024-07-21T09:30:00-04:00",
+        "timeZone": "America/New_York"
+      },
+      "recurrence": [
+        "RRULE:FREQ=DAILY;WKST=MO;UNTIL=20240801T035959Z;INTERVAL=1"
+      ],
+      "iCalUID": "98b54c0dcc3349149f84c22305020a30@google.com",
+      "sequence": 2,
+      "guestsCanModify": true,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3444955803508000\"",
+      "id": "db220c22344646999efd3b9be4bce994",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=ZGIyMjBjMjIzNDQ2NDY5OTllZmQzYjliZTRiY2U5OTRfMjAyNDA4MDJUMDIwMDAwWiBjX2I4NmYxN2QzYzAyNzdmNzE3NWUxYTc4MzVmYjk3ZjljNzg1NWUyMjJjMzQ2YjdiMDBjYTQ4OTkxM2Q3NjIyMTVAZw",
+      "created": "2024-07-26T14:24:52.000Z",
+      "updated": "2024-08-01T02:05:01.754Z",
+      "summary": "Read Tiny Habits",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "Work Blocks",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2024-08-01T22:00:00-04:00",
+        "timeZone": "America/New_York"
+      },
+      "end": {
+        "dateTime": "2024-08-01T22:45:00-04:00",
+        "timeZone": "America/New_York"
+      },
+      "recurrence": [
+        "RRULE:FREQ=WEEKLY;WKST=MO;INTERVAL=1;BYDAY=MO,TU,WE,TH,FR"
+      ],
+      "iCalUID": "db220c22344646999efd3b9be4bce994@google.com",
+      "sequence": 2,
+      "guestsCanModify": true,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3444955821592000\"",
+      "id": "3820c81057d2413c83a8431d93c2a3c9",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=MzgyMGM4MTA1N2QyNDEzYzgzYTg0MzFkOTNjMmEzYzlfMjAyNDA4MDFUMDAxNTAwWiBjX2I4NmYxN2QzYzAyNzdmNzE3NWUxYTc4MzVmYjk3ZjljNzg1NWUyMjJjMzQ2YjdiMDBjYTQ4OTkxM2Q3NjIyMTVAZw",
+      "created": "2024-08-01T02:04:52.000Z",
+      "updated": "2024-08-01T02:05:10.796Z",
+      "summary": "Edit & Upload",
+      "colorId": "3",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "Work Blocks",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2024-07-31T20:15:00-04:00",
+        "timeZone": "America/New_York"
+      },
+      "end": {
+        "dateTime": "2024-07-31T22:00:00-04:00",
+        "timeZone": "America/New_York"
+      },
+      "recurrence": ["RRULE:FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR"],
+      "iCalUID": "3820c81057d2413c83a8431d93c2a3c9@google.com",
+      "sequence": 1,
+      "guestsCanModify": true,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3444955834842000\"",
+      "id": "d130031791304c7b8623995c8a2d6e5c",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=ZDEzMDAzMTc5MTMwNGM3Yjg2MjM5OTVjOGEyZDZlNWNfMjAyNDA4MDFUMTcwMDAwWiBjX2I4NmYxN2QzYzAyNzdmNzE3NWUxYTc4MzVmYjk3ZjljNzg1NWUyMjJjMzQ2YjdiMDBjYTQ4OTkxM2Q3NjIyMTVAZw",
+      "created": "2024-08-01T02:04:03.000Z",
+      "updated": "2024-08-01T02:05:17.421Z",
+      "summary": "Record Mid Day Checkin/Update",
+      "colorId": "3",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "Work Blocks",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2024-08-01T13:00:00-04:00",
+        "timeZone": "America/New_York"
+      },
+      "end": {
+        "dateTime": "2024-08-01T13:30:00-04:00",
+        "timeZone": "America/New_York"
+      },
+      "recurrence": ["RRULE:FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR"],
+      "iCalUID": "d130031791304c7b8623995c8a2d6e5c@google.com",
+      "sequence": 4,
+      "guestsCanModify": true,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3445076214098000\"",
+      "id": "e7481299957844aa81440878750a82f8",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=ZTc0ODEyOTk5NTc4NDRhYTgxNDQwODc4NzUwYTgyZjhfMjAyNDA4MDFUMjIwMDAwWiBjX2I4NmYxN2QzYzAyNzdmNzE3NWUxYTc4MzVmYjk3ZjljNzg1NWUyMjJjMzQ2YjdiMDBjYTQ4OTkxM2Q3NjIyMTVAZw",
+      "created": "2024-08-01T02:04:29.000Z",
+      "updated": "2024-08-01T18:48:27.049Z",
+      "summary": "Record End Day Update",
+      "colorId": "3",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "Work Blocks",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2024-08-01T18:00:00-04:00",
+        "timeZone": "America/New_York"
+      },
+      "end": {
+        "dateTime": "2024-08-01T18:30:00-04:00",
+        "timeZone": "America/New_York"
+      },
+      "recurrence": ["RRULE:FREQ=DAILY"],
+      "iCalUID": "e7481299957844aa81440878750a82f8@google.com",
+      "sequence": 6,
+      "guestsCanModify": true,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3445076245690000\"",
+      "id": "72e18eed8c0e4feb8f9d0e3d74ddf33a",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=NzJlMThlZWQ4YzBlNGZlYjhmOWQwZTNkNzRkZGYzM2FfMjAyNDA3MjJUMTIxNTAwWiBjX2I4NmYxN2QzYzAyNzdmNzE3NWUxYTc4MzVmYjk3ZjljNzg1NWUyMjJjMzQ2YjdiMDBjYTQ4OTkxM2Q3NjIyMTVAZw",
+      "created": "2024-07-21T16:06:01.000Z",
+      "updated": "2024-08-01T18:48:42.845Z",
+      "summary": "Review all pitch docs",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "Work Blocks",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2024-07-22T08:15:00-04:00",
+        "timeZone": "America/New_York"
+      },
+      "end": {
+        "dateTime": "2024-07-22T09:00:00-04:00",
+        "timeZone": "America/New_York"
+      },
+      "recurrence": [
+        "RRULE:FREQ=DAILY;WKST=MO;UNTIL=20240802T035959Z;INTERVAL=1"
+      ],
+      "iCalUID": "72e18eed8c0e4feb8f9d0e3d74ddf33a@google.com",
+      "sequence": 2,
+      "guestsCanModify": true,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3445076254956000\"",
+      "id": "8a5ade74908148d8bd07005a71fedd36",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=OGE1YWRlNzQ5MDgxNDhkOGJkMDcwMDVhNzFmZWRkMzZfMjAyNDA4MDFUMTMwMDAwWiBjX2I4NmYxN2QzYzAyNzdmNzE3NWUxYTc4MzVmYjk3ZjljNzg1NWUyMjJjMzQ2YjdiMDBjYTQ4OTkxM2Q3NjIyMTVAZw",
+      "created": "2024-08-01T02:04:00.000Z",
+      "updated": "2024-08-01T18:48:47.478Z",
+      "summary": "Record Daily Standup/Plan",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "Work Blocks",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2024-08-01T09:00:00-04:00",
+        "timeZone": "America/New_York"
+      },
+      "end": {
+        "dateTime": "2024-08-01T09:30:00-04:00",
+        "timeZone": "America/New_York"
+      },
+      "recurrence": ["RRULE:FREQ=DAILY;WKST=MO;INTERVAL=1"],
+      "iCalUID": "8a5ade74908148d8bd07005a71fedd36@google.com",
+      "sequence": 2,
+      "guestsCanModify": true,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3445081874342000\"",
+      "id": "3621e9255731432b8c4c61a142494729",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=MzYyMWU5MjU1NzMxNDMyYjhjNGM2MWExNDI0OTQ3MjkgY19iODZmMTdkM2MwMjc3ZjcxNzVlMWE3ODM1ZmI5N2Y5Yzc4NTVlMjIyYzM0NmI3YjAwY2E0ODk5MTNkNzYyMjE1QGc",
+      "created": "2024-08-01T19:35:32.000Z",
+      "updated": "2024-08-01T19:35:37.171Z",
+      "summary": "SOMETIME: Email Mark & Margarite, Setup PM templates & videos as paid product",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "Work Blocks",
+        "self": true
+      },
+      "start": {
+        "date": "2024-07-29"
+      },
+      "end": {
+        "date": "2024-08-04"
+      },
+      "transparency": "transparent",
+      "iCalUID": "3621e9255731432b8c4c61a142494729@google.com",
+      "sequence": 0,
+      "guestsCanModify": true,
+      "reminders": {
+        "useDefault": false
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3445081915268000\"",
+      "id": "670f12ec31564438b30ac3612f083b0c",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=NjcwZjEyZWMzMTU2NDQzOGIzMGFjMzYxMmYwODNiMGMgY19iODZmMTdkM2MwMjc3ZjcxNzVlMWE3ODM1ZmI5N2Y5Yzc4NTVlMjIyYzM0NmI3YjAwY2E0ODk5MTNkNzYyMjE1QGc",
+      "created": "2024-06-28T18:04:56.000Z",
+      "updated": "2024-08-01T19:35:57.634Z",
+      "summary": "🚫 Quit Zyn",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "Work Blocks",
+        "self": true
+      },
+      "start": {
+        "date": "2024-08-01"
+      },
+      "end": {
+        "date": "2024-08-02"
+      },
+      "transparency": "transparent",
+      "iCalUID": "670f12ec31564438b30ac3612f083b0c@google.com",
+      "sequence": 0,
+      "guestsCanModify": true,
+      "reminders": {
+        "useDefault": false
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3445412859752000\"",
+      "id": "945520d889f4409db0470a542435487a",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=OTQ1NTIwZDg4OWY0NDA5ZGIwNDcwYTU0MjQzNTQ4N2EgY19iODZmMTdkM2MwMjc3ZjcxNzVlMWE3ODM1ZmI5N2Y5Yzc4NTVlMjIyYzM0NmI3YjAwY2E0ODk5MTNkNzYyMjE1QGc",
+      "created": "2024-08-03T15:14:13.000Z",
+      "updated": "2024-08-03T17:33:49.876Z",
+      "summary": "Chop Video and Post",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "Work Blocks",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2024-08-03T11:15:00-04:00",
+        "timeZone": "America/New_York"
+      },
+      "end": {
+        "dateTime": "2024-08-03T13:30:00-04:00",
+        "timeZone": "America/New_York"
+      },
+      "iCalUID": "945520d889f4409db0470a542435487a@google.com",
+      "sequence": 1,
+      "guestsCanModify": true,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3445556521582000\"",
+      "id": "a420f4d66e704c9699ff7e42de5b38a7",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=YTQyMGY0ZDY2ZTcwNGM5Njk5ZmY3ZTQyZGU1YjM4YTcgY19iODZmMTdkM2MwMjc3ZjcxNzVlMWE3ODM1ZmI5N2Y5Yzc4NTVlMjIyYzM0NmI3YjAwY2E0ODk5MTNkNzYyMjE1QGc",
+      "created": "2024-08-04T13:31:00.000Z",
+      "updated": "2024-08-04T13:31:00.791Z",
+      "summary": "Engine",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "Work Blocks",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2024-08-04T09:45:00-04:00",
+        "timeZone": "America/New_York"
+      },
+      "end": {
+        "dateTime": "2024-08-04T14:30:00-04:00",
+        "timeZone": "America/New_York"
+      },
+      "iCalUID": "a420f4d66e704c9699ff7e42de5b38a7@google.com",
+      "sequence": 0,
+      "guestsCanModify": true,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3445557213336000\"",
+      "id": "5vsjild4v084o3lioe5f3v3hq5_20240605T104500Z",
+      "status": "cancelled",
+      "recurringEventId": "5vsjild4v084o3lioe5f3v3hq5",
+      "originalStartTime": {
+        "dateTime": "2024-06-05T06:45:00-04:00",
+        "timeZone": "America/New_York"
+      }
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3445559067958000\"",
+      "id": "7uaqkn0h069osptj3ruo0r962b_20240605T100000Z",
+      "status": "cancelled",
+      "recurringEventId": "7uaqkn0h069osptj3ruo0r962b",
+      "originalStartTime": {
+        "dateTime": "2024-06-05T06:00:00-04:00",
+        "timeZone": "America/New_York"
+      }
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3445785456272000\"",
+      "id": "449f151bae3d4d5ea9b03433ed513596",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=NDQ5ZjE1MWJhZTNkNGQ1ZWE5YjAzNDMzZWQ1MTM1OTYgY19iODZmMTdkM2MwMjc3ZjcxNzVlMWE3ODM1ZmI5N2Y5Yzc4NTVlMjIyYzM0NmI3YjAwY2E0ODk5MTNkNzYyMjE1QGc",
+      "created": "2024-08-05T21:18:48.000Z",
+      "updated": "2024-08-05T21:18:48.136Z",
+      "summary": "Post Longform @ 11am ET ",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "Work Blocks",
+        "self": true
+      },
+      "start": {
+        "date": "2024-08-05"
+      },
+      "end": {
+        "date": "2024-08-06"
+      },
+      "transparency": "transparent",
+      "iCalUID": "449f151bae3d4d5ea9b03433ed513596@google.com",
+      "sequence": 0,
+      "guestsCanModify": true,
+      "reminders": {
+        "useDefault": false
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3446068545352000\"",
+      "id": "1867881cfa1b46e7ac473df4a1ce414d",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=MTg2Nzg4MWNmYTFiNDZlN2FjNDczZGY0YTFjZTQxNGRfMjAyNDA4MDdUMjMwMDAwWiBjX2I4NmYxN2QzYzAyNzdmNzE3NWUxYTc4MzVmYjk3ZjljNzg1NWUyMjJjMzQ2YjdiMDBjYTQ4OTkxM2Q3NjIyMTVAZw",
+      "created": "2024-08-07T12:37:48.000Z",
+      "updated": "2024-08-07T12:37:52.676Z",
+      "summary": "One Wedding Thing",
+      "creator": {
+        "email": "parker@mapthemap.com"
+      },
+      "organizer": {
+        "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "displayName": "Work Blocks",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2024-08-07T19:00:00-04:00",
+        "timeZone": "America/New_York"
+      },
+      "end": {
+        "dateTime": "2024-08-07T19:30:00-04:00",
+        "timeZone": "America/New_York"
+      },
+      "recurrence": ["RRULE:FREQ=DAILY"],
+      "iCalUID": "1867881cfa1b46e7ac473df4a1ce414d@google.com",
+      "sequence": 1,
+      "guestsCanModify": true,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    }
+  ]
+}

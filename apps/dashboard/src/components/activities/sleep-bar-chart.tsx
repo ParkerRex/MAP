@@ -1,7 +1,8 @@
-'use client';
-import { BarChart, Card } from '@tremor/react';
-import React, { useMemo } from 'react';
-import type { SleepData, SleepStageSummary } from '@/types/health';
+"use client";
+import { Charts } from "@/components/charts/charts";
+import type { SleepData, SleepStageSummary } from "@/types/health";
+import { Card, CardContent, CardHeader, CardTitle } from "@map/ui/card";
+import React, { useMemo } from "react";
 
 export function SleepComposition({
   sleepData,
@@ -11,7 +12,7 @@ export function SleepComposition({
   const chartData = useMemo(() => {
     const sleepCompositionByDay = sleepData.reduce(
       (acc: Record<string, SleepStageSummary>, curr) => {
-        const day = new Date(curr.start).toISOString().split('T')[0];
+        const day = new Date(curr.start).toISOString().split("T")[0];
         if (!acc[day]) {
           acc[day] = {
             total_rem_sleep_time_milli: 0,
@@ -43,16 +44,23 @@ export function SleepComposition({
   }, [sleepData]);
 
   return (
-    <Card className="p-4 rounded-sm">
-      <h2 className="text-lg font-bold mb-2">Sleep Composition by Day</h2>
-      <BarChart
-        data={chartData}
-        index="name"
-        categories={['REM', 'Light', 'Deep', 'Awake']}
-        colors={['blue', 'teal', 'amber', 'rose']}
-        valueFormatter={(value) => `${(value / (1000 * 60 * 60)).toFixed(2)}h`}
-        yAxisWidth={48}
-      />
+    <Card>
+      <CardHeader>
+        <CardTitle>Sleep Composition by Day</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <Charts
+          type="bar"
+          data={chartData}
+          index="name"
+          categories={["REM", "Light", "Deep", "Awake"]}
+          colors={["blue", "teal", "amber", "rose"]}
+          valueFormatter={(value) =>
+            `${(value / (1000 * 60 * 60)).toFixed(2)}h`
+          }
+          yAxisWidth={48}
+        />
+      </CardContent>
     </Card>
   );
 }

@@ -1,4 +1,4 @@
-import type { calendar_v3 } from 'googleapis';
+import type { calendar_v3 } from "googleapis";
 
 // Extend the Google Calendar API types for our specific needs
 export interface ExtendedCalendarListEntry
@@ -9,9 +9,9 @@ export interface ExtendedCalendarListEntry
 export type Calendar = ExtendedCalendarListEntry;
 
 export const createCalendarSchema: Partial<calendar_v3.Schema$Calendar> = {
-  summary: '',
-  description: '',
-  timeZone: '',
+  summary: "",
+  description: "",
+  timeZone: "",
 };
 
 export type CreateCalendarInput = typeof createCalendarSchema;
@@ -29,15 +29,15 @@ export interface CalendarEvent extends ExtendedEvent {
 }
 
 export const createEventSchema: Partial<calendar_v3.Schema$Event> = {
-  summary: '',
-  description: '',
+  summary: "",
+  description: "",
   start: {
-    dateTime: '',
-    timeZone: '',
+    dateTime: "",
+    timeZone: "",
   },
   end: {
-    dateTime: '',
-    timeZone: '',
+    dateTime: "",
+    timeZone: "",
   },
   recurrence: [],
   attendees: [],
@@ -53,16 +53,17 @@ export interface CalendarContextType {
   setCurrentWeekStartDate: (date: Date) => void;
   selectedCalendar: string | null;
   setSelectedCalendar: React.Dispatch<React.SetStateAction<string | null>>;
-  events: ExtendedEvent[];
-  selectedEvent: ExtendedEvent | null;
-  setSelectedEvent: React.Dispatch<React.SetStateAction<ExtendedEvent | null>>;
-  createEvent: (event: Partial<ExtendedEvent>) => void;
-  updateEvent: (event: ExtendedEvent) => void;
-  deleteEvent: (event: ExtendedEvent) => void;
+  events: calendar_v3.Schema$Event[];
+  selectedEvent: calendar_v3.Schema$Event | null;
+  setSelectedEvent: React.Dispatch<
+    React.SetStateAction<calendar_v3.Schema$Event | null>
+  >;
+  createEvent: (event: Partial<calendar_v3.Schema$Event>) => void;
+  updateEvent: (event: calendar_v3.Schema$Event) => void;
+  deleteEvent: (event: calendar_v3.Schema$Event) => void;
   visibleCalendars: Set<string>;
   toggleCalendarVisibility: (calendarId: string) => void;
-  calendars: ExtendedCalendarListEntry[];
-  userId: string;
+  calendars: calendar_v3.Schema$CalendarListEntry[];
   userTimeZone: string;
 }
 

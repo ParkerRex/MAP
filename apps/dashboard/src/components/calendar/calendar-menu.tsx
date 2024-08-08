@@ -1,9 +1,9 @@
 "use client";
 import { useWeekNavigation } from "@/hooks/use-week-navigation";
 import { useCalendar } from "@/store/calendar-context";
-import { safeParseDate } from "@/utils/date-utils";
 import { Calendar as UIDatePicker } from "@map/ui/calendar";
 import { Separator } from "@map/ui/separator";
+import { startOfWeek } from "date-fns";
 import { Eye, EyeOff } from "lucide-react";
 import { useCallback } from "react";
 
@@ -25,12 +25,9 @@ export default function CalendarMenu({
 
   const handleDateSelect = (date: Date | undefined) => {
     if (date) {
-      const parsedDate = safeParseDate(date);
-      if (parsedDate) {
-        const weekStartDate = parsedDate.startOf("week").setZone(userTimeZone);
-        setCurrentWeekStartDate(weekStartDate.toJSDate());
-        handleSetWeek(weekStartDate.toJSDate());
-      }
+      const weekStartDate = startOfWeek(date, { weekStartsOn: 1 }); // 1 represents Monday
+      setCurrentWeekStartDate(weekStartDate);
+      handleSetWeek(weekStartDate);
     }
   };
 

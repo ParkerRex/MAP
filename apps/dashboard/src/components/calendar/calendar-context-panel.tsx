@@ -1,63 +1,48 @@
-// /app/calendar/components/ContextPanel.tsx
 "use client";
 import { useCalendar } from "@/store/calendar-context";
-import { formatForDisplay, safeParseDate } from "@/utils/date-utils";
 import type { calendar_v3 } from "googleapis";
 import { MoveRight } from "lucide-react";
-import { DateTime } from "luxon";
 
 interface ContextPanelProps {
   className?: string;
 }
 
 export default function ContextPanel({ className }: ContextPanelProps) {
-  const { selectedEvent, events, visibleCalendars, calendars, userTimeZone } =
-    useCalendar();
+  const { selectedEvent, events, visibleCalendars, calendars } = useCalendar();
 
   const getNextEvent = (): calendar_v3.Schema$Event | undefined => {
-    const now = DateTime.now().setZone(userTimeZone);
+    const now = new Date();
     const visibleEvents = events.filter((event) =>
       visibleCalendars.has(event.organizer?.email || ""),
     );
     const upcomingEvents = visibleEvents.filter((event) => {
-      const startDateTime = safeParseDate(
-        event.start?.dateTime || event.start?.date,
+      const startDateTime = new Date(
+        event.start?.dateTime || event.start?.date || "",
       );
-      return startDateTime && startDateTime > now;
+      return startDateTime > now;
     });
     upcomingEvents.sort((a, b) => {
-      const aStartDateTime = safeParseDate(a.start?.dateTime || a.start?.date);
-      const bStartDateTime = safeParseDate(b.start?.dateTime || b.start?.date);
-      return aStartDateTime && bStartDateTime
-        ? aStartDateTime.toMillis() - bStartDateTime.toMillis()
-        : 0;
+      const aStartDateTime = new Date(a.start?.dateTime || a.start?.date || "");
+      const bStartDateTime = new Date(b.start?.dateTime || b.start?.date || "");
+      return aStartDateTime.getTime() - bStartDateTime.getTime();
     });
     return upcomingEvents[0];
   };
 
   const getTimeUntilNextEvent = (event: calendar_v3.Schema$Event) => {
-    const now = DateTime.now().setZone(userTimeZone);
-    const eventStart = safeParseDate(
-      event.start?.dateTime || event.start?.date,
+    const now = new Date();
+    const eventStart = new Date(
+      event.start?.dateTime || event.start?.date || "",
     );
-    if (!eventStart) return { hours: 0, minutes: 0 };
-    const diff = eventStart.diff(now, ["hours", "minutes"]);
-    return {
-      hours: Math.floor(diff.hours),
-      minutes: Math.floor(diff.minutes % 60),
-    };
+    const diff = eventStart.getTime() - now.getTime();
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    return { hours, minutes };
   };
 
   const getCalendarColor = (calendarId: string | null | undefined) => {
     const calendar = calendars.find((cal) => cal.id === calendarId);
     return calendar?.backgroundColor || "#DDFFE3";
-  };
-
-  const getEventDates = (event: calendar_v3.Schema$Event) => {
-    return {
-      startDate: safeParseDate(event.start?.dateTime || event.start?.date),
-      endDate: safeParseDate(event.end?.dateTime || event.end?.date),
-    };
   };
 
   if (!selectedEvent) {
@@ -78,12 +63,12 @@ export default function ContextPanel({ className }: ContextPanelProps) {
 
     const { hours, minutes } = getTimeUntilNextEvent(nextEvent);
     const { summary, description } = nextEvent;
-    const { startDate, endDate } = getEventDates(nextEvent);
-    const formattedDate = startDate?.toJSDate().toLocaleString(undefined, {
-      weekday: "short",
-      month: "short",
-      day: "numeric",
-    });
+    const startDate = new Date(
+      nextEvent.start?.dateTime || nextEvent.start?.date || "",
+    );
+    const endDate = new Date(
+      nextEvent.end?.dateTime || nextEvent.end?.date || "",
+    );
 
     return (
       <div
@@ -101,9 +86,7 @@ export default function ContextPanel({ className }: ContextPanelProps) {
               {summary}
             </h2>
             <p className="text-[11px]">
-              {startDate && formatForDisplay(startDate.toJSDate(), "h:mm a")}
-              {" - "}
-              {endDate && formatForDisplay(endDate.toJSDate(), "h:mm a")}
+              {startDate.toLocaleTimeString()} - {endDate.toLocaleTimeString()}
             </p>
           </div>
         </div>
@@ -112,12 +95,12 @@ export default function ContextPanel({ className }: ContextPanelProps) {
   }
 
   const { summary, description } = selectedEvent;
-  const { startDate, endDate } = getEventDates(selectedEvent);
-  const formattedDate = startDate?.toJSDate().toLocaleString(undefined, {
-    weekday: "short",
-    month: "short",
-    day: "numeric",
-  });
+  const startDate = new Date(
+    selectedEvent.start?.dateTime || selectedEvent.start?.date || "",
+  );
+  const endDate = new Date(
+    selectedEvent.end?.dateTime || selectedEvent.end?.date || "",
+  );
 
   return (
     <div
@@ -133,9 +116,7 @@ export default function ContextPanel({ className }: ContextPanelProps) {
         <div className="bg-gray-100 dark:bg-[#404040] p-4 rounded-lg">
           <h2 className="text-[11px] font-semibold line-clamp-1">{summary}</h2>
           <p className="text-[11px]">
-            {startDate && formatForDisplay(startDate.toJSDate(), "h:mm a")}
-            {startDate && endDate && " - "}
-            {endDate && formatForDisplay(endDate.toJSDate(), "h:mm a")}
+            {startDate.toLocaleTimeString()} - {endDate.toLocaleTimeString()}
           </p>
           <p className="text-[11px]">{description}</p>
         </div>

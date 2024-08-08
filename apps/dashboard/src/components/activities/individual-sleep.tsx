@@ -1,6 +1,6 @@
 "use client";
+import { Card, CardContent } from "@map/ui/card";
 import { Separator } from "@map/ui/separator";
-import { Card, ProgressCircle } from "@tremor/react";
 import React, { useMemo } from "react";
 
 interface SleepData {
@@ -70,45 +70,40 @@ export function IndividualSleeps({ sleepData }: IndividualSleepProps) {
   return (
     <>
       {sleepDetails.map((detail) => (
-        <Card
-          key={detail.id}
-          className="flex flex-col h-[140px] p-4 mb-4 rounded-sm"
-        >
-          <div className="flex flex-col">
-            <div className="text-lg font-bold">
-              {detail.start}-{detail.end}
-            </div>
-            <div className="text-sm text-gray-500">
-              Total Hours: {detail.totalHours.toFixed(2)}
-            </div>
-          </div>
-          <div className="flex justify-between items-center pt-2">
+        <Card key={detail.id} className="mb-4">
+          <CardContent className="flex flex-col h-[140px] p-4">
             <div className="flex flex-col">
-              <div className="text-xs">Light:</div>
-              <div>{detail.lightSleep.toFixed(2)} hrs</div>
+              <div className="text-lg font-bold">
+                {detail.start}-{detail.end}
+              </div>
+              <div className="text-sm text-gray-500">
+                Total Hours: {detail.totalHours.toFixed(2)}
+              </div>
             </div>
-            <Separator orientation="vertical" />
-            <div className="flex flex-col">
-              <div className="text-xs">REM:</div>
-              <div>{detail.remSleep.toFixed(2)} hrs</div>
+            <div className="flex justify-between items-center pt-2">
+              <div className="flex flex-col">
+                <div className="text-xs">Light:</div>
+                <div>{detail.lightSleep.toFixed(2)} hrs</div>
+              </div>
+              <Separator orientation="vertical" />
+              <div className="flex flex-col">
+                <div className="text-xs">REM:</div>
+                <div>{detail.remSleep.toFixed(2)} hrs</div>
+              </div>
+              <Separator orientation="vertical" />
+              <div className="flex flex-col">
+                <div className="text-xs">Deep:</div>
+                <div>{detail.deepSleep.toFixed(2)} hrs</div>
+              </div>
+              <Separator orientation="vertical" />
+              <div className="flex flex-col">
+                <div className="text-blue-500 text-xs">Recovery:</div>
+                <div className="text-sm font-semibold">
+                  {detail.recoveryScore}%
+                </div>
+              </div>
             </div>
-            <Separator orientation="vertical" />
-            <div className="flex flex-col">
-              <div className="text-xs">Deep:</div>
-              <div>{detail.deepSleep.toFixed(2)} hrs</div>
-            </div>
-            <Separator orientation="vertical" />
-            <div className="flex flex-col">
-              <div className="text-blue-500 text-xs">Recovery:</div>
-              <ProgressCircle
-                value={detail.recoveryScore}
-                radius={100}
-                tooltip={`Recovery Score: ${detail.recoveryScore}%`}
-                size="xs"
-                className="size-6"
-              />
-            </div>
-          </div>
+          </CardContent>
         </Card>
       ))}
     </>

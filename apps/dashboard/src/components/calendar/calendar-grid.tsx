@@ -1,9 +1,14 @@
 "use client";
 import { useCalendar } from "@/store/calendar-context";
 import type { CalendarEvent } from "@/types/calendar";
-import { safeParseDate } from "@/utils/date-utils";
+import {
+  addDays,
+  eachDayOfInterval,
+  format,
+  isSameDay,
+  startOfWeek,
+} from "date-fns";
 import type { calendar_v3 } from "googleapis";
-import { DateTime, Interval } from "luxon";
 import type { FC } from "react";
 import { useEffect, useRef } from "react";
 import CalendarAllDayEvents from "./all-day-events";
@@ -23,22 +28,17 @@ const CalendarGrid: FC<CalendarGridProps> = ({
   const { currentWeekStartDate, visibleCalendars, userTimeZone } =
     useCalendar();
   const gridRef = useRef<HTMLDivElement>(null);
-  const startOfWeek = DateTime.fromJSDate(currentWeekStartDate)
-    .startOf("week")
-    .plus({ days: 1 });
-  const endOfWeek = startOfWeek.plus({ days: 6 });
-  const daysOfWeek = Interval.fromDateTimes(startOfWeek, endOfWeek)
-    .splitBy({ days: 1 })
-    .map((d) => d.start)
-    .filter((day): day is DateTime => day !== null);
+  const startOfWeekDate = startOfWeek(currentWeekStartDate, {
+    weekStartsOn: 1,
+  });
+  const endOfWeekDate = addDays(startOfWeekDate, 6);
+  const daysOfWeek = eachDayOfInterval({
+    start: startOfWeekDate,
+    end: endOfWeekDate,
+  });
 
   const isAllDayEvent = (event: CalendarEvent) => {
-    const start = safeParseDate(event.start?.dateTime || event.start?.date);
-    const end = safeParseDate(event.end?.dateTime || event.end?.date);
-    return (
-      event.start?.date !== undefined ||
-      (start && end && end.diff(start).as("hours") >= 24)
-    );
+    return event.start?.date !== undefined;
   };
 
   const filteredEvents = events.filter(
@@ -54,8 +54,8 @@ const CalendarGrid: FC<CalendarGridProps> = ({
       const gridHeight = gridRef.current.scrollHeight;
       const viewportHeight = gridRef.current.clientHeight;
       const hourHeight = gridHeight / 24;
-      const now = DateTime.now().setZone(userTimeZone);
-      const currentHour = now.hour + now.minute / 60;
+      const now = new Date();
+      const currentHour = now.getHours() + now.getMinutes() / 60;
       const scrollPosition = currentHour * hourHeight - viewportHeight / 2;
       gridRef.current.scrollTop = scrollPosition;
     }
@@ -63,31 +63,30 @@ const CalendarGrid: FC<CalendarGridProps> = ({
 
   const hours = Array.from({ length: 24 }, (_, i) => i);
 
+  // TODO: Implement storing events in the database using UTC
+
   return (
     <div className={`flex flex-col h-full overflow-hidden ${className}`}>
       <div className="flex sticky top-0 z-10 bg-white dark:bg-black border-b border-gray-200 dark:border-gray-800">
         <div className="w-16 flex-shrink-0" />
         {daysOfWeek.map((day) => (
-          <div key={day.toISO()} className="flex-1 text-center p-2">
+          <div key={day.toISOString()} className="flex-1 text-center p-2">
             <div className="text-sm text-gray-600 dark:text-gray-400">
-              {day.toFormat("EEE")}
+              {format(day, "EEE")}
             </div>
             <div
               className={`mx-auto w-8 h-8 flex items-center justify-center rounded-full ${
-                day.hasSame(DateTime.now().setZone(userTimeZone), "day")
+                isSameDay(day, new Date())
                   ? "bg-[#48CA80] text-white"
                   : "text-gray-900 dark:text-gray-100"
               }`}
             >
-              {day.toFormat("d")}
+              {format(day, "d")}
             </div>
           </div>
         ))}
       </div>
-      <CalendarAllDayEvents
-        events={allDayEvents}
-        daysOfWeek={daysOfWeek.map((d) => d.toJSDate())}
-      />
+      <CalendarAllDayEvents events={allDayEvents} daysOfWeek={daysOfWeek} />
       <div className="flex flex-grow overflow-y-auto" ref={gridRef}>
         <div className="w-16 flex-shrink-0">
           {hours.map((hour) => (
@@ -95,15 +94,13 @@ const CalendarGrid: FC<CalendarGridProps> = ({
               key={hour}
               className="h-16 text-xs text-gray-500 text-right pr-2"
             >
-              {DateTime.fromObject({ hour }, { zone: userTimeZone }).toFormat(
-                "h a",
-              )}
+              {format(new Date().setHours(hour, 0, 0, 0), "h a")}
             </div>
           ))}
         </div>
         <div className="flex-grow grid grid-cols-7 relative">
           {daysOfWeek.map((day, dayIndex) => (
-            <div key={day.toISO()} className="relative">
+            <div key={day.toISOString()} className="relative">
               {hours.map((hour) => (
                 <div
                   key={hour}
@@ -112,10 +109,10 @@ const CalendarGrid: FC<CalendarGridProps> = ({
               ))}
               <CalendarEventComponent
                 events={regularEvents.filter((event) => {
-                  const eventStart = safeParseDate(
-                    event.start?.dateTime || event.start?.date,
-                  );
-                  return eventStart?.hasSame(day, "day");
+                  const eventStart = event.start?.dateTime
+                    ? new Date(event.start.dateTime)
+                    : null;
+                  return eventStart && isSameDay(eventStart, day);
                 })}
                 dayIndex={dayIndex}
               />

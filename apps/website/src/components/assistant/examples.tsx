@@ -1,53 +1,52 @@
 // TODO: Swap this out for examples of our own
 export const chatExamples = [
   {
-    title: `What's my burn rate`,
-    content:
-      "Based on your historical data, your average burn rate is $8,933.33 per month. Your expected runway is 7 months, ending on January 5, 2025.",
+    title: "Get me the agenda for today",
+    content: "Here's your agenda for today: [List of today's events and tasks]",
   },
   {
-    title: `What's my runway`,
+    title: "Help me break down my fitness goal",
     content:
-      "Based on your historical data, your expected runway is 7 months, ending in Jan 5, 2025.",
+      "Let's break down your fitness goal. What specific goal do you have in mind?",
   },
   {
-    title: "What is my spending on Software",
+    title: "Set goals for the week",
     content:
-      "You have spent $8,933.33 on Software between Jun 1, 2023 and Jun 5, 2024",
+      "Great! Let's set some goals for this week. What areas would you like to focus on?",
   },
   {
-    title: "Find a receipt or invoice",
+    title: "Break down my project to launch a new product",
     content:
-      "Please provide the name of the receipt or invoice you are looking for.",
+      "To break down your project for launching a new product, let's start with the main phases: [List of project phases]",
   },
   {
-    title: "Find a transaction",
+    title: "What's the best next step for my career growth?",
     content:
-      "Could you please provide more details about the transaction you are looking for?",
+      "To determine the best next step for your career growth, let's review your current position and goals. What's your current role and where do you see yourself in the future?",
   },
   {
-    title: `What's my profit for last year`,
+    title: "Remind me to order protein powder next week",
     content:
-      "Based on the period from Jun 1, 2022 and Jun 1, 2023 your current profit is $18,933.33. In the previous period, your profit was $3,422.33",
+      "I've set a reminder for you to order protein powder next week. Is there a specific day or time you'd like to be reminded?",
   },
   {
-    title: `Set a goal`,
+    title: "Plan a date night for this weekend",
     content:
-      "Based on the period from Jun 1, 2023 and Jun 5, 2024 your revenue is $18,933.33. In the previous period, your profit was $20,933.33.",
+      "Sure, I'd be happy to help plan a date night. What kind of activities do you and your partner enjoy?",
   },
   {
-    title: "Create a report",
+    title: "How can I improve my work-life balance?",
     content:
-      "Could you please specify the type of report you would like to create?",
+      "Improving work-life balance is important. Let's start by assessing your current schedule and priorities. Can you tell me about your typical workday?",
   },
   {
-    title: "Forecast profit",
+    title: "Create a meal plan for the week",
     content:
-      "Based on the last 12 months profit data, the forecasted profit for the next month is approximately $18,933.33. This is an indication of the forecast and should be verified.",
+      "Creating a meal plan is a great way to stay on track with your nutrition goals. Do you have any dietary preferences or restrictions I should consider?",
   },
   {
-    title: "Forecast revenue",
+    title: "Suggest a new hobby to try",
     content:
-      "Based on the last 12 months revenue data, the average monthly revenue is $3,422.33. Therefore, the forecasted revenue for the next month is approximately $18,933.33. This is an indication of the forecast and should be verified.",
+      "Exploring new hobbies can be exciting! To suggest a suitable hobby, could you tell me about your interests and how much free time you have?",
   },
 ];

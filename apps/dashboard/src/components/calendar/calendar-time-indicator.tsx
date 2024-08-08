@@ -1,7 +1,5 @@
-// /app/calendar/components/CurrentTimeIndicator.tsx
 "use client";
 import { useCalendar } from "@/store/calendar-context";
-import { formatForDisplay } from "@/utils/date-utils";
 import { DateTime } from "luxon";
 import { useEffect, useState } from "react";
 
@@ -28,7 +26,7 @@ const CurrentTimeIndicator = () => {
     >
       <div className="w-16 flex-shrink-0 text-right pr-2">
         <span className="text-[10px] text-red-500 font-mono">
-          {formatForDisplay(currentTime.toJSDate(), "h:mm:ss a")}
+          {currentTime.toFormat("h:mm:ss a")}
         </span>
       </div>
       <div className="flex-grow border-t border-red-500 border-dotted" />

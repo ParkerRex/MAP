@@ -1,10 +1,10 @@
-// src/app/health/heartrate.tsx
-
-import { WhoopWorkout } from '@/lib/integrations/whoop/Workout';
-import type { WhoopWorkoutSnapshotIn } from '@/types';
-import { AreaChart, Card } from '@tremor/react';
-import React, { useMemo } from 'react';
-import type { HeartRateData } from '@/types/health';
+"use client";
+import { Charts } from "@/components/charts/charts";
+import { WhoopWorkout } from "@/lib/integrations/whoop/Workout";
+import type { WhoopWorkoutSnapshotIn } from "@/types";
+import type { HeartRateData } from "@/types/health";
+import { Card, CardContent, CardHeader, CardTitle } from "@map/ui/card";
+import React, { useMemo } from "react";
 
 export function HeartRate({
   heartData,
@@ -48,27 +48,32 @@ export function HeartRate({
 
     return dailyAverageHeartRate.map((day) => ({
       name: day.date,
-      'Average Heart Rate': Math.round(day.averageHeartRate),
+      "Average Heart Rate": Math.round(day.averageHeartRate),
     }));
   }, [workoutData]);
 
   return (
-    <Card className="rounded-sm">
-      <div className="font-bold text-xl mb-2">Avg HR During Workout</div>
-      <div className="text-base font-thin mb-8">
-        During workouts in the last 30 days
-      </div>
-      <AreaChart
-        className="h-40"
-        data={chartData}
-        index="name"
-        categories={['Average Heart Rate']}
-        colors={['blue']}
-        valueFormatter={(value) => `${value} bpm`}
-        yAxisWidth={68}
-        showXAxis={false}
-        showLegend={false}
-      />
+    <Card>
+      <CardHeader>
+        <CardTitle>Avg HR During Workout</CardTitle>
+        <p className="text-base font-thin">
+          During workouts in the last 30 days
+        </p>
+      </CardHeader>
+      <CardContent>
+        <Charts
+          type="area"
+          className="h-40"
+          data={chartData}
+          index="name"
+          categories={["Average Heart Rate"]}
+          colors={["blue"]}
+          valueFormatter={(value) => `${value} bpm`}
+          yAxisWidth={68}
+          showXAxis={false}
+          showLegend={false}
+        />
+      </CardContent>
     </Card>
   );
 }

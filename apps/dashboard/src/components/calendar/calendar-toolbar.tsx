@@ -1,13 +1,12 @@
 "use client";
 import { useWeekNavigation } from "@/hooks/use-week-navigation";
 import { useCalendar } from "@/store/calendar-context";
-import { formatForDisplay, safeParseDate } from "@/utils/date-utils";
 import { Button } from "@map/ui/button";
 import { Tooltip, TooltipContent } from "@map/ui/tooltip";
 import { TooltipTrigger } from "@radix-ui/react-tooltip";
+import { format, getWeek } from "date-fns";
 import type { calendar_v3 } from "googleapis";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { useState } from "react";
 import * as React from "react";
 
 interface CalendarToolbarProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -22,19 +21,13 @@ const CalendarToolbar: React.FC<CalendarToolbarProps> = ({
   const { currentWeekStartDate, userTimeZone } = useCalendar();
   const { handleNextWeek, handleCurrentWeek, handlePreviousWeek } =
     useWeekNavigation();
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
-  const currentDate =
-    safeParseDate(currentWeekStartDate)?.setZone(userTimeZone);
+  const currentDate = new Date(currentWeekStartDate);
 
-  if (!currentDate) {
-    return null; // Or some error handling
-  }
-
-  const currentMonth = formatForDisplay(currentDate.toJSDate(), "MMMM");
-  const currentDay = formatForDisplay(currentDate.toJSDate(), "d");
-  const currentYear = formatForDisplay(currentDate.toJSDate(), "yyyy");
-  const currentWeek = `Week ${currentDate.weekNumber}`;
+  const currentMonth = format(currentDate, "MMMM");
+  const currentDay = format(currentDate, "d");
+  const currentYear = format(currentDate, "yyyy");
+  const currentWeek = `Week ${getWeek(currentDate)}`;
 
   return (
     <div

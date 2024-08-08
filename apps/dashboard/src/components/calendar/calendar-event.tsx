@@ -1,6 +1,5 @@
 "use client";
 import { useCalendar } from "@/store/calendar-context";
-import { formatForDisplay, safeParseDate } from "@/utils/date-utils";
 import {
   ContextMenu,
   ContextMenuContent,
@@ -8,9 +7,8 @@ import {
   ContextMenuTrigger,
 } from "@map/ui/context-menu";
 import type { calendar_v3 } from "googleapis";
-import { DateTime, Interval } from "luxon";
-import React, { useMemo } from "react";
-import type { FC } from "react";
+import type React from "react";
+import { useMemo } from "react";
 
 interface CalendarEventProps {
   events: calendar_v3.Schema$Event[];
@@ -20,12 +18,11 @@ interface CalendarEventProps {
 const MINUTES_IN_HOUR = 60;
 const HOUR_HEIGHT = 64;
 
-const CalendarEventComponent: FC<CalendarEventProps> = ({
+const CalendarEventComponent: React.FC<CalendarEventProps> = ({
   events,
   dayIndex,
 }) => {
-  const { setSelectedEvent, calendars, userTimeZone } = useCalendar();
-  const now = DateTime.now().setZone(userTimeZone);
+  const { setSelectedEvent, calendars } = useCalendar();
 
   const handleEventClick = (event: calendar_v3.Schema$Event) => {
     setSelectedEvent(event);
@@ -38,33 +35,29 @@ const CalendarEventComponent: FC<CalendarEventProps> = ({
 
   const sortedEvents = useMemo(() => {
     return events.sort((a, b) => {
-      const startA = safeParseDate(
+      const startA = new Date(
         a.start?.dateTime || a.start?.date || "",
-      )?.setZone(userTimeZone);
-      const startB = safeParseDate(
+      ).getTime();
+      const startB = new Date(
         b.start?.dateTime || b.start?.date || "",
-      )?.setZone(userTimeZone);
-      return (startA?.toMillis() || 0) - (startB?.toMillis() || 0);
+      ).getTime();
+      return startA - startB;
     });
-  }, [events, userTimeZone]);
+  }, [events]);
 
   const calculateEventStyle = (event: calendar_v3.Schema$Event) => {
-    const startDate = safeParseDate(
+    const startDate = new Date(
       event.start?.dateTime || event.start?.date || "",
-    )?.setZone(userTimeZone);
-    const endDate = safeParseDate(
-      event.end?.dateTime || event.end?.date || "",
-    )?.setZone(userTimeZone);
-    if (!startDate || !endDate) return {};
-
-    const dayStart = startDate.startOf("day");
-    const dayEnd = startDate.endOf("day");
+    );
+    const endDate = new Date(event.end?.dateTime || event.end?.date || "");
+    const dayStart = new Date(startDate);
+    dayStart.setHours(0, 0, 0, 0);
 
     const top =
-      (startDate.diff(dayStart, "minutes").minutes / MINUTES_IN_HOUR) *
+      ((startDate.getHours() * 60 + startDate.getMinutes()) / MINUTES_IN_HOUR) *
       HOUR_HEIGHT;
     const height =
-      (endDate.diff(startDate, "minutes").minutes / MINUTES_IN_HOUR) *
+      ((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60)) *
       HOUR_HEIGHT;
 
     return {
@@ -78,10 +71,8 @@ const CalendarEventComponent: FC<CalendarEventProps> = ({
   return (
     <div className="absolute inset-0">
       {sortedEvents.map((event) => {
-        const endDate = safeParseDate(
-          event.end?.dateTime || event.end?.date || "",
-        )?.setZone(userTimeZone);
-        const isPastEvent = endDate ? endDate < now : false;
+        const endDate = new Date(event.end?.dateTime || event.end?.date || "");
+        const isPastEvent = endDate < new Date();
         const calendarColor = getCalendarColor(event.organizer?.email);
         const style = calculateEventStyle(event);
 
@@ -92,7 +83,7 @@ const CalendarEventComponent: FC<CalendarEventProps> = ({
                 className="absolute select-none p-1 rounded-lg border-l-4 overflow-hidden cursor-pointer"
                 style={{
                   ...style,
-                  backgroundColor: `${calendarColor}33`, // Add 33 for 20% opacity
+                  backgroundColor: `${calendarColor}33`,
                   borderLeftColor: calendarColor,
                 }}
                 onClick={() => handleEventClick(event)}
@@ -111,15 +102,8 @@ const CalendarEventComponent: FC<CalendarEventProps> = ({
                     {event.summary}
                   </p>
                   <p className="text-[10px] line-clamp-1 font-mono tracking-tight">
-                    {formatForDisplay(
-                      event.start?.dateTime || event.start?.date,
-                      "HH:mm",
-                    )}
-                    {" - "}
-                    {formatForDisplay(
-                      event.end?.dateTime || event.end?.date,
-                      "HH:mm",
-                    )}
+                    {event.start?.dateTime || event.start?.date} -{" "}
+                    {event.end?.dateTime || event.end?.date}
                   </p>
                 </div>
               </div>

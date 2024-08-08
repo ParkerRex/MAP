@@ -21,6 +21,7 @@ import { useLongPress } from "use-long-press";
 
 const icons = {
   "/": () => <Icons.Overview size={22} />,
+  "/calendar": () => <Icons.Calendar size={22} />,
   "/transactions": () => <Icons.Transactions size={22} />,
   "/invoices": () => <Icons.Invoice size={22} />,
   "/tracker": () => <Icons.Tracker size={22} />,
@@ -32,7 +33,11 @@ const icons = {
 const defaultItems = [
   {
     path: "/",
-    name: "Overview",
+    name: "Home",
+  },
+  {
+    path: "/calendar",
+    name: "Calendar",
   },
   {
     path: "/inbox",
