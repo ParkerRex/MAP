@@ -1,446 +1,173 @@
-import { getAccessValidForDays } from "@map/engine/src/providers/gocardless/utils";
 import { addDays } from "date-fns";
 import type { Client } from "../types";
+import type { Database } from "../types/db";
 
-// TODO: This is where the CRUD operators for GCal get called ( i think ? )
+type Tables = Database["public"]["Tables"];
 
-type CreateBankAccountsPayload = {
-  accounts: {
-    account_id: string;
-    institution_id: string;
-    logo_url: string;
-    name: string;
-    bank_name: string;
-    currency: string;
-    enabled: boolean;
-    type: "depository" | "credit" | "other_asset" | "loan" | "other_liability";
-  }[];
-  balance: number;
-  accessToken?: string;
-  enrollmentId?: string;
-  referenceId?: string;
-  teamId: string;
-  userId: string;
-  provider: "gocardless" | "teller" | "plaid";
-};
-
-export async function createBankAccounts(
+// Calendar Events
+export async function createCalendarEvent(
   supabase: Client,
-  {
-    accounts,
-    accessToken,
-    enrollmentId,
-    referenceId,
-    teamId,
-    userId,
-    provider,
-  }: CreateBankAccountsPayload,
+  data: Partial<Tables["calendar_events"]["Insert"]>,
 ) {
-  // Get first account to create a bank connection
-  const account = accounts?.at(0);
-
-  if (!account) {
-    return;
-  }
-
-  // NOTE: GoCardLess connection expires after 90-180 days
-  const expiresAt =
-    provider === "gocardless"
-      ? addDays(
-          new Date(),
-          getAccessValidForDays({ institutionId: account.institution_id }),
-        ).toDateString()
-      : undefined;
-
-  const bankConnection = await supabase
-    .from("bank_connections")
-    .upsert(
-      {
-        institution_id: account.institution_id,
-        name: account.bank_name,
-        logo_url: account.logo_url,
-        team_id: teamId,
-        provider,
-        access_token: accessToken,
-        enrollment_id: enrollmentId,
-        reference_id: referenceId,
-        expires_at: expiresAt,
-      },
-      {
-        onConflict: "institution_id, team_id",
-      },
-    )
-    .select()
-    .single();
-
-  return supabase
-    .from("bank_accounts")
-    .upsert(
-      accounts.map(
-        (account) => ({
-          account_id: account.account_id,
-          bank_connection_id: bankConnection?.data?.id,
-          team_id: teamId,
-          created_by: userId,
-          name: account.name,
-          currency: account.currency,
-          enabled: account.enabled,
-          type: account.type,
-        }),
-        {
-          onConflict: "account_id",
-        },
-      ),
-    )
-    .select();
+  return supabase.from("calendar_events").insert(data).select().single();
 }
 
-type UpdateBankConnectionData = {
-  id: string;
-  referenceId?: string;
-};
-
-// NOTE: Only GoCardLess needs to be updated
-export async function updateBankConnection(
-  supabase: Client,
-  data: UpdateBankConnectionData,
-) {
-  const { id, referenceId } = data;
-
-  return await supabase
-    .from("bank_connections")
-    .update({
-      expires_at: addDays(
-        new Date(),
-        getAccessValidForDays({ institutionId: id }),
-      ).toDateString(),
-      reference_id: referenceId,
-    })
-    .eq("id", id)
-    .select()
-    .single();
-}
-
-type CreateTransactionsData = {
-  transactions: any[];
-  teamId: string;
-};
-
-export async function createTransactions(
-  supabase: Client,
-  data: CreateTransactionsData,
-) {
-  const { transactions, teamId } = data;
-
-  return supabase.from("transactions").insert(
-    transactions.map((transaction) => ({
-      ...transaction,
-      team_id: teamId,
-    })),
-  );
-}
-
-export async function updateTransaction(
+export async function updateCalendarEvent(
   supabase: Client,
   id: string,
-  data: any,
+  data: Partial<Tables["calendar_events"]["Update"]>,
 ) {
   return supabase
-    .from("transactions")
+    .from("calendar_events")
     .update(data)
     .eq("id", id)
-    .select("id, category, category_slug, team_id, name, status")
-    .single();
-}
-
-export async function updateUser(supabase: Client, data: any) {
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
-
-  if (!session?.user) {
-    return;
-  }
-
-  return supabase
-    .from("users")
-    .update(data)
-    .eq("id", session.user.id)
     .select()
     .single();
 }
 
-export async function deleteUser(supabase: Client) {
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
-
-  if (!session?.user) {
-    return;
-  }
-
-  await Promise.all([
-    supabase.auth.admin.deleteUser(session.user.id),
-    supabase.from("users").delete().eq("id", session.user.id),
-    supabase.auth.signOut(),
-  ]);
-
-  return session.user.id;
-}
-
-export async function deleteBankAccount(supabase: Client, id: string) {
-  return await supabase
-    .from("bank_accounts")
+export async function deleteCalendarEvent(supabase: Client, id: string) {
+  return supabase
+    .from("calendar_events")
     .delete()
     .eq("id", id)
     .select()
     .single();
 }
 
-type UpdateBankAccountParams = {
-  id: string;
-  teamId: string;
-  name: string;
-  type: "depository" | "credit" | "other_asset" | "loan" | "other_liability";
-};
-
-export async function updateBankAccount(
+// Calendars
+export async function createCalendar(
   supabase: Client,
-  params: UpdateBankAccountParams,
+  data: Partial<Tables["calendars"]["Insert"]>,
 ) {
-  const { id, teamId, ...data } = params;
-
-  return await supabase
-    .from("bank_accounts")
-    .update(data)
-    .eq("id", id)
-    .eq("team_id", teamId)
-    .select()
-    .single();
+  return supabase.from("calendars").insert(data).select().single();
 }
 
-type UpdateSimilarTransactionsParams = {
-  id: string;
-  team_id: string;
-};
-
-export async function updateSimilarTransactions(
+export async function updateCalendar(
   supabase: Client,
-  params: UpdateSimilarTransactionsParams,
+  id: string,
+  data: Partial<Tables["calendars"]["Update"]>,
 ) {
-  const { id, team_id } = params;
+  return supabase.from("calendars").update(data).eq("id", id).select().single();
+}
 
-  const transaction = await supabase
-    .from("transactions")
-    .select("name, category_slug")
-    .eq("id", id)
-    .single();
+export async function deleteCalendar(supabase: Client, id: string) {
+  return supabase.from("calendars").delete().eq("id", id).select().single();
+}
 
-  if (!transaction?.data?.category_slug) {
-    return null;
-  }
+// Folders
+export async function createFolder(
+  supabase: Client,
+  data: Partial<Tables["folder"]["Insert"]>,
+) {
+  return supabase.from("folder").insert(data).select().single();
+}
 
+export async function updateFolder(
+  supabase: Client,
+  id: string,
+  data: Partial<Tables["folder"]["Update"]>,
+) {
+  return supabase.from("folder").update(data).eq("id", id).select().single();
+}
+
+export async function deleteFolder(supabase: Client, id: string) {
+  return supabase.from("folder").delete().eq("id", id).select().single();
+}
+
+// Goals
+export async function createGoal(
+  supabase: Client,
+  data: Partial<Tables["goals"]["Insert"]>,
+) {
+  return supabase.from("goals").insert(data).select().single();
+}
+
+export async function updateGoal(
+  supabase: Client,
+  id: string,
+  data: Partial<Tables["goals"]["Update"]>,
+) {
+  return supabase.from("goals").update(data).eq("id", id).select().single();
+}
+
+export async function deleteGoal(supabase: Client, id: string) {
+  return supabase.from("goals").delete().eq("id", id).select().single();
+}
+
+// Notes
+export async function createNote(
+  supabase: Client,
+  data: Partial<Tables["notes"]["Insert"]>,
+) {
+  return supabase.from("notes").insert(data).select().single();
+}
+
+export async function updateNote(
+  supabase: Client,
+  id: string,
+  data: Partial<Tables["notes"]["Update"]>,
+) {
+  return supabase.from("notes").update(data).eq("id", id).select().single();
+}
+
+export async function deleteNote(supabase: Client, id: string) {
+  return supabase.from("notes").delete().eq("id", id).select().single();
+}
+
+// Tasks
+export async function createTask(
+  supabase: Client,
+  data: Partial<Tables["tasks"]["Insert"]>,
+) {
+  return supabase.from("tasks").insert(data).select().single();
+}
+
+export async function updateTask(
+  supabase: Client,
+  id: string,
+  data: Partial<Tables["tasks"]["Update"]>,
+) {
+  return supabase.from("tasks").update(data).eq("id", id).select().single();
+}
+
+export async function deleteTask(supabase: Client, id: string) {
+  return supabase.from("tasks").delete().eq("id", id).select().single();
+}
+
+// Users
+export async function updateUser(
+  supabase: Client,
+  id: string,
+  data: Partial<Tables["users"]["Update"]>,
+) {
+  return supabase.from("users").update(data).eq("id", id).select().single();
+}
+
+export async function deleteUser(supabase: Client, id: string) {
+  return supabase.from("users").delete().eq("id", id).select().single();
+}
+
+// Integrations
+export async function createIntegration(
+  supabase: Client,
+  data: Partial<Tables["integrations"]["Insert"]>,
+) {
+  return supabase.from("integrations").insert(data).select().single();
+}
+
+export async function updateIntegration(
+  supabase: Client,
+  id: string,
+  data: Partial<Tables["integrations"]["Update"]>,
+) {
   return supabase
-    .from("transactions")
-    .update({ category_slug: transaction.data.category_slug })
-    .eq("name", transaction.data.name)
-    .eq("team_id", team_id)
-    .select("id, team_id");
-}
-
-export type Attachment = {
-  type: string;
-  name: string;
-  size: number;
-  path: string;
-  transaction_id: string;
-};
-
-export async function createAttachments(
-  supabase: Client,
-  attachments: Attachment[],
-) {
-  const { data: userData } = await getCurrentUserTeamQuery(supabase);
-
-  const { data } = await supabase
-    .from("transaction_attachments")
-    .insert(
-      attachments.map((attachment) => ({
-        ...attachment,
-        team_id: userData?.team_id,
-      })),
-    )
-    .select();
-
-  return data;
-}
-
-export async function deleteAttachment(supabase: Client, id: string) {
-  const { data } = await supabase
-    .from("transaction_attachments")
-    .delete()
-    .eq("id", id)
-    .select("id, transaction_id, name, team_id")
-    .single();
-
-  return data;
-}
-
-type CreateTeamParams = {
-  name: string;
-};
-
-export async function createTeam(supabase: Client, params: CreateTeamParams) {
-  const { data } = await supabase.rpc("create_team", {
-    name: params.name,
-  });
-
-  return data;
-}
-
-type LeaveTeamParams = {
-  userId: string;
-  teamId: string;
-};
-
-export async function leaveTeam(supabase: Client, params: LeaveTeamParams) {
-  await supabase
-    .from("users")
-    .update({
-      team_id: null,
-    })
-    .eq("id", params.userId)
-    .eq("team_id", params.teamId);
-
-  return supabase
-    .from("users_on_team")
-    .delete()
-    .eq("team_id", params.teamId)
-    .eq("user_id", params.userId)
-    .select()
-    .single();
-}
-
-export async function joinTeamByInviteCode(supabase: Client, code: string) {
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
-
-  if (!session?.user.email) {
-    return;
-  }
-
-  const { data: inviteData } = await getUserInviteQuery(supabase, {
-    code,
-    email: session.user.email,
-  });
-
-  if (inviteData) {
-    // Add user team
-    await supabase.from("users_on_team").insert({
-      user_id: session.user.id,
-      team_id: inviteData?.team_id,
-      role: inviteData.role,
-    });
-
-    // Set current team
-    const { data } = await supabase
-      .from("users")
-      .update({
-        team_id: inviteData?.team_id,
-      })
-      .eq("id", session.user.id)
-      .select()
-      .single();
-
-    // remove invite
-    await supabase.from("user_invites").delete().eq("code", code);
-
-    return data;
-  }
-
-  return null;
-}
-
-type UpdateInboxByIdParams = {
-  id: string;
-  display_name?: string;
-  status?: "deleted";
-  attachment_id?: string;
-  transaction_id?: string;
-  teamId: string;
-};
-
-export async function updateInboxById(
-  supabase: Client,
-  params: UpdateInboxByIdParams,
-) {
-  const { id, teamId, ...data } = params;
-
-  const inbox = await supabase
-    .from("inbox")
+    .from("integrations")
     .update(data)
     .eq("id", id)
     .select()
     .single();
-
-  const { data: inboxData } = inbox;
-
-  if (inboxData && params.transaction_id) {
-    const { data: attachmentData } = await supabase
-      .from("transaction_attachments")
-      .insert({
-        type: inboxData.content_type,
-        path: inboxData.file_path,
-        transaction_id: params.transaction_id,
-        size: inboxData.size,
-        name: inboxData.file_name,
-        team_id: teamId,
-      })
-      .select()
-      .single();
-
-    if (attachmentData) {
-      return supabase
-        .from("inbox")
-        .update({ attachment_id: attachmentData.id })
-        .eq("id", params.id)
-        .select()
-        .single();
-    }
-  } else {
-    if (inboxData?.attachment_id) {
-      return supabase
-        .from("transaction_attachments")
-        .delete()
-        .eq("id", inboxData.attachment_id);
-    }
-  }
-
-  return inbox;
 }
 
-type CreateProjectParams = {
-  name: string;
-  description?: string;
-  estimate?: number;
-  billable?: boolean;
-  rate?: number;
-  currency?: string;
-};
-
-export async function createProject(
-  supabase: Client,
-  params: CreateProjectParams,
-) {
-  const { data: userData } = await getCurrentUserTeamQuery(supabase);
-
-  return supabase
-    .from("tracker_projects")
-    .insert({
-      ...params,
-      team_id: userData?.team_id,
-    })
-    .select()
-    .single();
+export async function deleteIntegration(supabase: Client, id: string) {
+  return supabase.from("integrations").delete().eq("id", id).select().single();
 }
