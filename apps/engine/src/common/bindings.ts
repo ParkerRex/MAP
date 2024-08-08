@@ -1,18 +1,15 @@
+// This file defines the Bindings type, which outlines the structure of various
+// configuration settings and credentials used throughout the application.
+// Each property represents a specific service or credential required for
+// the application's functionality.
+
 export type Bindings = {
-  KV: KVNamespace;
-  STORAGE: R2Bucket;
-  TELLER_CERT: Fetcher;
-  API_SECRET_KEY: string;
-  GOCARDLESS_SECRET_ID: string;
-  GOCARDLESS_SECRET_KEY: string;
-  PLAID_CLIENT_ID: string;
-  PLAID_ENVIRONMENT: string;
-  PLAID_SECRET: string;
-  TYPESENSE_API_KEY: string;
-  TYPESENSE_ENDPOINT_AU: string;
-  TYPESENSE_ENDPOINT_EU: string;
-  TYPESENSE_ENDPOINT_US: string;
-  TYPESENSE_ENDPOINT: string;
-  UPSTASH_REDIS_REST_TOKEN: string;
-  UPSTASH_REDIS_REST_URL: string;
+  KV: KVNamespace; // Key-Value namespace for storing data
+  STORAGE: R2Bucket; // R2 bucket for object storage
+  API_SECRET_KEY: string; // Secret key for API authentication
+  UPSTASH_REDIS_REST_TOKEN: string; // REST token for Upstash Redis
+  UPSTASH_REDIS_REST_URL: string; // REST URL for Upstash Redis
+  GOOGLE_CLIENT_ID: string;
+  GOOGLE_CLIENT_SECRET: string;
+  GOOGLE_REDIRECT_URI: string;
 };

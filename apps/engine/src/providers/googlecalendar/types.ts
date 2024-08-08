@@ -1,83 +1,44 @@
-import type { AccountType } from "@/utils/account";
-import type {
-  AccountsGetResponse,
-  Institution as BaseInstitution,
-  Transaction,
-  TransactionsSyncResponse,
-} from "plaid";
-import type { Balance } from "../types";
+import type { calendar_v3 } from "googleapis";
 
-export type LinkTokenCreateRequest = {
-  userId: string;
-  language?: string;
-  accessToken?: string;
-};
+export interface GetEventsRequest
+  extends calendar_v3.Params$Resource$Events$List {}
+export type GetEventsResponse = calendar_v3.Schema$Events;
 
-export type GetStatusResponse = {
-  page: {
-    id: string;
-    name: string;
-    url: string;
-    time_zone: string;
-    updated_at: string;
-  };
-  status: {
-    indicator: string;
-    description: string;
-  };
-};
+export interface CreateEventRequest
+  extends calendar_v3.Params$Resource$Events$Insert {}
+export interface UpdateEventRequest
+  extends calendar_v3.Params$Resource$Events$Update {}
+export interface DeleteEventRequest
+  extends calendar_v3.Params$Resource$Events$Delete {}
 
-export type GetTransactionsRequest = {
-  accessToken: string;
-  accountId: string;
-  latest?: boolean;
-};
+export interface GetCalendarsRequest
+  extends calendar_v3.Params$Resource$Calendarlist$List {}
+export type GetCalendarsResponse = calendar_v3.Schema$CalendarList;
 
-export type GetAccountsRequest = {
-  accessToken: string;
-  institutionId: string;
-};
+export interface WatchCalendarRequest
+  extends calendar_v3.Params$Resource$Events$Watch {}
+export type WatchCalendarResponse = calendar_v3.Schema$Channel;
 
-export type ItemPublicTokenExchangeRequest = {
-  publicToken: string;
-};
+// Add these new types
+export type AclRequest = calendar_v3.Params$Resource$Acl$Get;
+export type AclResponse = calendar_v3.Schema$AclRule;
 
-export type Institution = {
-  id: string;
-  name: string;
-  logo?: string | null;
-};
+export type CalendarListRequest = calendar_v3.Params$Resource$Calendarlist$Get;
+export type CalendarListResponse = calendar_v3.Schema$CalendarListEntry;
 
-export type TransformInstitution = BaseInstitution;
+export type CalendarRequest = calendar_v3.Params$Resource$Calendars$Get;
+export type CalendarResponse = calendar_v3.Schema$Calendar;
 
-export type AccountWithInstitution = AccountsGetResponse["accounts"][0] & {
-  institution: Institution;
-};
+export type ChannelRequest = calendar_v3.Params$Resource$Channels$Stop;
+export type ChannelResponse = calendar_v3.Schema$Channel;
 
-export type GetAccountsResponse = AccountWithInstitution[];
+export type ColorsResponse = calendar_v3.Schema$Colors;
 
-export type TransformAccount = AccountWithInstitution;
+export type EventRequest = calendar_v3.Params$Resource$Events$Get;
+export type EventResponse = calendar_v3.Schema$Event;
 
-export type TransformAccountBalance =
-  AccountsGetResponse["accounts"][0]["balances"];
+export type FreeBusyRequest = calendar_v3.Params$Resource$Freebusy$Query;
+export type FreeBusyResponse = calendar_v3.Schema$FreeBusyResponse;
 
-export type TransformTransaction = Transaction;
-
-export type GetTransactionsResponse = TransactionsSyncResponse["added"];
-
-export type GetAccountBalanceResponse =
-  AccountsGetResponse["accounts"][0]["balances"];
-
-export interface GetAccountBalanceRequest {
-  accessToken: string;
-  accountId: string;
-}
-
-export type TransformTransactionPayload = {
-  transaction: TransformTransaction;
-  accountType: AccountType;
-};
-
-export type DisconnectAccountRequest = {
-  accessToken: string;
-};
+export type SettingRequest = calendar_v3.Params$Resource$Settings$Get;
+export type SettingResponse = calendar_v3.Schema$Setting;

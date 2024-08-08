@@ -6,7 +6,13 @@ import { logger } from "hono/logger";
 import { secureHeaders } from "hono/secure-headers";
 import { logger as customLogger } from "./utils/logger";
 
-const PUBLIC_PATHS = ["/", "/openapi", "/health"];
+const PUBLIC_PATHS = [
+  "/",
+  "/openapi",
+  "/health",
+  "/auth/google-calendar/auth-url",
+  "/auth/google-calendar/exchange-token",
+];
 
 const authMiddleware = (c: Context, next: Next) => {
   if (PUBLIC_PATHS.includes(c.req.path)) {
