@@ -8,8 +8,11 @@ import {
   loggingMiddleware,
   securityMiddleware,
 } from "./middleware";
+import accountRoutes from "./routes/accounts";
 import authRoutes from "./routes/auth";
-import { googleCalendarRoutes } from "./routes/googlecalendar-routes";
+import healthRoutes from "./routes/health";
+import institutionRoutes from "./routes/institutions";
+import transactionsRoutes from "./routes/transactions";
 
 const app = new OpenAPIHono<{ Bindings: Bindings }>({
   defaultHook: (result, c) => {
@@ -25,8 +28,17 @@ app.use(authMiddleware);
 app.use(securityMiddleware);
 app.use(loggingMiddleware);
 
-app.route("/auth", authRoutes);
-app.route("/google-calendar", googleCalendarRoutes);
+// Enable cache for the following routes
+app.get("/institutions", cacheMiddleware);
+app.get("/accounts", cacheMiddleware);
+app.get("/accounts/balance", cacheMiddleware);
+app.get("/transactions", cacheMiddleware);
+
+app
+  .route("/transactions", transactionsRoutes)
+  .route("/accounts", accountRoutes)
+  .route("/institutions", institutionRoutes)
+  .route("/auth", authRoutes);
 
 app.openAPIRegistry.registerComponent("securitySchemes", "Bearer", {
   type: "http",
@@ -44,8 +56,10 @@ app.doc("/openapi", {
   openapi: "3.1.0",
   info: {
     version: "1.0.0",
-    title: "Google Calendar API",
+    title: "Midday Engine API",
   },
 });
+
+app.route("/health", healthRoutes);
 
 export default app;
