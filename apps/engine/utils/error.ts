@@ -1,3 +1,4 @@
+import { createErrorResponse } from "@/utils/error";
 import { logger } from "./logger";
 
 export class ProviderError extends Error {

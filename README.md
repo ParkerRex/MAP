@@ -1,12 +1,14 @@
 # Turbo Repo Todo List
-### General
+
+## General
+
 - [x] Create package.json for each package/app
 - [ ] Add env vars and set up plain for customer support
-
-- [ ] Setup user signup 
+- [ ] Setup user signup
 - [ ] /setup component form
 
 ### API Setup
+
 - [ ] Emails
   - [ ] Swap out the actual templates
     - [ ] Waitlist
@@ -18,37 +20,38 @@
 - [ ] Set up Resend for email functionality
 - [ ] Implement email loops
 - [ ] Configure Upstash setup
-- [ ] Add back my custom scripts for resetting the db 
+- [ ] Add back my custom scripts for resetting the db
 - [ ] Set up Job for google calendar fetch and ongoing every few minutes
-- 
-#### Log
-- [x] Merge pull request #208 from midday-ai/feature/inbox-ocr-provider
 
+#### Log
+
+- [x] Merge pull request #208 from midday-ai/feature/inbox-ocr-provider
 
 ## Omitting, but might come back to
 
 - [ ] Add documents package that processes medicals and other documents
 
+## Deployment Todos
 
-
-## Deployment Todos 
 - [ ] The actual hooks in GitHub
-- [ ] Linking environment variables in a smart way 
+- [ ] Linking environment variables in a smart way
 - [ ] Events
   - [ ] Adding instrumentation for the calendar and the server actions!
 
 ### Getting Around
+
 #### For db
+
 1. Make your sql changes in a new migration (`src/apps/api/migrations/`)
-2. Reset your local DB 
+2. Reset your local DB
    1. Navigate to `src/apps/api`
    2. Run `supabase db reset`
 3. Test them locally
-4. Gen types --local 
+4. Gen types --local
 5. push your migration to prod `supabase db push --linked`
 
-
 ### How AI Assistant Works
+
 1. Assistant Component (`dashboard/src/components/assistant/index.tsx`):
 This is the main component that handles the chat interface. It manages the AI state and UI state, and renders the chat messages.
 2. AI Action (`dashboard/src/actions/ai/chat/tools/burn-rate.tsx`):
@@ -72,9 +75,8 @@ This file contains utility functions, including getUIComponentFromMessage which 
         F --> A
 ```
 
+### Structure Explanation
 
-
-### Structure Explanation:
 1. CRUD Operations: You'll define CRUD operations for your calendar in a file similar to mutations/index.ts. These operations will interact with your database.
 2. Google Calendar Provider: Create a google-calendar-provider.ts file (similar to plaid-provider.ts) that will handle the communication with Google Calendar API.
 3. Google Calendar API: Create a google-calendar-api.ts file (similar to plaid-api.ts) that will contain the low-level API calls to Google Calendar.
@@ -83,6 +85,7 @@ This file contains utility functions, including getUIComponentFromMessage which 
 6. Types: Define your types in a separate file, e.g., types/calendar.ts.
 
 `mutations/index.ts`
+
 ``` typescript
 import { getCurrentUserTeamQuery } from "../queries";
 import type { Client } from "../types";
@@ -126,7 +129,6 @@ export async function deleteCalendarEvent(supabase: Client, id: string) {
     .single();
 }
 ```
-
 
 `google-calendar-provider.ts`
 
@@ -186,7 +188,6 @@ export class GoogleCalendarProvider implements Provider {
   }
 }
 ```
-
 
 `engine/src/providers/GCal/google-calendar-api.ts`
 
@@ -268,4 +269,3 @@ export class GoogleCalendarApi {
   }
 }
 ```
-
