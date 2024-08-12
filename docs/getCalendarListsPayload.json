@@ -1,0 +1,11 @@
+{
+  "queries": [
+    {
+      "provider": "google",
+      "accountId": "e3c37981-7f35-42e8-bb4e-3d740cb62e51",
+      "metadata": {
+        "caller": "initialization"
+      }
+    }
+  ]
+}

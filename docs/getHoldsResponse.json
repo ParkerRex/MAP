@@ -1,0 +1,25 @@
+{
+  "holds": [
+    {
+      "id": "c636bb38-efc0-4e97-90f7-d716fa47e913",
+      "createdAt": "2024-07-12T18:34:54.000Z",
+      "shortId": "63dsa4g8i",
+      "status": "active",
+      "userPrimaryTimeZone": "America/Los_Angeles",
+      "timeZone": "America/Los_Angeles",
+      "duration": 30,
+      "timeRanges": [
+        {
+          "id": "3dd3716ab6454c898240171b6a322858",
+          "startDate": "2024-07-10T08:15:00-07:00",
+          "endDate": "2024-07-10T08:45:00-07:00"
+        }
+      ],
+      "title": "Meeting with Parker Rex",
+      "conferencingProviderName": "googleMeet",
+      "conferencingAccountId": null,
+      "googleAccountId": "e3c37981-7f35-42e8-bb4e-3d740cb62e51",
+      "googleCalendarId": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com"
+    }
+  ]
+}

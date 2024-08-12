@@ -1,0 +1,216 @@
+{
+  "calendar": [
+    {
+      "id": 1,
+      "kind": "calendar",
+      "background": "#ac725e",
+      "foreground": "#1d1d1d"
+    },
+    {
+      "id": 2,
+      "kind": "calendar",
+      "background": "#d06b64",
+      "foreground": "#1d1d1d"
+    },
+    {
+      "id": 3,
+      "kind": "calendar",
+      "background": "#f83a22",
+      "foreground": "#1d1d1d"
+    },
+    {
+      "id": 4,
+      "kind": "calendar",
+      "background": "#fa573c",
+      "foreground": "#1d1d1d"
+    },
+    {
+      "id": 5,
+      "kind": "calendar",
+      "background": "#ff7537",
+      "foreground": "#1d1d1d"
+    },
+    {
+      "id": 6,
+      "kind": "calendar",
+      "background": "#ffad46",
+      "foreground": "#1d1d1d"
+    },
+    {
+      "id": 7,
+      "kind": "calendar",
+      "background": "#42d692",
+      "foreground": "#1d1d1d"
+    },
+    {
+      "id": 8,
+      "kind": "calendar",
+      "background": "#16a765",
+      "foreground": "#1d1d1d"
+    },
+    {
+      "id": 9,
+      "kind": "calendar",
+      "background": "#7bd148",
+      "foreground": "#1d1d1d"
+    },
+    {
+      "id": 10,
+      "kind": "calendar",
+      "background": "#b3dc6c",
+      "foreground": "#1d1d1d"
+    },
+    {
+      "id": 11,
+      "kind": "calendar",
+      "background": "#fbe983",
+      "foreground": "#1d1d1d"
+    },
+    {
+      "id": 12,
+      "kind": "calendar",
+      "background": "#fad165",
+      "foreground": "#1d1d1d"
+    },
+    {
+      "id": 13,
+      "kind": "calendar",
+      "background": "#92e1c0",
+      "foreground": "#1d1d1d"
+    },
+    {
+      "id": 14,
+      "kind": "calendar",
+      "background": "#9fe1e7",
+      "foreground": "#1d1d1d"
+    },
+    {
+      "id": 15,
+      "kind": "calendar",
+      "background": "#9fc6e7",
+      "foreground": "#1d1d1d"
+    },
+    {
+      "id": 16,
+      "kind": "calendar",
+      "background": "#4986e7",
+      "foreground": "#1d1d1d"
+    },
+    {
+      "id": 17,
+      "kind": "calendar",
+      "background": "#9a9cff",
+      "foreground": "#1d1d1d"
+    },
+    {
+      "id": 18,
+      "kind": "calendar",
+      "background": "#b99aff",
+      "foreground": "#1d1d1d"
+    },
+    {
+      "id": 19,
+      "kind": "calendar",
+      "background": "#c2c2c2",
+      "foreground": "#1d1d1d"
+    },
+    {
+      "id": 20,
+      "kind": "calendar",
+      "background": "#cabdbf",
+      "foreground": "#1d1d1d"
+    },
+    {
+      "id": 21,
+      "kind": "calendar",
+      "background": "#cca6ac",
+      "foreground": "#1d1d1d"
+    },
+    {
+      "id": 22,
+      "kind": "calendar",
+      "background": "#f691b2",
+      "foreground": "#1d1d1d"
+    },
+    {
+      "id": 23,
+      "kind": "calendar",
+      "background": "#cd74e6",
+      "foreground": "#1d1d1d"
+    },
+    {
+      "id": 24,
+      "kind": "calendar",
+      "background": "#a47ae2",
+      "foreground": "#1d1d1d"
+    }
+  ],
+  "event": [
+    {
+      "id": 1,
+      "kind": "event",
+      "background": "#a4bdfc",
+      "foreground": "#1d1d1d"
+    },
+    {
+      "id": 2,
+      "kind": "event",
+      "background": "#7ae7bf",
+      "foreground": "#1d1d1d"
+    },
+    {
+      "id": 3,
+      "kind": "event",
+      "background": "#dbadff",
+      "foreground": "#1d1d1d"
+    },
+    {
+      "id": 4,
+      "kind": "event",
+      "background": "#ff887c",
+      "foreground": "#1d1d1d"
+    },
+    {
+      "id": 5,
+      "kind": "event",
+      "background": "#fbd75b",
+      "foreground": "#1d1d1d"
+    },
+    {
+      "id": 6,
+      "kind": "event",
+      "background": "#ffb878",
+      "foreground": "#1d1d1d"
+    },
+    {
+      "id": 7,
+      "kind": "event",
+      "background": "#46d6db",
+      "foreground": "#1d1d1d"
+    },
+    {
+      "id": 8,
+      "kind": "event",
+      "background": "#e1e1e1",
+      "foreground": "#1d1d1d"
+    },
+    {
+      "id": 9,
+      "kind": "event",
+      "background": "#5484ed",
+      "foreground": "#1d1d1d"
+    },
+    {
+      "id": 10,
+      "kind": "event",
+      "background": "#51b749",
+      "foreground": "#1d1d1d"
+    },
+    {
+      "id": 11,
+      "kind": "event",
+      "background": "#dc2127",
+      "foreground": "#1d1d1d"
+    }
+  ]
+}

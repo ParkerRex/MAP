@@ -1,0 +1,53 @@
+{
+  "resourceName": "people/c4399291792014292119",
+  "etag": "%EgoBAgMJCy43PT4/GgQBAgUHIgxBTURmU0VveWlsYz0=",
+  "names": [
+    {
+      "metadata": {
+        "primary": true,
+        "source": {
+          "type": "CONTACT",
+          "id": "3d0d6c938e4db497"
+        },
+        "sourcePrimary": true
+      },
+      "displayName": "Skye Gamble",
+      "familyName": "Gamble",
+      "givenName": "Skye",
+      "displayNameLastFirst": "Gamble, Skye",
+      "unstructuredName": "Skye Gamble"
+    }
+  ],
+  "photos": [
+    {
+      "metadata": {
+        "primary": true,
+        "source": {
+          "id": "3d0d6c938e4db497",
+          "type": "CONTACT"
+        }
+      },
+      "url": "https://lh3.googleusercontent.com/cm/AGPWSu9CaO3qFdgbg-LGFM2kopRLFfSjiGkm-ru-K1NiURVCLMKGM08hzl5h8nrkt886ILoUdQ=s100",
+      "default": true
+    }
+  ],
+  "emailAddresses": [
+    {
+      "metadata": {
+        "primary": true,
+        "source": {
+          "type": "CONTACT",
+          "id": "3d0d6c938e4db497"
+        }
+      },
+      "value": "skye@viral-growth.xyz",
+      "type": "work",
+      "formattedType": "Work"
+    }
+  ],
+  "type": "default",
+  "accountId": "e3c37981-7f35-42e8-bb4e-3d740cb62e51",
+  "id": "people/c4399291792014292119",
+  "email": "skye@viral-growth.xyz",
+  "displayName": "Skye Gamble"
+}

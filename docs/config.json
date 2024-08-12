@@ -1,0 +1,11 @@
+{
+  "minimumWebVersion": {
+    "timestamp": 1708724072,
+    "required": true
+  },
+  "minimumElectronVersion": {
+    "version": "1.116.0"
+  },
+  "incrementalSyncInterval": 30,
+  "maintenanceRetryInterval": 0.5
+}

@@ -1,0 +1,251 @@
+[
+  {
+    "accountId": "e3c37981-7f35-42e8-bb4e-3d740cb62e51",
+    "calendars": [
+      {
+        "kind": "calendar#calendarListEntry",
+        "etag": "\"1716822581527000\"",
+        "id": "me@parkerrex.com",
+        "summary": "Parkerrex.com",
+        "timeZone": "America/Los_Angeles",
+        "summaryOverride": "me@parkerrex.com",
+        "colorId": "6",
+        "backgroundColor": "#ffad46",
+        "foregroundColor": "#000000",
+        "accessRole": "reader",
+        "defaultReminders": [],
+        "conferenceProperties": {
+          "allowedConferenceSolutionTypes": ["hangoutsMeet"]
+        },
+        "accountId": "e3c37981-7f35-42e8-bb4e-3d740cb62e51",
+        "provider": "google"
+      },
+      {
+        "kind": "calendar#calendarListEntry",
+        "etag": "\"1718689691943000\"",
+        "id": "en.usa.official#holiday@group.v.calendar.google.com",
+        "summary": "Holidays in United States",
+        "description": "Holidays in United States",
+        "timeZone": "America/New_York",
+        "summaryOverride": "Holidays in United States",
+        "colorId": "20",
+        "backgroundColor": "#cabdbf",
+        "foregroundColor": "#000000",
+        "accessRole": "reader",
+        "defaultReminders": [],
+        "conferenceProperties": {
+          "allowedConferenceSolutionTypes": ["hangoutsMeet"]
+        },
+        "accountId": "e3c37981-7f35-42e8-bb4e-3d740cb62e51",
+        "provider": "google"
+      },
+      {
+        "kind": "calendar#calendarListEntry",
+        "etag": "\"1720306097492000\"",
+        "id": "c_g7tjfdkok9me8t3iap4rq5aac8@group.calendar.google.com",
+        "summary": "Founder University - New",
+        "timeZone": "America/Los_Angeles",
+        "colorId": "7",
+        "backgroundColor": "#42d692",
+        "foregroundColor": "#000000",
+        "accessRole": "reader",
+        "defaultReminders": [],
+        "conferenceProperties": {
+          "allowedConferenceSolutionTypes": ["hangoutsMeet"]
+        },
+        "accountId": "e3c37981-7f35-42e8-bb4e-3d740cb62e51",
+        "provider": "google"
+      },
+      {
+        "kind": "calendar#calendarListEntry",
+        "etag": "\"1721244196171000\"",
+        "id": "c_1a8dab0d7e831621c65f32a8b144e393aba637e03b62125ce99f5a789d70739d@group.calendar.google.com",
+        "summary": "😍 B&P",
+        "timeZone": "America/New_York",
+        "colorId": "7",
+        "backgroundColor": "#42d692",
+        "foregroundColor": "#000000",
+        "accessRole": "owner",
+        "defaultReminders": [],
+        "conferenceProperties": {
+          "allowedConferenceSolutionTypes": ["hangoutsMeet"]
+        },
+        "accountId": "e3c37981-7f35-42e8-bb4e-3d740cb62e51",
+        "provider": "google"
+      },
+      {
+        "kind": "calendar#calendarListEntry",
+        "etag": "\"1721244200905000\"",
+        "id": "c_8a340a8b9dd2cb79142595af17bc4094847352eabcfdfa444fb25cb6a7a1de70@group.calendar.google.com",
+        "summary": "Workouts",
+        "description": "Workout data from Whoop",
+        "timeZone": "UTC",
+        "colorId": "16",
+        "backgroundColor": "#4986e7",
+        "foregroundColor": "#000000",
+        "accessRole": "owner",
+        "defaultReminders": [],
+        "conferenceProperties": {
+          "allowedConferenceSolutionTypes": ["hangoutsMeet"]
+        },
+        "accountId": "e3c37981-7f35-42e8-bb4e-3d740cb62e51",
+        "provider": "google"
+      },
+      {
+        "kind": "calendar#calendarListEntry",
+        "etag": "\"1722531971046000\"",
+        "id": "c_27f3b5818a7b8459e9f20e413c634af9b3d2c2832d74adfe2b0ca04e925a2a80@group.calendar.google.com",
+        "summary": "Food Windows",
+        "timeZone": "America/Los_Angeles",
+        "colorId": "18",
+        "backgroundColor": "#b99aff",
+        "foregroundColor": "#000000",
+        "accessRole": "owner",
+        "defaultReminders": [],
+        "conferenceProperties": {
+          "allowedConferenceSolutionTypes": ["hangoutsMeet"]
+        },
+        "accountId": "e3c37981-7f35-42e8-bb4e-3d740cb62e51",
+        "provider": "google"
+      },
+      {
+        "kind": "calendar#calendarListEntry",
+        "etag": "\"1722531971585000\"",
+        "id": "c_a35a475f3017e3715e656cd80d3ed8777a5695763b4c23a404273df723498af6@group.calendar.google.com",
+        "summary": "Events",
+        "timeZone": "America/Los_Angeles",
+        "colorId": "12",
+        "backgroundColor": "#fad165",
+        "foregroundColor": "#000000",
+        "accessRole": "owner",
+        "defaultReminders": [],
+        "conferenceProperties": {
+          "allowedConferenceSolutionTypes": ["hangoutsMeet"]
+        },
+        "accountId": "e3c37981-7f35-42e8-bb4e-3d740cb62e51",
+        "provider": "google"
+      },
+      {
+        "kind": "calendar#calendarListEntry",
+        "etag": "\"1722531988160000\"",
+        "id": "parker@mapthemap.com",
+        "summary": "Calls",
+        "description": "Work Calendar\n",
+        "timeZone": "America/New_York",
+        "colorId": "7",
+        "backgroundColor": "#5ecc89",
+        "foregroundColor": "#ffffff",
+        "selected": true,
+        "accessRole": "owner",
+        "defaultReminders": [
+          {
+            "method": "popup",
+            "minutes": 10
+          }
+        ],
+        "notificationSettings": {
+          "notifications": [
+            {
+              "type": "eventCreation",
+              "method": "email"
+            },
+            {
+              "type": "eventChange",
+              "method": "email"
+            },
+            {
+              "type": "eventCancellation",
+              "method": "email"
+            },
+            {
+              "type": "eventResponse",
+              "method": "email"
+            }
+          ]
+        },
+        "primary": true,
+        "conferenceProperties": {
+          "allowedConferenceSolutionTypes": ["hangoutsMeet"]
+        },
+        "accountId": "e3c37981-7f35-42e8-bb4e-3d740cb62e51",
+        "provider": "google",
+        "hidden": false
+      },
+      {
+        "kind": "calendar#calendarListEntry",
+        "etag": "\"1722532109958000\"",
+        "id": "c_955578c1b0190f1fa19f4752be1473c8037e427a536ec8831aa35d06bf3cef3a@group.calendar.google.com",
+        "summary": "Sleep",
+        "description": "Sleep data from Whoop",
+        "timeZone": "UTC",
+        "colorId": "4",
+        "backgroundColor": "#fa573c",
+        "foregroundColor": "#000000",
+        "selected": true,
+        "accessRole": "owner",
+        "defaultReminders": [],
+        "conferenceProperties": {
+          "allowedConferenceSolutionTypes": ["hangoutsMeet"]
+        },
+        "accountId": "e3c37981-7f35-42e8-bb4e-3d740cb62e51",
+        "provider": "google"
+      },
+      {
+        "kind": "calendar#calendarListEntry",
+        "etag": "\"1722562330233000\"",
+        "id": "c_da9f0ddfb6bf2687389c78034e6500cd67b28d7c5dd7494322836cf820ca14d8@group.calendar.google.com",
+        "summary": "Ryan Serhant",
+        "timeZone": "America/Los_Angeles",
+        "colorId": "3",
+        "backgroundColor": "#f83a22",
+        "foregroundColor": "#000000",
+        "accessRole": "owner",
+        "defaultReminders": [],
+        "conferenceProperties": {
+          "allowedConferenceSolutionTypes": ["hangoutsMeet"]
+        },
+        "accountId": "e3c37981-7f35-42e8-bb4e-3d740cb62e51",
+        "provider": "google"
+      },
+      {
+        "kind": "calendar#calendarListEntry",
+        "etag": "\"1723045281914000\"",
+        "id": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "summary": "Work Blocks",
+        "timeZone": "America/New_York",
+        "colorId": "9",
+        "backgroundColor": "#7bd148",
+        "foregroundColor": "#000000",
+        "selected": true,
+        "accessRole": "owner",
+        "defaultReminders": [],
+        "conferenceProperties": {
+          "allowedConferenceSolutionTypes": ["hangoutsMeet"]
+        },
+        "accountId": "e3c37981-7f35-42e8-bb4e-3d740cb62e51",
+        "provider": "google"
+      }
+    ],
+    "syncToken": "CIjU-s-o7ocDEhRwYXJrZXJAbWFwdGhlbWFwLmNvbQ=="
+  },
+  {
+    "accountId": "06ddc898-5a40-48f9-b5a3-eaec732f859e",
+    "calendars": [
+      {
+        "provider": "notion",
+        "kind": "calendar#timeCollectionView",
+        "id": "274d64bf-347e-4ad1-a16d-6d341a5f4782",
+        "accountId": "06ddc898-5a40-48f9-b5a3-eaec732f859e",
+        "accessRole": "writer",
+        "defaultReminders": [],
+        "etag": "",
+        "summary": "Next Actions",
+        "subtitle": "Timeline",
+        "notionViewType": "timeline",
+        "notionUrl": "https://www.notion.so/seed-hill-666/990e845a04b14cf589cee38fe171de6d",
+        "notionPath": ["Project Gotham"],
+        "notionParentId": "990e845a-04b1-4cf5-89ce-e38fe171de6d"
+      }
+    ]
+  }
+]

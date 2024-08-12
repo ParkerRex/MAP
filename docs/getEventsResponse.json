@@ -1,0 +1,45 @@
+[
+  {
+    "accountId": "e3c37981-7f35-42e8-bb4e-3d740cb62e51",
+    "calendarId": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+    "events": [
+      {
+        "kind": "calendar#event",
+        "etag": "\"3446942873882000\"",
+        "id": "1f3b7098d6194c7ea80eb1f9416dd161",
+        "status": "confirmed",
+        "htmlLink": "https://www.google.com/calendar/event?eid=MWYzYjcwOThkNjE5NGM3ZWE4MGViMWY5NDE2ZGQxNjEgY19iODZmMTdkM2MwMjc3ZjcxNzVlMWE3ODM1ZmI5N2Y5Yzc4NTVlMjIyYzM0NmI3YjAwY2E0ODk5MTNkNzYyMjE1QGc",
+        "created": "2024-08-12T00:00:41.000Z",
+        "updated": "2024-08-12T14:03:56.941Z",
+        "summary": "test",
+        "creator": {
+          "email": "parker@mapthemap.com"
+        },
+        "organizer": {
+          "email": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+          "displayName": "Work Blocks",
+          "self": true
+        },
+        "start": {
+          "dateTime": "2024-08-12T10:45:00-04:00",
+          "timeZone": "America/New_York"
+        },
+        "end": {
+          "dateTime": "2024-08-12T11:30:00-04:00",
+          "timeZone": "America/New_York"
+        },
+        "iCalUID": "1f3b7098d6194c7ea80eb1f9416dd161@google.com",
+        "sequence": 0,
+        "guestsCanModify": true,
+        "reminders": {
+          "useDefault": true
+        },
+        "eventType": "default",
+        "accountId": "e3c37981-7f35-42e8-bb4e-3d740cb62e51",
+        "calendarId": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+        "provider": "google"
+      }
+    ],
+    "syncToken": "CMiNnrbP74cDEMiNnrbP74cDGAUg5of4ugIo5of4ugI="
+  }
+]

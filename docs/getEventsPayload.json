@@ -1,0 +1,14 @@
+{
+  "queries": [
+    {
+      "provider": "google",
+      "accountId": "e3c37981-7f35-42e8-bb4e-3d740cb62e51",
+      "calendarId": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+      "metadata": {
+        "caller": "websocket",
+        "websocketId": "e0d10488-fe10-4247-b5c9-eb017659bb5f"
+      },
+      "syncToken": "CICGu5TP74cDEICGu5TP74cDGAUg5of4ugIo5of4ugI="
+    }
+  ]
+}

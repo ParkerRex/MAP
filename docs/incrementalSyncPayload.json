@@ -1,0 +1,52 @@
+{
+  "metadata": {
+    "caller": "onFocus"
+  },
+  "syncTokens": [
+    {
+      "accountId": "e3c37981-7f35-42e8-bb4e-3d740cb62e51",
+      "resourceId": "me@parkerrex.com",
+      "token": "CNj-j_-b7IcDENj-j_-b7IcDGAEg5of4ugIo5of4ugI="
+    },
+    {
+      "accountId": "e3c37981-7f35-42e8-bb4e-3d740cb62e51",
+      "resourceId": "en.usa.official#holiday@group.v.calendar.google.com",
+      "token": "CKjQvPKP74cDEKjQvPKP74cDGAEg5of4ugIo5of4ugI="
+    },
+    {
+      "accountId": "e3c37981-7f35-42e8-bb4e-3d740cb62e51",
+      "resourceId": "c_g7tjfdkok9me8t3iap4rq5aac8@group.calendar.google.com",
+      "token": "CKC4lbLd4ocDEKC4lbLd4ocDGAEg5of4ugIo5of4ugI="
+    },
+    {
+      "accountId": "e3c37981-7f35-42e8-bb4e-3d740cb62e51",
+      "resourceId": "c_1a8dab0d7e831621c65f32a8b144e393aba637e03b62125ce99f5a789d70739d@group.calendar.google.com",
+      "token": "COC7wcmq7ocDEOC7wcmq7ocDGAUg5of4ugIo5of4ugI="
+    },
+    {
+      "accountId": "e3c37981-7f35-42e8-bb4e-3d740cb62e51",
+      "resourceId": "c_8a340a8b9dd2cb79142595af17bc4094847352eabcfdfa444fb25cb6a7a1de70@group.calendar.google.com",
+      "token": "CPjc1czBuIcDEPjc1czBuIcDGAUg5of4ugIo5of4ugI="
+    },
+    {
+      "accountId": "e3c37981-7f35-42e8-bb4e-3d740cb62e51",
+      "resourceId": "c_a35a475f3017e3715e656cd80d3ed8777a5695763b4c23a404273df723498af6@group.calendar.google.com",
+      "token": "CMCyu4-7sYcDEMCyu4-7sYcDGAUg5of4ugIo5of4ugI="
+    },
+    {
+      "accountId": "e3c37981-7f35-42e8-bb4e-3d740cb62e51",
+      "resourceId": "parker@mapthemap.com",
+      "token": "CIjU-s-o7ocDEIjU-s-o7ocDGAUg5of4ugIo5of4ugI="
+    },
+    {
+      "accountId": "e3c37981-7f35-42e8-bb4e-3d740cb62e51",
+      "resourceId": "c_955578c1b0190f1fa19f4752be1473c8037e427a536ec8831aa35d06bf3cef3a@group.calendar.google.com",
+      "token": "CIjGo_7TrocDEIjGo_7TrocDGAUg5of4ugIo5of4ugI="
+    },
+    {
+      "accountId": "e3c37981-7f35-42e8-bb4e-3d740cb62e51",
+      "resourceId": "c_b86f17d3c0277f7175e1a7835fb97f9c7855e222c346b7b00ca489913d762215@group.calendar.google.com",
+      "token": "CMiNnrbP74cDEMiNnrbP74cDGAUg5of4ugIo5of4ugI="
+    }
+  ]
+}

@@ -4,9 +4,11 @@ import ContextPanel from "@/components/calendar/calendar-context-panel";
 import CalendarGrid from "@/components/calendar/calendar-grid";
 import CalendarMenu from "@/components/calendar/calendar-menu";
 import CalendarToolbar from "@/components/calendar/calendar-toolbar";
+import { useWebSocket } from "@/hooks/use-web-socket";
 import { CalendarProvider, useCalendar } from "@/store/calendar-context";
 
 export default function CalendarPage() {
+  const { sendMessage } = useWebSocket();
   return (
     <CalendarProvider>
       <div className="flex h-screen w-screen overflow-hidden">

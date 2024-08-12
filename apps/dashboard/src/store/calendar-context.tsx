@@ -5,7 +5,13 @@ import type {
 } from "@/types/calendar";
 import type { CalendarContextType } from "@/types/calendar";
 
-import { createContext, useContext, useEffect, useState } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 
 export const CalendarContext = createContext<CalendarContextType | undefined>(
   undefined,
@@ -40,6 +46,22 @@ export const CalendarProvider: React.FC<{ children: React.ReactNode }> = ({
     // TODO: Implement server action: deleteCalendarEvent
   };
 
+  const syncEvents = useCallback((events: ExtendedEvent[]) => {
+    setEvents((prevEvents) => {
+      const eventMap = new Map(prevEvents.map((event) => [event.id, event]));
+
+      events.forEach((event) => {
+        if (event.status === "cancelled") {
+          eventMap.delete(event.id);
+        } else {
+          eventMap.set(event.id, event);
+        }
+      });
+
+      return Array.from(eventMap.values());
+    });
+  }, []);
+
   const contextValue: CalendarContextType = {
     calendars,
     events,
@@ -64,6 +86,7 @@ export const CalendarProvider: React.FC<{ children: React.ReactNode }> = ({
     updateEvent,
     deleteEvent,
     userTimeZone,
+    syncEvents,
   };
 
   return (

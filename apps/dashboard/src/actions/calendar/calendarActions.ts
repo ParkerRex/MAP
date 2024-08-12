@@ -15,17 +15,6 @@ import {
   safeToISOString,
 } from "../../app/calendar/utils/dateUtils";
 
-const getCalendarClient = async (userId: string) => {
-  const authManager = new AuthManager();
-  const accessToken = await authManager.getAccessToken("GOOGLE", userId);
-  return new CalendarClient(accessToken || "", "UTC", userId);
-};
-
-type CalendarsQueryResult = {
-  calendars: calendar_v3.Schema$CalendarListEntry[];
-  primaryCalendarId: string | null;
-};
-
 export const fetchCalendars = async (
   userId: string,
 ): Promise<calendar_v3.Schema$CalendarListEntry[]> => {

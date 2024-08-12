@@ -1,0 +1,70 @@
+{
+  "id": "e8b86b66-5282-40a7-94ff-ce5dc0d5ee4b",
+  "createdAt": "2024-01-18T13:05:17.297Z",
+  "status": "active",
+  "email": "parker@mapapp.pro",
+  "username": "parkerrex",
+  "displayName": "Parker Rex",
+  "givenName": "Parker",
+  "familyName": "Rex",
+  "locale": "en",
+  "profilePhotoURL": "https://lh3.googleusercontent.com/a/ACg8ocLb7THH96HBrGWKbTzT9oQ8KtAs7DDipMSMMyt4NgbcQ8o=s96-c",
+  "accounts": [
+    {
+      "id": "e3c37981-7f35-42e8-bb4e-3d740cb62e51",
+      "createdAt": "2024-01-18T13:05:17.304Z",
+      "primary": true,
+      "email": "parker@mapthemap.com",
+      "displayName": "Parker Rex",
+      "givenName": "Parker",
+      "familyName": "Rex",
+      "profilePhotoURL": "https://lh3.googleusercontent.com/a/ACg8ocJ3fHmxV0lV9cKnJdmYYm7BKbtrGlNYIWCNI1aWPsisSUlRCwe8=s96-c",
+      "providerName": "google",
+      "providerUserId": "116984704759707539058",
+      "hostedDomain": "mapthemap.com",
+      "scopes": [
+        "https://www.googleapis.com/auth/userinfo.email",
+        "https://www.googleapis.com/auth/calendar.settings.readonly",
+        "https://www.googleapis.com/auth/contacts.other.readonly",
+        "https://www.googleapis.com/auth/calendar.events",
+        "https://www.googleapis.com/auth/userinfo.profile",
+        "https://www.googleapis.com/auth/directory.readonly",
+        "https://www.googleapis.com/auth/contacts",
+        "openid",
+        "https://www.googleapis.com/auth/admin.directory.resource.calendar.readonly",
+        "https://www.googleapis.com/auth/calendar"
+      ]
+    },
+    {
+      "id": "d47d42e9-136e-4804-ab37-64bd3206a1ed",
+      "createdAt": "2024-01-18T13:06:01.092Z",
+      "primary": false,
+      "email": "parker@mapapp.pro",
+      "displayName": "Parker Rex",
+      "givenName": "Parker",
+      "familyName": "Rex",
+      "profilePhotoURL": "https://us06web.zoom.us/p/v2/6db015909903f2e22ab462f09a6912dc34a5e96df1eb9de310e5a7fb05f0f0d7/aa41e49b-92a3-483a-befa-1c9629c09583-4408",
+      "providerName": "zoom",
+      "providerUserId": "YPfz0fpmTwybqSau3sdFOg",
+      "info": {
+        "zoomClientId": "iLWXYqgIS_2ILDXQbhfRfw"
+      },
+      "scopes": ["meeting:write", "user:read"]
+    },
+    {
+      "id": "06ddc898-5a40-48f9-b5a3-eaec732f859e",
+      "createdAt": "2024-04-28T20:00:39.398Z",
+      "primary": false,
+      "email": "parker@mapthemap.com",
+      "displayName": "map",
+      "providerName": "notion",
+      "providerUserId": "8d0ce9c1-8e82-4446-b0bd-a0bafe1db8a3",
+      "info": {
+        "notionUserId": "ed3b6377-6e8f-4ab0-9422-ac9a746ea4bc",
+        "notionWorkspaceId": "5c5ee781-9c71-44aa-9af2-59a32f639b12",
+        "notionUserDisplayName": "Parker Rex"
+      },
+      "scopes": [""]
+    }
+  ]
+}
