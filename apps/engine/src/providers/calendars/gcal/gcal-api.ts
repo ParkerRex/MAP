@@ -21,74 +21,8 @@ export class GoogleCalendarApi {
     this.kv = kv;
   }
 
-  // ACL methods
-  async getAcl(
-    params: calendar_v3.Params$Resource$Acl$Get,
-  ): Promise<calendar_v3.Schema$AclRule> {
-    try {
-      const response = await this.calendar.acl.get(params);
-      return response.data;
-    } catch (error) {
-      throw this.handleError(error);
-    }
-  }
-
-  async listAcl(
-    params: calendar_v3.Params$Resource$Acl$List,
-  ): Promise<calendar_v3.Schema$Acl> {
-    try {
-      const response = await this.calendar.acl.list(params);
-      return response.data;
-    } catch (error) {
-      throw this.handleError(error);
-    }
-  }
-
-  async insertAcl(
-    params: calendar_v3.Params$Resource$Acl$Insert,
-  ): Promise<calendar_v3.Schema$AclRule> {
-    try {
-      const response = await this.calendar.acl.insert(params);
-      return response.data;
-    } catch (error) {
-      throw this.handleError(error);
-    }
-  }
-
-  async updateAcl(
-    params: calendar_v3.Params$Resource$Acl$Update,
-  ): Promise<calendar_v3.Schema$AclRule> {
-    try {
-      const response = await this.calendar.acl.update(params);
-      return response.data;
-    } catch (error) {
-      throw this.handleError(error);
-    }
-  }
-
-  async deleteAcl(
-    params: calendar_v3.Params$Resource$Acl$Delete,
-  ): Promise<void> {
-    try {
-      await this.calendar.acl.delete(params);
-    } catch (error) {
-      throw this.handleError(error);
-    }
-  }
-
   // Calendar List methods
   async getCalendarList(
-    params: calendar_v3.Params$Resource$Calendarlist$Get,
-  ): Promise<calendar_v3.Schema$CalendarListEntry> {
-    try {
-      const response = await this.calendar.calendarList.get(params);
-      return response.data;
-    } catch (error) {
-      throw this.handleError(error);
-    }
-  }
-
-  async listCalendarList(
     params: calendar_v3.Params$Resource$Calendarlist$List,
   ): Promise<calendar_v3.Schema$CalendarList> {
     try {
@@ -99,110 +33,12 @@ export class GoogleCalendarApi {
     }
   }
 
-  async insertCalendarList(
-    params: calendar_v3.Params$Resource$Calendarlist$Insert,
-  ): Promise<calendar_v3.Schema$CalendarListEntry> {
-    try {
-      const response = await this.calendar.calendarList.insert(params);
-      return response.data;
-    } catch (error) {
-      throw this.handleError(error);
-    }
-  }
-
-  async updateCalendarList(
-    params: calendar_v3.Params$Resource$Calendarlist$Update,
-  ): Promise<calendar_v3.Schema$CalendarListEntry> {
-    try {
-      const response = await this.calendar.calendarList.update(params);
-      return response.data;
-    } catch (error) {
-      throw this.handleError(error);
-    }
-  }
-
-  async deleteCalendarList(
-    params: calendar_v3.Params$Resource$Calendarlist$Delete,
-  ): Promise<void> {
-    try {
-      await this.calendar.calendarList.delete(params);
-    } catch (error) {
-      throw this.handleError(error);
-    }
-  }
-
-  // Calendar methods
-  async getCalendar(
-    params: calendar_v3.Params$Resource$Calendars$Get,
-  ): Promise<calendar_v3.Schema$Calendar> {
-    try {
-      const response = await this.calendar.calendars.get(params);
-      return response.data;
-    } catch (error) {
-      throw this.handleError(error);
-    }
-  }
-
-  async insertCalendar(
-    params: calendar_v3.Params$Resource$Calendars$Insert,
-  ): Promise<calendar_v3.Schema$Calendar> {
-    try {
-      const response = await this.calendar.calendars.insert(params);
-      return response.data;
-    } catch (error) {
-      throw this.handleError(error);
-    }
-  }
-
-  async updateCalendar(
-    params: calendar_v3.Params$Resource$Calendars$Update,
-  ): Promise<calendar_v3.Schema$Calendar> {
-    try {
-      const response = await this.calendar.calendars.update(params);
-      return response.data;
-    } catch (error) {
-      throw this.handleError(error);
-    }
-  }
-
-  async deleteCalendar(
-    params: calendar_v3.Params$Resource$Calendars$Delete,
-  ): Promise<void> {
-    try {
-      await this.calendar.calendars.delete(params);
-    } catch (error) {
-      throw this.handleError(error);
-    }
-  }
-
   // Event methods
-  async getEvent(
-    params: calendar_v3.Params$Resource$Events$Get,
-  ): Promise<calendar_v3.Schema$Event> {
-    try {
-      const response = await this.calendar.events.get(params);
-      return response.data;
-    } catch (error) {
-      throw this.handleError(error);
-    }
-  }
-
-  async listEvents(
+  async getEvents(
     params: calendar_v3.Params$Resource$Events$List,
   ): Promise<calendar_v3.Schema$Events> {
     try {
       const response = await this.calendar.events.list(params);
-      return response.data;
-    } catch (error) {
-      throw this.handleError(error);
-    }
-  }
-
-  async insertEvent(
-    params: calendar_v3.Params$Resource$Events$Insert,
-  ): Promise<calendar_v3.Schema$Event> {
-    try {
-      const response = await this.calendar.events.insert(params);
       return response.data;
     } catch (error) {
       throw this.handleError(error);
@@ -230,18 +66,30 @@ export class GoogleCalendarApi {
     }
   }
 
-  // Colors method
-  async getColors(): Promise<calendar_v3.Schema$Colors> {
+  // Calendar methods
+  async deleteCalendar(
+    params: calendar_v3.Params$Resource$Calendars$Delete,
+  ): Promise<void> {
     try {
-      const response = await this.calendar.colors.get();
+      await this.calendar.calendars.delete(params);
+    } catch (error) {
+      throw this.handleError(error);
+    }
+  }
+
+  async updateCalendar(
+    params: calendar_v3.Params$Resource$Calendars$Update,
+  ): Promise<calendar_v3.Schema$Calendar> {
+    try {
+      const response = await this.calendar.calendars.update(params);
       return response.data;
     } catch (error) {
       throw this.handleError(error);
     }
   }
 
-  // FreeBusy method
-  async queryFreeBusy(
+  // Calendar Resources methods
+  async getCalendarResources(
     params: calendar_v3.Params$Resource$Freebusy$Query,
   ): Promise<calendar_v3.Schema$FreeBusyResponse> {
     try {
@@ -252,28 +100,17 @@ export class GoogleCalendarApi {
     }
   }
 
-  // Settings methods
-  async getSetting(
-    params: calendar_v3.Params$Resource$Settings$Get,
-  ): Promise<calendar_v3.Schema$Setting> {
+  // Colors methods
+  async getColors(): Promise<calendar_v3.Schema$Colors> {
     try {
-      const response = await this.calendar.settings.get(params);
+      const response = await this.calendar.colors.get();
       return response.data;
     } catch (error) {
       throw this.handleError(error);
     }
   }
 
-  async listSettings(): Promise<calendar_v3.Schema$Settings> {
-    try {
-      const response = await this.calendar.settings.list();
-      return response.data;
-    } catch (error) {
-      throw this.handleError(error);
-    }
-  }
-
-  // Channel methods
+  // Webhook methods
   async watchEvents(
     params: calendar_v3.Params$Resource$Events$Watch,
   ): Promise<calendar_v3.Schema$Channel> {
@@ -295,41 +132,15 @@ export class GoogleCalendarApi {
     }
   }
 
-  async getAuthUrl(scopes: string[]): Promise<string> {
-    try {
-      const oauth2Client = new google.auth.OAuth2(
-        this.clientId,
-        this.clientSecret,
-        this.redirectUri,
-      );
-      return oauth2Client.generateAuthUrl({
-        access_type: "offline",
-        scope: scopes,
+  private handleError(error: unknown): ProviderError {
+    if (isError(error)) {
+      return new ProviderError(error.message, {
+        cause: error,
+        provider: "google",
       });
-    } catch (error) {
-      throw this.handleError(error);
     }
-  }
-
-  async exchangeCode(code: string): Promise<Credentials> {
-    try {
-      const oauth2Client = new google.auth.OAuth2(
-        this.clientId,
-        this.clientSecret,
-        this.redirectUri,
-      );
-      const { tokens } = await oauth2Client.getToken(code);
-      return tokens;
-    } catch (error) {
-      throw this.handleError(error);
-    }
-  }
-
-  private handleError(error: unknown): never {
-    const errorDetails = isError(error);
-    if (errorDetails) {
-      throw new ProviderError(errorDetails.message, errorDetails.code);
-    }
-    throw new ProviderError("An unknown error occurred", "UNKNOWN_ERROR");
+    return new ProviderError("An unknown error occurred", {
+      provider: "google",
+    });
   }
 }

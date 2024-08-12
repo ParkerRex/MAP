@@ -37,7 +37,7 @@ export const getUser = async () => {
       tags: [`user_${userId}`],
       revalidate: 180,
     },
-  )(userId);
+  )();
 };
 
 export const getGoals = async () => {

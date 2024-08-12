@@ -1,4 +1,13 @@
+"use client";
+import {
+  addEvent,
+  deleteEvent,
+  syncEvents,
+  updateCalendar,
+  updateEvent,
+} from "@/actions/calendar/calendarActions";
 import { useCalendar } from "@/store/calendar-context";
+import type { calendar_v3 } from "googleapis";
 import { useCallback, useEffect, useState } from "react";
 
 const WS_URL =
@@ -11,37 +20,38 @@ type WebSocketMessage = {
     | "EVENT_DELETED"
     | "CALENDAR_UPDATED"
     | "SYNC_COMPLETED";
-  payload: any;
+  payload: calendar_v3.Schema$Event | calendar_v3.Schema$Events;
 };
 
 export function useWebSocket() {
   const [socket, setSocket] = useState<WebSocket | null>(null);
-  const { addEvent, updateEvent, deleteEvent, updateCalendar, syncEvents } =
-    useCalendar();
+  const { setEvents, setCalendar } = useCalendar();
 
   const handleMessage = useCallback(
-    (message: WebSocketMessage) => {
+    async (message: WebSocketMessage) => {
       switch (message.type) {
         case "EVENT_CREATED":
-          addEvent(message.payload);
+          await addEvent(message.payload as calendar_v3.Schema$Event);
           break;
         case "EVENT_UPDATED":
-          updateEvent(message.payload);
+          await updateEvent(message.payload as calendar_v3.Schema$Event);
           break;
         case "EVENT_DELETED":
-          deleteEvent(message.payload.id);
+          if ("id" in message.payload) {
+            await deleteEvent(message.payload.id as string);
+          }
           break;
         case "CALENDAR_UPDATED":
-          updateCalendar(message.payload);
+          await updateCalendar(message.payload as calendar_v3.Schema$Calendar);
           break;
         case "SYNC_COMPLETED":
-          syncEvents(message.payload);
+          await syncEvents(message.payload as calendar_v3.Schema$Events);
           break;
         default:
           console.warn("Unknown message type:", message.type);
       }
     },
-    [addEvent, updateEvent, deleteEvent, updateCalendar, syncEvents],
+    [setEvents, setCalendar],
   );
 
   const connect = useCallback(() => {

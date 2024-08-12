@@ -1,3 +1,4 @@
+// TODO: ADD ANALYTICS CHECK BACK ONCE THATS SETUP
 import { logger } from "@/utils/logger";
 import { setupAnalytics } from "@map/events/server";
 import { client as RedisClient } from "@map/kv";
@@ -89,16 +90,16 @@ export const authActionClient = actionClientWithMeta
       throw new Error("Unauthorized");
     }
 
-    if (metadata) {
-      const analytics = await setupAnalytics({
-        userId: user.data.id,
-        fullName: user.data.full_name,
-      });
+    // if (metadata) {
+    //   const analytics = await setupAnalytics({
+    //     userId: user.data.id,
+    //     fullName: user.data.full_name,
+    //   });
 
-      if (metadata.track) {
-        analytics.track(metadata.track);
-      }
-    }
+    //   if (metadata.track) {
+    //     analytics.track(metadata.track);
+    //   }
+    // }
 
     return Sentry.withServerActionInstrumentation(metadata.name, async () => {
       return next({

@@ -1,9 +1,17 @@
 "use client";
+// TODO: SWAP THESE OUT FOR SEPARATE SERVER ACTIONS THAT ARE SAFE
+
+import {
+  addEvent,
+  deleteEvent,
+  updateEvent,
+} from "@/actions/calendar/calendarActions";
 import type {
   ExtendedCalendarListEntry,
   ExtendedEvent,
 } from "@/types/calendar";
 import type { CalendarContextType } from "@/types/calendar";
+import type { calendar_v3 } from "googleapis";
 
 import {
   createContext,
@@ -32,40 +40,35 @@ export const CalendarProvider: React.FC<{ children: React.ReactNode }> = ({
   const [selectedCalendar, setSelectedCalendar] = useState<string | null>(null);
   const [userTimeZone, setUserTimeZone] = useState<string>("UTC");
   const [calendars, setCalendars] = useState<ExtendedCalendarListEntry[]>([]);
-  const [events, setEvents] = useState<ExtendedEvent[]>([]);
-
-  const createEvent = async (newEvent: Partial<ExtendedEvent>) => {
-    // TODO: Implement server action: createCalendarEvent
-  };
-
-  const updateEvent = async (updatedEvent: Partial<ExtendedEvent>) => {
-    // TODO: Implement server action: updateCalendarEvent
-  };
-
-  const deleteEvent = async (event: ExtendedEvent) => {
-    // TODO: Implement server action: deleteCalendarEvent
-  };
+  const [events, setEvents] = useState<calendar_v3.Schema$Event[]>([]);
+  const [calendar, setCalendar] = useState<calendar_v3.Schema$Calendar | null>(
+    null,
+  );
 
   const syncEvents = useCallback((events: ExtendedEvent[]) => {
     setEvents((prevEvents) => {
       const eventMap = new Map(prevEvents.map((event) => [event.id, event]));
 
-      events.forEach((event) => {
+      for (const event of events) {
         if (event.status === "cancelled") {
           eventMap.delete(event.id);
         } else {
           eventMap.set(event.id, event);
         }
-      });
+      }
 
       return Array.from(eventMap.values());
     });
   }, []);
 
   const contextValue: CalendarContextType = {
-    calendars,
     events,
+    calendars,
     selectedEvent,
+    setEvents,
+    setCalendars: (newCalendars: ExtendedCalendarListEntry[]) => {
+      setCalendars(newCalendars);
+    },
     setSelectedEvent,
     visibleCalendars,
     toggleCalendarVisibility: (calendarId: string) =>
@@ -82,7 +85,7 @@ export const CalendarProvider: React.FC<{ children: React.ReactNode }> = ({
     setSelectedCalendar,
     currentWeekStartDate,
     setCurrentWeekStartDate,
-    createEvent,
+    createEvent: addEvent,
     updateEvent,
     deleteEvent,
     userTimeZone,
