@@ -4,11 +4,6 @@ env:
   VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_DASHBOARD }}
   TURBO_TOKEN: ${{ secrets.VERCEL_TOKEN }}
   TURBO_TEAM: ${{ secrets.VERCEL_ORG_ID }}
-  SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
-  SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
-  SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
-  SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}
-  SENTRY_LOG_LEVEL: info
 on:
   push:
     branches-ignore:
@@ -21,22 +16,24 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Generate slug
+        uses: rlespinasse/github-slug-action@v4
       - uses: oven-sh/setup-bun@v1
         with:
-          bun-version: latest
+          bun-version: "1.0.28"
       - name: Install dependencies
-        run: bun install
+        run: bun install --frozen-lockfile
       # - name: 🔦 Run linter
-      #   run: bun run lint --filter=@map/dashboard
+      #   run: bun run lint --filter=@midday/dashboard
       # - name: 🪐 Check TypeScript
-      #   run: bun run typecheck --filter=@map/dashboard
+      #   run: bun run typecheck --filter=@midday/dashboard
       - name: 🧪 Run unit tests
         run: bun run test
       - name: 📤 Pull Vercel Environment Information
         run: bunx vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
       - name: 🏗 Build Project Artifacts
         run: bunx vercel build --token=${{ secrets.VERCEL_TOKEN }}
-        env:
-          NODE_OPTIONS: "--max_old_space_size=4096"
       - name: Deploy Project Artifacts to Vercel
-        run: bunx vercel deploy --prebuilt --archive=tgz --token=${{ secrets.VERCEL_TOKEN }}
+        run: |
+          bunx vercel deploy --prebuilt --archive=tgz --token=${{ secrets.VERCEL_TOKEN }} > domain.txt
+          bunx vercel alias --scope=${{ secrets.VERCEL_ORG_ID }} --token=${{ secrets.VERCEL_TOKEN }} set `cat domain.txt` ${{ env.GITHUB_REF_SLUG }}.app.midday.ai

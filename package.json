@@ -13,7 +13,6 @@
     "dev:api": "turbo dev --filter=@map/api",
     "dev:dashboard": "turbo dev --filter=@map/dashboard",
     "build:dashboard": "turbo build --filter=@map/dashboard",
-    "dev:engine": "turbo dev --filter=@map/engine",
     "dev:website": "turbo dev --filter=@map/website ",
     "dev:desktop": "turbo dev --filter=@map/desktop",
     "jobs:dashboard": "turbo jobs --filter=@map/dashboard",
