@@ -1,7 +1,7 @@
 "use server";
 
 import { sendWebSocketMessage } from "@/lib/websocket";
-import { GoogleCalendarApi } from "@map/engine";
+import { GoogleCalendarApi } from "@map/providers";
 
 import { calendar_v3 } from "googleapis";
 import { z } from "zod";
@@ -26,7 +26,7 @@ export async function addEvent(event: z.infer<typeof eventSchema>) {
   });
 
   // Add event to Supabase
-  // You'll need to implement this function in your @map/engine package
+  // You'll need to implement this function in your @map/providers package
   await addEventToSupabase(createdEvent);
 
   // Send WebSocket message to clients

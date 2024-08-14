@@ -94,8 +94,6 @@ export default async function Overview({
           searchParams={searchParams}
         />
       </div>
-      {/* Show OverviewModal when page is empty and modal is not open */}
-      {!isOpen && empty && <OverviewModal />}
     </>
   );
 }

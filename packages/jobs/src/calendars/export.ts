@@ -39,20 +39,14 @@ client.defineJob({
     });
 
     const { data, count } = await client
-      .from("transactions")
+      .from("decrypted_transactions")
       .select(
         `
-        id,
-        date,
-        name,
-        amount,
-        note,
-        balance,
-        currency,
-        vat:calculated_vat,
+        *,
+        name:decrypted_name,
         attachments:transaction_attachments(*)
       `,
-        { count: "exact" },
+        { count: "exact" }
       )
       .in("id", transactionIds)
       .eq("team_id", teamId);
@@ -92,9 +86,9 @@ client.defineJob({
               name,
               blob: data,
             };
-          },
+          }
         );
-      }),
+      })
     );
 
     await generateExport.update("generate-export-attachments-end", {
@@ -111,38 +105,20 @@ client.defineJob({
       },
     });
 
-    const rows = data
-      ?.sort((a, b) => a.date - b.date)
-      .map((transaction, idx) => [
-        idx + 1,
-        transaction.date,
-        transaction.name,
-        Intl.NumberFormat(locale, {
-          style: "currency",
-          currency: transaction.currency,
-        }).format(transaction.amount),
-        transaction?.vat
-          ? Intl.NumberFormat(locale, {
-              style: "currency",
-              currency: transaction.currency,
-            }).format(transaction?.vat)
-          : "",
-        transaction?.attachments?.length > 0 ? "✔️" : "❌",
-        transaction?.note ?? "",
-        transaction?.balance ?? "",
-      ]);
+    const rows = data.map((transaction, idx) => [
+      idx + 1,
+      transaction.date,
+      transaction.name,
+      Intl.NumberFormat(locale, {
+        style: "currency",
+        currency: transaction.currency,
+      }).format(transaction.amount),
+      transaction?.attachments?.length > 0 ? "✔️" : "❌",
+      transaction?.note ?? "",
+    ]);
 
     const csv = await writeToString(rows, {
-      headers: [
-        "ID",
-        "Date",
-        "Description",
-        "Amount",
-        "VAT",
-        "Attachment",
-        "Note",
-        "Balance",
-      ],
+      headers: ["ID", "Date", "Description", "Amount", "Attachment", "Note"],
     });
 
     await generateExport.update("generate-export-csv-end", {
@@ -168,7 +144,7 @@ client.defineJob({
       if (attachment?.value?.blob) {
         zipWriter.add(
           attachment.value.name,
-          new BlobReader(attachment.value.blob),
+          new BlobReader(attachment.value.blob)
         );
       }
     });

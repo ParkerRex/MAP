@@ -17,7 +17,7 @@
     "@date-fns/utc": "^1.2.0",
     "@hookform/resolvers": "^3.9.0",
     "@map/events": "workspace:*",
-    "@map/engine": "workspace:*",
+    "@map/providers": "workspace:*",
     "@map/jobs": "workspace:*",
     "@map/kv": "workspace:*",
     "@map/location": "workspace:*",

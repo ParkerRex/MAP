@@ -1,4 +1,4 @@
-import { GoogleCalendarApi } from "@map/engine";
+import { GoogleCalendarApi } from "@map/providers";
 import { createClient } from "@map/supabase";
 import { updateEventMutation } from "@map/supabase";
 

@@ -4,6 +4,7 @@ CREATE SCHEMA calendar;
 CREATE TABLE calendar.accounts (
   id UUID PRIMARY KEY,
   email VARCHAR(255) NOT NULL UNIQUE,
+  "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
   provider VARCHAR(50) NOT NULL
 );
 ALTER TABLE calendar.accounts OWNER TO postgres;

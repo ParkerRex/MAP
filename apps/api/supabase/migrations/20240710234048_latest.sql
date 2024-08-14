@@ -47,7 +47,6 @@ CREATE TABLE "users"."users" (
   "created_at" TIMESTAMP WITH TIME ZONE NOT NULL,
   status VARCHAR(50) NOT NULL,
   email VARCHAR(255) NOT NULL UNIQUE,
-  username VARCHAR(255) NOT NULL UNIQUE,
   display_name VARCHAR(255),
   first_name VARCHAR(255),
   last_name VARCHAR(255),
@@ -124,7 +123,7 @@ CREATE TABLE IF NOT EXISTS "public"."headers" (
   "deleted_at" TIMESTAMPTZ
 );
 ALTER TABLE "public"."headers" OWNER TO "postgres";
-CREATE TABLE IF NOT EXISTS "public"."integrations" (
+CREATE TABLE IF NOT EXISTS "users"."integrations" (
   "id" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   "user_id" UUID NOT NULL,
   "provider" public.integration_provider NOT NULL,
@@ -135,7 +134,7 @@ CREATE TABLE IF NOT EXISTS "public"."integrations" (
   "updated_at" TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
   UNIQUE (user_id, provider)
 );
-ALTER TABLE "public"."integrations" OWNER TO "postgres";
+ALTER TABLE "users"."integrations" OWNER TO "postgres";
 CREATE TABLE IF NOT EXISTS "public"."notes" (
   "id" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   "title" VARCHAR,
@@ -204,21 +203,25 @@ INSERT INTO users.users (
     id,
     created_at,
     status,
+    email,
+    username,
     display_name,
     first_name,
     last_name,
-    avatar_url,
-    email,
+    locale,
+    profile_photo_url
   )
 VALUES (
     NEW.id,
     NEW.created_at,
     'active',
+    NEW.email,
+    NEW.raw_user_meta_data->>'username',
     NEW.raw_user_meta_data->>'display_name',
     NEW.raw_user_meta_data->>'first_name',
     NEW.raw_user_meta_data->>'last_name',
-    NEW.raw_user_meta_data->>'avatar_url',
-    NEW.email
+    NEW.raw_user_meta_data->>'locale',
+    NEW.raw_user_meta_data->>'avatar_url'
   );
 RETURN NEW;
 END;
@@ -233,7 +236,7 @@ ALTER TABLE "public"."goals" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "public"."headers" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "public"."projects" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "users"."users" ENABLE ROW LEVEL SECURITY;
-ALTER TABLE "public"."integrations" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "users"."integrations" ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Allow authenticated user to view & modify their own data" ON "public"."goals" TO authenticated USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
 CREATE POLICY "Allow authenticated user to view & modify their own data" ON "public"."headers" TO authenticated USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
 CREATE POLICY "Allow authenticated user to view & modify their own data" ON "public"."projects" TO authenticated USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
@@ -243,15 +246,15 @@ CREATE POLICY "Users can insert their own profile." ON "users"."users" FOR
 INSERT WITH CHECK (("auth"."uid"() = "id"));
 CREATE POLICY "Users can update own profile." ON "users"."users" FOR
 UPDATE USING (("auth"."uid"() = "id"));
-CREATE POLICY "Users can view their own integrations" ON "public"."integrations" FOR
+CREATE POLICY "Users can view their own integrations" ON "users"."integrations" FOR
 SELECT USING (auth.uid() = user_id);
-CREATE POLICY "Users can insert their own integrations" ON "public"."integrations" FOR
+CREATE POLICY "Users can insert their own integrations" ON "users"."integrations" FOR
 INSERT WITH CHECK (auth.uid() = user_id);
-CREATE POLICY "Users can update their own integrations" ON "public"."integrations" FOR
+CREATE POLICY "Users can update their own integrations" ON "users"."integrations" FOR
 UPDATE USING (auth.uid() = user_id);
-CREATE POLICY "Users can delete their own integrations" ON "public"."integrations" FOR DELETE USING (auth.uid() = user_id);
+CREATE POLICY "Users can delete their own integrations" ON "users"."integrations" FOR DELETE USING (auth.uid() = user_id);
 -- Add foreign key constraints
-ALTER TABLE "public"."integrations"
+ALTER TABLE "users"."integrations"
 ADD CONSTRAINT "integration_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "auth"."users"("id") ON DELETE CASCADE;
 ALTER TABLE "public"."folder"
 ADD CONSTRAINT "folder_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "auth"."users"("id") ON DELETE

@@ -1,6 +1,5 @@
 import TransactionsEmail from "@midday/email/emails/transactions";
 import { getI18n } from "@midday/email/locales";
-import { getInboxEmail } from "@midday/inbox";
 import {
   NotificationTypes,
   TriggerEvents,
@@ -27,9 +26,7 @@ client.defineJob({
           amount: z.number(),
           name: z.string(),
           currency: z.string(),
-          category: z.string().optional().nullable(),
-          status: z.enum(["posted", "pending"]),
-        }),
+        })
       ),
     }),
   }),
@@ -37,23 +34,19 @@ client.defineJob({
   run: async (payload, io) => {
     const { transactions, teamId } = payload;
 
-    const sortedTransactions = transactions.sort(
-      (a, b) => b.date.getTime() - a.date.getTime(),
-    );
-
     const { data: usersData } = await io.supabase.client
       .from("users_on_team")
       .select(
-        "id, team_id, team:teams(inbox_id, name), user:users(id, full_name, avatar_url, email, locale)",
+        "id, team_id, user:users(id, full_name, avatar_url, email, locale)"
       )
       .eq("team_id", teamId);
 
-    const notificationEvents = usersData?.map(({ user, team_id, team }) => {
+    const notificationEvents = usersData?.map(({ user, team_id }) => {
       const { t } = getI18n({ locale: user.locale });
 
       // If single transaction
-      if (sortedTransactions.length === 1) {
-        const transaction = sortedTransactions?.at(0);
+      if (transactions.length === 1) {
+        const transaction = transactions?.at(0);
 
         if (transaction) {
           return {
@@ -69,7 +62,6 @@ client.defineJob({
                 from: transaction.name,
               }),
             },
-            replyTo: getInboxEmail(team?.inbox_id),
             user: {
               subscriberId: user.id,
               teamId: team_id,
@@ -86,10 +78,10 @@ client.defineJob({
         name: TriggerEvents.TransactionsNewInApp,
         payload: {
           type: NotificationTypes.Transactions,
-          from: sortedTransactions.at(0)?.date,
-          to: sortedTransactions[sortedTransactions.length - 1]?.date,
+          from: transactions.at(0)?.date,
+          to: transactions[transactions.length - 1]?.date,
           description: t("notifications.transactions", {
-            numberOfTransactions: sortedTransactions.length,
+            numberOfTransactions: transactions.length,
           }),
         },
         user: {
@@ -110,16 +102,15 @@ client.defineJob({
       }
     }
 
-    const emailPromises = usersData?.map(async ({ user, team_id, team }) => {
+    const emailPromises = usersData?.map(async ({ user, team_id }) => {
       const { t } = getI18n({ locale: user.locale });
 
       const html = await renderAsync(
         TransactionsEmail({
           fullName: user.full_name,
-          transactions: sortedTransactions,
+          transactions,
           locale: user.locale,
-          teamName: team?.name,
-        }),
+        })
       );
 
       return {
@@ -128,7 +119,6 @@ client.defineJob({
           subject: t("transactions.subject"),
           html,
         },
-        replyTo: getInboxEmail(team?.inbox_id),
         user: {
           subscriberId: user.id,
           teamId: team_id,
@@ -139,11 +129,11 @@ client.defineJob({
       };
     });
 
-    const emailEvents = await Promise.all(emailPromises ?? []);
+    const emailEvents = await Promise.all(emailPromises);
 
-    if (emailEvents.length) {
+    if (emailEvents?.length) {
       try {
-        await triggerBulk(emailEvents);
+        await triggerBulk(emailEvents.flat());
       } catch (error) {
         await io.logger.error("email events", error);
       }

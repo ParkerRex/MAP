@@ -24,7 +24,6 @@ export const env = createEnv({
     NOVU_API_KEY: z.string(),
     RESEND_API_KEY: z.string(),
     OPENPANEL_SECRET_KEY: z.string(),
-    MAP_ENGINE_API_KEY: z.string(),
     WEBHOOK_SECRET_KEY: z.string(),
   },
   /**
@@ -60,16 +59,10 @@ export const env = createEnv({
     NEXT_PUBLIC_TRIGGER_API_KEY: process.env.NEXT_PUBLIC_TRIGGER_API_KEY,
     SUPABASE_SERVICE_KEY: process.env.SUPABASE_SERVICE_KEY,
     OPENAI_API_KEY: process.env.OPENAI_API_KEY,
-    // PLAIN_API_KEY: process.env.PLAIN_API_KEY,
     NEXT_PUBLIC_OPENPANEL_CLIENT_ID:
       process.env.NEXT_PUBLIC_OPENPANEL_CLIENT_ID,
     OPENPANEL_SECRET_KEY: process.env.OPENPANEL_SECRET_KEY,
-    MAP_ENGINE_API_KEY: process.env.MAP_ENGINE_API_KEY,
     WEBHOOK_SECRET_KEY: process.env.WEBHOOK_SECRET_KEY,
-    // AZURE_DOCUMENT_INTELLIGENCE_ENDPOINT:
-    //   process.env.AZURE_DOCUMENT_INTELLIGENCE_ENDPOINT,
-    // AZURE_DOCUMENT_INTELLIGENCE_KEY:
-    //   process.env.AZURE_DOCUMENT_INTELLIGENCE_KEY,
   },
   skipValidation: !!process.env.CI || !!process.env.SKIP_ENV_VALIDATION,
 });
