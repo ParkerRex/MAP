@@ -1,35 +1,27 @@
-import type { Bindings } from "@/common/bindings";
-import { ErrorSchema } from "@/common/schema";
-import { GoCardLessApi } from "@/providers/gocardless/gocardless-api";
-import { PlaidApi } from "@/providers/plaid/plaid-api";
-import { createErrorResponse } from "@/utils/error";
-import { createRoute } from "@hono/zod-openapi";
-import { OpenAPIHono } from "@hono/zod-openapi";
-import { env } from "hono/adapter";
+import { OpenAPIHono, createRoute } from "@hono/zod-openapi";
+import { z } from "zod";
+import { GoogleCalendarProvider } from "../../providers/google-calendar/google-calendar-provider";
+import { WhoopProvider } from "../../providers/whoop/whoop-provider";
+import type { Bindings } from "../../types";
 import {
-  GoCardLessAgreementBodySchema,
-  GoCardLessAgreementSchema,
-  GoCardLessExchangeBodySchema,
-  GoCardLessExchangeSchema,
-  GoCardLessLinkBodySchema,
-  GoCardLessLinkSchema,
-  PlaidExchangeBodySchema,
-  PlaidExchangeSchema,
-  PlaidLinkBodySchema,
-  PlaidLinkSchema,
+  GoogleAuthResponseSchema,
+  GoogleAuthSchema,
+  RefreshTokenResponseSchema,
+  RefreshTokenSchema,
+  WhoopAuthResponseSchema,
+  WhoopAuthSchema,
 } from "./schema";
 
-const app = new OpenAPIHono<{ Bindings: Bindings }>();
+const authRoutes = new OpenAPIHono<{ Bindings: Bindings }>();
 
-const linkPlaidRoute = createRoute({
+const googleAuthRoute = createRoute({
   method: "post",
-  path: "/plaid/link",
-  summary: "Auth Link (Plaid)",
+  path: "/google/auth",
   request: {
     body: {
       content: {
         "application/json": {
-          schema: PlaidLinkBodySchema,
+          schema: GoogleAuthSchema,
         },
       },
     },
@@ -38,31 +30,22 @@ const linkPlaidRoute = createRoute({
     200: {
       content: {
         "application/json": {
-          schema: PlaidLinkSchema,
+          schema: GoogleAuthResponseSchema,
         },
       },
-      description: "Retrieve Link",
-    },
-    400: {
-      content: {
-        "application/json": {
-          schema: ErrorSchema,
-        },
-      },
-      description: "Returns an error",
+      description: "Successful authentication",
     },
   },
 });
 
-const exchangePlaidRoute = createRoute({
+const whoopAuthRoute = createRoute({
   method: "post",
-  path: "/plaid/exchange",
-  summary: "Exchange token (Plaid)",
+  path: "/whoop/auth",
   request: {
     body: {
       content: {
         "application/json": {
-          schema: PlaidExchangeBodySchema,
+          schema: WhoopAuthSchema,
         },
       },
     },
@@ -71,31 +54,22 @@ const exchangePlaidRoute = createRoute({
     200: {
       content: {
         "application/json": {
-          schema: PlaidExchangeSchema,
+          schema: WhoopAuthResponseSchema,
         },
       },
-      description: "Retrieve Exchange",
-    },
-    400: {
-      content: {
-        "application/json": {
-          schema: ErrorSchema,
-        },
-      },
-      description: "Returns an error",
+      description: "Successful authentication",
     },
   },
 });
 
-const linkGoCardLessRoute = createRoute({
+const refreshTokenRoute = createRoute({
   method: "post",
-  path: "/gocardless/link",
-  summary: "Auth link (GoCardLess)",
+  path: "/refresh",
   request: {
     body: {
       content: {
         "application/json": {
-          schema: GoCardLessLinkBodySchema,
+          schema: RefreshTokenSchema,
         },
       },
     },
@@ -104,227 +78,75 @@ const linkGoCardLessRoute = createRoute({
     200: {
       content: {
         "application/json": {
-          schema: GoCardLessLinkSchema,
+          schema: RefreshTokenResponseSchema,
         },
       },
-      description: "Retrieve Link",
-    },
-    400: {
-      content: {
-        "application/json": {
-          schema: ErrorSchema,
-        },
-      },
-      description: "Returns an error",
+      description: "Successfully refreshed token",
     },
   },
 });
 
-const agreementGoCardLessRoute = createRoute({
-  method: "post",
-  path: "/gocardless/agreement",
-  summary: "Agreement (GoCardLess)",
-  request: {
-    body: {
-      content: {
-        "application/json": {
-          schema: GoCardLessAgreementBodySchema,
-        },
-      },
-    },
-  },
-  responses: {
-    200: {
-      content: {
-        "application/json": {
-          schema: GoCardLessAgreementSchema,
-        },
-      },
-      description: "Retrieve Agreement",
-    },
-    400: {
-      content: {
-        "application/json": {
-          schema: ErrorSchema,
-        },
-      },
-      description: "Returns an error",
-    },
-  },
-});
-
-const exchangeGoCardLessRoute = createRoute({
-  method: "post",
-  path: "/gocardless/exchange",
-  summary: "Exchange token (GoCardLess)",
-  request: {
-    body: {
-      content: {
-        "application/json": {
-          schema: GoCardLessExchangeBodySchema,
-        },
-      },
-    },
-  },
-  responses: {
-    200: {
-      content: {
-        "application/json": {
-          schema: GoCardLessExchangeSchema,
-        },
-      },
-      description: "Retrieve Exchange",
-    },
-    400: {
-      content: {
-        "application/json": {
-          schema: ErrorSchema,
-        },
-      },
-      description: "Returns an error",
-    },
-  },
-});
-
-app.openapi(linkPlaidRoute, async (c) => {
-  const envs = env(c);
-
-  const { userId, language, accessToken } = await c.req.json();
-
-  const api = new PlaidApi({
+authRoutes.openapi(googleAuthRoute, async (c) => {
+  const { code, redirectUri } = c.req.valid("json");
+  const googleCalendarProvider = new GoogleCalendarProvider({
     kv: c.env.KV,
-    envs,
+    envs: c.env,
   });
 
   try {
-    const { data } = await api.linkTokenCreate({
-      userId,
-      language,
-      accessToken,
-    });
-
-    return c.json(
-      {
-        data,
-      },
-      200,
-    );
+    const tokens = await googleCalendarProvider.getTokens(code, redirectUri);
+    return c.json(tokens);
   } catch (error) {
-    const errorResponse = createErrorResponse(error, c.get("requestId"));
-
-    return c.json(errorResponse, 400);
+    if (error instanceof Error) {
+      return c.json({ error: error.message }, 400);
+    }
+    return c.json({ error: "An unexpected error occurred" }, 500);
   }
 });
 
-app.openapi(exchangePlaidRoute, async (c) => {
-  const envs = env(c);
-
-  const { token } = await c.req.json();
-
-  const api = new PlaidApi({
+authRoutes.openapi(whoopAuthRoute, async (c) => {
+  const { code, redirectUri } = c.req.valid("json");
+  const whoopProvider = new WhoopProvider({
     kv: c.env.KV,
-    envs,
+    envs: c.env,
   });
 
   try {
-    const data = await api.itemPublicTokenExchange({
-      publicToken: token,
-    });
-
-    return c.json(data, 200);
+    const tokens = await whoopProvider.getTokens(code, redirectUri);
+    return c.json(tokens);
   } catch (error) {
-    const errorResponse = createErrorResponse(error, c.get("requestId"));
-
-    return c.json(errorResponse, 400);
+    if (error instanceof Error) {
+      return c.json({ error: error.message }, 400);
+    }
+    return c.json({ error: "An unexpected error occurred" }, 500);
   }
 });
 
-app.openapi(linkGoCardLessRoute, async (c) => {
-  const envs = env(c);
-
-  const { institutionId, agreement, redirect } = await c.req.json();
-
-  const api = new GoCardLessApi({
-    kv: c.env.KV,
-    envs,
-  });
+authRoutes.openapi(refreshTokenRoute, async (c) => {
+  const { refreshToken, provider } = c.req.valid("json");
 
   try {
-    const data = await api.buildLink({
-      institutionId,
-      agreement,
-      redirect,
-    });
-
-    return c.json(
-      {
-        data,
-      },
-      200,
-    );
+    let newTokens;
+    if (provider === "google") {
+      const googleCalendarProvider = new GoogleCalendarProvider({
+        kv: c.env.KV,
+        envs: c.env,
+      });
+      newTokens = await googleCalendarProvider.refreshToken(refreshToken);
+    } else {
+      const whoopProvider = new WhoopProvider({
+        kv: c.env.KV,
+        envs: c.env,
+      });
+      newTokens = await whoopProvider.refreshToken(refreshToken);
+    }
+    return c.json(newTokens);
   } catch (error) {
-    const errorResponse = createErrorResponse(error, c.get("requestId"));
-
-    return c.json(errorResponse, 400);
+    if (error instanceof Error) {
+      return c.json({ error: error.message }, 400);
+    }
+    return c.json({ error: "An unexpected error occurred" }, 500);
   }
 });
 
-app.openapi(exchangeGoCardLessRoute, async (c) => {
-  const envs = env(c);
-
-  const { institutionId, transactionTotalDays } = await c.req.json();
-
-  const api = new GoCardLessApi({
-    kv: c.env.KV,
-    envs,
-  });
-
-  try {
-    const data = await api.createEndUserAgreement({
-      institutionId,
-      transactionTotalDays,
-    });
-
-    return c.json(
-      {
-        data,
-      },
-      200,
-    );
-  } catch (error) {
-    const errorResponse = createErrorResponse(error, c.get("requestId"));
-
-    return c.json(errorResponse, 400);
-  }
-});
-
-app.openapi(agreementGoCardLessRoute, async (c) => {
-  const envs = env(c);
-
-  const { institutionId, transactionTotalDays } = await c.req.json();
-
-  const api = new GoCardLessApi({
-    kv: c.env.KV,
-    envs,
-  });
-
-  try {
-    const data = await api.createEndUserAgreement({
-      institutionId,
-      transactionTotalDays,
-    });
-
-    return c.json(
-      {
-        data,
-      },
-      200,
-    );
-  } catch (error) {
-    const errorResponse = createErrorResponse(error, c.get("requestId"));
-
-    return c.json(errorResponse, 400);
-  }
-});
-
-export default app;
+export { authRoutes };

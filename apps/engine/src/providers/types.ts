@@ -1,106 +1,76 @@
-import type { AccountType } from "@/utils/account";
+import { z } from "zod";
+import type { Bindings } from "../types";
 
-export type Providers = "teller" | "plaid" | "gocardless";
+export const Providers = z.enum(["google-calendar", "whoop"]);
+export type Provider = z.infer<typeof Providers>;
 
 export type ProviderParams = {
-  provider: Providers;
-  kv: KVNamespace;
-  fetcher?: Fetcher | null; // Teller
-  envs: {
-    GOCARDLESS_SECRET_KEY: string;
-    GOCARDLESS_SECRET_ID: string;
-    PLAID_CLIENT_ID: string;
-    PLAID_SECRET: string;
-    PLAID_ENVIRONMENT: string;
+  provider: Provider;
+  env: Bindings;
+};
+
+export type GetEventsRequest = {
+  calendarId: string;
+  timeMin?: string;
+  timeMax?: string;
+  maxResults?: number;
+};
+
+export type GetProfileRequest = {
+  accessToken: string;
+};
+
+export type GetCyclesRequest = {
+  accessToken: string;
+  start: string;
+  end: string;
+};
+
+export type GetWorkoutsRequest = {
+  accessToken: string;
+  start: string;
+  end: string;
+};
+
+export type GetRecoveriesRequest = {
+  accessToken: string;
+  start: string;
+  end: string;
+};
+
+export type GetSleepsRequest = {
+  accessToken: string;
+  start: string;
+  end: string;
+};
+
+export type GetBodyMeasurementsRequest = {
+  accessToken: string;
+};
+
+export type CreateBodyMeasurementRequest = {
+  accessToken: string;
+  measurement: {
+    timestamp: string;
+    height?: number;
+    weight?: number;
+    bodyFatPercentage?: number;
+    boneMass?: number;
+    muscleMass?: number;
   };
 };
 
-export type Transaction = {
-  id: string;
-  amount: number;
-  currency: string;
-  date: string;
-  status: "posted" | "pending";
-  balance: number | null;
-  category: string | null;
-  method: string;
-  name: string;
-  description: string | null;
-  currency_rate: number | null;
-  currency_source: string | null;
+export type GetActivitiesRequest = {
+  accessToken: string;
+  start: string;
+  end: string;
 };
 
-export type Institution = {
-  id: string;
-  name: string;
-  logo: string | null;
-  provider: Providers;
+export type GetTeamsRequest = {
+  accessToken: string;
 };
 
-export type Account = {
-  id: string;
-  name: string;
-  currency: string;
-  type: AccountType;
-  institution: Institution;
-  balance: Balance;
-  enrollment_id: string | null; // Teller
-};
-
-export type Balance = {
-  amount: number;
-  currency: string;
-};
-
-export type GetTransactionsRequest = {
-  accountId: string;
-  latest?: boolean;
-  accessToken?: string; // Teller & Plaid
-  accountType: AccountType;
-};
-
-export type GetAccountsRequest = {
-  id?: string; // GoCardLess
-  accessToken?: string; // Teller & Plaid
-  institutionId?: string; // Plaid
-};
-
-export type GetAccountBalanceRequest = {
-  accountId: string;
-  accessToken?: string; // Teller & Plaid
-};
-
-export type GetAccountBalanceResponse = {
-  currency: string;
-  amount: number;
-};
-
-export type DeleteAccountsRequest = {
-  accountId?: string; // GoCardLess
-  accessToken?: string; // Teller & Plaid
-};
-
-export type GetTransactionsResponse = Transaction[];
-
-export type GetAccountsResponse = Account[];
-
-export type GetInstitutionsResponse = {
-  id: string;
-  name: string;
-  logo: string | null;
-  provider: Providers;
-}[];
-
-export type GetInstitutionsRequest = {
-  countryCode?: string;
-};
-
-export type HealthCheckResponse = {
-  healthy: boolean;
-};
-
-export type GetHealthCheckResponse = {
-  teller: HealthCheckResponse;
-  gocardless: HealthCheckResponse;
-  plaid: HealthCheckResponse;
+export type GetTeamMembersRequest = {
+  accessToken: string;
+  teamId: string;
 };

@@ -25,7 +25,7 @@ export const GeneralErrorSchema = z.object({
   }),
 });
 
-export const Providers = z.enum(["teller", "plaid", "gocardless"]);
+export const Providers = z.enum(["google-calendar", "whoop"]);
 
 export const HeadersSchema = z.object({
   authorization: z.string().openapi({
