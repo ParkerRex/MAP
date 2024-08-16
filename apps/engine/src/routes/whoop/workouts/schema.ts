@@ -1,0 +1,73 @@
+import { z } from "zod";
+
+export const GetWorkoutsSchema = z
+  .object({
+    accessToken: z.string().openapi({ example: "your_access_token_here" }),
+    start: z
+      .string()
+      .datetime()
+      .optional()
+      .openapi({ example: "2023-01-01T00:00:00Z" }),
+    end: z
+      .string()
+      .datetime()
+      .optional()
+      .openapi({ example: "2023-12-31T23:59:59Z" }),
+    limit: z.number().int().min(1).max(25).default(10).openapi({ example: 10 }),
+    nextToken: z.string().optional().openapi({ example: "MTIzOjEyMzEyMw" }),
+  })
+  .openapi("GetWorkoutsSchema");
+
+const WorkoutScoreSchema = z
+  .object({
+    strain: z.number().openapi({ example: 8.2463 }),
+    average_heart_rate: z.number().int().openapi({ example: 123 }),
+    max_heart_rate: z.number().int().openapi({ example: 146 }),
+    kilojoule: z.number().openapi({ example: 1569.34033203125 }),
+    percent_recorded: z.number().openapi({ example: 100 }),
+    distance_meter: z.number().openapi({ example: 1772.77035916 }),
+    altitude_gain_meter: z.number().openapi({ example: 46.64384460449 }),
+    altitude_change_meter: z.number().openapi({ example: -0.781372010707855 }),
+    zone_duration: z.object({
+      zone_zero_milli: z.number().int().openapi({ example: 13458 }),
+      zone_one_milli: z.number().int().openapi({ example: 389370 }),
+      zone_two_milli: z.number().int().openapi({ example: 388367 }),
+      zone_three_milli: z.number().int().openapi({ example: 71137 }),
+      zone_four_milli: z.number().int().openapi({ example: 0 }),
+      zone_five_milli: z.number().int().openapi({ example: 0 }),
+    }),
+  })
+  .openapi("WorkoutScoreSchema");
+
+const WorkoutSchema = z
+  .object({
+    id: z.number().int().openapi({ example: 1043 }),
+    user_id: z.number().int().openapi({ example: 9012 }),
+    created_at: z
+      .string()
+      .datetime()
+      .openapi({ example: "2022-04-24T11:25:44.774Z" }),
+    updated_at: z
+      .string()
+      .datetime()
+      .openapi({ example: "2022-04-24T14:25:44.774Z" }),
+    start: z
+      .string()
+      .datetime()
+      .openapi({ example: "2022-04-24T02:25:44.774Z" }),
+    end: z.string().datetime().openapi({ example: "2022-04-24T10:25:44.774Z" }),
+    timezone_offset: z.string().openapi({ example: "-05:00" }),
+    sport_id: z.number().int().openapi({ example: 1 }),
+    score_state: z.string().openapi({ example: "SCORED" }),
+    score: WorkoutScoreSchema,
+  })
+  .openapi("WorkoutSchema");
+
+export const WorkoutsResponseSchema = z
+  .object({
+    data: z.object({
+      records: z.array(WorkoutSchema),
+      next_token: z.string().optional().openapi({ example: "MTIzOjEyMzEyMw" }),
+    }),
+  })
+  .openapi("WorkoutsResponseSchema");
