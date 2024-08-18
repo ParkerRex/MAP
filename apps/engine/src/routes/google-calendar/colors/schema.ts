@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-const ColorSchema = z.object({
+export const ColorSchema = z.object({
   background: z.string().openapi({ example: "#9fc6e7" }),
   foreground: z.string().openapi({ example: "#000000" }),
 });

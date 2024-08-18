@@ -18,7 +18,7 @@ export const GetSleepsSchema = z
   })
   .openapi("GetSleepsSchema");
 
-const StageSummarySchema = z
+export const StageSummarySchema = z
   .object({
     total_in_bed_time_milli: z.number().int().openapi({ example: 30272735 }),
     total_awake_time_milli: z.number().int().openapi({ example: 1403507 }),
@@ -37,7 +37,7 @@ const StageSummarySchema = z
   })
   .openapi("StageSummarySchema");
 
-const SleepNeededSchema = z
+export const SleepNeededSchema = z
   .object({
     baseline_milli: z.number().int().openapi({ example: 27395716 }),
     need_from_sleep_debt_milli: z.number().int().openapi({ example: 352230 }),
@@ -49,7 +49,7 @@ const SleepNeededSchema = z
   })
   .openapi("SleepNeededSchema");
 
-const SleepScoreSchema = z
+export const SleepScoreSchema = z
   .object({
     stage_summary: StageSummarySchema,
     sleep_needed: SleepNeededSchema,
@@ -60,7 +60,7 @@ const SleepScoreSchema = z
   })
   .openapi("SleepScoreSchema");
 
-const SleepSchema = z
+export const SleepSchema = z
   .object({
     id: z.number().int().openapi({ example: 93845 }),
     user_id: z.number().int().openapi({ example: 10129 }),

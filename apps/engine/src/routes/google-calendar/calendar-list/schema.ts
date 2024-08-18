@@ -1,11 +1,11 @@
 import { z } from "zod";
 
-const DefaultReminderSchema = z.object({
+export const DefaultReminderSchema = z.object({
   method: z.string().openapi({ example: "email" }),
   minutes: z.number().openapi({ example: 30 }),
 });
 
-const NotificationSchema = z.object({
+export const NotificationSchema = z.object({
   type: z.string().openapi({ example: "eventCreation" }),
   method: z.string().openapi({ example: "email" }),
 });
@@ -73,12 +73,10 @@ export const ChannelSchema = z
     kind: z.string().openapi({ example: "api#channel" }),
     id: z.string().openapi({ example: "channelId" }),
     resourceId: z.string().openapi({ example: "resourceId" }),
-    resourceUri: z
-      .string()
-      .openapi({
-        example:
-          "https://www.googleapis.com/calendar/v3/users/me/calendarList/watch",
-      }),
+    resourceUri: z.string().openapi({
+      example:
+        "https://www.googleapis.com/calendar/v3/users/me/calendarList/watch",
+    }),
     token: z.string().optional().openapi({ example: "token" }),
     expiration: z
       .string()

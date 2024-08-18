@@ -1,15 +1,12 @@
 import { z } from "zod";
-import {
-  ActivitySchema,
-  BodyMeasurementSchema,
-  CycleSchema,
-  ProfileSchema,
-  RecoverySchema,
-  SleepSchema,
-  TeamMemberSchema,
-  TeamSchema,
-  WorkoutSchema,
-} from "../../routes/whoop/schema";
+import { ActivitySchema } from "../../routes/whoop/activities/schema";
+import { BodyMeasurementSchema } from "../../routes/whoop/body-measurements/schema";
+import { CycleSchema } from "../../routes/whoop/cycles/schema";
+import { ProfileSchema } from "../../routes/whoop/profile/schema";
+import { RecoverySchema } from "../../routes/whoop/recoveries/schema";
+import { SleepSchema } from "../../routes/whoop/sleeps/schema";
+import { TeamMemberSchema, TeamSchema } from "../../routes/whoop/teams/schema";
+import { WorkoutSchema } from "../../routes/whoop/workouts/schema";
 import type { Bindings } from "../../types";
 
 export class WhoopProvider {
@@ -47,43 +44,103 @@ export class WhoopProvider {
     return ProfileSchema.parse(data);
   }
 
-  async getCycles(accessToken: string, start: string, end: string) {
-    const data = await this.fetchWithAuth<z.infer<typeof CycleSchema>[]>(
-      `/cycle?start=${start}&end=${end}`,
-      accessToken,
-    );
-    return z.array(CycleSchema).parse(data);
+  async getCycles(
+    accessToken: string,
+    start: string,
+    end: string,
+    limit?: number,
+    nextToken?: string,
+  ) {
+    const queryParams = new URLSearchParams({
+      start,
+      end,
+      ...(limit && { limit: limit.toString() }),
+      ...(nextToken && { nextToken }),
+    });
+    const data = await this.fetchWithAuth<{
+      records: z.infer<typeof CycleSchema>[];
+      next_token?: string;
+    }>(`/cycle?${queryParams.toString()}`, accessToken);
+    return {
+      records: z.array(CycleSchema).parse(data.records),
+      nextToken: data.next_token,
+    };
   }
 
-  async getWorkouts(accessToken: string, start: string, end: string) {
-    const data = await this.fetchWithAuth<z.infer<typeof WorkoutSchema>[]>(
-      `/workout?start=${start}&end=${end}`,
-      accessToken,
-    );
-    return z.array(WorkoutSchema).parse(data);
+  async getWorkouts(
+    accessToken: string,
+    start: string,
+    end: string,
+    limit?: number,
+    nextToken?: string,
+  ) {
+    const queryParams = new URLSearchParams({
+      start,
+      end,
+      ...(limit && { limit: limit.toString() }),
+      ...(nextToken && { nextToken }),
+    });
+    const data = await this.fetchWithAuth<{
+      records: z.infer<typeof WorkoutSchema>[];
+      next_token?: string;
+    }>(`/workout?${queryParams.toString()}`, accessToken);
+    return {
+      records: z.array(WorkoutSchema).parse(data.records),
+      nextToken: data.next_token,
+    };
   }
 
-  async getRecoveries(accessToken: string, start: string, end: string) {
-    const data = await this.fetchWithAuth<z.infer<typeof RecoverySchema>[]>(
-      `/recovery?start=${start}&end=${end}`,
-      accessToken,
-    );
-    return z.array(RecoverySchema).parse(data);
+  async getRecoveries(
+    accessToken: string,
+    start: string,
+    end: string,
+    limit?: number,
+    nextToken?: string,
+  ) {
+    const queryParams = new URLSearchParams({
+      start,
+      end,
+      ...(limit && { limit: limit.toString() }),
+      ...(nextToken && { nextToken }),
+    });
+    const data = await this.fetchWithAuth<{
+      records: z.infer<typeof RecoverySchema>[];
+      next_token?: string;
+    }>(`/recovery?${queryParams.toString()}`, accessToken);
+    return {
+      records: z.array(RecoverySchema).parse(data.records),
+      nextToken: data.next_token,
+    };
   }
 
-  async getSleeps(accessToken: string, start: string, end: string) {
-    const data = await this.fetchWithAuth<z.infer<typeof SleepSchema>[]>(
-      `/sleep?start=${start}&end=${end}`,
-      accessToken,
-    );
-    return z.array(SleepSchema).parse(data);
+  async getSleeps(
+    accessToken: string,
+    start: string,
+    end: string,
+    limit?: number,
+    nextToken?: string,
+  ) {
+    const queryParams = new URLSearchParams({
+      start,
+      end,
+      ...(limit && { limit: limit.toString() }),
+      ...(nextToken && { nextToken }),
+    });
+    const data = await this.fetchWithAuth<{
+      records: z.infer<typeof SleepSchema>[];
+      next_token?: string;
+    }>(`/sleep?${queryParams.toString()}`, accessToken);
+    return {
+      records: z.array(SleepSchema).parse(data.records),
+      nextToken: data.next_token,
+    };
   }
 
   async getBodyMeasurements(accessToken: string) {
     const data = await this.fetchWithAuth<
-      z.infer<typeof BodyMeasurementSchema>[]
+      z.infer<typeof BodyMeasurementSchema>
     >("/body_measurement", accessToken);
-    return z.array(BodyMeasurementSchema).parse(data);
+    return BodyMeasurementSchema.parse(data);
   }
 
   async createBodyMeasurement(
@@ -96,12 +153,27 @@ export class WhoopProvider {
     return BodyMeasurementSchema.parse(data);
   }
 
-  async getActivities(accessToken: string, start: string, end: string) {
-    const data = await this.fetchWithAuth<z.infer<typeof ActivitySchema>[]>(
-      `/activity?start=${start}&end=${end}`,
-      accessToken,
-    );
-    return z.array(ActivitySchema).parse(data);
+  async getActivities(
+    accessToken: string,
+    start: string,
+    end: string,
+    limit?: number,
+    nextToken?: string,
+  ) {
+    const queryParams = new URLSearchParams({
+      start,
+      end,
+      ...(limit && { limit: limit.toString() }),
+      ...(nextToken && { nextToken }),
+    });
+    const data = await this.fetchWithAuth<{
+      records: z.infer<typeof ActivitySchema>[];
+      next_token?: string;
+    }>(`/activity?${queryParams.toString()}`, accessToken);
+    return {
+      records: z.array(ActivitySchema).parse(data.records),
+      nextToken: data.next_token,
+    };
   }
 
   async getTeams(accessToken: string) {

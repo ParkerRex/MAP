@@ -40,15 +40,14 @@ const getAclRoute = createRoute({
 app.openapi(getAclRoute, async (c) => {
   try {
     const { calendarId } = c.req.valid("param");
-    const provider = new GoogleCalendarProvider(c);
+    const provider = new GoogleCalendarProvider({ env: c.env });
     const data = await provider.getAcl(calendarId);
-    return c.json({ data }, 200);
+    return c.json(data, 200);
   } catch (error) {
     return c.json(
       {
         error: "Failed to retrieve ACL",
         message: error instanceof Error ? error.message : "Unknown error",
-        requestId: c.get("requestId"),
         code: "400",
       },
       400,
@@ -97,15 +96,14 @@ app.openapi(insertAclRoute, async (c) => {
   try {
     const { calendarId } = c.req.valid("param");
     const rule = c.req.valid("json");
-    const provider = new GoogleCalendarProvider(c);
+    const provider = new GoogleCalendarProvider({ env: c.env });
     const data = await provider.insertAcl(calendarId, rule);
-    return c.json({ data }, 200);
+    return c.json(data, 200);
   } catch (error) {
     return c.json(
       {
         error: "Failed to insert ACL rule",
         message: error instanceof Error ? error.message : "Unknown error",
-        requestId: c.get("requestId"),
         code: "400",
       },
       400,
@@ -155,15 +153,14 @@ app.openapi(updateAclRoute, async (c) => {
   try {
     const { calendarId, ruleId } = c.req.valid("param");
     const rule = c.req.valid("json");
-    const provider = new GoogleCalendarProvider(c);
+    const provider = new GoogleCalendarProvider({ env: c.env });
     const data = await provider.updateAcl(calendarId, ruleId, rule);
-    return c.json({ data }, 200);
+    return c.json(data, 200);
   } catch (error) {
     return c.json(
       {
         error: "Failed to update ACL rule",
         message: error instanceof Error ? error.message : "Unknown error",
-        requestId: c.get("requestId"),
         code: "400",
       },
       400,
@@ -200,7 +197,7 @@ const deleteAclRoute = createRoute({
 app.openapi(deleteAclRoute, async (c) => {
   try {
     const { calendarId, ruleId } = c.req.valid("param");
-    const provider = new GoogleCalendarProvider(c);
+    const provider = new GoogleCalendarProvider({ env: c.env });
     await provider.deleteAcl(calendarId, ruleId);
     return c.json(null, 204);
   } catch (error) {
@@ -208,7 +205,6 @@ app.openapi(deleteAclRoute, async (c) => {
       {
         error: "Failed to delete ACL rule",
         message: error instanceof Error ? error.message : "Unknown error",
-        requestId: c.get("requestId"),
         code: "400",
       },
       400,

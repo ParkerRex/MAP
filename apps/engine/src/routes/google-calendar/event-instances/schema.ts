@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { EventSchema } from "../events/schema";
 
-const DefaultReminderSchema = z.object({
+export const DefaultReminderSchema = z.object({
   method: z.string().openapi({ example: "email" }),
   minutes: z.number().openapi({ example: 30 }),
 });

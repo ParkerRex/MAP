@@ -1,12 +1,11 @@
+import type { CalendarSchema } from "@/routes/google-calendar/calendars/schema";
 import type { z } from "zod";
-import {
-  type CalendarListEntrySchema,
-  type CalendarSchema,
-  type ChannelSchema,
-  type EventSchema,
-  FreeBusyRequestSchema,
-} from "../routes/google-calendar/schema";
-import type { BodyMeasurementSchema } from "../routes/whoop/schema";
+import type {
+  CalendarListEntrySchema,
+  ChannelSchema,
+} from "../routes/google-calendar/calendar-list/schema";
+import type { EventSchema } from "../routes/google-calendar/events/schema";
+import type { BodyMeasurementSchema } from "../routes/whoop/body-measurements/schema";
 import { GoogleCalendarProvider } from "./google-calendar/google-calendar-provider";
 import type { ProviderParams } from "./types";
 import { WhoopProvider } from "./whoop/whoop-provider";
@@ -36,7 +35,7 @@ export class Provider {
 
   async getCalendarList(params?: Record<string, unknown>) {
     if (this.#provider instanceof GoogleCalendarProvider) {
-      return this.#provider.getCalendarList(params);
+      return this.#provider.getCalendarList();
     }
     throw new Error("Method not supported for this provider");
   }

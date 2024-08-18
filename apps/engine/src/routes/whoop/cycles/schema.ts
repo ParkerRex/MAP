@@ -18,7 +18,7 @@ export const GetCyclesSchema = z
   })
   .openapi("GetCyclesSchema");
 
-const CycleScoreSchema = z
+export const CycleScoreSchema = z
   .object({
     strain: z.number().openapi({ example: 5.2951527 }),
     kilojoule: z.number().openapi({ example: 8288.297 }),
@@ -27,7 +27,7 @@ const CycleScoreSchema = z
   })
   .openapi("CycleScoreSchema");
 
-const CycleSchema = z
+export const CycleSchema = z
   .object({
     id: z.number().int().openapi({ example: 93845 }),
     user_id: z.number().int().openapi({ example: 10129 }),

@@ -39,7 +39,7 @@ const ActivityScoreSchema = z
   })
   .openapi("ActivityScoreSchema");
 
-const ActivitySchema = z
+export const ActivitySchema = z
   .object({
     id: z.number().int().openapi({ example: 1043 }),
     user_id: z.number().int().openapi({ example: 9012 }),

@@ -5,11 +5,9 @@ export const ChannelSchema = z
     kind: z.string().openapi({ example: "api#channel" }),
     id: z.string().openapi({ example: "channelId" }),
     resourceId: z.string().openapi({ example: "resourceId" }),
-    resourceUri: z
-      .string()
-      .openapi({
-        example: "https://www.googleapis.com/calendar/v3/channels/stop",
-      }),
+    resourceUri: z.string().openapi({
+      example: "https://www.googleapis.com/calendar/v3/channels/stop",
+    }),
     token: z.string().optional().openapi({ example: "token" }),
     expiration: z
       .string()

@@ -1,17 +1,22 @@
 import { type calendar_v3, google } from "googleapis";
-import { z } from "zod";
+import type { z } from "zod";
+import { AclSchema } from "../../routes/google-calendar/acl/schema";
 import {
-  AclSchema,
   CalendarListEntrySchema,
-  CalendarSchema,
-  ChannelSchema,
-  ColorsSchema,
+  CalendarListSchema,
+} from "../../routes/google-calendar/calendar-list/schema";
+import { CalendarSchema } from "../../routes/google-calendar/calendars/schema";
+import { ChannelSchema } from "../../routes/google-calendar/channels/schema";
+import { ColorsSchema } from "../../routes/google-calendar/colors/schema";
+import {
   EventSchema,
   EventsSchema,
+} from "../../routes/google-calendar/events/schema";
+import {
   type FreeBusyRequestSchema,
   FreeBusyResponseSchema,
-  SettingsSchema,
-} from "../../routes/google-calendar/schema";
+} from "../../routes/google-calendar/freebusy/schema";
+import { SettingsSchema } from "../../routes/google-calendar/settings/schema";
 import type { Bindings } from "../../types";
 
 export class GoogleCalendarProvider {
@@ -51,7 +56,10 @@ export class GoogleCalendarProvider {
     return EventSchema.parse(result.data);
   }
 
-  async watchEvents(calendarId: string, requestBody: Record<string, unknown>) {
+  async watchEvents(
+    calendarId: string,
+    requestBody: z.infer<typeof ChannelSchema>,
+  ) {
     const result = await this.calendar.events.watch({
       calendarId,
       requestBody,
@@ -59,7 +67,7 @@ export class GoogleCalendarProvider {
     return ChannelSchema.parse(result.data);
   }
 
-  async watchSettings(requestBody: Record<string, unknown>) {
+  async watchSettings(requestBody: z.infer<typeof ChannelSchema>) {
     const result = await this.calendar.settings.watch({ requestBody });
     return ChannelSchema.parse(result.data);
   }
@@ -91,7 +99,7 @@ export class GoogleCalendarProvider {
 
   async getCalendarList() {
     const result = await this.calendar.calendarList.list();
-    return z.array(CalendarListEntrySchema).parse(result.data.items);
+    return CalendarListSchema.parse(result.data);
   }
 
   async getCalendarListEntry(calendarId: string) {
@@ -170,7 +178,7 @@ export class GoogleCalendarProvider {
 
   async listEvents(calendarId: string, params: Record<string, unknown>) {
     const result = await this.calendar.events.list({ calendarId, ...params });
-    return z.array(EventSchema).parse(result.data.items);
+    return EventsSchema.parse(result.data);
   }
 
   async insertEvent(calendarId: string, event: z.infer<typeof EventSchema>) {
@@ -214,7 +222,7 @@ export class GoogleCalendarProvider {
 
   async getSettings() {
     const result = await this.calendar.settings.list();
-    return z.array(SettingsSchema).parse(result.data.items);
+    return SettingsSchema.parse(result.data);
   }
 
   async getSetting(settingId: string) {

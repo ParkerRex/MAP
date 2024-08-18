@@ -1,28 +1,34 @@
+import type { EventInstancesSchema } from "@/routes/google-calendar/event-instances/schema";
 import type { calendar_v3 } from "googleapis";
 import type { z } from "zod";
+import type { AclSchema } from "../routes/google-calendar/acl/schema";
+import {
+  CalendarListEntrySchema,
+  type CalendarListSchema,
+} from "../routes/google-calendar/calendar-list/schema";
+import type { CalendarSchema } from "../routes/google-calendar/calendars/schema";
+import type { ChannelSchema } from "../routes/google-calendar/channels/schema";
+import type { ColorsSchema } from "../routes/google-calendar/colors/schema";
+import {
+  type EventSchema,
+  EventsSchema,
+} from "../routes/google-calendar/events/schema";
 import type {
-  AclSchema,
-  CalendarListSchema,
-  CalendarSchema,
-  ChannelSchema,
-  ColorsSchema,
-  EventInstancesSchema,
-  EventSchema,
   FreeBusyRequestSchema,
   FreeBusyResponseSchema,
-  SettingsSchema,
-} from "../routes/google-calendar/schema";
+} from "../routes/google-calendar/freebusy/schema";
+import type { SettingsSchema } from "../routes/google-calendar/settings/schema";
+import type { ActivitySchema } from "../routes/whoop/activities/schema";
+import type { BodyMeasurementSchema } from "../routes/whoop/body-measurements/schema";
+import type { CycleSchema } from "../routes/whoop/cycles/schema";
+import type { ProfileSchema } from "../routes/whoop/profile/schema";
+import type { RecoverySchema } from "../routes/whoop/recoveries/schema";
+import type { SleepSchema } from "../routes/whoop/sleeps/schema";
 import type {
-  ActivitySchema,
-  BodyMeasurementSchema,
-  CycleSchema,
-  ProfileSchema,
-  RecoverySchema,
-  SleepSchema,
   TeamMemberSchema,
   TeamSchema,
-  WorkoutSchema,
-} from "../routes/whoop/schema";
+} from "../routes/whoop/teams/schema";
+import type { WorkoutSchema } from "../routes/whoop/workouts/schema";
 
 export interface Provider {
   // Google Calendar methods

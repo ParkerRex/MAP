@@ -18,7 +18,7 @@ export const GetRecoveriesSchema = z
   })
   .openapi("GetRecoveriesSchema");
 
-const RecoveryScoreSchema = z
+export const RecoveryScoreSchema = z
   .object({
     user_calibrating: z.boolean().openapi({ example: false }),
     recovery_score: z.number().int().openapi({ example: 44 }),
@@ -29,7 +29,7 @@ const RecoveryScoreSchema = z
   })
   .openapi("RecoveryScoreSchema");
 
-const RecoverySchema = z
+export const RecoverySchema = z
   .object({
     cycle_id: z.number().int().openapi({ example: 93845 }),
     sleep_id: z.number().int().openapi({ example: 10235 }),

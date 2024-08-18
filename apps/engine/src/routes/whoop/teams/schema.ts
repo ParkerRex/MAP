@@ -12,7 +12,7 @@ export const GetTeamMembersSchema = z
   })
   .openapi("GetTeamMembersSchema");
 
-const TeamSchema = z
+export const TeamSchema = z
   .object({
     id: z.string().openapi({ example: "team123" }),
     name: z.string().openapi({ example: "My Team" }),
@@ -20,7 +20,7 @@ const TeamSchema = z
   })
   .openapi("TeamSchema");
 
-const TeamMemberSchema = z
+export const TeamMemberSchema = z
   .object({
     id: z.string().openapi({ example: "user123" }),
     name: z.string().openapi({ example: "John Doe" }),

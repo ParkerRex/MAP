@@ -95,18 +95,19 @@ const getCalendarListEntryRoute = createRoute({
 });
 
 app.openapi(getCalendarListEntryRoute, async (c) => {
+  const { calendarId } = c.req.valid("param");
+  const googleCalendarProvider = new GoogleCalendarProvider(c.env as Bindings);
+
   try {
-    const { calendarId } = c.req.valid("param");
-    const provider = new GoogleCalendarProvider(c);
-    const data = await provider.getCalendarListEntry(calendarId);
-    return c.json({ data }, 200);
+    const data = await googleCalendarProvider.getCalendarList(calendarId);
+    return c.json(data, 200);
   } catch (error) {
     return c.json(
       {
-        error: "Failed to retrieve calendar list entry",
+        error: "Failed to get calendar list entry",
         message: error instanceof Error ? error.message : "Unknown error",
-        requestId: c.get("requestId"),
-        code: "400",
+        requestId: c.env.requestId,
+        code: "GOOGLE_CALENDAR_LIST_ERROR",
       },
       400,
     );

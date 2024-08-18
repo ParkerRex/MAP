@@ -18,7 +18,7 @@ export const GetWorkoutsSchema = z
   })
   .openapi("GetWorkoutsSchema");
 
-const WorkoutScoreSchema = z
+export const WorkoutScoreSchema = z
   .object({
     strain: z.number().openapi({ example: 8.2463 }),
     average_heart_rate: z.number().int().openapi({ example: 123 }),
@@ -39,7 +39,7 @@ const WorkoutScoreSchema = z
   })
   .openapi("WorkoutScoreSchema");
 
-const WorkoutSchema = z
+export const WorkoutSchema = z
   .object({
     id: z.number().int().openapi({ example: 1043 }),
     user_id: z.number().int().openapi({ example: 9012 }),
