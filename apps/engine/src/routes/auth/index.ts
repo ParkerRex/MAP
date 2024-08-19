@@ -88,10 +88,7 @@ const refreshTokenRoute = createRoute({
 
 authRoutes.openapi(googleAuthRoute, async (c) => {
   const { code, redirectUri } = c.req.valid("json");
-  const googleCalendarProvider = new GoogleCalendarProvider({
-    kv: c.env.KV,
-    envs: c.env,
-  });
+  const googleCalendarProvider = new GoogleCalendarProvider({ env: c.env });
 
   try {
     const tokens = await googleCalendarProvider.getTokens(code, redirectUri);
@@ -106,10 +103,7 @@ authRoutes.openapi(googleAuthRoute, async (c) => {
 
 authRoutes.openapi(whoopAuthRoute, async (c) => {
   const { code, redirectUri } = c.req.valid("json");
-  const whoopProvider = new WhoopProvider({
-    kv: c.env.KV,
-    envs: c.env,
-  });
+  const whoopProvider = new WhoopProvider({ env: c.env });
 
   try {
     const tokens = await whoopProvider.getTokens(code, redirectUri);
@@ -128,16 +122,10 @@ authRoutes.openapi(refreshTokenRoute, async (c) => {
   try {
     let newTokens;
     if (provider === "google") {
-      const googleCalendarProvider = new GoogleCalendarProvider({
-        kv: c.env.KV,
-        envs: c.env,
-      });
+      const googleCalendarProvider = new GoogleCalendarProvider({ env: c.env });
       newTokens = await googleCalendarProvider.refreshToken(refreshToken);
     } else {
-      const whoopProvider = new WhoopProvider({
-        kv: c.env.KV,
-        envs: c.env,
-      });
+      const whoopProvider = new WhoopProvider({ env: c.env });
       newTokens = await whoopProvider.refreshToken(refreshToken);
     }
     return c.json(newTokens);

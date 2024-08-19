@@ -1,7 +1,6 @@
 import type { EventInstancesSchema } from "@/routes/google-calendar/event-instances/schema";
 import type { calendar_v3 } from "googleapis";
 import type { z } from "zod";
-import type { AclSchema } from "../routes/google-calendar/acl/schema";
 import {
   CalendarListEntrySchema,
   type CalendarListSchema,
@@ -30,9 +29,14 @@ import type {
 } from "../routes/whoop/teams/schema";
 import type { WorkoutSchema } from "../routes/whoop/workouts/schema";
 
+type RefreshTokenResponse = {
+  access_token: string;
+  expires_in: number;
+  token_type: string;
+};
+
 export interface Provider {
   // Google Calendar methods
-  getAcl: (calendarId: string) => Promise<z.infer<typeof AclSchema>>;
   getCalendarList: (
     params?: calendar_v3.Params$Resource$Calendarlist$List,
   ) => Promise<z.infer<typeof CalendarListSchema>>;
@@ -97,13 +101,15 @@ export interface Provider {
   getEventInstances: (
     calendarId: string,
     eventId: string,
-    params: any,
+    params: calendar_v3.Params$Resource$Events$Instances,
   ) => Promise<z.infer<typeof EventInstancesSchema>>;
   quickAddEvent: (
     calendarId: string,
     text: string,
   ) => Promise<z.infer<typeof EventSchema>>;
-  watchSettings: (requestBody: any) => Promise<z.infer<typeof ChannelSchema>>;
+  watchSettings: (
+    requestBody: calendar_v3.Schema$Channel,
+  ) => Promise<z.infer<typeof ChannelSchema>>;
 
   // WHOOP methods
   getProfile: (accessToken: string) => Promise<z.infer<typeof ProfileSchema>>;
@@ -146,5 +152,5 @@ export interface Provider {
   ) => Promise<z.infer<typeof TeamMemberSchema>[]>;
 
   // Common method
-  refreshToken: (refreshToken: string) => Promise<any>;
+  refreshToken(refreshToken: string): Promise<RefreshTokenResponse>;
 }

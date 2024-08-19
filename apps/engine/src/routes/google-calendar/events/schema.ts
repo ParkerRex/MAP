@@ -160,12 +160,10 @@ export const EventSchema = z
               type: z.string().openapi({ example: "hangoutsMeet" }),
             }),
             name: z.string().openapi({ example: "Google Meet" }),
-            iconUri: z
-              .string()
-              .openapi({
-                example:
-                  "https://fonts.gstatic.com/s/i/productlogos/meet_2020q4/v1/web-24dp/logo_meet_2020q4_color_1x_web_24dp.png",
-              }),
+            iconUri: z.string().openapi({
+              example:
+                "https://fonts.gstatic.com/s/i/productlogos/meet_2020q4/v1/web-24dp/logo_meet_2020q4_color_1x_web_24dp.png",
+            }),
           })
           .optional(),
         conferenceId: z
@@ -233,12 +231,10 @@ export const EventSchema = z
             .openapi({ example: "https://drive.google.com/file/d/..." }),
           title: z.string().openapi({ example: "Attachment" }),
           mimeType: z.string().openapi({ example: "application/pdf" }),
-          iconLink: z
-            .string()
-            .openapi({
-              example:
-                "https://drive-thirdparty.googleusercontent.com/16/type/application/pdf",
-            }),
+          iconLink: z.string().openapi({
+            example:
+              "https://drive-thirdparty.googleusercontent.com/16/type/application/pdf",
+          }),
           fileId: z.string().openapi({ example: "fileId" }),
         }),
       )

@@ -1,6 +1,5 @@
 import { type calendar_v3, google } from "googleapis";
 import type { z } from "zod";
-import { AclSchema } from "../../routes/google-calendar/acl/schema";
 import {
   CalendarListEntrySchema,
   CalendarListSchema,
@@ -30,9 +29,45 @@ export class GoogleCalendarProvider {
     this.calendar = google.calendar({ version: "v3", auth });
   }
 
-  async getAcl(calendarId: string) {
-    const result = await this.calendar.acl.list({ calendarId });
-    return AclSchema.parse(result.data);
+  async clearCalendar(calendarId: string) {
+    await this.calendar.calendars.clear({ calendarId });
+  }
+
+  async deleteCalendar(calendarId: string) {
+    await this.calendar.calendars.delete({ calendarId });
+  }
+
+  async deleteCalendarListEntry(calendarId: string) {
+    await this.calendar.calendarList.delete({ calendarId });
+  }
+
+  async deleteEvent(calendarId: string, eventId: string) {
+    await this.calendar.events.delete({ calendarId, eventId });
+  }
+
+  async getCalendar(calendarId: string) {
+    const result = await this.calendar.calendars.get({ calendarId });
+    return CalendarSchema.parse(result.data);
+  }
+
+  async getCalendarList() {
+    const result = await this.calendar.calendarList.list();
+    return CalendarListSchema.parse(result.data);
+  }
+
+  async getCalendarListEntry(calendarId: string) {
+    const result = await this.calendar.calendarList.get({ calendarId });
+    return CalendarListEntrySchema.parse(result.data);
+  }
+
+  async getColors() {
+    const result = await this.calendar.colors.get();
+    return ColorsSchema.parse(result.data);
+  }
+
+  async getEvent(calendarId: string, eventId: string) {
+    const result = await this.calendar.events.get({ calendarId, eventId });
+    return EventSchema.parse(result.data);
   }
 
   async getEventInstances(
@@ -48,63 +83,21 @@ export class GoogleCalendarProvider {
     return EventsSchema.parse(result.data);
   }
 
-  async quickAddEvent(calendarId: string, text: string) {
-    const result = await this.calendar.events.quickAdd({
-      calendarId,
-      text,
+  async getSetting(settingId: string) {
+    const result = await this.calendar.settings.get({ setting: settingId });
+    return SettingsSchema.parse(result.data);
+  }
+
+  async getSettings() {
+    const result = await this.calendar.settings.list();
+    return SettingsSchema.parse(result.data);
+  }
+
+  async insertCalendar(calendar: z.infer<typeof CalendarSchema>) {
+    const result = await this.calendar.calendars.insert({
+      requestBody: calendar,
     });
-    return EventSchema.parse(result.data);
-  }
-
-  async watchEvents(
-    calendarId: string,
-    requestBody: z.infer<typeof ChannelSchema>,
-  ) {
-    const result = await this.calendar.events.watch({
-      calendarId,
-      requestBody,
-    });
-    return ChannelSchema.parse(result.data);
-  }
-
-  async watchSettings(requestBody: z.infer<typeof ChannelSchema>) {
-    const result = await this.calendar.settings.watch({ requestBody });
-    return ChannelSchema.parse(result.data);
-  }
-
-  async insertAcl(calendarId: string, rule: z.infer<typeof AclSchema>) {
-    const result = await this.calendar.acl.insert({
-      calendarId,
-      requestBody: rule,
-    });
-    return AclSchema.parse(result.data);
-  }
-
-  async updateAcl(
-    calendarId: string,
-    ruleId: string,
-    rule: z.infer<typeof AclSchema>,
-  ) {
-    const result = await this.calendar.acl.update({
-      calendarId,
-      ruleId,
-      requestBody: rule,
-    });
-    return AclSchema.parse(result.data);
-  }
-
-  async deleteAcl(calendarId: string, ruleId: string) {
-    await this.calendar.acl.delete({ calendarId, ruleId });
-  }
-
-  async getCalendarList() {
-    const result = await this.calendar.calendarList.list();
-    return CalendarListSchema.parse(result.data);
-  }
-
-  async getCalendarListEntry(calendarId: string) {
-    const result = await this.calendar.calendarList.get({ calendarId });
-    return CalendarListEntrySchema.parse(result.data);
+    return CalendarSchema.parse(result.data);
   }
 
   async insertCalendarListEntry(
@@ -116,71 +109,6 @@ export class GoogleCalendarProvider {
     return CalendarListEntrySchema.parse(result.data);
   }
 
-  async updateCalendarListEntry(
-    calendarId: string,
-    calendarListEntry: z.infer<typeof CalendarListEntrySchema>,
-  ) {
-    const result = await this.calendar.calendarList.update({
-      calendarId,
-      requestBody: calendarListEntry,
-    });
-    return CalendarListEntrySchema.parse(result.data);
-  }
-
-  async deleteCalendarListEntry(calendarId: string) {
-    await this.calendar.calendarList.delete({ calendarId });
-  }
-
-  async getCalendar(calendarId: string) {
-    const result = await this.calendar.calendars.get({ calendarId });
-    return CalendarSchema.parse(result.data);
-  }
-
-  async insertCalendar(calendar: z.infer<typeof CalendarSchema>) {
-    const result = await this.calendar.calendars.insert({
-      requestBody: calendar,
-    });
-    return CalendarSchema.parse(result.data);
-  }
-
-  async updateCalendar(
-    calendarId: string,
-    calendar: z.infer<typeof CalendarSchema>,
-  ) {
-    const result = await this.calendar.calendars.update({
-      calendarId,
-      requestBody: calendar,
-    });
-    return CalendarSchema.parse(result.data);
-  }
-
-  async deleteCalendar(calendarId: string) {
-    await this.calendar.calendars.delete({ calendarId });
-  }
-
-  async clearCalendar(calendarId: string) {
-    await this.calendar.calendars.clear({ calendarId });
-  }
-
-  async stopChannel(channel: z.infer<typeof ChannelSchema>) {
-    await this.calendar.channels.stop({ requestBody: channel });
-  }
-
-  async getColors() {
-    const result = await this.calendar.colors.get();
-    return ColorsSchema.parse(result.data);
-  }
-
-  async getEvent(calendarId: string, eventId: string) {
-    const result = await this.calendar.events.get({ calendarId, eventId });
-    return EventSchema.parse(result.data);
-  }
-
-  async listEvents(calendarId: string, params: Record<string, unknown>) {
-    const result = await this.calendar.events.list({ calendarId, ...params });
-    return EventsSchema.parse(result.data);
-  }
-
   async insertEvent(calendarId: string, event: z.infer<typeof EventSchema>) {
     const result = await this.calendar.events.insert({
       calendarId,
@@ -189,21 +117,9 @@ export class GoogleCalendarProvider {
     return EventSchema.parse(result.data);
   }
 
-  async updateEvent(
-    calendarId: string,
-    eventId: string,
-    event: z.infer<typeof EventSchema>,
-  ) {
-    const result = await this.calendar.events.update({
-      calendarId,
-      eventId,
-      requestBody: event,
-    });
-    return EventSchema.parse(result.data);
-  }
-
-  async deleteEvent(calendarId: string, eventId: string) {
-    await this.calendar.events.delete({ calendarId, eventId });
+  async listEvents(calendarId: string, params: Record<string, unknown>) {
+    const result = await this.calendar.events.list({ calendarId, ...params });
+    return EventsSchema.parse(result.data);
   }
 
   async moveEvent(calendarId: string, eventId: string, destination: string) {
@@ -220,14 +136,12 @@ export class GoogleCalendarProvider {
     return FreeBusyResponseSchema.parse(result.data);
   }
 
-  async getSettings() {
-    const result = await this.calendar.settings.list();
-    return SettingsSchema.parse(result.data);
-  }
-
-  async getSetting(settingId: string) {
-    const result = await this.calendar.settings.get({ setting: settingId });
-    return SettingsSchema.parse(result.data);
+  async quickAddEvent(calendarId: string, text: string) {
+    const result = await this.calendar.events.quickAdd({
+      calendarId,
+      text,
+    });
+    return EventSchema.parse(result.data);
   }
 
   async refreshToken(refreshToken: string) {
@@ -240,10 +154,65 @@ export class GoogleCalendarProvider {
     return credentials;
   }
 
+  async stopChannel(channel: z.infer<typeof ChannelSchema>) {
+    await this.calendar.channels.stop({ requestBody: channel });
+  }
+
+  async updateCalendar(
+    calendarId: string,
+    calendar: z.infer<typeof CalendarSchema>,
+  ) {
+    const result = await this.calendar.calendars.update({
+      calendarId,
+      requestBody: calendar,
+    });
+    return CalendarSchema.parse(result.data);
+  }
+
+  async updateCalendarListEntry(
+    calendarId: string,
+    calendarListEntry: z.infer<typeof CalendarListEntrySchema>,
+  ) {
+    const result = await this.calendar.calendarList.update({
+      calendarId,
+      requestBody: calendarListEntry,
+    });
+    return CalendarListEntrySchema.parse(result.data);
+  }
+
+  async updateEvent(
+    calendarId: string,
+    eventId: string,
+    event: z.infer<typeof EventSchema>,
+  ) {
+    const result = await this.calendar.events.update({
+      calendarId,
+      eventId,
+      requestBody: event,
+    });
+    return EventSchema.parse(result.data);
+  }
+
   async watchCalendarList(requestBody: z.infer<typeof ChannelSchema>) {
     const result = await this.calendar.calendarList.watch({
       requestBody,
     });
+    return ChannelSchema.parse(result.data);
+  }
+
+  async watchEvents(
+    calendarId: string,
+    requestBody: z.infer<typeof ChannelSchema>,
+  ) {
+    const result = await this.calendar.events.watch({
+      calendarId,
+      requestBody,
+    });
+    return ChannelSchema.parse(result.data);
+  }
+
+  async watchSettings(requestBody: z.infer<typeof ChannelSchema>) {
+    const result = await this.calendar.settings.watch({ requestBody });
     return ChannelSchema.parse(result.data);
   }
 }

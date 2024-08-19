@@ -36,12 +36,44 @@ export class WhoopProvider {
     return response.json();
   }
 
-  async getProfile(accessToken: string) {
-    const data = await this.fetchWithAuth<z.infer<typeof ProfileSchema>>(
-      "/user/profile",
-      accessToken,
-    );
-    return ProfileSchema.parse(data);
+  async createBodyMeasurement(
+    accessToken: string,
+    measurement: z.infer<typeof BodyMeasurementSchema>,
+  ) {
+    const data = await this.fetchWithAuth<
+      z.infer<typeof BodyMeasurementSchema>
+    >("/body_measurement", accessToken, "POST", measurement);
+    return BodyMeasurementSchema.parse(data);
+  }
+
+  async getActivities(
+    accessToken: string,
+    start: string,
+    end: string,
+    limit?: number,
+    nextToken?: string,
+  ) {
+    const queryParams = new URLSearchParams({
+      start,
+      end,
+      ...(limit && { limit: limit.toString() }),
+      ...(nextToken && { nextToken }),
+    });
+    const data = await this.fetchWithAuth<{
+      records: z.infer<typeof ActivitySchema>[];
+      next_token?: string;
+    }>(`/activity?${queryParams.toString()}`, accessToken);
+    return {
+      records: z.array(ActivitySchema).parse(data.records),
+      nextToken: data.next_token,
+    };
+  }
+
+  async getBodyMeasurements(accessToken: string) {
+    const data = await this.fetchWithAuth<
+      z.infer<typeof BodyMeasurementSchema>
+    >("/body_measurement", accessToken);
+    return BodyMeasurementSchema.parse(data);
   }
 
   async getCycles(
@@ -67,27 +99,12 @@ export class WhoopProvider {
     };
   }
 
-  async getWorkouts(
-    accessToken: string,
-    start: string,
-    end: string,
-    limit?: number,
-    nextToken?: string,
-  ) {
-    const queryParams = new URLSearchParams({
-      start,
-      end,
-      ...(limit && { limit: limit.toString() }),
-      ...(nextToken && { nextToken }),
-    });
-    const data = await this.fetchWithAuth<{
-      records: z.infer<typeof WorkoutSchema>[];
-      next_token?: string;
-    }>(`/workout?${queryParams.toString()}`, accessToken);
-    return {
-      records: z.array(WorkoutSchema).parse(data.records),
-      nextToken: data.next_token,
-    };
+  async getProfile(accessToken: string) {
+    const data = await this.fetchWithAuth<z.infer<typeof ProfileSchema>>(
+      "/user/profile",
+      accessToken,
+    );
+    return ProfileSchema.parse(data);
   }
 
   async getRecoveries(
@@ -136,24 +153,23 @@ export class WhoopProvider {
     };
   }
 
-  async getBodyMeasurements(accessToken: string) {
-    const data = await this.fetchWithAuth<
-      z.infer<typeof BodyMeasurementSchema>
-    >("/body_measurement", accessToken);
-    return BodyMeasurementSchema.parse(data);
+  async getTeamMembers(accessToken: string, teamId: string) {
+    const data = await this.fetchWithAuth<z.infer<typeof TeamMemberSchema>[]>(
+      `/team/${teamId}/member`,
+      accessToken,
+    );
+    return z.array(TeamMemberSchema).parse(data);
   }
 
-  async createBodyMeasurement(
-    accessToken: string,
-    measurement: z.infer<typeof BodyMeasurementSchema>,
-  ) {
-    const data = await this.fetchWithAuth<
-      z.infer<typeof BodyMeasurementSchema>
-    >("/body_measurement", accessToken, "POST", measurement);
-    return BodyMeasurementSchema.parse(data);
+  async getTeams(accessToken: string) {
+    const data = await this.fetchWithAuth<z.infer<typeof TeamSchema>[]>(
+      "/team",
+      accessToken,
+    );
+    return z.array(TeamSchema).parse(data);
   }
 
-  async getActivities(
+  async getWorkouts(
     accessToken: string,
     start: string,
     end: string,
@@ -167,29 +183,13 @@ export class WhoopProvider {
       ...(nextToken && { nextToken }),
     });
     const data = await this.fetchWithAuth<{
-      records: z.infer<typeof ActivitySchema>[];
+      records: z.infer<typeof WorkoutSchema>[];
       next_token?: string;
-    }>(`/activity?${queryParams.toString()}`, accessToken);
+    }>(`/workout?${queryParams.toString()}`, accessToken);
     return {
-      records: z.array(ActivitySchema).parse(data.records),
+      records: z.array(WorkoutSchema).parse(data.records),
       nextToken: data.next_token,
     };
-  }
-
-  async getTeams(accessToken: string) {
-    const data = await this.fetchWithAuth<z.infer<typeof TeamSchema>[]>(
-      "/team",
-      accessToken,
-    );
-    return z.array(TeamSchema).parse(data);
-  }
-
-  async getTeamMembers(accessToken: string, teamId: string) {
-    const data = await this.fetchWithAuth<z.infer<typeof TeamMemberSchema>[]>(
-      `/team/${teamId}/member`,
-      accessToken,
-    );
-    return z.array(TeamMemberSchema).parse(data);
   }
 
   async refreshToken(refreshToken: string) {

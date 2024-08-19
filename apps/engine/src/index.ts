@@ -8,7 +8,7 @@ import {
   securityMiddleware,
 } from "./middleware";
 import { authRoutes } from "./routes/auth";
-import { googleCalendarRoutes } from "./routes/google-calendar";
+import googleCalendarRoutes from "./routes/google-calendar";
 import { whoopRoutes } from "./routes/whoop";
 import type { Bindings } from "./types";
 import { validateEnv } from "./utils/env-validator";
