@@ -2,15 +2,6 @@
 
 ## General
 
-
-lol
-fastk
-- [x] Create package.json for each package/ap
-- 
-- p
-- [ ] Setup user signup
-- [ ] /setup component form
-
 ### API Setup
 
 - [ ] Emails
