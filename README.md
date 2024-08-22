@@ -7,6 +7,7 @@
 - [ ] Emails
   - [ ] Swap out the actual templates
     - [ ] Waitlist
+aojsaiod
     - [ ] Onboarding
 - [x] Set up tsconfig files for each package/app
 - [ ] Implement separate actions for each dashboard event
