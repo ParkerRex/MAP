@@ -3,7 +3,6 @@
 ## General
 
 - [x] Create package.json for each package/app
-- [ ] Add env vars and set up plain for customer support
 - [ ] Setup user signup
 - [ ] /setup component form
 
