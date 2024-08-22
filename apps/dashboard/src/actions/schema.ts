@@ -42,15 +42,10 @@ export const updateBankAccountSchema = z.object({
   id: z.string().uuid(),
   name: z.string().optional(),
   enabled: z.boolean().optional(),
-  type: z
-    .enum(["depository", "credit", "other_asset", "loan", "other_liability"])
-    .optional()
-    .nullable(),
+  type: z.enum(["depository", "credit", "other_asset", "loan", "other_liability"]).optional().nullable(),
 });
 
-export type DeleteBankAccountFormValues = z.infer<
-  typeof deleteBankAccountSchema
->;
+export type DeleteBankAccountFormValues = z.infer<typeof deleteBankAccountSchema>;
 
 export const updateSubscriberPreferenceSchema = z.object({
   templateId: z.string(),
@@ -74,11 +69,7 @@ export const changeChartPeriodSchema = z.object({
   to: z.string().optional(),
 });
 
-export const changeTransactionsPeriodSchema = z.enum([
-  "all",
-  "income",
-  "expense",
-]);
+export const changeTransactionsPeriodSchema = z.enum(["all", "income", "expense"]);
 
 export const createAttachmentsSchema = z.array(
   z.object({
@@ -108,16 +99,6 @@ export const createFolderSchema = z.object({
   name: z.string(),
 });
 
-export const unenrollMfaSchema = z.object({
-  factorId: z.string(),
-});
-
-export const mfaVerifySchema = z.object({
-  factorId: z.string(),
-  challengeId: z.string(),
-  code: z.string(),
-});
-
 export const shareFileSchema = z.object({
   filepath: z.string(),
   expireIn: z.number(),
@@ -137,13 +118,7 @@ export const connectBankAccountSchema = z.object({
       institution_id: z.string(),
       enabled: z.boolean(),
       logo_url: z.string().nullable().optional(),
-      type: z.enum([
-        "credit",
-        "depository",
-        "other_asset",
-        "loan",
-        "other_liability",
-      ]),
+      type: z.enum(["credit", "depository", "other_asset", "loan", "other_liability"]),
     }),
   ),
 });
@@ -234,9 +209,7 @@ export const inviteTeamMembersSchema = z.object({
   revalidatePath: z.string().optional(),
 });
 
-export type InviteTeamMembersFormValues = z.infer<
-  typeof inviteTeamMembersSchema
->;
+export type InviteTeamMembersFormValues = z.infer<typeof inviteTeamMembersSchema>;
 
 export const createCategoriesSchema = z.object({
   categories: z.array(
@@ -416,9 +389,7 @@ export const createTransactionsSchema = z.object({
   ),
 });
 
-export type CreateTransactionsFormValues = z.infer<
-  typeof createTransactionsSchema
->;
+export type CreateTransactionsFormValues = z.infer<typeof createTransactionsSchema>;
 
 export const assistantSettingsSchema = z.object({
   enabled: z.boolean().optional(),

@@ -24,14 +24,6 @@ client_id = "env(GOOGLE_CLIENT_ID)"
 secret = "env(GOOGLE_SECRET)"
 redirect_uri = "http://localhost:54321/auth/v1/callback"
 
-
-[auth.external.github]
-enabled = true
-client_id = "env(GITHUB_CLIENT_ID)"
-secret = "env(GITHUB_SECRET)"
-redirect_uri = "http://localhost:54321/auth/v1/callback"
-
-
 [auth.email]
 double_confirm_changes = true
 enable_confirmations = true
@@ -42,3 +34,9 @@ enabled = true
 port = 54327
 vector_port = 54328
 backend = "postgres"
+
+[functions.new-user-sync]
+verify_jwt = false
+
+[functions.nightly-sync]
+verify_jwt = false

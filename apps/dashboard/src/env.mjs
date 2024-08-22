@@ -14,7 +14,6 @@ export const env = createEnv({
    * built with invalid env vars.
    */
   server: {
-    // PLAIN_API_KEY: z.string(),
     OPENAI_API_KEY: z.string(),
     SUPABASE_SERVICE_KEY: z.string(),
     UPSTASH_REDIS_REST_TOKEN: z.string(),
@@ -24,7 +23,6 @@ export const env = createEnv({
     NOVU_API_KEY: z.string(),
     RESEND_API_KEY: z.string(),
     OPENPANEL_SECRET_KEY: z.string(),
-    WEBHOOK_SECRET_KEY: z.string(),
   },
   /**
    * Specify your client-side environment variables schema here.
@@ -46,7 +44,6 @@ export const env = createEnv({
     NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
     NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
     NEXT_PUBLIC_SUPABASE_ID: process.env.NEXT_PUBLIC_SUPABASE_ID,
-    NEXT_PUBLIC_SENTRY_DSN: process.env.NEXT_PUBLIC_SENTRY_DSN,
     RESEND_API_KEY: process.env.RESEND_API_KEY,
     PORT: process.env.PORT,
     LOOPS_ENDPOINT: process.env.LOOPS_ENDPOINT,
@@ -62,7 +59,6 @@ export const env = createEnv({
     NEXT_PUBLIC_OPENPANEL_CLIENT_ID:
       process.env.NEXT_PUBLIC_OPENPANEL_CLIENT_ID,
     OPENPANEL_SECRET_KEY: process.env.OPENPANEL_SECRET_KEY,
-    WEBHOOK_SECRET_KEY: process.env.WEBHOOK_SECRET_KEY,
   },
   skipValidation: !!process.env.CI || !!process.env.SKIP_ENV_VALIDATION,
 });

@@ -1,7 +1,6 @@
 "use server";
 
 import { sendWebSocketMessage } from "@/lib/websocket";
-import { GoogleCalendarApi } from "@map/providers";
 
 import { calendar_v3 } from "googleapis";
 import { z } from "zod";

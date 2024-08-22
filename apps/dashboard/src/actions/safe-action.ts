@@ -1,10 +1,8 @@
 // TODO: ADD ANALYTICS CHECK BACK ONCE THATS SETUP
 import { logger } from "@/utils/logger";
-import { setupAnalytics } from "@map/events/server";
 import { client as RedisClient } from "@map/kv";
 import { getUser } from "@map/supabase/cached-queries";
 import { createClient } from "@map/supabase/server";
-import * as Sentry from "@sentry/nextjs";
 import { Ratelimit } from "@upstash/ratelimit";
 import {
   DEFAULT_SERVER_ERROR_MESSAGE,
@@ -51,7 +49,7 @@ export const actionClientWithMeta = createSafeActionClient({
 
 export const authActionClient = actionClientWithMeta
   .use(async ({ next, clientInput, metadata }) => {
-    const result = await next({ ctx: null });
+    const result = await next({ ctx: {} });
 
     if (process.env.NODE_ENV === "development") {
       logger("Input ->", clientInput);
@@ -90,23 +88,10 @@ export const authActionClient = actionClientWithMeta
       throw new Error("Unauthorized");
     }
 
-    // if (metadata) {
-    //   const analytics = await setupAnalytics({
-    //     userId: user.data.id,
-    //     fullName: user.data.full_name,
-    //   });
-
-    //   if (metadata.track) {
-    //     analytics.track(metadata.track);
-    //   }
-    // }
-
-    return Sentry.withServerActionInstrumentation(metadata.name, async () => {
-      return next({
-        ctx: {
-          supabase,
-          user: user.data,
-        },
-      });
+    return next({
+      ctx: {
+        supabase,
+        user: user.data,
+      },
     });
   });

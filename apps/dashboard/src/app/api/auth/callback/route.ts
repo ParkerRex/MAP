@@ -1,6 +1,4 @@
 import { Cookies } from "@/utils/constants";
-import { LogEvents } from "@map/events/events";
-import { setupAnalytics } from "@map/events/server";
 import { getSession } from "@map/supabase/cached-queries";
 import { createClient } from "@map/supabase/server";
 import { addYears } from "date-fns";
@@ -17,7 +15,6 @@ export async function GET(req: NextRequest) {
   const client = requestUrl.searchParams.get("client");
   const returnTo = requestUrl.searchParams.get("return_to");
   const provider = requestUrl.searchParams.get("provider");
-  const mfaSetupVisited = cookieStore.has(Cookies.MfaSetupVisited);
 
   if (client === "desktop") {
     return NextResponse.redirect(`${requestUrl.origin}/verify?code=${code}`);
@@ -33,31 +30,7 @@ export async function GET(req: NextRequest) {
     const supabase = createClient(cookieStore);
     await supabase.auth.exchangeCodeForSession(code);
 
-    const {
-      data: { session },
-    } = await getSession();
-
-    if (session) {
-      const userId = session.user.id;
-
-      const analytics = await setupAnalytics({
-        userId,
-        fullName: session?.user?.user_metadata?.full_name,
-      });
-
-      await analytics.track({
-        event: LogEvents.SignIn.name,
-        channel: LogEvents.SignIn.channel,
-      });
-    }
-  }
-
-  if (!mfaSetupVisited) {
-    cookieStore.set(Cookies.MfaSetupVisited, "true", {
-      expires: addYears(new Date(), 1),
-    });
-
-    return NextResponse.redirect(`${requestUrl.origin}/mfa/setup`);
+    await getSession();
   }
 
   if (returnTo) {

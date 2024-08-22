@@ -1,7 +1,5 @@
 "use server";
 // TODO: Full_name?
-import { LogEvents } from "@map/events/events";
-import { setupAnalytics } from "@map/events/server";
 import { getSession } from "@map/supabase/cached-queries";
 import { createClient } from "@map/supabase/server";
 import { revalidateTag } from "next/cache";
@@ -15,16 +13,6 @@ export async function signOutAction() {
 
   await supabase.auth.signOut({
     scope: "local",
-  });
-
-  const analytics = await setupAnalytics({
-    userId: session?.user.id,
-    fullName: session?.user.user_metadata?.full_name,
-  });
-
-  analytics.track({
-    event: LogEvents.SignOut.name,
-    channel: LogEvents.SignOut.channel,
   });
 
   revalidateTag(`user_${session?.user.id}`);

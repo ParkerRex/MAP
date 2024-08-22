@@ -1,13 +1,10 @@
-import { getCalendarListsQuery } from "@map/supabase";
-import { createClient } from "@map/supabase";
 import { unstable_cache } from "next/cache";
+import { authorizedApiCall } from "../../utils/express-client";
 
 export async function getCalendarLists(userId: string) {
-  const supabase = createClient();
-
   return unstable_cache(
     async () => {
-      return getCalendarListsQuery(supabase, userId);
+      return authorizedApiCall("/calendars");
     },
     ["calendar-lists", userId],
     {

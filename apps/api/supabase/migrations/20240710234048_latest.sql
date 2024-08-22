@@ -11,7 +11,6 @@ SET row_security = off;
 CREATE EXTENSION IF NOT EXISTS "pg_net" WITH SCHEMA "extensions";
 CREATE EXTENSION IF NOT EXISTS "pgsodium" WITH SCHEMA "pgsodium";
 CREATE SCHEMA IF NOT EXISTS "public";
-CREATE SCHEMA IF NOT EXISTS "users";
 CREATE SCHEMA IF NOT EXISTS "private";
 ALTER SCHEMA "private" OWNER TO "postgres";
 COMMENT ON SCHEMA "public" IS 'standard public schema';
@@ -42,7 +41,7 @@ CREATE TYPE "public"."goal_categories" AS ENUM (
 ALTER TYPE "public"."goal_categories" OWNER TO "postgres";
 -- Create tables
 -- Users table
-CREATE TABLE "users"."users" (
+CREATE TABLE "public"."users" (
   "id" UUID PRIMARY KEY,
   "created_at" TIMESTAMP WITH TIME ZONE NOT NULL,
   status VARCHAR(50) NOT NULL,
@@ -53,13 +52,13 @@ CREATE TABLE "users"."users" (
   locale VARCHAR(10),
   profile_photo_url TEXT
 );
-ALTER TABLE "users"."users" OWNER TO "postgres";
-ALTER TABLE ONLY "users"."users"
+ALTER TABLE "public"."users" OWNER TO "postgres";
+ALTER TABLE ONLY "public"."users"
 ADD CONSTRAINT "users_id_fkey" FOREIGN KEY ("id") REFERENCES "auth"."users"("id") ON DELETE CASCADE;
 -- Accounts table
-CREATE TABLE users.accounts (
+CREATE TABLE public.accounts (
   id UUID PRIMARY KEY,
-  user_id UUID NOT NULL REFERENCES users.users(id),
+  user_id UUID NOT NULL REFERENCES public.users(id),
   created_at TIMESTAMP WITH TIME ZONE NOT NULL,
   is_primary BOOLEAN NOT NULL,
   email VARCHAR(255) NOT NULL,
@@ -72,27 +71,27 @@ CREATE TABLE users.accounts (
   hosted_domain VARCHAR(255),
   UNIQUE (provider_name, provider_user_id)
 );
-ALTER TABLE "users"."accounts" OWNER TO "postgres";
+ALTER TABLE "public"."accounts" OWNER TO "postgres";
 -- Account scopes table
-CREATE TABLE users.account_scopes (
-  account_id UUID REFERENCES users.accounts(id),
+CREATE TABLE public.account_scopes (
+  account_id UUID REFERENCES public.accounts(id),
   scope TEXT NOT NULL,
   PRIMARY KEY (account_id, scope)
 );
-ALTER TABLE "users"."account_scopes" OWNER TO "postgres";
+ALTER TABLE "public"."account_scopes" OWNER TO "postgres";
 -- Account info table (for additional provider-specific information)
-CREATE TABLE users.account_info (
-  account_id UUID PRIMARY KEY REFERENCES users.accounts(id),
+CREATE TABLE public.account_info (
+  account_id UUID PRIMARY KEY REFERENCES public.accounts(id),
   info JSONB NOT NULL
 );
-ALTER TABLE "users"."account_info" OWNER TO "postgres";
+ALTER TABLE "public"."account_info" OWNER TO "postgres";
 -- Access tokens table (if you want to store them, consider security implications)
-CREATE TABLE users.access_tokens (
-  user_id UUID PRIMARY KEY REFERENCES users.users(id),
+CREATE TABLE public.access_tokens (
+  user_id UUID PRIMARY KEY REFERENCES public.users(id),
   token TEXT NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE NOT NULL
 );
-ALTER TABLE "users"."access_tokens" OWNER TO "postgres";
+ALTER TABLE "public"."access_tokens" OWNER TO "postgres";
 CREATE TABLE IF NOT EXISTS "public"."folder" (
   "id" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   "name" VARCHAR(255) NOT NULL,
@@ -123,7 +122,7 @@ CREATE TABLE IF NOT EXISTS "public"."headers" (
   "deleted_at" TIMESTAMPTZ
 );
 ALTER TABLE "public"."headers" OWNER TO "postgres";
-CREATE TABLE IF NOT EXISTS "users"."integrations" (
+CREATE TABLE IF NOT EXISTS "public"."integrations" (
   "id" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   "user_id" UUID NOT NULL,
   "provider" public.integration_provider NOT NULL,
@@ -134,7 +133,7 @@ CREATE TABLE IF NOT EXISTS "users"."integrations" (
   "updated_at" TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
   UNIQUE (user_id, provider)
 );
-ALTER TABLE "users"."integrations" OWNER TO "postgres";
+ALTER TABLE "public"."integrations" OWNER TO "postgres";
 CREATE TABLE IF NOT EXISTS "public"."notes" (
   "id" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   "title" VARCHAR,
@@ -197,14 +196,13 @@ CREATE TABLE IF NOT EXISTS "public"."tasks" (
 );
 ALTER TABLE "public"."tasks" OWNER TO "postgres";
 -- Create functions
-CREATE OR REPLACE FUNCTION "users"."handle_new_user"() RETURNS TRIGGER LANGUAGE plpgsql SECURITY DEFINER
+CREATE OR REPLACE FUNCTION "public"."handle_new_user"() RETURNS TRIGGER LANGUAGE plpgsql SECURITY DEFINER
 SET search_path = public AS $$ BEGIN
-INSERT INTO users.users (
+INSERT INTO public.users (
     id,
     created_at,
     status,
     email,
-    username,
     display_name,
     first_name,
     last_name,
@@ -216,7 +214,6 @@ VALUES (
     NEW.created_at,
     'active',
     NEW.email,
-    NEW.raw_user_meta_data->>'username',
     NEW.raw_user_meta_data->>'display_name',
     NEW.raw_user_meta_data->>'first_name',
     NEW.raw_user_meta_data->>'last_name',
@@ -226,35 +223,35 @@ VALUES (
 RETURN NEW;
 END;
 $$;
-ALTER FUNCTION "users"."handle_new_user"() OWNER TO "postgres";
+ALTER FUNCTION "public"."handle_new_user"() OWNER TO "postgres";
 -- Create triggers
 CREATE TRIGGER on_auth_user_created
 AFTER
-INSERT ON auth.users FOR EACH ROW EXECUTE FUNCTION users.handle_new_user();
+INSERT ON auth.users FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
 -- Set up RLS policies
 ALTER TABLE "public"."goals" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "public"."headers" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "public"."projects" ENABLE ROW LEVEL SECURITY;
-ALTER TABLE "users"."users" ENABLE ROW LEVEL SECURITY;
-ALTER TABLE "users"."integrations" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "public"."users" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "public"."integrations" ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Allow authenticated user to view & modify their own data" ON "public"."goals" TO authenticated USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
 CREATE POLICY "Allow authenticated user to view & modify their own data" ON "public"."headers" TO authenticated USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
 CREATE POLICY "Allow authenticated user to view & modify their own data" ON "public"."projects" TO authenticated USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
-CREATE POLICY "Users can select their own profile." ON "users"."users" FOR
+CREATE POLICY "Users can select their own profile." ON "public"."users" FOR
 SELECT USING (("auth"."uid"() = "id"));
-CREATE POLICY "Users can insert their own profile." ON "users"."users" FOR
+CREATE POLICY "Users can insert their own profile." ON "public"."users" FOR
 INSERT WITH CHECK (("auth"."uid"() = "id"));
-CREATE POLICY "Users can update own profile." ON "users"."users" FOR
+CREATE POLICY "Users can update own profile." ON "public"."users" FOR
 UPDATE USING (("auth"."uid"() = "id"));
-CREATE POLICY "Users can view their own integrations" ON "users"."integrations" FOR
+CREATE POLICY "Users can view their own integrations" ON "public"."integrations" FOR
 SELECT USING (auth.uid() = user_id);
-CREATE POLICY "Users can insert their own integrations" ON "users"."integrations" FOR
+CREATE POLICY "Users can insert their own integrations" ON "public"."integrations" FOR
 INSERT WITH CHECK (auth.uid() = user_id);
-CREATE POLICY "Users can update their own integrations" ON "users"."integrations" FOR
+CREATE POLICY "Users can update their own integrations" ON "public"."integrations" FOR
 UPDATE USING (auth.uid() = user_id);
-CREATE POLICY "Users can delete their own integrations" ON "users"."integrations" FOR DELETE USING (auth.uid() = user_id);
+CREATE POLICY "Users can delete their own integrations" ON "public"."integrations" FOR DELETE USING (auth.uid() = user_id);
 -- Add foreign key constraints
-ALTER TABLE "users"."integrations"
+ALTER TABLE "public"."integrations"
 ADD CONSTRAINT "integration_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "auth"."users"("id") ON DELETE CASCADE;
 ALTER TABLE "public"."folder"
 ADD CONSTRAINT "folder_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "auth"."users"("id") ON DELETE
@@ -285,9 +282,9 @@ ADD CONSTRAINT "task_assigned_to_fkey" FOREIGN KEY ("assigned_to") REFERENCES "a
   ADD CONSTRAINT "task_deleted_by_fkey" FOREIGN KEY ("deleted_by") REFERENCES "auth"."users"("id"),
   ADD CONSTRAINT "task_updated_by_fkey" FOREIGN KEY ("updated_by") REFERENCES "auth"."users"("id");
 -- Grant necessary permissions
-GRANT ALL ON TABLE "users"."users" TO "anon";
-GRANT ALL ON TABLE "users"."users" TO "authenticated";
-GRANT ALL ON TABLE "users"."users" TO "service_role";
+GRANT ALL ON TABLE "public"."users" TO "anon";
+GRANT ALL ON TABLE "public"."users" TO "authenticated";
+GRANT ALL ON TABLE "public"."users" TO "service_role";
 GRANT USAGE ON SCHEMA "public" TO "postgres",
   "anon",
   "authenticated",
@@ -321,6 +318,6 @@ GRANT ALL ON SEQUENCES TO "postgres",
   "authenticated",
   "service_role";
 COMMENT ON SCHEMA "public" IS 'standard public schema';
-GRANT ALL ON FUNCTION "users"."handle_new_user"() TO "anon";
-GRANT ALL ON FUNCTION "users"."handle_new_user"() TO "authenticated";
-GRANT ALL ON FUNCTION "users"."handle_new_user"() TO "service_role";
+GRANT ALL ON FUNCTION "public"."handle_new_user"() TO "anon";
+GRANT ALL ON FUNCTION "public"."handle_new_user"() TO "authenticated";
+GRANT ALL ON FUNCTION "public"."handle_new_user"() TO "service_role";
