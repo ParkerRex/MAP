@@ -2,6 +2,8 @@
 
 ## General
 
+lol
+
 - [x] Create package.json for each package/app
 - [ ] Setup user signup
 - [ ] /setup component form
