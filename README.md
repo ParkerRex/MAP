@@ -24,7 +24,7 @@ fastk
 - [ ] Configure Upstash setup
 - [ ] Add back my custom scripts for resetting the db
 - [ ] Set up Job for google calendar fetch and ongoing every few minutes
-test
+testkkkk
 #### Log
 
 - [x] Merge pull request #208 from midday-ai/feature/inbox-ocr-provider
