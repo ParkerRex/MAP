@@ -17,7 +17,7 @@
 - [ ] Create separate queries for Supabase functions
 - [x] Find and replace all UI components
 - [ ] Set up Resend for email functionality
-- [ ] Implement email loops
+
 - [ ] Configure Upstash setup
 - [ ] Add back my custom scripts for resetting the db
 - [ ] Set up Job for google calendar fetch and ongoing every few minutes
