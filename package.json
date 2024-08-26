@@ -19,7 +19,8 @@
     "jobs:dashboard": "turbo jobs --filter=@map/dashboard",
     "format": "biome format --write .",
     "lint": "turbo lint && manypkg check",
-    "typecheck": "turbo typecheck"
+    "typecheck": "turbo typecheck",
+    "deploy": "turbo run clean && turbo run build && pm2 restart all"
   },
   "dependencies": {
     "@biomejs/biome": "1.8.3",

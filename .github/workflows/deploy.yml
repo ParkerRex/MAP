@@ -9,19 +9,6 @@ jobs:
     runs-on: self-hosted
     steps:
       - uses: actions/checkout@v3
-      
-      - name: Debug information
-        run: |
-          whoami
-          id
-          groups
-          sudo -l
-          ls -l /usr/bin/apt-get /usr/bin/apt
-
-      - name: Install system dependencies
-        run: |
-          sudo -n apt-get update || echo "apt-get update failed"
-          sudo -n apt-get install -y build-essential libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev pkg-config || echo "apt-get install failed"
 
       - name: Setup Bun
         uses: oven-sh/setup-bun@v1
@@ -29,16 +16,13 @@ jobs:
           bun-version: latest
 
       - name: Install dependencies
-        run: bun install
+        run: bun install --frozen-lockfile
 
-      - name: Build
-        run: bun run build
-
-      - name: Start or Restart PM2 processes
+      - name: Build and deploy
         run: |
-          pm2 delete all || true
-          pm2 start ecosystem.config.js
-          pm2 save
+          bun run deploy
+        env:
+          NODE_OPTIONS: "--max-old-space-size=4096"
 
       - name: Reload Nginx
-        run: sudo -n systemctl reload nginx
+        run: sudo systemctl reload nginx
