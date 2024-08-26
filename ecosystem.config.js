@@ -36,5 +36,17 @@ module.exports = {
       restart_delay: 4000,
       max_restarts: 10,
     },
+    {
+      name: "email",
+      script: "bun",
+      args: "run start",
+      cwd: "/home/github-runner/actions-runner/_work/map/map/packages/email",
+      env: { NODE_ENV: "production" },
+      max_memory_restart: "512M",
+      error_file: "/var/log/email-error.log",
+      out_file: "/var/log/email-out.log",
+      restart_delay: 4000,
+      max_restarts: 10,
+    },
   ],
 };
