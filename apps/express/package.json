@@ -5,7 +5,9 @@
   "main": "index.ts",
   "scripts": {
     "start": "bun run index.ts",
-    "dev": "bun --watch run index.ts"
+    "dev": "bun --watch run index.ts",
+    "build": "bun build index.ts --target node --outdir ./dist",
+    "serve": "bun run ./dist/index.js"
   },
   "dependencies": {
     "@map/supabase": "workspace:*",
