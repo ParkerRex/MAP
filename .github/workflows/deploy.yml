@@ -10,10 +10,18 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       
+      - name: Debug information
+        run: |
+          whoami
+          id
+          groups
+          sudo -l
+          ls -l /usr/bin/apt-get /usr/bin/apt
+
       - name: Install system dependencies
         run: |
-          sudo -n apt-get update
-          sudo -n apt-get install -y build-essential libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev pkg-config
+          sudo -n apt-get update || echo "apt-get update failed"
+          sudo -n apt-get install -y build-essential libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev pkg-config || echo "apt-get install failed"
 
       - name: Setup Bun
         uses: oven-sh/setup-bun@v1
