@@ -5,8 +5,8 @@ on:
     branches: [main]
 
 jobs:
-  deploy:
-    runs-on: self-hosted
+  build:
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
 
@@ -18,11 +18,30 @@ jobs:
       - name: Install dependencies
         run: bun install
 
-      - name: Build and deploy
+      - name: Build
+        run: bun run build
+
+      - name: Create artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: dist
+          path: .
+
+  deploy:
+    needs: build
+    runs-on: self-hosted
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: dist
+          path: /home/github-runner/actions-runner/_work/map/map
+
+      - name: Deploy to server
         run: |
-          bun run deploy
-        env:
-          NODE_OPTIONS: "--max-old-space-size=4096"
+          cd /home/github-runner/actions-runner/_work/map/map
+          bun install --production
+          pm2 restart all
 
       - name: Reload Nginx
         run: sudo systemctl reload nginx
