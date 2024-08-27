@@ -41,7 +41,7 @@ jobs:
         run: |
           cd /home/github-runner/actions-runner/_work/map/map
           bun install --production
-          pm2 restart all
+          pm2 reload ecosystem.config.js --update-env
 
       - name: Reload Nginx
         run: sudo systemctl reload nginx
