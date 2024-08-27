@@ -1,0 +1,22 @@
+name: Production Deployment - Dashboard
+
+on:
+  push:
+    branches:
+      - main
+jobs:
+  deploy-production:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+      - run : |
+          bun install
+          bun run build
+          pm2 stop 0 
+          pm2 start 0 
+          pm2 save
+          sudo service nginx restart
