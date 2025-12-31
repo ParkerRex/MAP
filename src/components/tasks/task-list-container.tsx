@@ -1,7 +1,7 @@
 "use client";
-import type { TaskWithTags } from "@/types";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import type { FC } from "react";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import type { TaskWithTags } from "@/types";
 import TaskItem from "./task-item";
 
 type SimpleTag = { id: string; title: string };
@@ -41,9 +41,7 @@ const TaskListContainer: FC<TaskListContainerProps> = ({
     <ScrollArea className="flex-1 overflow-auto p-4 md:p-6">
       <div className="container mx-auto">
         {filteredTasks.length === 0 ? (
-          <div className="text-center text-muted-foreground">
-            We can&apos;t find your task!
-          </div>
+          <div className="text-center text-muted-foreground">We can&apos;t find your task!</div>
         ) : (
           <div className="grid gap-2">
             {filteredTasks.map((task) => (

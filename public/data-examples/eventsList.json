@@ -1212,9 +1212,7 @@
         "dateTime": "2024-05-28T14:00:00-04:00",
         "timeZone": "America/New_York"
       },
-      "recurrence": [
-        "RRULE:FREQ=WEEKLY;UNTIL=20240611T035959Z;BYDAY=FR,MO,TH,TU,WE"
-      ],
+      "recurrence": ["RRULE:FREQ=WEEKLY;UNTIL=20240611T035959Z;BYDAY=FR,MO,TH,TU,WE"],
       "iCalUID": "5hr38afent4pvqtsdv0cli33ll@google.com",
       "sequence": 1,
       "reminders": {
@@ -1313,9 +1311,7 @@
         "dateTime": "2024-05-29T06:45:00-04:00",
         "timeZone": "America/New_York"
       },
-      "recurrence": [
-        "RRULE:FREQ=WEEKLY;WKST=SU;UNTIL=20240612T035959Z;BYDAY=WE,FR,MO"
-      ],
+      "recurrence": ["RRULE:FREQ=WEEKLY;WKST=SU;UNTIL=20240612T035959Z;BYDAY=WE,FR,MO"],
       "iCalUID": "7uaqkn0h069osptj3ruo0r962b@google.com",
       "sequence": 3,
       "reminders": {
@@ -1551,9 +1547,7 @@
         "dateTime": "2024-05-28T06:45:00-04:00",
         "timeZone": "America/New_York"
       },
-      "recurrence": [
-        "RRULE:FREQ=WEEKLY;WKST=SU;UNTIL=20240625T035959Z;BYDAY=TU,TH"
-      ],
+      "recurrence": ["RRULE:FREQ=WEEKLY;WKST=SU;UNTIL=20240625T035959Z;BYDAY=TU,TH"],
       "iCalUID": "2jmsgvcu9kk06jnbssf58035ea@google.com",
       "sequence": 4,
       "reminders": {
@@ -1685,9 +1679,7 @@
         "dateTime": "2024-06-26T15:00:00-04:00",
         "timeZone": "America/Los_Angeles"
       },
-      "recurrence": [
-        "RRULE:FREQ=DAILY;WKST=MO;UNTIL=20240627T065959Z;INTERVAL=1"
-      ],
+      "recurrence": ["RRULE:FREQ=DAILY;WKST=MO;UNTIL=20240627T065959Z;INTERVAL=1"],
       "iCalUID": "2i25f5didmcn3qcdtscvl60sa6@google.com",
       "sequence": 5,
       "reminders": {
@@ -2221,9 +2213,7 @@
         "dateTime": "2024-06-27T17:15:00-04:00",
         "timeZone": "America/Los_Angeles"
       },
-      "recurrence": [
-        "RRULE:FREQ=DAILY;WKST=MO;UNTIL=20240702T065959Z;INTERVAL=1"
-      ],
+      "recurrence": ["RRULE:FREQ=DAILY;WKST=MO;UNTIL=20240702T065959Z;INTERVAL=1"],
       "iCalUID": "3r48f6ipt1pfg3ac1kiig4sps2@google.com",
       "sequence": 0,
       "reminders": {
@@ -2293,9 +2283,7 @@
         "dateTime": "2024-06-25T09:45:00-04:00",
         "timeZone": "America/Los_Angeles"
       },
-      "recurrence": [
-        "RRULE:FREQ=WEEKLY;WKST=SU;UNTIL=20240702T065959Z;INTERVAL=1;BYDAY=TU,TH"
-      ],
+      "recurrence": ["RRULE:FREQ=WEEKLY;WKST=SU;UNTIL=20240702T065959Z;INTERVAL=1;BYDAY=TU,TH"],
       "iCalUID": "dr3hgjh0ctmdt4jkstigf61eft@google.com",
       "sequence": 5,
       "reminders": {
@@ -3653,9 +3641,7 @@
         "dateTime": "2024-07-19T12:30:00-04:00",
         "timeZone": "America/Los_Angeles"
       },
-      "recurrence": [
-        "RRULE:FREQ=DAILY;WKST=MO;UNTIL=20240721T035959Z;INTERVAL=1"
-      ],
+      "recurrence": ["RRULE:FREQ=DAILY;WKST=MO;UNTIL=20240721T035959Z;INTERVAL=1"],
       "iCalUID": "q424nmbn85c6h5u4to2q9m4vcd@google.com",
       "sequence": 2,
       "guestsCanModify": true,
@@ -4036,9 +4022,7 @@
         "dateTime": "2024-07-21T09:30:00-04:00",
         "timeZone": "America/New_York"
       },
-      "recurrence": [
-        "RRULE:FREQ=DAILY;WKST=MO;UNTIL=20240801T035959Z;INTERVAL=1"
-      ],
+      "recurrence": ["RRULE:FREQ=DAILY;WKST=MO;UNTIL=20240801T035959Z;INTERVAL=1"],
       "iCalUID": "98b54c0dcc3349149f84c22305020a30@google.com",
       "sequence": 2,
       "guestsCanModify": true,
@@ -4072,9 +4056,7 @@
         "dateTime": "2024-08-01T22:45:00-04:00",
         "timeZone": "America/New_York"
       },
-      "recurrence": [
-        "RRULE:FREQ=WEEKLY;WKST=MO;INTERVAL=1;BYDAY=MO,TU,WE,TH,FR"
-      ],
+      "recurrence": ["RRULE:FREQ=WEEKLY;WKST=MO;INTERVAL=1;BYDAY=MO,TU,WE,TH,FR"],
       "iCalUID": "db220c22344646999efd3b9be4bce994@google.com",
       "sequence": 2,
       "guestsCanModify": true,
@@ -4213,9 +4195,7 @@
         "dateTime": "2024-07-22T09:00:00-04:00",
         "timeZone": "America/New_York"
       },
-      "recurrence": [
-        "RRULE:FREQ=DAILY;WKST=MO;UNTIL=20240802T035959Z;INTERVAL=1"
-      ],
+      "recurrence": ["RRULE:FREQ=DAILY;WKST=MO;UNTIL=20240802T035959Z;INTERVAL=1"],
       "iCalUID": "72e18eed8c0e4feb8f9d0e3d74ddf33a@google.com",
       "sequence": 2,
       "guestsCanModify": true,

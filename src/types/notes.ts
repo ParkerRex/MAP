@@ -1,5 +1,5 @@
 import type { LucideIcon } from "lucide-react";
-import type { Note as DrizzleNote, Folder as DrizzleFolder } from "@/db/schema";
+import type { Folder as DrizzleFolder, Note as DrizzleNote } from "@/db/schema";
 
 export type Note = DrizzleNote;
 

@@ -1,13 +1,10 @@
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import { notesDb } from "@/db/notes";
 import { getUser } from "@/lib/auth";
 
 type Params = Promise<{ noteId: string }>;
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Params },
-) {
+export async function GET(request: NextRequest, { params }: { params: Params }) {
   try {
     const { noteId } = await params;
     const user = await getUser();
@@ -25,17 +22,11 @@ export async function GET(
     return NextResponse.json({ note });
   } catch (error) {
     console.error("Failed to fetch note:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch note" },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: "Failed to fetch note" }, { status: 500 });
   }
 }
 
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: Params },
-) {
+export async function PUT(request: NextRequest, { params }: { params: Params }) {
   try {
     const { noteId } = await params;
     const user = await getUser();
@@ -55,17 +46,11 @@ export async function PUT(
     return NextResponse.json({ note });
   } catch (error) {
     console.error("Failed to update note:", error);
-    return NextResponse.json(
-      { error: "Failed to update note" },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: "Failed to update note" }, { status: 500 });
   }
 }
 
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: Params },
-) {
+export async function DELETE(request: NextRequest, { params }: { params: Params }) {
   try {
     const { noteId } = await params;
     const user = await getUser();
@@ -78,9 +63,6 @@ export async function DELETE(
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Failed to delete note:", error);
-    return NextResponse.json(
-      { error: "Failed to delete note" },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: "Failed to delete note" }, { status: 500 });
   }
 }

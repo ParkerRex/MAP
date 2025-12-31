@@ -1,13 +1,10 @@
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import { notesDb } from "@/db/notes";
 import { getUser } from "@/lib/auth";
 
 type Params = Promise<{ folderId: string }>;
 
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: Params },
-) {
+export async function PUT(request: NextRequest, { params }: { params: Params }) {
   try {
     const { folderId } = await params;
     const user = await getUser();
@@ -27,17 +24,11 @@ export async function PUT(
     return NextResponse.json({ folder });
   } catch (error) {
     console.error("Failed to update folder:", error);
-    return NextResponse.json(
-      { error: "Failed to update folder" },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: "Failed to update folder" }, { status: 500 });
   }
 }
 
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: Params },
-) {
+export async function DELETE(request: NextRequest, { params }: { params: Params }) {
   try {
     const { folderId } = await params;
     const user = await getUser();
@@ -50,9 +41,6 @@ export async function DELETE(
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Failed to delete folder:", error);
-    return NextResponse.json(
-      { error: "Failed to delete folder" },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: "Failed to delete folder" }, { status: 500 });
   }
 }

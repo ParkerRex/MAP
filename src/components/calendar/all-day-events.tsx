@@ -1,5 +1,7 @@
 "use client";
-import type { ExtendedEvent } from "@/types/calendar";
+import type { calendar_v3 } from "googleapis";
+import { ChevronDown, ChevronUp } from "lucide-react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   ContextMenu,
@@ -7,9 +9,7 @@ import {
   ContextMenuItem,
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
-import type { calendar_v3 } from "googleapis";
-import { ChevronDown, ChevronUp } from "lucide-react";
-import { useState } from "react";
+import type { ExtendedEvent } from "@/types/calendar";
 
 interface CalendarAllDayEventsProps {
   events: calendar_v3.Schema$Event[];
@@ -54,15 +54,9 @@ export default function CalendarAllDayEvents({
           size="sm"
           onClick={toggleExpand}
           aria-expanded={isExpanded}
-          aria-label={
-            isExpanded ? "Collapse all-day events" : "Expand all-day events"
-          }
+          aria-label={isExpanded ? "Collapse all-day events" : "Expand all-day events"}
         >
-          {isExpanded ? (
-            <ChevronUp className="h-4 w-4" />
-          ) : (
-            <ChevronDown className="h-4 w-4" />
-          )}
+          {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
         </Button>
       </div>
       <div
@@ -72,18 +66,11 @@ export default function CalendarAllDayEvents({
           <div className="w-16 flex-shrink-0" />
           <div className="flex-grow grid grid-cols-7">
             {daysOfWeek.map((day) => (
-              <div
-                key={day.toISOString()}
-                className="border-r border-gray-200 p-1"
-              >
+              <div key={day.toISOString()} className="border-r border-gray-200 p-1">
                 {visibleEvents
                   .filter((event) => {
-                    const eventStart =
-                      event.start?.date || event.start?.dateTime;
-                    return (
-                      new Date(eventStart!).toDateString() ===
-                      day.toDateString()
-                    );
+                    const eventStart = event.start?.date || event.start?.dateTime;
+                    return new Date(eventStart!).toDateString() === day.toDateString();
                   })
                   .map((event) => (
                     <ContextMenu key={event.id}>
@@ -109,9 +96,7 @@ export default function CalendarAllDayEvents({
                         </div>
                       </ContextMenuTrigger>
                       <ContextMenuContent>
-                        <ContextMenuItem onSelect={() => {}}>
-                          Delete Event
-                        </ContextMenuItem>
+                        <ContextMenuItem onSelect={() => {}}>Delete Event</ContextMenuItem>
                       </ContextMenuContent>
                     </ContextMenu>
                   ))}

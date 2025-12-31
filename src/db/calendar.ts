@@ -1,16 +1,16 @@
+import { and, eq, gte, lte, or } from "drizzle-orm";
 import { db } from "./index";
 import {
-  calendarEvents,
-  calendars,
   calendarAccounts,
-  integrations,
-  syncLogs,
   calendarEventAttendees,
+  calendarEvents,
   calendarSyncTokens,
-  type NewCalendarEvent,
+  calendars,
+  integrations,
   type NewCalendar,
+  type NewCalendarEvent,
+  syncLogs,
 } from "./schema";
-import { eq, and, gte, lte, or } from "drizzle-orm";
 
 export const calendarDb = {
   // Events
@@ -23,10 +23,7 @@ export const calendarDb = {
           or(...calendarIds.map((id) => eq(calendarEvents.calendarId, id))),
           or(
             // For timed events
-            and(
-              gte(calendarEvents.startTime, timeMin),
-              lte(calendarEvents.startTime, timeMax),
-            ),
+            and(gte(calendarEvents.startTime, timeMin), lte(calendarEvents.startTime, timeMax)),
             // For all-day events
             and(
               gte(calendarEvents.startDate, timeMin.split("T")[0]),
@@ -41,12 +38,7 @@ export const calendarDb = {
     const result = await db
       .select()
       .from(calendarEvents)
-      .where(
-        and(
-          eq(calendarEvents.id, eventId),
-          eq(calendarEvents.calendarId, calendarId),
-        ),
-      )
+      .where(and(eq(calendarEvents.id, eventId), eq(calendarEvents.calendarId, calendarId)))
       .limit(1);
     return result[0] ?? null;
   },
@@ -56,20 +48,11 @@ export const calendarDb = {
     return result[0];
   },
 
-  async updateEvent(
-    eventId: string,
-    calendarId: string,
-    data: Partial<NewCalendarEvent>,
-  ) {
+  async updateEvent(eventId: string, calendarId: string, data: Partial<NewCalendarEvent>) {
     const result = await db
       .update(calendarEvents)
       .set(data)
-      .where(
-        and(
-          eq(calendarEvents.id, eventId),
-          eq(calendarEvents.calendarId, calendarId),
-        ),
-      )
+      .where(and(eq(calendarEvents.id, eventId), eq(calendarEvents.calendarId, calendarId)))
       .returning();
     return result[0];
   },
@@ -77,30 +60,18 @@ export const calendarDb = {
   async deleteEvent(eventId: string, calendarId: string) {
     const result = await db
       .delete(calendarEvents)
-      .where(
-        and(
-          eq(calendarEvents.id, eventId),
-          eq(calendarEvents.calendarId, calendarId),
-        ),
-      )
+      .where(and(eq(calendarEvents.id, eventId), eq(calendarEvents.calendarId, calendarId)))
       .returning();
     return result[0];
   },
 
   // Calendars
   async getCalendarsByAccountId(accountId: string) {
-    return db
-      .select()
-      .from(calendars)
-      .where(eq(calendars.accountId, accountId));
+    return db.select().from(calendars).where(eq(calendars.accountId, accountId));
   },
 
   async getCalendarById(calendarId: string) {
-    const result = await db
-      .select()
-      .from(calendars)
-      .where(eq(calendars.id, calendarId))
-      .limit(1);
+    const result = await db.select().from(calendars).where(eq(calendars.id, calendarId)).limit(1);
     return result[0] ?? null;
   },
 
@@ -127,17 +98,10 @@ export const calendarDb = {
 
   // Calendar Accounts
   async getCalendarAccountsByEmail(email: string) {
-    return db
-      .select()
-      .from(calendarAccounts)
-      .where(eq(calendarAccounts.email, email));
+    return db.select().from(calendarAccounts).where(eq(calendarAccounts.email, email));
   },
 
-  async upsertCalendarAccount(data: {
-    id: string;
-    email: string;
-    provider: string;
-  }) {
+  async upsertCalendarAccount(data: { id: string; email: string; provider: string }) {
     const result = await db
       .insert(calendarAccounts)
       .values(data)
@@ -154,12 +118,7 @@ export const calendarDb = {
     const result = await db
       .select()
       .from(integrations)
-      .where(
-        and(
-          eq(integrations.userId, userId),
-          eq(integrations.provider, provider),
-        ),
-      )
+      .where(and(eq(integrations.userId, userId), eq(integrations.provider, provider)))
       .limit(1);
     return result[0] ?? null;
   },
@@ -172,12 +131,7 @@ export const calendarDb = {
     const result = await db
       .update(integrations)
       .set({ ...data, updatedAt: new Date() })
-      .where(
-        and(
-          eq(integrations.userId, userId),
-          eq(integrations.provider, provider),
-        ),
-      )
+      .where(and(eq(integrations.userId, userId), eq(integrations.provider, provider)))
       .returning();
     return result[0];
   },
@@ -214,22 +168,13 @@ export const calendarDb = {
     const result = await db
       .select({ id: integrations.id })
       .from(integrations)
-      .where(
-        and(
-          eq(integrations.userId, userId),
-          eq(integrations.provider, provider),
-        ),
-      )
+      .where(and(eq(integrations.userId, userId), eq(integrations.provider, provider)))
       .limit(1);
     return result.length > 0;
   },
 
   // Sync Logs
-  async createSyncLog(data: {
-    userId: string;
-    status: string;
-    message?: string;
-  }) {
+  async createSyncLog(data: { userId: string; status: string; message?: string }) {
     const result = await db.insert(syncLogs).values(data).returning();
     return result[0];
   },

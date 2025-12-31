@@ -1,6 +1,11 @@
 "use client";
 
-import { useCreateFolder, useDeleteFolder, useUpdateFolder } from "@/hooks/use-notes";
+import { AnimatePresence, motion } from "framer-motion";
+import type { LucideIcon } from "lucide-react";
+import { CirclePlus, Folder } from "lucide-react";
+import * as React from "react";
+import NoteDisplay from "@/components/notes/note-display";
+import NoteList from "@/components/notes/note-list";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/components/ui/cn";
 import {
@@ -16,13 +21,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
-import { AnimatePresence, motion } from "framer-motion";
-import { CirclePlus, Folder } from "lucide-react";
-import type { LucideIcon } from "lucide-react";
-import * as React from "react";
-
-import NoteDisplay from "@/components/notes/note-display";
-import NoteList from "@/components/notes/note-list";
+import { useCreateFolder, useDeleteFolder, useUpdateFolder } from "@/hooks/use-notes";
 
 import type { FolderBarProps, LinkItem, Note } from "@/types";
 
@@ -47,7 +46,9 @@ export default function FolderBar({ folders, notes }: FolderBarProps) {
       const folderNotes = notes.filter((note) => note.folderId === selectedFolderId);
       if (folderNotes.length > 0) {
         const mostRecentNote = folderNotes.sort(
-          (a, b) => new Date(b.updatedAt ?? b.createdAt).getTime() - new Date(a.updatedAt ?? a.createdAt).getTime(),
+          (a, b) =>
+            new Date(b.updatedAt ?? b.createdAt).getTime() -
+            new Date(a.updatedAt ?? a.createdAt).getTime(),
         )[0];
         setSelectedNote(mostRecentNote);
       }

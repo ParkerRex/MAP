@@ -1,7 +1,9 @@
 "use client";
 
-import { useCreateNote, useDeleteNote, useDuplicateNote, useUpdateNote } from "@/hooks/use-notes";
-import type { Note } from "@/types/notes";
+import { format, formatDistanceToNow, parseISO } from "date-fns";
+import { AnimatePresence, motion } from "framer-motion";
+import { Leaf, Plus, Search, Trash } from "lucide-react";
+import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/components/ui/cn";
 import {
@@ -16,11 +18,8 @@ import {
 } from "@/components/ui/context-menu";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { format, formatDistanceToNow, parseISO } from "date-fns";
-import { AnimatePresence, motion } from "framer-motion";
-import { Plus, Trash } from "lucide-react";
-import { Leaf, Search } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useCreateNote, useDeleteNote, useDuplicateNote, useUpdateNote } from "@/hooks/use-notes";
+import type { Note } from "@/types/notes";
 
 interface Folder {
   id: string;
@@ -71,7 +70,9 @@ export default function NoteList({
       );
     }
     return filtered.sort(
-      (a, b) => new Date(b.updatedAt ?? b.createdAt).getTime() - new Date(a.updatedAt ?? a.createdAt).getTime(),
+      (a, b) =>
+        new Date(b.updatedAt ?? b.createdAt).getTime() -
+        new Date(a.updatedAt ?? a.createdAt).getTime(),
     );
   }, [notes, view, selectedFolderId, searchQuery]);
 

@@ -1,6 +1,6 @@
+import { useRef } from "react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { useRef } from "react";
 
 import type { Note } from "@/types/notes";
 
@@ -43,17 +43,12 @@ export default function NoteDisplay({
             </button>
           </>
         ) : (
-          <p className="text-center text-muted-foreground">
-            Select a note to view its content
-          </p>
+          <p className="text-center text-muted-foreground">Select a note to view its content</p>
         )}
       </div>
       {note && (
         <div className="flex-grow overflow-hidden p-4">
-          <Textarea
-            className="w-full h-full resize-none"
-            placeholder="Start typing your note..."
-          />
+          <Textarea className="w-full h-full resize-none" placeholder="Start typing your note..." />
         </div>
       )}
     </div>

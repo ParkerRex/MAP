@@ -1,13 +1,13 @@
 "use client";
 
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { Tag } from "@/db/schema";
 import {
   api,
   queryKeys,
-  type TaskWithTags,
-  type TasksResponse,
   type TagsResponse,
+  type TasksResponse,
+  type TaskWithTags,
 } from "@/lib/api";
 
 export type { TaskWithTags };
@@ -24,13 +24,10 @@ export function useCreateTask() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data: { title: string; body?: string; dueAt?: string }) =>
-      api.tasks.create(data),
+    mutationFn: (data: { title: string; body?: string; dueAt?: string }) => api.tasks.create(data),
     onMutate: async (newTask) => {
       await queryClient.cancelQueries({ queryKey: queryKeys.tasks.all });
-      const previous = queryClient.getQueryData<TasksResponse>(
-        queryKeys.tasks.all,
-      );
+      const previous = queryClient.getQueryData<TasksResponse>(queryKeys.tasks.all);
 
       queryClient.setQueryData<TasksResponse>(queryKeys.tasks.all, (old) => ({
         tasks: [
@@ -94,9 +91,7 @@ export function useUpdateTask() {
     }) => api.tasks.update(taskId, data),
     onMutate: async (update) => {
       await queryClient.cancelQueries({ queryKey: queryKeys.tasks.all });
-      const previous = queryClient.getQueryData<TasksResponse>(
-        queryKeys.tasks.all,
-      );
+      const previous = queryClient.getQueryData<TasksResponse>(queryKeys.tasks.all);
 
       queryClient.setQueryData<TasksResponse>(queryKeys.tasks.all, (old) => ({
         tasks:
@@ -136,9 +131,7 @@ export function useDeleteTask() {
     mutationFn: (taskId: string) => api.tasks.delete(taskId),
     onMutate: async (taskId) => {
       await queryClient.cancelQueries({ queryKey: queryKeys.tasks.all });
-      const previous = queryClient.getQueryData<TasksResponse>(
-        queryKeys.tasks.all,
-      );
+      const previous = queryClient.getQueryData<TasksResponse>(queryKeys.tasks.all);
 
       queryClient.setQueryData<TasksResponse>(queryKeys.tasks.all, (old) => ({
         tasks: old?.tasks.filter((task) => task.id !== taskId) ?? [],
@@ -200,9 +193,7 @@ export function useCreateTag() {
     mutationFn: (data: { title: string }) => api.tags.create(data),
     onMutate: async (newTag) => {
       await queryClient.cancelQueries({ queryKey: queryKeys.tags.all });
-      const previous = queryClient.getQueryData<TagsResponse>(
-        queryKeys.tags.all,
-      );
+      const previous = queryClient.getQueryData<TagsResponse>(queryKeys.tags.all);
 
       queryClient.setQueryData<TagsResponse>(queryKeys.tags.all, (old) => ({
         tags: [
@@ -236,15 +227,10 @@ export function useUpdateTag() {
       api.tags.update(tagId, { title }),
     onMutate: async ({ tagId, title }) => {
       await queryClient.cancelQueries({ queryKey: queryKeys.tags.all });
-      const previous = queryClient.getQueryData<TagsResponse>(
-        queryKeys.tags.all,
-      );
+      const previous = queryClient.getQueryData<TagsResponse>(queryKeys.tags.all);
 
       queryClient.setQueryData<TagsResponse>(queryKeys.tags.all, (old) => ({
-        tags:
-          old?.tags.map((tag) =>
-            tag.id === tagId ? { ...tag, title } : tag,
-          ) ?? [],
+        tags: old?.tags.map((tag) => (tag.id === tagId ? { ...tag, title } : tag)) ?? [],
       }));
 
       return { previous };
@@ -269,12 +255,8 @@ export function useDeleteTag() {
       await queryClient.cancelQueries({ queryKey: queryKeys.tags.all });
       await queryClient.cancelQueries({ queryKey: queryKeys.tasks.all });
 
-      const previousTags = queryClient.getQueryData<TagsResponse>(
-        queryKeys.tags.all,
-      );
-      const previousTasks = queryClient.getQueryData<TasksResponse>(
-        queryKeys.tasks.all,
-      );
+      const previousTags = queryClient.getQueryData<TagsResponse>(queryKeys.tags.all);
+      const previousTasks = queryClient.getQueryData<TasksResponse>(queryKeys.tasks.all);
 
       queryClient.setQueryData<TagsResponse>(queryKeys.tags.all, (old) => ({
         tags: old?.tags.filter((tag) => tag.id !== tagId) ?? [],

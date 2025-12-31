@@ -1,7 +1,7 @@
-import { SetupForm } from "@/components/setup-form";
-import { Icons } from "@/components/ui/icons";
 import type { Metadata } from "next";
 import Link from "next/link";
+import { SetupForm } from "@/components/setup-form";
+import { Icons } from "@/components/ui/icons";
 
 export const metadata: Metadata = {
   title: "Setup account | map",

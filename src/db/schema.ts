@@ -1,21 +1,18 @@
+import { relations } from "drizzle-orm";
 import {
-  pgTable,
-  text,
   boolean,
+  integer,
+  interval,
+  pgEnum,
+  pgTable,
+  primaryKey,
+  text,
   timestamp,
   uuid,
-  integer,
-  pgEnum,
-  primaryKey,
-  interval,
 } from "drizzle-orm/pg-core";
-import { relations } from "drizzle-orm";
 
 // Enums
-export const integrationProviderEnum = pgEnum("integration_provider", [
-  "GOOGLE",
-  "WHOOP",
-]);
+export const integrationProviderEnum = pgEnum("integration_provider", ["GOOGLE", "WHOOP"]);
 export const goalCategoryEnum = pgEnum("goal_categories", [
   "health",
   "work",
@@ -23,23 +20,13 @@ export const goalCategoryEnum = pgEnum("goal_categories", [
   "family",
   "spiritual",
 ]);
-export const goalStatusEnum = pgEnum("goal_status", [
-  "pending",
-  "in_progress",
-  "completed",
-]);
-export const taskStatusEnum = pgEnum("task_status", [
-  "pending",
-  "in_progress",
-  "completed",
-]);
+export const goalStatusEnum = pgEnum("goal_status", ["pending", "in_progress", "completed"]);
+export const taskStatusEnum = pgEnum("task_status", ["pending", "in_progress", "completed"]);
 
 // Users
 export const users = pgTable("users", {
   id: uuid("id").primaryKey().defaultRandom(),
-  createdAt: timestamp("created_at", { withTimezone: true })
-    .notNull()
-    .defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   email: text("email").notNull().unique(),
   passwordHash: text("password_hash"),
   displayName: text("display_name"),
@@ -57,9 +44,7 @@ export const sessions = pgTable("sessions", {
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
   expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
-  createdAt: timestamp("created_at", { withTimezone: true })
-    .notNull()
-    .defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
 // Folders
@@ -83,9 +68,7 @@ export const notes = pgTable("notes", {
   content: text("content"),
   folderId: uuid("folder_id").notNull(),
   userId: uuid("user_id").notNull(),
-  createdAt: timestamp("created_at", { withTimezone: true })
-    .notNull()
-    .defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }),
 });
 
@@ -101,9 +84,7 @@ export const projects = pgTable("projects", {
   description: text("description"),
   projectPosition: integer("project_position"),
   userId: uuid("user_id").notNull(),
-  createdAt: timestamp("created_at", { withTimezone: true })
-    .notNull()
-    .defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }),
   deletedAt: timestamp("deleted_at", { withTimezone: true }),
 });
@@ -113,9 +94,7 @@ export const headers = pgTable("headers", {
   id: uuid("id").primaryKey().defaultRandom(),
   title: text("title").notNull(),
   userId: uuid("user_id").notNull(),
-  createdAt: timestamp("created_at", { withTimezone: true })
-    .notNull()
-    .defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }),
   deletedAt: timestamp("deleted_at", { withTimezone: true }),
 });
@@ -129,9 +108,7 @@ export const goals = pgTable("goals", {
   userId: uuid("user_id").notNull(),
   goalCategory: goalCategoryEnum("goal_category").default("personal"),
   goalStatus: goalStatusEnum("goal_status").default("pending"),
-  createdAt: timestamp("created_at", { withTimezone: true })
-    .notNull()
-    .defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }),
 });
 
@@ -143,13 +120,9 @@ export const tasks = pgTable("tasks", {
   dueAt: timestamp("due_at", { withTimezone: true }),
   completedAt: timestamp("completed_at", { withTimezone: true }),
   completedBy: uuid("completed_by"),
-  createdAt: timestamp("created_at", { withTimezone: true })
-    .notNull()
-    .defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   createdBy: uuid("created_by").notNull(),
-  updatedAt: timestamp("updated_at", { withTimezone: true })
-    .notNull()
-    .defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   updatedBy: uuid("updated_by").notNull(),
   deletedAt: timestamp("deleted_at", { withTimezone: true }),
   deletedBy: uuid("deleted_by"),
@@ -212,9 +185,7 @@ export const calendarAccounts = pgTable("calendar_accounts", {
   id: uuid("id").primaryKey().defaultRandom(),
   email: text("email").notNull(),
   provider: text("provider").notNull(),
-  createdAt: timestamp("created_at", { withTimezone: true })
-    .notNull()
-    .defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
 // Calendars
@@ -319,12 +290,8 @@ export const preferences = pgTable("preferences", {
   dismissedWelcomeChecklist: boolean("dismissed_welcome_checklist"),
   dismissedReferralCard: boolean("dismissed_referral_card"),
   shownWelcomeDialog: boolean("shown_welcome_dialog"),
-  autoAddConferencingPromptViewed: boolean(
-    "auto_add_conferencing_prompt_viewed",
-  ),
-  autoChangeTimeZonesPromptEnabled: boolean(
-    "auto_change_time_zones_prompt_enabled",
-  ),
+  autoAddConferencingPromptViewed: boolean("auto_add_conferencing_prompt_viewed"),
+  autoChangeTimeZonesPromptEnabled: boolean("auto_change_time_zones_prompt_enabled"),
 });
 
 // Contacts

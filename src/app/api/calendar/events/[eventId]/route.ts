@@ -1,17 +1,11 @@
-import { NextRequest, NextResponse } from "next/server";
-import {
-  getGoogleCalendarClient,
-  mapGoogleEventToDb,
-} from "@/lib/google-calendar";
+import { type NextRequest, NextResponse } from "next/server";
 import { calendarDb } from "@/db/calendar";
 import { getUser } from "@/lib/auth";
+import { getGoogleCalendarClient, mapGoogleEventToDb } from "@/lib/google-calendar";
 
 type Params = Promise<{ eventId: string }>;
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Params },
-) {
+export async function GET(request: NextRequest, { params }: { params: Params }) {
   try {
     const { eventId } = await params;
     const { searchParams } = new URL(request.url);
@@ -27,17 +21,11 @@ export async function GET(
     return NextResponse.json({ event: response.data });
   } catch (error) {
     console.error("Failed to fetch event:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch event" },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: "Failed to fetch event" }, { status: 500 });
   }
 }
 
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: Params },
-) {
+export async function PUT(request: NextRequest, { params }: { params: Params }) {
   try {
     const { eventId } = await params;
     const { searchParams } = new URL(request.url);
@@ -62,27 +50,17 @@ export async function PUT(
 
     // Update in database
     if (event.id) {
-      await calendarDb.updateEvent(
-        eventId,
-        calendarId,
-        mapGoogleEventToDb(event, calendarId),
-      );
+      await calendarDb.updateEvent(eventId, calendarId, mapGoogleEventToDb(event, calendarId));
     }
 
     return NextResponse.json({ event });
   } catch (error) {
     console.error("Failed to update event:", error);
-    return NextResponse.json(
-      { error: "Failed to update event" },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: "Failed to update event" }, { status: 500 });
   }
 }
 
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: Params },
-) {
+export async function DELETE(request: NextRequest, { params }: { params: Params }) {
   try {
     const { eventId } = await params;
     const { searchParams } = new URL(request.url);
@@ -107,9 +85,6 @@ export async function DELETE(
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Failed to delete event:", error);
-    return NextResponse.json(
-      { error: "Failed to delete event" },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: "Failed to delete event" }, { status: 500 });
   }
 }

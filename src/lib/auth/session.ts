@@ -1,10 +1,10 @@
 import "server-only";
 
+import { and, eq, gt } from "drizzle-orm";
+import { nanoid } from "nanoid";
+import { cookies } from "next/headers";
 import { db } from "@/db";
 import { sessions, users } from "@/db/schema";
-import { eq, and, gt } from "drizzle-orm";
-import { cookies } from "next/headers";
-import { nanoid } from "nanoid";
 
 const SESSION_COOKIE_NAME = "session";
 const SESSION_EXPIRY_DAYS = 30;
@@ -92,10 +92,7 @@ export async function refreshSession(): Promise<void> {
 
   const expiresAt = getExpiryDate();
 
-  await db
-    .update(sessions)
-    .set({ expiresAt })
-    .where(eq(sessions.id, sessionId));
+  await db.update(sessions).set({ expiresAt }).where(eq(sessions.id, sessionId));
 
   cookieStore.set(SESSION_COOKIE_NAME, sessionId, {
     httpOnly: true,

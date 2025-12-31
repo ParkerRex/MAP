@@ -1,5 +1,5 @@
-import { cn } from "@/components/ui/cn";
 import * as React from "react";
+import { cn } from "@/components/ui/cn";
 
 export type TextareaProps = React.TextareaHTMLAttributes<HTMLTextAreaElement>;
 

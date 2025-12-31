@@ -1,6 +1,11 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation } from "@tanstack/react-query";
+import { Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -13,11 +18,6 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
-import { Loader2 } from "lucide-react";
-import { useMutation } from "@tanstack/react-query";
-import { useForm } from "react-hook-form";
-import { useRouter } from "next/navigation";
-import { z } from "zod";
 
 const setupUserSchema = z.object({
   full_name: z.string().min(1, "Name is required"),
@@ -60,10 +60,7 @@ export function SetupForm() {
 
   return (
     <Form {...form}>
-      <form
-        onSubmit={form.handleSubmit((data) => setupUser.mutate(data))}
-        className="space-y-8"
-      >
+      <form onSubmit={form.handleSubmit((data) => setupUser.mutate(data))} className="space-y-8">
         <FormField
           control={form.control}
           name="full_name"
@@ -73,19 +70,13 @@ export function SetupForm() {
               <FormControl>
                 <Input placeholder="Name" {...field} />
               </FormControl>
-              <FormDescription>
-                This is your first and last name.
-              </FormDescription>
+              <FormDescription>This is your first and last name.</FormDescription>
               <FormMessage />
             </FormItem>
           )}
         />
         <Button type="submit" className="w-full" disabled={setupUser.isPending}>
-          {setupUser.isPending ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : (
-            <span>Submit</span>
-          )}
+          {setupUser.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <span>Submit</span>}
         </Button>
       </form>
     </Form>

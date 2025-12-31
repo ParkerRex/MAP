@@ -1,13 +1,13 @@
 "use client";
 
-import { Icons } from "@/components/ui/icons";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Icons } from "@/components/ui/icons";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -106,11 +106,7 @@ export default function LoginPage() {
                 disabled={isLoading}
                 className="w-full bg-primary text-secondary"
               >
-                {isLoading ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  "Sign in"
-                )}
+                {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Sign in"}
               </Button>
             </form>
 
@@ -122,8 +118,7 @@ export default function LoginPage() {
             </p>
 
             <p className="text-xs text-[#878787] mt-6">
-              By signing in, you acknowledge that you have read and agree to
-              MAP&apos;s{" "}
+              By signing in, you acknowledge that you have read and agree to MAP&apos;s{" "}
               <a href="https://mapthemap.com/terms" className="underline">
                 Terms of Service
               </a>{" "}

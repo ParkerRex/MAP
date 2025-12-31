@@ -1,4 +1,4 @@
-import type { Task as DrizzleTask, Tag as DrizzleTag } from "@/db/schema";
+import type { Tag as DrizzleTag, Task as DrizzleTask } from "@/db/schema";
 
 export type Tag = DrizzleTag;
 

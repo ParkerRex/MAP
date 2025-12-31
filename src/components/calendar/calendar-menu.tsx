@@ -1,9 +1,9 @@
 "use client";
-import { Calendar as UIDatePicker } from "@/components/ui/calendar";
-import { Separator } from "@/components/ui/separator";
 import { startOfWeek } from "date-fns";
 import type { calendar_v3 } from "googleapis";
 import { Eye, EyeOff } from "lucide-react";
+import { Calendar as UIDatePicker } from "@/components/ui/calendar";
+import { Separator } from "@/components/ui/separator";
 
 interface CalendarMenuProps {
   className?: string;

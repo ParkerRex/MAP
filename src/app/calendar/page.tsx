@@ -1,18 +1,18 @@
 "use client";
 
+import { startOfWeek } from "date-fns";
+import { useEffect, useMemo, useState } from "react";
 import ContextPanel from "@/components/calendar/calendar-context-panel";
 import CalendarGrid from "@/components/calendar/calendar-grid";
 import CalendarMenu from "@/components/calendar/calendar-menu";
 import CalendarToolbar from "@/components/calendar/calendar-toolbar";
 import { useCalendars, useMultiCalendarEvents } from "@/hooks/use-calendar";
 import type { ExtendedEvent } from "@/types/calendar";
-import { startOfWeek } from "date-fns";
-import { useState, useMemo, useEffect } from "react";
 
 export default function CalendarPage() {
   // UI State - just React useState
   const [currentWeekStartDate, setCurrentWeekStartDate] = useState(() =>
-    startOfWeek(new Date(), { weekStartsOn: 1 })
+    startOfWeek(new Date(), { weekStartsOn: 1 }),
   );
   const [selectedEvent, setSelectedEvent] = useState<ExtendedEvent | null>(null);
   const [visibleCalendars, setVisibleCalendars] = useState<Set<string>>(new Set());
@@ -33,18 +33,18 @@ export default function CalendarPage() {
   const timeMin = useMemo(() => currentWeekStartDate.toISOString(), [currentWeekStartDate]);
   const timeMax = useMemo(
     () => new Date(currentWeekStartDate.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString(),
-    [currentWeekStartDate]
+    [currentWeekStartDate],
   );
 
   const visibleCalendarIds = useMemo(
     () => Array.from(visibleCalendars).filter((id) => calendars.some((cal) => cal.id === id)),
-    [visibleCalendars, calendars]
+    [visibleCalendars, calendars],
   );
 
   const { data: events = [] } = useMultiCalendarEvents(visibleCalendarIds, timeMin, timeMax);
 
   const visibleEvents = events.filter((event) =>
-    visibleCalendars.has(event.organizer?.email ?? "")
+    visibleCalendars.has(event.organizer?.email ?? ""),
   );
 
   const toggleCalendarVisibility = (calendarId: string) => {

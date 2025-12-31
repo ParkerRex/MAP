@@ -286,9 +286,7 @@
           "dateTime": "2024-08-01T22:45:00-04:00",
           "timeZone": "America/New_York"
         },
-        "recurrence": [
-          "RRULE:FREQ=WEEKLY;WKST=MO;INTERVAL=1;BYDAY=MO,TU,WE,TH,FR"
-        ],
+        "recurrence": ["RRULE:FREQ=WEEKLY;WKST=MO;INTERVAL=1;BYDAY=MO,TU,WE,TH,FR"],
         "iCalUID": "db220c22344646999efd3b9be4bce994@google.com",
         "sequence": 2,
         "guestsCanModify": true,
@@ -1722,9 +1720,7 @@
           "dateTime": "2024-03-22T16:30:00-04:00",
           "timeZone": "America/New_York"
         },
-        "recurrence": [
-          "RRULE:FREQ=WEEKLY;WKST=SU;UNTIL=20240329T035959Z;BYDAY=FR"
-        ],
+        "recurrence": ["RRULE:FREQ=WEEKLY;WKST=SU;UNTIL=20240329T035959Z;BYDAY=FR"],
         "iCalUID": "0ahfqfa529njgpl7ep1sloac99@google.com",
         "sequence": 0,
         "attendees": [

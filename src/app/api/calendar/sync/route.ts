@@ -1,9 +1,9 @@
-import { NextRequest, NextResponse } from "next/server";
+import { addMonths, subMonths } from "date-fns";
 import { google } from "googleapis";
+import { type NextRequest, NextResponse } from "next/server";
 import { calendarDb } from "@/db/calendar";
-import { mapGoogleEventToDb } from "@/lib/google-calendar";
 import { getUser } from "@/lib/auth";
-import { subMonths, addMonths } from "date-fns";
+import { mapGoogleEventToDb } from "@/lib/google-calendar";
 
 const MAX_RETRIES = 3;
 const RETRY_DELAY = 5000;
@@ -41,9 +41,7 @@ async function syncUserCalendars(userId: string) {
 
         await calendarDb.updateIntegration(userId, "GOOGLE", {
           accessToken: credentials.access_token ?? integration.accessToken,
-          expiresAt: credentials.expiry_date
-            ? new Date(credentials.expiry_date)
-            : undefined,
+          expiresAt: credentials.expiry_date ? new Date(credentials.expiry_date) : undefined,
         });
 
         oauth2Client.setCredentials(credentials);
@@ -131,11 +129,7 @@ async function syncUserCalendars(userId: string) {
   }
 }
 
-async function retrySync(
-  userId: string,
-  maxRetries = MAX_RETRIES,
-  delay = RETRY_DELAY,
-) {
+async function retrySync(userId: string, maxRetries = MAX_RETRIES, delay = RETRY_DELAY) {
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     const result = await syncUserCalendars(userId);
 
@@ -162,10 +156,7 @@ export async function POST(request: NextRequest) {
       const userId = body.record?.id || body.userId;
 
       if (!userId) {
-        return NextResponse.json(
-          { error: "User ID required" },
-          { status: 400 },
-        );
+        return NextResponse.json({ error: "User ID required" }, { status: 400 });
       }
 
       const result = await retrySync(userId);
@@ -183,9 +174,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(result);
   } catch (error) {
     console.error("Sync error:", error);
-    return NextResponse.json(
-      { error: "Failed to sync calendars" },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: "Failed to sync calendars" }, { status: 500 });
   }
 }

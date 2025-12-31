@@ -1,13 +1,10 @@
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import { tasksDb } from "@/db/tasks";
 import { getUser } from "@/lib/auth";
 
 type Params = Promise<{ tagId: string }>;
 
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: Params },
-) {
+export async function PUT(request: NextRequest, { params }: { params: Params }) {
   try {
     const { tagId } = await params;
     const user = await getUser();
@@ -27,17 +24,11 @@ export async function PUT(
     return NextResponse.json({ tag });
   } catch (error) {
     console.error("Failed to update tag:", error);
-    return NextResponse.json(
-      { error: "Failed to update tag" },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: "Failed to update tag" }, { status: 500 });
   }
 }
 
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: Params },
-) {
+export async function DELETE(request: NextRequest, { params }: { params: Params }) {
   try {
     const { tagId } = await params;
     const user = await getUser();
@@ -50,9 +41,6 @@ export async function DELETE(
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Failed to delete tag:", error);
-    return NextResponse.json(
-      { error: "Failed to delete tag" },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: "Failed to delete tag" }, { status: 500 });
   }
 }

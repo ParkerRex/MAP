@@ -1,14 +1,14 @@
 "use client";
-import type { ExtendedEvent } from "@/types/calendar";
+import type { calendar_v3 } from "googleapis";
+import type React from "react";
+import { useMemo } from "react";
 import {
   ContextMenu,
   ContextMenuContent,
   ContextMenuItem,
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
-import type { calendar_v3 } from "googleapis";
-import type React from "react";
-import { useMemo } from "react";
+import type { ExtendedEvent } from "@/types/calendar";
 
 interface CalendarEventProps {
   events: calendar_v3.Schema$Event[];
@@ -37,28 +37,19 @@ const CalendarEventComponent: React.FC<CalendarEventProps> = ({
 
   const sortedEvents = useMemo(() => {
     return [...events].sort((a, b) => {
-      const startA = new Date(
-        a.start?.dateTime || a.start?.date || "",
-      ).getTime();
-      const startB = new Date(
-        b.start?.dateTime || b.start?.date || "",
-      ).getTime();
+      const startA = new Date(a.start?.dateTime || a.start?.date || "").getTime();
+      const startB = new Date(b.start?.dateTime || b.start?.date || "").getTime();
       return startA - startB;
     });
   }, [events]);
 
   const calculateEventStyle = (event: calendar_v3.Schema$Event) => {
-    const startDate = new Date(
-      event.start?.dateTime || event.start?.date || "",
-    );
+    const startDate = new Date(event.start?.dateTime || event.start?.date || "");
     const endDate = new Date(event.end?.dateTime || event.end?.date || "");
 
     const top =
-      ((startDate.getHours() * 60 + startDate.getMinutes()) / MINUTES_IN_HOUR) *
-      HOUR_HEIGHT;
-    const height =
-      ((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60)) *
-      HOUR_HEIGHT;
+      ((startDate.getHours() * 60 + startDate.getMinutes()) / MINUTES_IN_HOUR) * HOUR_HEIGHT;
+    const height = ((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60)) * HOUR_HEIGHT;
 
     return {
       top: `${top}px`,
@@ -96,9 +87,7 @@ const CalendarEventComponent: React.FC<CalendarEventProps> = ({
                 aria-label={`Event: ${event.summary}`}
               >
                 <div className="flex flex-col h-full w-full overflow-hidden">
-                  <p className="text-[11px] font-semibold line-clamp-1">
-                    {event.summary}
-                  </p>
+                  <p className="text-[11px] font-semibold line-clamp-1">{event.summary}</p>
                   <p className="text-[10px] line-clamp-1 font-mono tracking-tight">
                     {event.start?.dateTime || event.start?.date} -{" "}
                     {event.end?.dateTime || event.end?.date}
@@ -107,9 +96,7 @@ const CalendarEventComponent: React.FC<CalendarEventProps> = ({
               </div>
             </ContextMenuTrigger>
             <ContextMenuContent>
-              <ContextMenuItem onSelect={() => {}}>
-                Delete Event
-              </ContextMenuItem>
+              <ContextMenuItem onSelect={() => {}}>Delete Event</ContextMenuItem>
             </ContextMenuContent>
           </ContextMenu>
         );

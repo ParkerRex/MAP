@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import { tasksDb } from "@/db/tasks";
 import { getUser } from "@/lib/auth";
 
@@ -14,10 +14,7 @@ export async function GET() {
     return NextResponse.json({ tags });
   } catch (error) {
     console.error("Failed to fetch tags:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch tags" },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: "Failed to fetch tags" }, { status: 500 });
   }
 }
 
@@ -40,9 +37,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ tag });
   } catch (error) {
     console.error("Failed to create tag:", error);
-    return NextResponse.json(
-      { error: "Failed to create tag" },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: "Failed to create tag" }, { status: 500 });
   }
 }

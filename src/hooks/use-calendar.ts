@@ -1,6 +1,6 @@
 "use client";
 
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { calendar_v3 } from "googleapis";
 
 // Types
@@ -59,11 +59,7 @@ export function useEvents(calendarId: string, timeMin: string, timeMax: string) 
   });
 }
 
-export function useMultiCalendarEvents(
-  calendarIds: string[],
-  timeMin: string,
-  timeMax: string
-) {
+export function useMultiCalendarEvents(calendarIds: string[], timeMin: string, timeMax: string) {
   return useQuery<CalendarEvent[]>({
     queryKey: ["events", "multi", calendarIds.sort().join(","), timeMin, timeMax],
     queryFn: async () => {
@@ -81,7 +77,7 @@ export function useMultiCalendarEvents(
             const data: EventsResponse = await response.json();
             allEvents.push(...data.events);
           }
-        })
+        }),
       );
 
       return allEvents;
@@ -108,22 +104,24 @@ export function useColors() {
 export function useCreateEvent() {
   const queryClient = useQueryClient();
 
-  return useMutation<{ event: CalendarEvent }, Error, { calendarId: string; event: CalendarEvent }>({
-    mutationFn: async ({ calendarId, event }) => {
-      const response = await fetch(`/api/calendar/events?calendarId=${calendarId}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(event),
-      });
-      if (!response.ok) {
-        throw new Error("Failed to create event");
-      }
-      return response.json();
+  return useMutation<{ event: CalendarEvent }, Error, { calendarId: string; event: CalendarEvent }>(
+    {
+      mutationFn: async ({ calendarId, event }) => {
+        const response = await fetch(`/api/calendar/events?calendarId=${calendarId}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(event),
+        });
+        if (!response.ok) {
+          throw new Error("Failed to create event");
+        }
+        return response.json();
+      },
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ["events"] });
+      },
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["events"] });
-    },
-  });
+  );
 }
 
 export function useUpdateEvent() {
@@ -135,14 +133,11 @@ export function useUpdateEvent() {
     { calendarId: string; eventId: string; event: Partial<CalendarEvent> }
   >({
     mutationFn: async ({ calendarId, eventId, event }) => {
-      const response = await fetch(
-        `/api/calendar/events/${eventId}?calendarId=${calendarId}`,
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(event),
-        }
-      );
+      const response = await fetch(`/api/calendar/events/${eventId}?calendarId=${calendarId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(event),
+      });
       if (!response.ok) {
         throw new Error("Failed to update event");
       }
@@ -159,12 +154,9 @@ export function useDeleteEvent() {
 
   return useMutation<{ success: boolean }, Error, { calendarId: string; eventId: string }>({
     mutationFn: async ({ calendarId, eventId }) => {
-      const response = await fetch(
-        `/api/calendar/events/${eventId}?calendarId=${calendarId}`,
-        {
-          method: "DELETE",
-        }
-      );
+      const response = await fetch(`/api/calendar/events/${eventId}?calendarId=${calendarId}`, {
+        method: "DELETE",
+      });
       if (!response.ok) {
         throw new Error("Failed to delete event");
       }

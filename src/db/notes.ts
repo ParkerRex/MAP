@@ -1,6 +1,6 @@
-import { db } from "./index";
-import { notes, folders, type NewNote, type NewFolder } from "./schema";
 import { eq, sql } from "drizzle-orm";
+import { db } from "./index";
+import { folders, type NewFolder, type NewNote, notes } from "./schema";
 
 export const notesDb = {
   // Notes
@@ -33,11 +33,7 @@ export const notesDb = {
   },
 
   async moveNoteToFolder(noteId: string, folderId: string) {
-    const result = await db
-      .update(notes)
-      .set({ folderId })
-      .where(eq(notes.id, noteId))
-      .returning();
+    const result = await db.update(notes).set({ folderId }).where(eq(notes.id, noteId)).returning();
     return result[0];
   },
 
@@ -62,7 +58,10 @@ export const notesDb = {
         userId: folders.userId,
         createdAt: folders.createdAt,
         updatedAt: folders.updatedAt,
-        notesCount: sql<number>`(SELECT COUNT(*) FROM notes WHERE notes.folder_id = ${folders.id})`.as("notes_count"),
+        notesCount:
+          sql<number>`(SELECT COUNT(*) FROM notes WHERE notes.folder_id = ${folders.id})`.as(
+            "notes_count",
+          ),
       })
       .from(folders)
       .where(eq(folders.userId, userId));
@@ -97,11 +96,7 @@ export const notesDb = {
 
   async ensureCoachNotesFolder(userId: string) {
     // Check if exists
-    const existing = await db
-      .select()
-      .from(folders)
-      .where(eq(folders.userId, userId))
-      .limit(1);
+    const existing = await db.select().from(folders).where(eq(folders.userId, userId)).limit(1);
 
     const coachFolder = existing.find((f) => f.name === "Coach Notes");
     if (coachFolder) return coachFolder;

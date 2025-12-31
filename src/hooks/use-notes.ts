@@ -1,7 +1,7 @@
 "use client";
 
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import type { Note, Folder } from "@/db/schema";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import type { Folder, Note } from "@/db/schema";
 
 interface NotesResponse {
   notes: Note[];
@@ -67,7 +67,11 @@ export function useCreateNote() {
 export function useUpdateNote() {
   const queryClient = useQueryClient();
 
-  return useMutation<NoteResponse, Error, { noteId: string; title?: string; content?: string; folderId?: string }>({
+  return useMutation<
+    NoteResponse,
+    Error,
+    { noteId: string; title?: string; content?: string; folderId?: string }
+  >({
     mutationFn: async ({ noteId, ...data }) => {
       const response = await fetch(`/api/notes/${noteId}`, {
         method: "PUT",

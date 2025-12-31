@@ -1,20 +1,12 @@
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import { tasksDb } from "@/db/tasks";
+import { handleApiError, notFound, unauthorized, validationError } from "@/lib/api/errors";
 import { getUser } from "@/lib/auth";
-import {
-  handleApiError,
-  notFound,
-  unauthorized,
-  validationError,
-} from "@/lib/api/errors";
 import { updateTaskSchema } from "@/lib/validations/tasks";
 
 type Params = Promise<{ taskId: string }>;
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Params },
-) {
+export async function GET(request: NextRequest, { params }: { params: Params }) {
   try {
     const { taskId } = await params;
     const user = await getUser();
@@ -35,10 +27,7 @@ export async function GET(
   }
 }
 
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: Params },
-) {
+export async function PUT(request: NextRequest, { params }: { params: Params }) {
   try {
     const { taskId } = await params;
     const user = await getUser();
@@ -66,10 +55,7 @@ export async function PUT(
 
     // Handle due date update
     if (dueAt !== undefined) {
-      const task = await tasksDb.updateTaskDueDate(
-        taskId,
-        dueAt ? new Date(dueAt) : null,
-      );
+      const task = await tasksDb.updateTaskDueDate(taskId, dueAt ? new Date(dueAt) : null);
       return NextResponse.json({ task });
     }
 
@@ -92,10 +78,7 @@ export async function PUT(
   }
 }
 
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: Params },
-) {
+export async function DELETE(request: NextRequest, { params }: { params: Params }) {
   try {
     const { taskId } = await params;
     const user = await getUser();

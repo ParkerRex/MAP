@@ -14,9 +14,6 @@ export async function POST() {
     return NextResponse.json({ folder });
   } catch (error) {
     console.error("Failed to ensure coach notes folder:", error);
-    return NextResponse.json(
-      { error: "Failed to ensure coach notes folder" },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: "Failed to ensure coach notes folder" }, { status: 500 });
   }
 }

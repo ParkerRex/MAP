@@ -1,6 +1,6 @@
-import { db } from "./index";
-import { tasks, tags, tagTasks, type NewTask, type NewTag } from "./schema";
 import { eq, isNull } from "drizzle-orm";
+import { db } from "./index";
+import { type NewTag, type NewTask, tags, tagTasks, tasks } from "./schema";
 
 // Type for task with tags
 export interface TaskWithTags {
@@ -118,11 +118,7 @@ export const tasksDb = {
   },
 
   async getTaskById(taskId: string) {
-    const result = await db
-      .select()
-      .from(tasks)
-      .where(eq(tasks.id, taskId))
-      .limit(1);
+    const result = await db.select().from(tasks).where(eq(tasks.id, taskId)).limit(1);
     return result[0] ?? null;
   },
 
@@ -218,10 +214,7 @@ export const tasksDb = {
   async deleteTask(taskId: string) {
     // Delete tag associations first
     await db.delete(tagTasks).where(eq(tagTasks.taskId, taskId));
-    const result = await db
-      .delete(tasks)
-      .where(eq(tasks.id, taskId))
-      .returning();
+    const result = await db.delete(tasks).where(eq(tasks.id, taskId)).returning();
     return result[0];
   },
 
@@ -252,11 +245,7 @@ export const tasksDb = {
   },
 
   async getTagById(tagId: string) {
-    const result = await db
-      .select()
-      .from(tags)
-      .where(eq(tags.id, tagId))
-      .limit(1);
+    const result = await db.select().from(tags).where(eq(tags.id, tagId)).limit(1);
     return result[0] ?? null;
   },
 
@@ -266,11 +255,7 @@ export const tasksDb = {
   },
 
   async updateTag(tagId: string, title: string) {
-    const result = await db
-      .update(tags)
-      .set({ title })
-      .where(eq(tags.id, tagId))
-      .returning();
+    const result = await db.update(tags).set({ title }).where(eq(tags.id, tagId)).returning();
     return result[0];
   },
 
@@ -288,9 +273,7 @@ export const tasksDb = {
 
     // Insert new associations
     if (tagIds.length > 0) {
-      await db
-        .insert(tagTasks)
-        .values(tagIds.map((tagId) => ({ taskId, tagId })));
+      await db.insert(tagTasks).values(tagIds.map((tagId) => ({ taskId, tagId })));
     }
 
     // Return the task with updated tags

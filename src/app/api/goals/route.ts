@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from "next/server";
+import { addDays } from "date-fns";
+import { type NextRequest, NextResponse } from "next/server";
 import { goalsDb } from "@/db/goals";
 import { getUser } from "@/lib/auth";
-import { addDays } from "date-fns";
 
 export async function GET() {
   try {
@@ -15,10 +15,7 @@ export async function GET() {
     return NextResponse.json({ goals });
   } catch (error) {
     console.error("Failed to fetch goals:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch goals" },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: "Failed to fetch goals" }, { status: 500 });
   }
 }
 
@@ -47,10 +44,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ goal });
   } catch (error) {
     console.error("Failed to create goal:", error);
-    return NextResponse.json(
-      { error: "Failed to create goal" },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: "Failed to create goal" }, { status: 500 });
   }
 }
 
@@ -66,9 +60,6 @@ export async function DELETE() {
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Failed to delete goals:", error);
-    return NextResponse.json(
-      { error: "Failed to delete goals" },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: "Failed to delete goals" }, { status: 500 });
   }
 }

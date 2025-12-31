@@ -1,6 +1,6 @@
+import { unstable_cache } from "next/cache";
 import { NextResponse } from "next/server";
 import { getGoogleCalendarClient } from "@/lib/google-calendar";
-import { unstable_cache } from "next/cache";
 
 const getColorsFromGoogle = unstable_cache(
   async () => {
@@ -9,7 +9,7 @@ const getColorsFromGoogle = unstable_cache(
     return response.data;
   },
   ["calendar-colors"],
-  { revalidate: 600 } // 10 minutes
+  { revalidate: 600 }, // 10 minutes
 );
 
 export async function GET() {

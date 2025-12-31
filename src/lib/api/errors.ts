@@ -74,17 +74,11 @@ export function notFound(resource = "Resource"): ApiError {
   return new ApiError(ErrorCodes.NOT_FOUND, `${resource} not found`, 404);
 }
 
-export function badRequest(
-  message: string,
-  details?: Record<string, unknown>,
-): ApiError {
+export function badRequest(message: string, details?: Record<string, unknown>): ApiError {
   return new ApiError(ErrorCodes.BAD_REQUEST, message, 400, details);
 }
 
-export function validationError(
-  message: string,
-  details?: Record<string, unknown>,
-): ApiError {
+export function validationError(message: string, details?: Record<string, unknown>): ApiError {
   return new ApiError(ErrorCodes.VALIDATION_ERROR, message, 400, details);
 }
 

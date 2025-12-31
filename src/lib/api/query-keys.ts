@@ -30,12 +30,6 @@ export const queryKeys = {
     byCalendar: (calendarId: string, timeMin: string, timeMax: string) =>
       ["events", calendarId, timeMin, timeMax] as const,
     multi: (calendarIds: string[], timeMin: string, timeMax: string) =>
-      [
-        "events",
-        "multi",
-        calendarIds.sort().join(","),
-        timeMin,
-        timeMax,
-      ] as const,
+      ["events", "multi", calendarIds.sort().join(","), timeMin, timeMax] as const,
   },
 } as const;

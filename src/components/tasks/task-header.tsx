@@ -1,6 +1,8 @@
 "use client";
 
-import type { Tag as TagType } from "@/types";
+import { Search, Tag } from "lucide-react";
+import type { FC } from "react";
+import React from "react";
 import { Button } from "@/components/ui/button";
 import {
   ContextMenu,
@@ -17,9 +19,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
-import { Search, Tag } from "lucide-react";
-import React from "react";
-import type { FC } from "react";
+import type { Tag as TagType } from "@/types";
 
 interface TaskListHeaderProps {
   searchQuery: string;
@@ -91,9 +91,7 @@ const TaskListHeader: FC<TaskListHeaderProps> = ({
                           onChange={(e) => setEditTagTitle(e.target.value)}
                           className="flex-1"
                         />
-                        <Button onClick={() => tag.id && handleSaveTag(tag.id)}>
-                          Save
-                        </Button>
+                        <Button onClick={() => tag.id && handleSaveTag(tag.id)}>Save</Button>
                       </div>
                     ) : (
                       <DropdownMenuCheckboxItem
@@ -105,14 +103,10 @@ const TaskListHeader: FC<TaskListHeaderProps> = ({
                     )}
                   </ContextMenuTrigger>
                   <ContextMenuContent>
-                    <ContextMenuItem
-                      onSelect={() => tag.id && handleDeleteTag(tag.id)}
-                    >
+                    <ContextMenuItem onSelect={() => tag.id && handleDeleteTag(tag.id)}>
                       Delete Tag
                     </ContextMenuItem>
-                    <ContextMenuItem onSelect={() => handleEditTag(tag)}>
-                      Edit Tag
-                    </ContextMenuItem>
+                    <ContextMenuItem onSelect={() => handleEditTag(tag)}>Edit Tag</ContextMenuItem>
                   </ContextMenuContent>
                 </ContextMenu>
               ))}

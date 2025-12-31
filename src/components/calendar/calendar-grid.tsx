@@ -1,15 +1,9 @@
 "use client";
-import type { CalendarEvent, ExtendedEvent } from "@/types/calendar";
-import {
-  addDays,
-  eachDayOfInterval,
-  format,
-  isSameDay,
-  startOfWeek,
-} from "date-fns";
+import { addDays, eachDayOfInterval, format, isSameDay, startOfWeek } from "date-fns";
 import type { calendar_v3 } from "googleapis";
 import type { FC } from "react";
 import { useEffect, useRef } from "react";
+import type { CalendarEvent, ExtendedEvent } from "@/types/calendar";
 import CalendarAllDayEvents from "./all-day-events";
 import CalendarEventComponent from "./calendar-event";
 
@@ -45,8 +39,7 @@ const CalendarGrid: FC<CalendarGridProps> = ({
   };
 
   const filteredEvents = events.filter(
-    (event) =>
-      event.organizer?.email && visibleCalendars.has(event.organizer.email),
+    (event) => event.organizer?.email && visibleCalendars.has(event.organizer.email),
   );
 
   const allDayEvents = filteredEvents.filter(isAllDayEvent);
@@ -72,9 +65,7 @@ const CalendarGrid: FC<CalendarGridProps> = ({
         <div className="w-16 flex-shrink-0" />
         {daysOfWeek.map((day) => (
           <div key={day.toISOString()} className="flex-1 text-center p-2">
-            <div className="text-sm text-gray-600 dark:text-gray-400">
-              {format(day, "EEE")}
-            </div>
+            <div className="text-sm text-gray-600 dark:text-gray-400">{format(day, "EEE")}</div>
             <div
               className={`mx-auto w-8 h-8 flex items-center justify-center rounded-full ${
                 isSameDay(day, new Date())
@@ -96,10 +87,7 @@ const CalendarGrid: FC<CalendarGridProps> = ({
       <div className="flex flex-grow overflow-y-auto" ref={gridRef}>
         <div className="w-16 flex-shrink-0">
           {hours.map((hour) => (
-            <div
-              key={hour}
-              className="h-16 text-xs text-gray-500 text-right pr-2"
-            >
+            <div key={hour} className="h-16 text-xs text-gray-500 text-right pr-2">
               {format(new Date().setHours(hour, 0, 0, 0), "h a")}
             </div>
           ))}
@@ -108,16 +96,11 @@ const CalendarGrid: FC<CalendarGridProps> = ({
           {daysOfWeek.map((day, dayIndex) => (
             <div key={day.toISOString()} className="relative">
               {hours.map((hour) => (
-                <div
-                  key={hour}
-                  className="h-16 border-t border-gray-200 dark:border-gray-700"
-                />
+                <div key={hour} className="h-16 border-t border-gray-200 dark:border-gray-700" />
               ))}
               <CalendarEventComponent
                 events={regularEvents.filter((event) => {
-                  const eventStart = event.start?.dateTime
-                    ? new Date(event.start.dateTime)
-                    : null;
+                  const eventStart = event.start?.dateTime ? new Date(event.start.dateTime) : null;
                   return eventStart && isSameDay(eventStart, day);
                 })}
                 dayIndex={dayIndex}

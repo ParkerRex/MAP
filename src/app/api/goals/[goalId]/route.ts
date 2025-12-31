@@ -1,13 +1,10 @@
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import { goalsDb } from "@/db/goals";
 import { getUser } from "@/lib/auth";
 
 type Params = Promise<{ goalId: string }>;
 
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: Params },
-) {
+export async function PUT(request: NextRequest, { params }: { params: Params }) {
   try {
     const { goalId } = await params;
     const user = await getUser();
@@ -34,17 +31,11 @@ export async function PUT(
     return NextResponse.json({ goal });
   } catch (error) {
     console.error("Failed to update goal:", error);
-    return NextResponse.json(
-      { error: "Failed to update goal" },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: "Failed to update goal" }, { status: 500 });
   }
 }
 
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: Params },
-) {
+export async function DELETE(request: NextRequest, { params }: { params: Params }) {
   try {
     const { goalId } = await params;
     const user = await getUser();
@@ -57,9 +48,6 @@ export async function DELETE(
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Failed to delete goal:", error);
-    return NextResponse.json(
-      { error: "Failed to delete goal" },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: "Failed to delete goal" }, { status: 500 });
   }
 }

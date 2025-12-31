@@ -1,11 +1,7 @@
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import { tasksDb } from "@/db/tasks";
+import { handleApiError, unauthorized, validationError } from "@/lib/api/errors";
 import { getUser } from "@/lib/auth";
-import {
-  handleApiError,
-  unauthorized,
-  validationError,
-} from "@/lib/api/errors";
 import { createTaskSchema } from "@/lib/validations/tasks";
 
 export async function GET() {

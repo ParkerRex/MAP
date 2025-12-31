@@ -1,6 +1,6 @@
-import { ApiError, ErrorCodes } from "./errors";
-import type { Task, Tag, Note, Folder, Goal } from "@/db/schema";
 import type { calendar_v3 } from "googleapis";
+import type { Folder, Goal, Note, Tag, Task } from "@/db/schema";
+import { ApiError, ErrorCodes } from "./errors";
 
 export interface TaskWithTags extends Task {
   tags: { id: string; title: string }[];
@@ -101,10 +101,7 @@ export interface UpdateTagInput {
 class ApiClient {
   private baseUrl = "/api";
 
-  private async request<T>(
-    endpoint: string,
-    options?: RequestInit,
-  ): Promise<T> {
+  private async request<T>(endpoint: string, options?: RequestInit): Promise<T> {
     const response = await fetch(this.baseUrl + endpoint, {
       ...options,
       headers: {
@@ -156,8 +153,7 @@ class ApiClient {
         method: "PUT",
         body: JSON.stringify(data),
       }),
-    delete: (id: string) =>
-      this.request<{ success: boolean }>("/tags/" + id, { method: "DELETE" }),
+    delete: (id: string) => this.request<{ success: boolean }>("/tags/" + id, { method: "DELETE" }),
   };
 }
 

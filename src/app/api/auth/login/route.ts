@@ -1,12 +1,8 @@
-import { db } from "@/db";
-import { createSession, verifyPassword } from "@/lib/auth";
-import {
-  handleApiError,
-  unauthorized,
-  validationError,
-} from "@/lib/api/errors";
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { db } from "@/db";
+import { handleApiError, unauthorized, validationError } from "@/lib/api/errors";
+import { createSession, verifyPassword } from "@/lib/auth";
 
 const loginSchema = z.object({
   email: z.string().email("Invalid email address"),

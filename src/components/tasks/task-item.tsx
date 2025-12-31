@@ -1,5 +1,10 @@
 "use client";
-import type { Tag as TagType, TaskWithTags } from "@/types";
+import { differenceInDays, format, parseISO } from "date-fns";
+import { AnimatePresence, motion, Reorder } from "framer-motion";
+import { Calendar, Flag, Tag } from "lucide-react";
+import type React from "react";
+import type { FC } from "react";
+import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Calendar as DatePicker } from "@/components/ui/calendar";
@@ -21,12 +26,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { differenceInDays, format, parseISO } from "date-fns";
-import { AnimatePresence, Reorder, motion } from "framer-motion";
-import { Calendar, Flag, Tag } from "lucide-react";
-import { useEffect, useState } from "react";
-import type React from "react";
-import type { FC } from "react";
+import type { Tag as TagType, TaskWithTags } from "@/types";
 
 interface TaskItemProps {
   task: TaskWithTags;
@@ -190,10 +190,7 @@ const TaskItem: FC<TaskItemProps> = ({
                   <Calendar className="w-5 h-5 text-muted-foreground cursor-pointer hover:text-primary" />
                 </PopoverTrigger>
                 <PopoverContent>
-                  <DatePicker
-                    selected={localDueDate ?? new Date()}
-                    onDayClick={handleDateChange}
-                  />
+                  <DatePicker selected={localDueDate ?? new Date()} onDayClick={handleDateChange} />
                 </PopoverContent>
               </Popover>
               <DropdownMenu>

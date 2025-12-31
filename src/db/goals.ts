@@ -1,6 +1,6 @@
+import { eq } from "drizzle-orm";
 import { db } from "./index";
 import { goals, type NewGoal } from "./schema";
-import { eq } from "drizzle-orm";
 
 export const goalsDb = {
   async getGoals(userId: string) {
@@ -8,11 +8,7 @@ export const goalsDb = {
   },
 
   async getGoalById(goalId: string) {
-    const result = await db
-      .select()
-      .from(goals)
-      .where(eq(goals.id, goalId))
-      .limit(1);
+    const result = await db.select().from(goals).where(eq(goals.id, goalId)).limit(1);
     return result[0] ?? null;
   },
 
@@ -31,10 +27,7 @@ export const goalsDb = {
   },
 
   async deleteGoal(goalId: string) {
-    const result = await db
-      .delete(goals)
-      .where(eq(goals.id, goalId))
-      .returning();
+    const result = await db.delete(goals).where(eq(goals.id, goalId)).returning();
     return result[0];
   },
 
@@ -48,10 +41,7 @@ export const goalsDb = {
   },
 
   async getCompletionStats(userId: string) {
-    const allGoals = await db
-      .select()
-      .from(goals)
-      .where(eq(goals.userId, userId));
+    const allGoals = await db.select().from(goals).where(eq(goals.userId, userId));
     const completedGoals = allGoals.filter((g) => g.completed);
 
     const total = allGoals.length;
@@ -63,10 +53,7 @@ export const goalsDb = {
 
   async deleteUserGoals(userId: string) {
     // Only delete user-created goals (not system goals)
-    const result = await db
-      .delete(goals)
-      .where(eq(goals.userId, userId))
-      .returning();
+    const result = await db.delete(goals).where(eq(goals.userId, userId)).returning();
     return result;
   },
 };

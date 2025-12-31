@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import { notesDb } from "@/db/notes";
 import { getUser } from "@/lib/auth";
 
@@ -14,10 +14,7 @@ export async function GET() {
     return NextResponse.json({ folders });
   } catch (error) {
     console.error("Failed to fetch folders:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch folders" },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: "Failed to fetch folders" }, { status: 500 });
   }
 }
 
@@ -40,9 +37,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ folder });
   } catch (error) {
     console.error("Failed to create folder:", error);
-    return NextResponse.json(
-      { error: "Failed to create folder" },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: "Failed to create folder" }, { status: 500 });
   }
 }

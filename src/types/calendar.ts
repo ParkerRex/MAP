@@ -1,8 +1,7 @@
 import type { calendar_v3 } from "googleapis";
 
 // Extend the Google Calendar API types for our specific needs
-export interface ExtendedCalendarListEntry
-  extends calendar_v3.Schema$CalendarListEntry {
+export interface ExtendedCalendarListEntry extends calendar_v3.Schema$CalendarListEntry {
   nextSyncToken?: string;
 }
 

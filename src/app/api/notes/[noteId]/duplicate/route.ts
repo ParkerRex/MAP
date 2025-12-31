@@ -1,13 +1,10 @@
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import { notesDb } from "@/db/notes";
 import { getUser } from "@/lib/auth";
 
 type Params = Promise<{ noteId: string }>;
 
-export async function POST(
-  request: NextRequest,
-  { params }: { params: Params },
-) {
+export async function POST(request: NextRequest, { params }: { params: Params }) {
   try {
     const { noteId } = await params;
     const user = await getUser();
@@ -20,9 +17,6 @@ export async function POST(
     return NextResponse.json({ note });
   } catch (error) {
     console.error("Failed to duplicate note:", error);
-    return NextResponse.json(
-      { error: "Failed to duplicate note" },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: "Failed to duplicate note" }, { status: 500 });
   }
 }

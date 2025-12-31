@@ -1,6 +1,6 @@
-import { deleteSession } from "@/lib/auth";
-import { handleApiError } from "@/lib/api/errors";
 import { NextResponse } from "next/server";
+import { handleApiError } from "@/lib/api/errors";
+import { deleteSession } from "@/lib/auth";
 
 export async function POST() {
   try {

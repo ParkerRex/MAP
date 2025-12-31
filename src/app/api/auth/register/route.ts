@@ -1,9 +1,9 @@
-import { db } from "@/db";
-import { users } from "@/db/schema";
-import { createSession, hashPassword } from "@/lib/auth";
-import { handleApiError, validationError } from "@/lib/api/errors";
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { db } from "@/db";
+import { users } from "@/db/schema";
+import { handleApiError, validationError } from "@/lib/api/errors";
+import { createSession, hashPassword } from "@/lib/auth";
 
 const registerSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -44,10 +44,7 @@ export async function POST(request: Request) {
         passwordHash,
         firstName,
         lastName,
-        displayName:
-          firstName && lastName
-            ? `${firstName} ${lastName}`
-            : firstName || null,
+        displayName: firstName && lastName ? `${firstName} ${lastName}` : firstName || null,
       })
       .returning({
         id: users.id,

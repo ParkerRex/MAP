@@ -1,10 +1,10 @@
 "use client";
 
-import { useUpdateTaskTags } from "@/hooks/use-tasks";
-import type { Tag as TagType } from "@/db/schema";
-import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import type { FC } from "react";
+import { Button } from "@/components/ui/button";
+import type { Tag as TagType } from "@/db/schema";
+import { useUpdateTaskTags } from "@/hooks/use-tasks";
 
 interface TagFilterProps {
   tags: TagType[];
@@ -13,12 +13,7 @@ interface TagFilterProps {
   taskId: string | undefined;
 }
 
-const TagFilter: FC<TagFilterProps> = ({
-  tags,
-  selectedTags,
-  handleTagSelect,
-  taskId,
-}) => {
+const TagFilter: FC<TagFilterProps> = ({ tags, selectedTags, handleTagSelect, taskId }) => {
   const updateTaskTagsMutation = useUpdateTaskTags();
 
   const handleTagClick = async (tagTitle: string) => {

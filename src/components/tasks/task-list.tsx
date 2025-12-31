@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo, useState } from "react";
 import {
   useCreateTag,
   useCreateTask,
@@ -12,8 +13,7 @@ import {
   useUpdateTaskDueDate,
   useUpdateTaskTags,
 } from "@/hooks/use-tasks";
-import type { TaskWithTags, Tag as TagType } from "@/types";
-import { useMemo, useState } from "react";
+import type { Tag as TagType, TaskWithTags } from "@/types";
 import TagFilter from "./tag-filter";
 import TaskListHeader from "./task-header";
 import TaskListContainer from "./task-list-container";
@@ -72,7 +72,7 @@ const TaskList: React.FC = () => {
           onSuccess: (data) => {
             resolve({ id: data.tag.id, title: data.tag.title });
           },
-        }
+        },
       );
     });
   };
@@ -122,9 +122,7 @@ const TaskList: React.FC = () => {
 
   const filteredTasks = useMemo(() => {
     return tasks.filter((task) => {
-      const matchesSearch = task.title
-        .toLowerCase()
-        .includes(searchQuery.toLowerCase());
+      const matchesSearch = task.title.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesTags =
         selectedTags.length === 0 ||
         selectedTags.every((tag) => task.tags?.some((t) => t.title === tag));
