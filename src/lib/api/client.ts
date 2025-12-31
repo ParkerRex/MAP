@@ -98,10 +98,44 @@ export interface UpdateTagInput {
   title: string;
 }
 
+export interface CreateNoteInput {
+  title: string;
+  content?: string;
+  folderId: string;
+}
+
+export interface UpdateNoteInput {
+  title?: string;
+  content?: string | null;
+  folderId?: string;
+}
+
+export interface CreateFolderInput {
+  name: string;
+}
+
+export interface UpdateFolderInput {
+  name: string;
+}
+
+export interface CreateGoalInput {
+  title: string;
+  dueAt?: string;
+}
+
+export interface UpdateGoalInput {
+  title?: string;
+  dueAt?: string | null;
+  completed?: boolean;
+}
+
 class ApiClient {
   private baseUrl = "/api";
 
-  private async request<T>(endpoint: string, options?: RequestInit): Promise<T> {
+  private async request<T>(
+    endpoint: string,
+    options?: RequestInit,
+  ): Promise<T> {
     const response = await fetch(this.baseUrl + endpoint, {
       ...options,
       headers: {
@@ -153,7 +187,110 @@ class ApiClient {
         method: "PUT",
         body: JSON.stringify(data),
       }),
-    delete: (id: string) => this.request<{ success: boolean }>("/tags/" + id, { method: "DELETE" }),
+    delete: (id: string) =>
+      this.request<{ success: boolean }>("/tags/" + id, { method: "DELETE" }),
+  };
+
+  notes = {
+    list: () => this.request<NotesResponse>("/notes"),
+    get: (id: string) => this.request<NoteResponse>("/notes/" + id),
+    create: (data: CreateNoteInput) =>
+      this.request<NoteResponse>("/notes", {
+        method: "POST",
+        body: JSON.stringify(data),
+      }),
+    update: (id: string, data: UpdateNoteInput) =>
+      this.request<NoteResponse>("/notes/" + id, {
+        method: "PUT",
+        body: JSON.stringify(data),
+      }),
+    delete: (id: string) =>
+      this.request<{ success: boolean }>("/notes/" + id, { method: "DELETE" }),
+    duplicate: (id: string) =>
+      this.request<NoteResponse>("/notes/" + id + "/duplicate", {
+        method: "POST",
+      }),
+  };
+
+  folders = {
+    list: () => this.request<FoldersResponse>("/folders"),
+    create: (data: CreateFolderInput) =>
+      this.request<FolderResponse>("/folders", {
+        method: "POST",
+        body: JSON.stringify(data),
+      }),
+    update: (id: string, data: UpdateFolderInput) =>
+      this.request<FolderResponse>("/folders/" + id, {
+        method: "PUT",
+        body: JSON.stringify(data),
+      }),
+    delete: (id: string) =>
+      this.request<{ success: boolean }>("/folders/" + id, {
+        method: "DELETE",
+      }),
+    ensureCoachNotes: () =>
+      this.request<FolderResponse>("/folders/coach-notes", { method: "POST" }),
+  };
+
+  goals = {
+    list: () => this.request<GoalsResponse>("/goals"),
+    stats: () => this.request<GoalStatsResponse>("/goals/stats"),
+    create: (data: CreateGoalInput) =>
+      this.request<GoalResponse>("/goals", {
+        method: "POST",
+        body: JSON.stringify(data),
+      }),
+    update: (id: string, data: UpdateGoalInput) =>
+      this.request<GoalResponse>("/goals/" + id, {
+        method: "PUT",
+        body: JSON.stringify(data),
+      }),
+    delete: (id: string) =>
+      this.request<{ success: boolean }>("/goals/" + id, { method: "DELETE" }),
+    deleteAll: () =>
+      this.request<{ success: boolean }>("/goals", { method: "DELETE" }),
+  };
+
+  calendar = {
+    listCalendars: () => this.request<CalendarsResponse>("/calendar/calendars"),
+    getColors: () => this.request<ColorsResponse>("/calendar/colors"),
+    sync: () =>
+      this.request<SyncResponse>("/calendar/sync", { method: "POST" }),
+    events: {
+      list: (calendarId: string, timeMin: string, timeMax: string) =>
+        this.request<EventsResponse>(
+          `/calendar/events?calendarId=${calendarId}&timeMin=${timeMin}&timeMax=${timeMax}`,
+        ),
+      get: (eventId: string, calendarId: string) =>
+        this.request<{ event: CalendarEvent }>(
+          `/calendar/events/${eventId}?calendarId=${calendarId}`,
+        ),
+      create: (calendarId: string, event: Partial<CalendarEvent>) =>
+        this.request<{ event: CalendarEvent }>(
+          `/calendar/events?calendarId=${calendarId}`,
+          {
+            method: "POST",
+            body: JSON.stringify(event),
+          },
+        ),
+      update: (
+        eventId: string,
+        calendarId: string,
+        event: Partial<CalendarEvent>,
+      ) =>
+        this.request<{ event: CalendarEvent }>(
+          `/calendar/events/${eventId}?calendarId=${calendarId}`,
+          {
+            method: "PUT",
+            body: JSON.stringify(event),
+          },
+        ),
+      delete: (eventId: string, calendarId: string) =>
+        this.request<{ success: boolean }>(
+          `/calendar/events/${eventId}?calendarId=${calendarId}`,
+          { method: "DELETE" },
+        ),
+    },
   };
 }
 

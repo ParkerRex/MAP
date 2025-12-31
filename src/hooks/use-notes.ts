@@ -2,6 +2,7 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { Folder, Note } from "@/db/schema";
+import { queryKeys } from "@/lib/api/query-keys";
 
 interface NotesResponse {
   notes: Note[];
@@ -22,7 +23,7 @@ interface FolderResponse {
 // Notes Queries
 export function useNotes() {
   return useQuery<NotesResponse>({
-    queryKey: ["notes"],
+    queryKey: queryKeys.notes.all,
     queryFn: async () => {
       const response = await fetch("/api/notes");
       if (!response.ok) throw new Error("Failed to fetch notes");
@@ -33,7 +34,7 @@ export function useNotes() {
 
 export function useNote(noteId: string) {
   return useQuery<NoteResponse>({
-    queryKey: ["notes", noteId],
+    queryKey: queryKeys.notes.detail(noteId),
     queryFn: async () => {
       const response = await fetch(`/api/notes/${noteId}`);
       if (!response.ok) throw new Error("Failed to fetch note");
@@ -47,7 +48,11 @@ export function useNote(noteId: string) {
 export function useCreateNote() {
   const queryClient = useQueryClient();
 
-  return useMutation<NoteResponse, Error, { title: string; content?: string; folderId: string }>({
+  return useMutation<
+    NoteResponse,
+    Error,
+    { title: string; content?: string; folderId: string }
+  >({
     mutationFn: async (data) => {
       const response = await fetch("/api/notes", {
         method: "POST",
@@ -58,8 +63,8 @@ export function useCreateNote() {
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["notes"] });
-      queryClient.invalidateQueries({ queryKey: ["folders"] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.notes.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.folders.all });
     },
   });
 }
@@ -82,8 +87,8 @@ export function useUpdateNote() {
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["notes"] });
-      queryClient.invalidateQueries({ queryKey: ["folders"] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.notes.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.folders.all });
     },
   });
 }
@@ -100,8 +105,8 @@ export function useDeleteNote() {
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["notes"] });
-      queryClient.invalidateQueries({ queryKey: ["folders"] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.notes.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.folders.all });
     },
   });
 }
@@ -118,8 +123,8 @@ export function useDuplicateNote() {
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["notes"] });
-      queryClient.invalidateQueries({ queryKey: ["folders"] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.notes.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.folders.all });
     },
   });
 }
@@ -127,7 +132,7 @@ export function useDuplicateNote() {
 // Folders Queries
 export function useFolders() {
   return useQuery<FoldersResponse>({
-    queryKey: ["folders"],
+    queryKey: queryKeys.folders.all,
     queryFn: async () => {
       const response = await fetch("/api/folders");
       if (!response.ok) throw new Error("Failed to fetch folders");
@@ -151,7 +156,7 @@ export function useCreateFolder() {
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["folders"] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.folders.all });
     },
   });
 }
@@ -159,20 +164,22 @@ export function useCreateFolder() {
 export function useUpdateFolder() {
   const queryClient = useQueryClient();
 
-  return useMutation<FolderResponse, Error, { folderId: string; name: string }>({
-    mutationFn: async ({ folderId, name }) => {
-      const response = await fetch(`/api/folders/${folderId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name }),
-      });
-      if (!response.ok) throw new Error("Failed to update folder");
-      return response.json();
+  return useMutation<FolderResponse, Error, { folderId: string; name: string }>(
+    {
+      mutationFn: async ({ folderId, name }) => {
+        const response = await fetch(`/api/folders/${folderId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name }),
+        });
+        if (!response.ok) throw new Error("Failed to update folder");
+        return response.json();
+      },
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: queryKeys.folders.all });
+      },
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["folders"] });
-    },
-  });
+  );
 }
 
 export function useDeleteFolder() {
@@ -187,8 +194,8 @@ export function useDeleteFolder() {
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["folders"] });
-      queryClient.invalidateQueries({ queryKey: ["notes"] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.folders.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.notes.all });
     },
   });
 }
@@ -205,7 +212,7 @@ export function useEnsureCoachNotesFolder() {
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["folders"] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.folders.all });
     },
   });
 }

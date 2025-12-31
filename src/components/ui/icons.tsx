@@ -1,7 +1,10 @@
+import type { SVGProps } from "react";
 import { ArchiveIcon } from "@radix-ui/react-icons";
 
 import { FaXTwitter } from "react-icons/fa6";
 import { FiGithub } from "react-icons/fi";
+
+type IconProps = SVGProps<SVGSVGElement>;
 import {
   MdAdd,
   MdArrowBack,
@@ -96,7 +99,7 @@ import {
 } from "react-icons/md";
 import { PiDiscordLogo } from "react-icons/pi";
 export const Icons = {
-  LogoSmall: (props: any) => (
+  LogoSmall: (props: IconProps) => (
     <svg xmlns="http://www.w3.org/2000/svg" width={29} height={32} fill="none" {...props}>
       <path
         fill="currentColor"
@@ -106,7 +109,7 @@ export const Icons = {
       />
     </svg>
   ),
-  LogoIcon: (props: any) => (
+  LogoIcon: (props: IconProps) => (
     <svg xmlns="http://www.w3.org/2000/svg" width={16} height={17} fill="none" {...props}>
       <path
         d="M1.36818 17C0.691203 17 0.209852 16.3414 0.415386 15.6964L5.19505 0.696397C5.32722 0.281622 5.71253 0 6.14785 0H9.85215C10.2875 0 10.6728 0.281621 10.805 0.696396L15.5846 15.6964C15.7901 16.3414 15.3088 17 14.6318 17H1.36818ZM5.52495 12.3779C5.3342 13.0191 5.81451 13.6631 6.48343 13.6631H9.50873C10.1776 13.6631 10.658 13.0191 10.4672 12.3779L8.07668 4.34331C8.06607 4.30765 8.03329 4.2832 7.99608 4.2832V4.2832C7.95887 4.2832 7.92609 4.30765 7.91548 4.34331L5.52495 12.3779Z"
@@ -114,7 +117,7 @@ export const Icons = {
       />
     </svg>
   ),
-  Logo: (props: any) => (
+  Logo: (props: IconProps) => (
     <svg xmlns="http://www.w3.org/2000/svg" width={88} height={28} fill="none" {...props}>
       <path
         fill="currentColor"
@@ -135,7 +138,7 @@ export const Icons = {
       />
     </svg>
   ),
-  InboxCustomize: (props: any) => (
+  InboxCustomize: (props: IconProps) => (
     <svg
       xmlns="http://www.w3.org/2000/svg"
       width={17}
@@ -149,7 +152,7 @@ export const Icons = {
       />
     </svg>
   ),
-  Info: (props: any) => (
+  Info: (props: IconProps) => (
     <svg xmlns="http://www.w3.org/2000/svg" width={14} height={14} fill="none" {...props}>
       <path
         fill="currentColor"
@@ -157,7 +160,7 @@ export const Icons = {
       />
     </svg>
   ),
-  AlertCircle: (props: any) => (
+  AlertCircle: (props: IconProps) => (
     <svg xmlns="http://www.w3.org/2000/svg" width={16} height={17} fill="none" {...props}>
       <path
         fill="currentColor"
@@ -166,7 +169,7 @@ export const Icons = {
     </svg>
   ),
 
-  Apple: (props: any) => (
+  Apple: (props: IconProps) => (
     <svg xmlns="http://www.w3.org/2000/svg" width={19} height={23} fill="none" {...props}>
       <path
         fill="currentColor"
@@ -174,7 +177,7 @@ export const Icons = {
       />
     </svg>
   ),
-  Google: (props: any) => (
+  Google: (props: IconProps) => (
     <svg width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
       <g clipPath="url(#a)">
         <path
@@ -201,12 +204,12 @@ export const Icons = {
       </defs>
     </svg>
   ),
-  Check: (props: any) => (
+  Check: (props: IconProps) => (
     <svg xmlns="http://www.w3.org/2000/svg" width={16} height={17} fill="none" {...props}>
       <path fill="currentColor" d="m14 5.167-8 8L2.333 9.5l.94-.94L6 11.28l7.06-7.053.94.94Z" />
     </svg>
   ),
-  Github: (props: any) => (
+  Github: (props: IconProps) => (
     <svg xmlns="http://www.w3.org/2000/svg" width={22} height={22} fill="none" {...props}>
       <path
         fill="currentColor"
@@ -220,7 +223,7 @@ export const Icons = {
       />
     </svg>
   ),
-  OpenAI: (props: any) => (
+  OpenAI: (props: IconProps) => (
     <svg xmlns="http://www.w3.org/2000/svg" width={120} height={24} fill="none" {...props}>
       <path
         fill="currentColor"
@@ -228,7 +231,7 @@ export const Icons = {
       />
     </svg>
   ),
-  Sidebar: (props: any) => (
+  Sidebar: (props: IconProps) => (
     <svg
       xmlns="http://www.w3.org/2000/svg"
       width={24}
@@ -240,7 +243,7 @@ export const Icons = {
       <path d="M160-160q-33 0-56.5-23.5T80-240v-480q0-33 23.5-56.5T160-800h640q33 0 56.5 23.5T880-720v480q0 33-23.5 56.5T800-160H160Zm240-80h400v-480H400v480Zm-80 0v-480H160v480h160Zm-160 0v-480 480Zm160 0h80-80Zm0-480h80-80Z" />
     </svg>
   ),
-  SidebarFilled: (props: any) => (
+  SidebarFilled: (props: IconProps) => (
     <svg
       xmlns="http://www.w3.org/2000/svg"
       width={24}
@@ -252,7 +255,7 @@ export const Icons = {
       <path d="M160-160q-33 0-56.5-23.5T80-240v-480q0-33 23.5-56.5T160-800h160v640H160Zm240 0v-640h400q33 0 56.5 23.5T880-720v480q0 33-23.5 56.5T800-160H400Z" />
     </svg>
   ),
-  Reconnect: (props: any) => (
+  Reconnect: (props: IconProps & { size?: number }) => (
     <svg
       xmlns="http://www.w3.org/2000/svg"
       width={props.size}

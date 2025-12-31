@@ -17,13 +17,6 @@ export default function NoteDisplay({
 }: NoteDisplayProps) {
   const titleInputRef = useRef<HTMLInputElement>(null);
 
-  // TODO: Implement server actions for CRUD operations
-  // 1. Create note
-  // 2. Read note
-  // 3. Update note title
-  // 4. Update note content
-  // 5. Delete note
-
   return (
     <div className="flex flex-col h-full">
       <div className="p-4 space-y-4 shrink-0">

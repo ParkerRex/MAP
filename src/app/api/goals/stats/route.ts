@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { goalsDb } from "@/db/goals";
+import { handleApiError, unauthorized } from "@/lib/api/errors";
 import { getUser } from "@/lib/auth";
 
 export async function GET() {
@@ -7,13 +8,12 @@ export async function GET() {
     const user = await getUser();
 
     if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      throw unauthorized();
     }
 
     const stats = await goalsDb.getCompletionStats(user.id);
     return NextResponse.json({ stats });
   } catch (error) {
-    console.error("Failed to fetch goal stats:", error);
-    return NextResponse.json({ error: "Failed to fetch goal stats" }, { status: 500 });
+    return handleApiError(error);
   }
 }
