@@ -1,6 +1,7 @@
 import type { MutableAIState } from "@/actions/ai/types";
 import { calculateAvgBurnRate } from "@/utils/format";
-import { getBurnRate, getRunway } from "@map/supabase/cached-queries";
+// TODO: Implement getBurnRate and getRunway in @/lib/db/cached-queries
+// import { getBurnRate, getRunway } from "@/lib/db/cached-queries";
 import { startOfMonth } from "date-fns";
 import { nanoid } from "nanoid";
 import { z } from "zod";

@@ -1,48 +1,23 @@
 "use client";
 
 import { useCreateGoal } from "@/hooks/use-goals";
-import type { Goal } from "@/types/goals";
 import { CheckCircleIcon } from "lucide-react";
 import type React from "react";
-import { startTransition, useRef } from "react";
-import { useFormStatus } from "react-dom";
+import { useRef } from "react";
 
-type AddGoalFormProps = {
-  setOptimisticGoals: (
-    action: Goal[] | ((pendingState: Goal[]) => Goal[]),
-  ) => void;
-};
-
-const AddGoalForm = ({ setOptimisticGoals }: AddGoalFormProps) => {
+const AddGoalForm = () => {
   const formRef = useRef<HTMLFormElement>(null);
-  const { pending } = useFormStatus();
   const createGoal = useCreateGoal();
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!formRef.current) return;
     const formData = new FormData(formRef.current);
     const title = formData.get("goaltext") as string;
 
-    // Create an optimistic goal to update the UI immediately
-    const optimisticGoal: Goal = {
-      id: Date.now(),
-      title,
-      completed: false,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-      user_id: "temp",
-    };
+    if (!title.trim()) return;
 
-    // Wrap the optimistic update in startTransition
-    startTransition(() => {
-      setOptimisticGoals((prev) => [optimisticGoal, ...prev]);
-    });
-
-    // Create the goal via mutation
     createGoal.mutate({ title });
-
-    // Reset the form after submission
     formRef.current?.reset();
   };
 
@@ -52,7 +27,17 @@ const AddGoalForm = ({ setOptimisticGoals }: AddGoalFormProps) => {
       className="hover:bg-slate-100 hover:dark:bg-slate-800 group flex items-center gap-2 rounded-full duration-200 focus-within:ring-2 w-full px-4 py-4"
       ref={formRef}
     >
-      <SubmitButton pending={false} />
+      <button
+        type="submit"
+        className="ml-auto"
+        disabled={createGoal.isPending}
+      >
+        {createGoal.isPending ? (
+          <div className="h-5 w-5 animate-spin rounded-full border-t-2" />
+        ) : (
+          <CheckCircleIcon className="h-5 w-5" />
+        )}
+      </button>
       <input
         type="text"
         name="goaltext"
@@ -63,24 +48,6 @@ const AddGoalForm = ({ setOptimisticGoals }: AddGoalFormProps) => {
         autoComplete="off"
       />
     </form>
-  );
-};
-
-type SubmitButtonProps = {
-  pending: boolean;
-};
-
-const SubmitButton = ({ pending }: SubmitButtonProps) => {
-  const { pending: formPending } = useFormStatus();
-
-  return (
-    <button type="submit" className="ml-auto" disabled={formPending}>
-      {formPending ? (
-        <div className="h-5 w-5 animate-spin rounded-full border-t-2" />
-      ) : (
-        <CheckCircleIcon className="h-5 w-5" />
-      )}
-    </button>
   );
 };
 

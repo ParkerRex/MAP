@@ -3,12 +3,12 @@ import type { UpdateTransactionValues } from "@/actions/schema";
 // import { updateSimilarTransactionsAction } from "@/actions/update-similar-transactions-action";
 import { createClient } from "@/lib/db/client";
 // TODO: Implement getTransactionQuery
-// import { getTransactionQuery } from "@map/supabase/queries";
+// import { getTransactionQuery } from "@/lib/db/queries";
 // TODO: Implement getCurrentUserTeamQuery and getSimilarTransactions
 // import {
 //   getCurrentUserTeamQuery,
 //   getSimilarTransactions,
-// } from "@map/supabase/queries";
+// } from "@/lib/db/queries";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@map/ui/accordion";
 import { cn } from "@map/ui/cn";
 import { Label } from "@map/ui/label";

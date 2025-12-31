@@ -1,5 +1,6 @@
-import { createClient } from "@map/supabase/client";
-import { upload } from "@map/supabase/storage";
+import { createClient } from "@/lib/db/client";
+// TODO: Implement upload in @/lib/db/storage
+// import { upload } from "@/lib/db/storage";
 import { useState } from "react";
 
 export function useUpload() {

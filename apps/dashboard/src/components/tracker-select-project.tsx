@@ -3,8 +3,8 @@
 // TODO: Implement createProjectAction
 // import { createProjectAction } from "@/actions/project/create-project-action";
 // TODO: Implement cached queries
-// import { createClient } from "@map/supabase/client";
-// import { getTrackerProjectsQuery } from "@map/supabase/queries";
+// import { createClient } from "@/lib/db/client";
+// import { getTrackerProjectsQuery } from "@/lib/db/queries";
 import { Combobox, type Option } from "@map/ui/combobox";
 import { useToast } from "@map/ui/use-toast";
 // TODO: Implement useAction

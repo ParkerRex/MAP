@@ -1,6 +1,5 @@
 "use client";
 
-import { inboxOrderAction } from "@/actions/inbox/order";
 import { Button } from "@map/ui/button";
 import {
   DropdownMenu,
@@ -9,20 +8,19 @@ import {
   DropdownMenuTrigger,
 } from "@map/ui/dropdown-menu";
 import { Icons } from "@map/ui/icons";
-import { useOptimisticAction } from "next-safe-action/hooks";
+import { useState } from "react";
 
 type Props = {
   ascending: boolean;
 };
 
-export function InboxOrdering({ ascending }: Props) {
-  const { execute: inboxOrder, optimisticState } = useOptimisticAction(
-    inboxOrderAction,
-    {
-      currentState: ascending,
-      updateFn: (_, state) => !state,
-    },
-  );
+export function InboxOrdering({ ascending: initialAscending }: Props) {
+  const [ascending, setAscending] = useState(initialAscending);
+
+  const handleOrderChange = (newAscending: boolean) => {
+    setAscending(newAscending);
+    // Cookie will be set by the parent component or via API
+  };
 
   return (
     <DropdownMenu>
@@ -33,15 +31,15 @@ export function InboxOrdering({ ascending }: Props) {
       </DropdownMenuTrigger>
       <DropdownMenuContent>
         <DropdownMenuCheckboxItem
-          checked={!optimisticState}
-          onCheckedChange={() => inboxOrder(false)}
+          checked={!ascending}
+          onCheckedChange={() => handleOrderChange(false)}
         >
           Most recent
         </DropdownMenuCheckboxItem>
 
         <DropdownMenuCheckboxItem
-          checked={optimisticState}
-          onCheckedChange={() => inboxOrder(true)}
+          checked={ascending}
+          onCheckedChange={() => handleOrderChange(true)}
         >
           Oldest first
         </DropdownMenuCheckboxItem>

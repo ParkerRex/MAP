@@ -11,7 +11,7 @@ import { useDeleteAllGoals, useGoalStats } from "@/hooks/use-goals";
 import type { Goal } from "@/types/goals";
 import { Progress } from "@map/ui/progress";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@map/ui/tooltip";
-import { useEffect, useOptimistic, useState } from "react";
+import { useEffect, useState } from "react";
 import { GiMagicBroom } from "react-icons/gi";
 import AddGoalForm from "./AddGoalForm";
 import ScrollArea from "./ui/ScrollArea";
@@ -54,7 +54,6 @@ const GoalsComponent = ({
 }: GoalsComponentProps & {
   className?: string;
 }) => {
-  const [optimisticGoals, setOptimisticGoals] = useOptimistic(goals);
   const [countdown, setCountdown] = useState("");
   const currentQuarter = getCurrentQuarter();
 
@@ -79,7 +78,6 @@ const GoalsComponent = ({
 
   const handleClearGoals = () => {
     deleteAllGoals.mutate();
-    setOptimisticGoals([]);
   };
 
   return (
@@ -109,13 +107,10 @@ const GoalsComponent = ({
       </CardHeader>
 
       <CardContent>
-        <ScrollArea
-          goals={optimisticGoals}
-          setOptimisticGoals={setOptimisticGoals}
-        />
+        <ScrollArea goals={goals} />
       </CardContent>
       <CardFooter>
-        <AddGoalForm setOptimisticGoals={setOptimisticGoals} />
+        <AddGoalForm />
       </CardFooter>
     </Card>
   );

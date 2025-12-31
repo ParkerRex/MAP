@@ -1,7 +1,5 @@
 "use client";
 
-// TODO: Implement changeChartCurrencyAction in @/actions/change-chart-currency
-// import { changeChartCurrencyAction } from "@/actions/change-chart-currency";
 import { cn } from "@map/ui/cn";
 import {
   Select,
@@ -9,8 +7,7 @@ import {
   SelectItem,
   SelectTrigger,
 } from "@map/ui/select";
-// TODO: Replace with actual implementation when changeChartCurrencyAction is available
-// import { useOptimisticAction } from "next-safe-action/hooks";
+import { useState } from "react";
 
 type Props = {
   defaultValue?: string;
@@ -19,38 +16,26 @@ type Props = {
     id: string;
     label: string;
   }[];
+  onChange?: (value: string) => void;
 };
 
 export function SelectChartCurrency({
   currencies,
   defaultValue,
   className,
+  onChange,
 }: Props) {
-  // TODO: Replace with actual implementation when changeChartCurrencyAction is available
-  // const { execute, optimisticState } = useOptimisticAction(
-  //   changeChartCurrencyAction,
-  //   {
-  //     currentState: defaultValue,
-  //     updateFn: (_, newState) => newState,
-  //   },
-  // );
+  const [value, setValue] = useState(defaultValue || currencies.at(0)?.id);
 
-  // Stub for optimisticState
-  const optimisticState = defaultValue;
-
-  // Stub for execute function
-  const execute = (value: string) => {
-    console.log("Currency changed to:", value);
-    // In a real implementation, this would update the state
+  const handleChange = (newValue: string) => {
+    setValue(newValue);
+    onChange?.(newValue);
   };
 
   return (
-    <Select
-      defaultValue={optimisticState || currencies.at(0)?.id}
-      onValueChange={execute}
-    >
+    <Select defaultValue={value} onValueChange={handleChange}>
       <SelectTrigger className={cn("w-[90px] font-medium", className)}>
-        <span>{optimisticState}</span>
+        <span>{value}</span>
       </SelectTrigger>
       <SelectContent>
         {currencies.map((currency) => {

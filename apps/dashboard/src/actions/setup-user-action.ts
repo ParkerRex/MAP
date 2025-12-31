@@ -1,6 +1,7 @@
 "use server";
 
-import { updateUser } from "@map/supabase/mutations";
+// TODO: Implement updateUser in @/lib/db/mutations
+// import { updateUser } from "@/lib/db/mutations";
 import { revalidateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import { authActionClient } from "./safe-action";

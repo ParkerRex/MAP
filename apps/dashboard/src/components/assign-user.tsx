@@ -3,7 +3,7 @@ import { createClient } from "@/lib/db/client";
 // import {
 //   getCurrentUserTeamQuery,
 //   getTeamMembersQuery,
-// } from "@map/supabase/queries";
+// } from "@/lib/db/queries";
 import {
   Select,
   SelectContent,
