@@ -2,7 +2,7 @@
 
 import { format, formatDistanceToNow, parseISO } from "date-fns";
 import { AnimatePresence, motion } from "framer-motion";
-import { Leaf, Plus, Search, Trash } from "lucide-react";
+import { FileText, FolderPlus, Leaf, Plus, Search, Trash } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/components/ui/cn";
@@ -26,6 +26,9 @@ interface Folder {
   name: string;
 }
 
+type SortField = "updatedAt" | "createdAt" | "title";
+type SortOrder = "desc" | "asc";
+
 interface NoteListProps {
   notes: Note[];
   note: Note | null;
@@ -35,6 +38,8 @@ interface NoteListProps {
   selectedNote: Note | null;
   setSelectedNote: (note: Note | null) => void;
   folders: Folder[];
+  sortField?: SortField;
+  sortOrder?: SortOrder;
 }
 
 export default function NoteList({
@@ -45,6 +50,8 @@ export default function NoteList({
   selectedNote,
   setSelectedNote,
   folders,
+  sortField = "updatedAt",
+  sortOrder = "desc",
 }: NoteListProps) {
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -69,12 +76,25 @@ export default function NoteList({
           (note.content?.toLowerCase() ?? "").includes(searchQuery.toLowerCase()),
       );
     }
-    return filtered.sort(
-      (a, b) =>
-        new Date(b.updatedAt ?? b.createdAt).getTime() -
-        new Date(a.updatedAt ?? a.createdAt).getTime(),
-    );
-  }, [notes, view, selectedFolderId, searchQuery]);
+
+    return filtered.sort((a, b) => {
+      let comparison = 0;
+
+      if (sortField === "title") {
+        const titleA = (a.title ?? "").toLowerCase();
+        const titleB = (b.title ?? "").toLowerCase();
+        comparison = titleA.localeCompare(titleB);
+      } else if (sortField === "createdAt") {
+        comparison = new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+      } else {
+        comparison =
+          new Date(a.updatedAt ?? a.createdAt).getTime() -
+          new Date(b.updatedAt ?? b.createdAt).getTime();
+      }
+
+      return sortOrder === "asc" ? comparison : -comparison;
+    });
+  }, [notes, view, selectedFolderId, searchQuery, sortField, sortOrder]);
 
   const handleMoveNote = (noteId: string, newFolderId: string) => {
     updateNote.mutate({ noteId, folderId: newFolderId });
@@ -167,9 +187,45 @@ export default function NoteList({
       <ScrollArea className="h-screen max-w-[350px] min-w-[160px]">
         <div className="flex flex-col gap-2 p-4 pt-0">
           {filteredNotes.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
-              <Leaf className="h-8 w-8 mb-2" />
-              <p>You&apos;ve got no notes</p>
+            <div className="flex flex-col items-center justify-center h-64 text-muted-foreground text-center px-4">
+              {selectedFolderId ? (
+                <>
+                  <FileText className="h-12 w-12 mb-4 opacity-50" />
+                  <p className="font-medium mb-2">No notes in this folder</p>
+                  <p className="text-sm mb-4">
+                    Click the <Plus className="inline h-3 w-3" /> button above to create your first
+                    note
+                  </p>
+                  <Button variant="outline" size="sm" onClick={handleNewNote}>
+                    <Plus className="h-4 w-4 mr-1" />
+                    New Note
+                  </Button>
+                </>
+              ) : searchQuery ? (
+                <>
+                  <Search className="h-12 w-12 mb-4 opacity-50" />
+                  <p className="font-medium mb-2">No notes found</p>
+                  <p className="text-sm">Try a different search term</p>
+                </>
+              ) : (
+                <>
+                  <FolderPlus className="h-12 w-12 mb-4 opacity-50" />
+                  <p className="font-medium mb-2">Get started with notes</p>
+                  <p className="text-sm mb-4">
+                    Select a folder from the left to view or create notes
+                  </p>
+                  <div className="text-xs space-y-1">
+                    <p>
+                      <kbd className="px-1.5 py-0.5 bg-muted rounded text-[10px]">Click</kbd> folder
+                      to select
+                    </p>
+                    <p>
+                      <kbd className="px-1.5 py-0.5 bg-muted rounded text-[10px]">Right-click</kbd>{" "}
+                      for options
+                    </p>
+                  </div>
+                </>
+              )}
             </div>
           ) : (
             <AnimatePresence initial={false}>

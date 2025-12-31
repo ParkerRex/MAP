@@ -1,17 +1,27 @@
 # MAP - Personal Productivity Platform
 
-A personal productivity dashboard integrating calendar, tasks, notes, and health data into one unified interface.
+A personal productivity dashboard integrating calendar, tasks, notes, and health data into one unified interface. Includes a native iOS app for Apple Health sync.
 
 ## Features
 
+### Web Dashboard
 - **Calendar** - Week view with Google Calendar sync, event management
 - **Tasks** - Task management with tags, due dates, and bulk actions
 - **Notes** - Folder-organized notes with search
 - **Health** - WHOOP integration for recovery, strain, sleep, and workout data
 - **Goals** - Goal tracking with completion stats
 
+### iOS App
+- **Apple Health Sync** - Pulls 25+ health metrics from HealthKit
+- **Background Sync** - Automatically syncs when new health data arrives
+- **AI Chat** - Chat with an LLM about your health data (OpenAI/Local Llama)
+- **Sleep Tracking** - Full sleep stage analysis (Core, Deep, REM, Awake)
+- **Heart & Recovery** - HRV, resting HR, VO2 Max, respiratory rate
+- **Activity** - Steps, distance, exercise time, stand time, flights climbed
+
 ## Tech Stack
 
+### Web
 - **Framework**: Next.js 16 (App Router)
 - **Database**: PostgreSQL with Drizzle ORM
 - **Auth**: Session-based with HTTP-only cookies
@@ -20,7 +30,14 @@ A personal productivity dashboard integrating calendar, tasks, notes, and health
 - **Validation**: Zod schemas
 - **Package Manager**: Bun
 
+### iOS
+- **Platform**: iOS 17+ / Swift 5.9
+- **Framework**: Stanford Spezi (HealthKit, LLM, Chat, Onboarding)
+- **Build**: Swift Package Manager + Xcode 16.2
+
 ## Getting Started
+
+### Web Dashboard
 
 ```bash
 # Start Docker services (Postgres)
@@ -38,35 +55,62 @@ bun run dev
 
 Dashboard runs on http://localhost:3000
 
+### iOS App
+
+```bash
+cd ios
+
+# Build with Swift Package Manager
+swift build
+
+# Or open in Xcode
+open MapHealth.xcodeproj
+```
+
+**Requirements:** Xcode 16.2+, physical iOS device (HealthKit requires real device)
+
 ## Project Structure
 
 ```
-src/
-├── app/                    # Next.js pages + API routes
-│   ├── api/                # REST API endpoints
-│   ├── calendar/           # Calendar page
-│   ├── tasks/              # Tasks page
-│   ├── notes/              # Notes page
-│   ├── health/             # Health dashboard
-│   ├── login/              # Login page
-│   └── signup/             # Signup page
+src/                            # Web Dashboard
+├── app/                        # Next.js pages + API routes
+│   ├── api/                    # REST API endpoints
+│   ├── calendar/               # Calendar page
+│   ├── tasks/                  # Tasks page
+│   ├── notes/                  # Notes page
+│   ├── health/                 # Health dashboard
+│   ├── login/                  # Login page
+│   └── signup/                 # Signup page
 ├── components/
-│   ├── calendar/           # Calendar components
-│   ├── tasks/              # Task components
-│   ├── notes/              # Note components
-│   └── ui/                 # Radix UI primitives
-├── db/                     # Drizzle ORM queries
-├── hooks/                  # React Query hooks
-│   ├── use-auth.ts         # Authentication
-│   ├── use-calendar.ts     # Calendar data
-│   ├── use-tasks.ts        # Tasks data
-│   ├── use-notes.ts        # Notes data
-│   └── use-whoop.ts        # WHOOP health data
+│   ├── calendar/               # Calendar components
+│   ├── tasks/                  # Task components
+│   ├── notes/                  # Note components
+│   └── ui/                     # Radix UI primitives
+├── db/                         # Drizzle ORM queries
+├── hooks/                      # React Query hooks
+│   ├── use-auth.ts             # Authentication
+│   ├── use-calendar.ts         # Calendar data
+│   ├── use-tasks.ts            # Tasks data
+│   ├── use-notes.ts            # Notes data
+│   └── use-whoop.ts            # WHOOP health data
 ├── lib/
-│   ├── api/                # API client + error handling
-│   ├── auth/               # Session management
-│   └── validations/        # Zod schemas
-└── types/                  # TypeScript types
+│   ├── api/                    # API client + error handling
+│   ├── auth/                   # Session management
+│   └── validations/            # Zod schemas
+└── types/                      # TypeScript types
+
+ios/                            # iOS App
+├── Package.swift               # Swift Package Manager config
+├── Sources/
+│   ├── MapHealthApp/           # Main app target
+│   │   ├── MapHealthApp.swift  # App entry point
+│   │   ├── Views/              # SwiftUI views
+│   │   └── Onboarding/         # Onboarding flow
+│   └── MapHealthCore/          # Shared library
+│       ├── HealthKit/          # HealthKit queries
+│       ├── Services/           # API client, background sync
+│       └── Models/             # Data models
+└── Tests/                      # Unit tests
 ```
 
 ## Authentication

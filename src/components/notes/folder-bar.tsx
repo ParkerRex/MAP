@@ -29,6 +29,9 @@ const FilledFolder: React.FC<React.ComponentProps<LucideIcon>> = (props) => (
   <Folder {...props} fill="currentColor" fillOpacity={0.2} />
 );
 
+export type SortField = "updatedAt" | "createdAt" | "title";
+export type SortOrder = "desc" | "asc";
+
 export default function FolderBar({ folders, notes }: FolderBarProps) {
   const [view, setView] = React.useState<"all" | "folder">("all");
   const [selectedFolderId, setSelectedFolderId] = React.useState<string | null>(null);
@@ -36,6 +39,8 @@ export default function FolderBar({ folders, notes }: FolderBarProps) {
   const [newFolderName, setNewFolderName] = React.useState("");
   const [renameFolderName, setRenameFolderName] = React.useState("");
   const [editingFolderId, setEditingFolderId] = React.useState<string | null>(null);
+  const [sortField, setSortField] = React.useState<SortField>("updatedAt");
+  const [sortOrder, setSortOrder] = React.useState<SortOrder>("desc");
 
   const createFolder = useCreateFolder();
   const updateFolder = useUpdateFolder();
@@ -169,13 +174,37 @@ export default function FolderBar({ folders, notes }: FolderBarProps) {
                   <ContextMenuSub>
                     <ContextMenuSubTrigger>Sort by</ContextMenuSubTrigger>
                     <ContextMenuSubContent>
-                      <ContextMenuItem>Default (Date edited)</ContextMenuItem>
-                      <ContextMenuItem>Date Edited</ContextMenuItem>
-                      <ContextMenuItem>Date Created</ContextMenuItem>
-                      <ContextMenuItem>Title</ContextMenuItem>
+                      <ContextMenuItem
+                        onSelect={() => setSortField("updatedAt")}
+                        className={sortField === "updatedAt" ? "bg-accent" : ""}
+                      >
+                        Date Edited {sortField === "updatedAt" && "✓"}
+                      </ContextMenuItem>
+                      <ContextMenuItem
+                        onSelect={() => setSortField("createdAt")}
+                        className={sortField === "createdAt" ? "bg-accent" : ""}
+                      >
+                        Date Created {sortField === "createdAt" && "✓"}
+                      </ContextMenuItem>
+                      <ContextMenuItem
+                        onSelect={() => setSortField("title")}
+                        className={sortField === "title" ? "bg-accent" : ""}
+                      >
+                        Title {sortField === "title" && "✓"}
+                      </ContextMenuItem>
                       <ContextMenuSeparator />
-                      <ContextMenuItem>Newest First</ContextMenuItem>
-                      <ContextMenuItem>Oldest First</ContextMenuItem>
+                      <ContextMenuItem
+                        onSelect={() => setSortOrder("desc")}
+                        className={sortOrder === "desc" ? "bg-accent" : ""}
+                      >
+                        Newest First {sortOrder === "desc" && "✓"}
+                      </ContextMenuItem>
+                      <ContextMenuItem
+                        onSelect={() => setSortOrder("asc")}
+                        className={sortOrder === "asc" ? "bg-accent" : ""}
+                      >
+                        Oldest First {sortOrder === "asc" && "✓"}
+                      </ContextMenuItem>
                     </ContextMenuSubContent>
                   </ContextMenuSub>
                 </ContextMenuContent>
@@ -218,6 +247,8 @@ export default function FolderBar({ folders, notes }: FolderBarProps) {
           setSelectedNote={setSelectedNote}
           folders={folders}
           note={null}
+          sortField={sortField}
+          sortOrder={sortOrder}
         />
       </div>
       <div className="grow">

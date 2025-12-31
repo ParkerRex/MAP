@@ -1,4 +1,4 @@
-import { and, eq, isNull } from "drizzle-orm";
+import { and, eq, inArray, isNull } from "drizzle-orm";
 import { db } from "./index";
 import { type NewTag, type NewTask, tags, tagTasks, tasks } from "./schema";
 
@@ -242,5 +242,35 @@ export const tasksDb = {
     }
 
     return this.getTaskWithTags(taskId, userId);
+  },
+
+  async bulkCompleteTasks(taskIds: string[], userId: string) {
+    if (taskIds.length === 0) return 0;
+
+    const result = await db
+      .update(tasks)
+      .set({
+        completedAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .where(and(inArray(tasks.id, taskIds), eq(tasks.createdBy, userId)))
+      .returning();
+
+    return result.length;
+  },
+
+  async bulkDeleteTasks(taskIds: string[], userId: string) {
+    if (taskIds.length === 0) return 0;
+
+    const result = await db
+      .delete(tasks)
+      .where(and(inArray(tasks.id, taskIds), eq(tasks.createdBy, userId)))
+      .returning();
+
+    if (result.length > 0) {
+      await db.delete(tagTasks).where(inArray(tagTasks.taskId, taskIds));
+    }
+
+    return result.length;
   },
 };

@@ -1,10 +1,9 @@
 "use client";
-import { differenceInDays, format, parseISO } from "date-fns";
+import { differenceInDays, format } from "date-fns";
 import { AnimatePresence, motion, Reorder } from "framer-motion";
-import { Calendar, Flag, Tag } from "lucide-react";
-import type React from "react";
+import { Calendar, Check, Flag, Loader2, Tag } from "lucide-react";
 import type { FC } from "react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Calendar as DatePicker } from "@/components/ui/calendar";
@@ -26,7 +25,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import type { Tag as TagType, TaskWithTags } from "@/types";
+import type { TaskWithTags } from "@/types";
 
 interface TaskItemProps {
   task: TaskWithTags;
@@ -39,9 +38,13 @@ interface TaskItemProps {
   handleDelete: (taskId: string) => void;
   setSelectedTask: (task: TaskWithTags | null) => void;
   updateTaskDueDate: (taskId: string, dueDate: string) => Promise<void>;
+  updateTask: (taskId: string, data: { title?: string; body?: string }) => Promise<void>;
   getAllTags: () => Promise<{ id: string; title: string }[]>;
   createTag: (title: string) => Promise<{ id: string; title: string }>;
   updateTaskTags: (taskId: string, tags: string[]) => Promise<void>;
+  isSelectMode: boolean;
+  isSelected: boolean;
+  onToggleSelect: () => void;
 }
 
 const TaskItem: FC<TaskItemProps> = ({
@@ -55,9 +58,13 @@ const TaskItem: FC<TaskItemProps> = ({
   handleDelete,
   setSelectedTask,
   updateTaskDueDate,
+  updateTask,
   getAllTags,
   createTag,
   updateTaskTags,
+  isSelectMode,
+  isSelected,
+  onToggleSelect,
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [localDueDate, setLocalDueDate] = useState(task.dueAt);
@@ -66,6 +73,14 @@ const TaskItem: FC<TaskItemProps> = ({
   const [tags, setTags] = useState<string[]>(task.tags?.map((tag) => tag.title) ?? []);
   const [newTag, setNewTag] = useState("");
   const [availableTags, setAvailableTags] = useState<string[]>([]);
+  const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved">("idle");
+  const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Sync local state when task prop changes
+  useEffect(() => {
+    setTitle(task.title);
+    setBody(task.body || "");
+  }, [task.title, task.body]);
 
   useEffect(() => {
     const fetchTags = async () => {
@@ -74,6 +89,51 @@ const TaskItem: FC<TaskItemProps> = ({
     };
     fetchTags();
   }, [getAllTags]);
+
+  // Debounced save function
+  const debouncedSave = useCallback(
+    (data: { title?: string; body?: string }) => {
+      if (!task.id) return;
+
+      // Clear existing timer
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+
+      setSaveStatus("saving");
+
+      debounceTimerRef.current = setTimeout(async () => {
+        try {
+          await updateTask(task.id, data);
+          setSaveStatus("saved");
+          // Reset to idle after showing "saved" briefly
+          setTimeout(() => setSaveStatus("idle"), 1500);
+        } catch {
+          setSaveStatus("idle");
+        }
+      }, 500);
+    },
+    [task.id, updateTask],
+  );
+
+  // Cleanup timer on unmount
+  useEffect(() => {
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+    };
+  }, []);
+
+  const handleTitleChange = (newTitle: string) => {
+    setTitle(newTitle);
+    debouncedSave({ title: newTitle });
+  };
+
+  const handleBodyChange = (newBody: string) => {
+    setBody(newBody);
+    debouncedSave({ body: newBody });
+  };
 
   const handleDateChange = async (date: Date) => {
     if (task.id) {
@@ -146,24 +206,38 @@ const TaskItem: FC<TaskItemProps> = ({
           <motion.div
             className={`relative flex flex-col gap-2 p-1 rounded-sm select-none transition-colors border bg-card text-card-foreground border-slate-100 dark:border-none dark:bg-[#2E2E2E] dark:shadow-md dark:shadow-gray-950 ${
               highlightedTaskId === task.id ? "bg-gray-100" : ""
-            }`}
-            onClick={() => handleTaskClick(task)}
-            onDoubleClick={() => handleTaskDoubleClick(task)}
+            } ${isSelected ? "ring-2 ring-primary bg-primary/5" : ""}`}
+            onClick={() => (isSelectMode ? onToggleSelect() : handleTaskClick(task))}
+            onDoubleClick={() => !isSelectMode && handleTaskDoubleClick(task)}
             layout
             initial={{ borderRadius: "0.375rem" }}
             animate={{ borderRadius: "0.375rem" }}
           >
             <div className="flex items-center gap-2">
-              <Checkbox
-                checked={!!task.completedAt}
-                onCheckedChange={() => toggleTaskCompletion(task)}
-              />
+              {isSelectMode ? (
+                <Checkbox
+                  checked={isSelected}
+                  onCheckedChange={onToggleSelect}
+                  onClick={(e) => e.stopPropagation()}
+                />
+              ) : (
+                <Checkbox
+                  checked={!!task.completedAt}
+                  onCheckedChange={() => toggleTaskCompletion(task)}
+                />
+              )}
               <Input
                 type="text"
                 value={title}
-                onChange={(e) => setTitle(e.target.value)}
+                onChange={(e) => handleTitleChange(e.target.value)}
                 className="text-sm bg-none text-black dark:text-white border-none rounded-md placeholder-gray-400 dark:placeholder-white"
               />
+              {saveStatus !== "idle" && (
+                <span className="flex items-center text-xs text-muted-foreground">
+                  {saveStatus === "saving" && <Loader2 className="w-3 h-3 animate-spin" />}
+                  {saveStatus === "saved" && <Check className="w-3 h-3 text-green-500" />}
+                </span>
+              )}
               <AnimatePresence>
                 {selectedTask?.id !== task.id && task.tags && task.tags.length > 0 && (
                   <motion.div
@@ -242,8 +316,8 @@ const TaskItem: FC<TaskItemProps> = ({
                     <Input
                       type="text"
                       value={body}
-                      placeholder="Note"
-                      onChange={(e) => setBody(e.target.value)}
+                      placeholder="Add a note..."
+                      onChange={(e) => handleBodyChange(e.target.value)}
                       className="text-sm text-gray-400 border-none rounded-md placeholder-gray-400 dark:placeholder-white"
                     />
                     {task.tags && task.tags.length > 0 && (

@@ -286,3 +286,59 @@ export function useDeleteTag() {
     },
   });
 }
+
+// Bulk operations
+export function useBulkCompleteTasks() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (taskIds: string[]) => api.tasks.bulkUpdate(taskIds, { completed: true }),
+    onMutate: async (taskIds) => {
+      await queryClient.cancelQueries({ queryKey: queryKeys.tasks.all });
+      const previous = queryClient.getQueryData<TasksResponse>(queryKeys.tasks.all);
+
+      queryClient.setQueryData<TasksResponse>(queryKeys.tasks.all, (old) => ({
+        tasks:
+          old?.tasks.map((task) =>
+            taskIds.includes(task.id) ? { ...task, completedAt: new Date() } : task,
+          ) ?? [],
+      }));
+
+      return { previous };
+    },
+    onError: (_, __, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(queryKeys.tasks.all, context.previous);
+      }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.tasks.all });
+    },
+  });
+}
+
+export function useBulkDeleteTasks() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (taskIds: string[]) => api.tasks.bulkDelete(taskIds),
+    onMutate: async (taskIds) => {
+      await queryClient.cancelQueries({ queryKey: queryKeys.tasks.all });
+      const previous = queryClient.getQueryData<TasksResponse>(queryKeys.tasks.all);
+
+      queryClient.setQueryData<TasksResponse>(queryKeys.tasks.all, (old) => ({
+        tasks: old?.tasks.filter((task) => !taskIds.includes(task.id)) ?? [],
+      }));
+
+      return { previous };
+    },
+    onError: (_, __, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(queryKeys.tasks.all, context.previous);
+      }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.tasks.all });
+    },
+  });
+}
