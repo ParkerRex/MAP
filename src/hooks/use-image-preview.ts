@@ -1,23 +1,32 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useRef } from "react";
 
 export const useImagePreview = (file: File | null) => {
-  const [preview, setPreview] = useState<string | null>(null);
+  const prevUrlRef = useRef<string | null>(null);
 
-  useEffect(() => {
-    let url: string | null = null;
-
-    if (file && file instanceof File) {
-      url = URL.createObjectURL(file);
-      setPreview(url);
-    } else {
-      setPreview(null);
+  const preview = useMemo(() => {
+    // Revoke previous URL when creating a new one
+    if (prevUrlRef.current) {
+      URL.revokeObjectURL(prevUrlRef.current);
     }
 
-    // Cleanup function to revoke the created URL
+    if (file && file instanceof File) {
+      const url = URL.createObjectURL(file);
+      prevUrlRef.current = url;
+      return url;
+    }
+
+    prevUrlRef.current = null;
+    return null;
+  }, [file]);
+
+  // Cleanup on unmount
+  useEffect(() => {
     return () => {
-      if (url) URL.revokeObjectURL(url);
+      if (prevUrlRef.current) {
+        URL.revokeObjectURL(prevUrlRef.current);
+      }
     };
-  }, [file]); // Dependency array includes `file` to re-run the effect when `file` changes
+  }, []);
 
   return {
     preview,

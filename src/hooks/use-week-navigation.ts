@@ -1,8 +1,11 @@
-import { useCalendar } from "@/store/calendar-context";
+import { useCalendarStore } from "@/store/calendar";
 import { addWeeks, startOfWeek, subWeeks } from "date-fns";
 
 export const useWeekNavigation = () => {
-  const { currentWeekStartDate, setCurrentWeekStartDate } = useCalendar();
+  const currentWeekStartDate = useCalendarStore((s) => s.currentWeekStartDate);
+  const setCurrentWeekStartDate = useCalendarStore(
+    (s) => s.setCurrentWeekStartDate,
+  );
 
   const handleNextWeek = () => {
     const newDate = addWeeks(currentWeekStartDate, 1);

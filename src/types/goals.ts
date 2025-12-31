@@ -1,8 +1,3 @@
-export type Goal = {
-  id: number;
-  title: string;
-  completed: boolean;
-  created_at: string;
-  updated_at: string;
-  user_id: string;
-};
+import type { Goal as DrizzleGoal } from "@/db/schema";
+
+export type Goal = DrizzleGoal;

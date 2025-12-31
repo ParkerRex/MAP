@@ -57,11 +57,8 @@ export default function NoteList({
   const filteredNotes = useMemo(() => {
     let filtered = notes;
     switch (view) {
-      case "shared":
-        filtered = notes.filter((note) => note.shared);
-        break;
       case "folder":
-        filtered = notes.filter((note) => note.folder_id === selectedFolderId);
+        filtered = notes.filter((note) => note.folderId === selectedFolderId);
         break;
       default:
         filtered = notes;
@@ -69,12 +66,12 @@ export default function NoteList({
     if (searchQuery) {
       filtered = filtered.filter(
         (note) =>
-          note.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          note.content.toLowerCase().includes(searchQuery.toLowerCase()),
+          (note.title?.toLowerCase() ?? "").includes(searchQuery.toLowerCase()) ||
+          (note.content?.toLowerCase() ?? "").includes(searchQuery.toLowerCase()),
       );
     }
     return filtered.sort(
-      (a, b) => parseISO(b.updated_at).getTime() - parseISO(a.updated_at).getTime(),
+      (a, b) => new Date(b.updatedAt ?? b.createdAt).getTime() - new Date(a.updatedAt ?? a.createdAt).getTime(),
     );
   }, [notes, view, selectedFolderId, searchQuery]);
 
@@ -198,7 +195,7 @@ export default function NoteList({
                           <div className="flex items-center">
                             <div className="flex items-center gap-2">
                               <div className="font-semibold" style={{ userSelect: "none" }}>
-                                {highlightText(note.title, searchQuery)}
+                                {highlightText(note.title ?? "Untitled", searchQuery)}
                               </div>
                               <div
                                 className={cn(
@@ -209,7 +206,7 @@ export default function NoteList({
                                 )}
                                 style={{ userSelect: "none" }}
                               >
-                                {formatTimestamp(note.updated_at)}
+                                {formatTimestamp(note.updatedAt ?? note.createdAt)}
                               </div>
                             </div>
                           </div>
@@ -217,7 +214,7 @@ export default function NoteList({
                             className="line-clamp-2 text-xs text-muted-foreground"
                             style={{ userSelect: "none" }}
                           >
-                            {highlightText(note.content.substring(0, 300), searchQuery)}
+                            {highlightText((note.content ?? "").substring(0, 300), searchQuery)}
                           </div>
                         </div>
                       </button>

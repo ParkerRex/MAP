@@ -1,14 +1,35 @@
 "use client";
-import { useCalendar } from "@/store/calendar-context";
+import { useCalendars, useMultiCalendarEvents } from "@/hooks/use-calendar";
+import { useCalendarStore } from "@/store/calendar";
 import type { calendar_v3 } from "googleapis";
 import { MoveRight } from "lucide-react";
+import { useMemo } from "react";
 
 interface ContextPanelProps {
   className?: string;
 }
 
 export default function ContextPanel({ className }: ContextPanelProps) {
-  const { selectedEvent, events, visibleCalendars, calendars } = useCalendar();
+  const selectedEvent = useCalendarStore((s) => s.selectedEvent);
+  const visibleCalendars = useCalendarStore((s) => s.visibleCalendars);
+  const currentWeekStartDate = useCalendarStore((s) => s.currentWeekStartDate);
+
+  const { data: calendarsData } = useCalendars();
+  const calendars = calendarsData?.calendars ?? [];
+
+  // Calculate time range for events
+  const timeMin = useMemo(() => currentWeekStartDate.toISOString(), [currentWeekStartDate]);
+  const timeMax = useMemo(
+    () => new Date(currentWeekStartDate.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+    [currentWeekStartDate]
+  );
+
+  const visibleCalendarIds = useMemo(
+    () => Array.from(visibleCalendars).filter((id) => calendars.some((cal) => cal.id === id)),
+    [visibleCalendars, calendars]
+  );
+
+  const { data: events = [] } = useMultiCalendarEvents(visibleCalendarIds, timeMin, timeMax);
 
   const getNextEvent = (): calendar_v3.Schema$Event | undefined => {
     const now = new Date();

@@ -1,6 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { tasksDb } from "@/db/tasks";
 import { getUser } from "@/lib/auth";
+import {
+  handleApiError,
+  notFound,
+  unauthorized,
+  validationError,
+} from "@/lib/api/errors";
+import { updateTaskSchema } from "@/lib/validations/tasks";
 
 type Params = Promise<{ taskId: string }>;
 
@@ -13,22 +20,18 @@ export async function GET(
     const user = await getUser();
 
     if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      throw unauthorized();
     }
 
     const task = await tasksDb.getTaskById(taskId);
 
     if (!task) {
-      return NextResponse.json({ error: "Task not found" }, { status: 404 });
+      throw notFound("Task");
     }
 
     return NextResponse.json({ task });
   } catch (error) {
-    console.error("Failed to fetch task:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch task" },
-      { status: 500 },
-    );
+    return handleApiError(error);
   }
 }
 
@@ -41,11 +44,19 @@ export async function PUT(
     const user = await getUser();
 
     if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      throw unauthorized();
     }
 
     const body = await request.json();
-    const { title, body: taskBody, dueAt, completed, tags } = body;
+    const parsed = updateTaskSchema.safeParse(body);
+
+    if (!parsed.success) {
+      throw validationError("Invalid input", {
+        errors: parsed.error.flatten(),
+      });
+    }
+
+    const { title, body: taskBody, dueAt, completed, tags } = parsed.data;
 
     // Handle toggle complete
     if (typeof completed === "boolean") {
@@ -77,11 +88,7 @@ export async function PUT(
 
     return NextResponse.json({ task });
   } catch (error) {
-    console.error("Failed to update task:", error);
-    return NextResponse.json(
-      { error: "Failed to update task" },
-      { status: 500 },
-    );
+    return handleApiError(error);
   }
 }
 
@@ -94,16 +101,12 @@ export async function DELETE(
     const user = await getUser();
 
     if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      throw unauthorized();
     }
 
     await tasksDb.deleteTask(taskId);
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Failed to delete task:", error);
-    return NextResponse.json(
-      { error: "Failed to delete task" },
-      { status: 500 },
-    );
+    return handleApiError(error);
   }
 }

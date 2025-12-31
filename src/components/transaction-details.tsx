@@ -32,13 +32,30 @@ type Category = {
   color: string;
 };
 
+interface TransactionData {
+  id: string;
+  name?: string;
+  amount?: number;
+  currency?: string;
+  date?: string;
+  vat?: number;
+  description?: string;
+  note?: string;
+  category?: Category;
+  assigned?: { id: string };
+  bank_account?: {
+    name: string;
+    bank_connection?: { logo_url: string };
+  };
+}
+
 // Stub component until SelectCategory is implemented
-function SelectCategory({ id, selected, onChange }: { id: string | null; selected: Category | null; onChange: (cat: Category) => void }) {
+function SelectCategory({ id: _id, selected: _selected, onChange: _onChange }: { id: string | null; selected: Category | null; onChange: (cat: Category) => void }) {
   return <div className="text-sm text-muted-foreground">Category selector placeholder</div>;
 }
 
 type Props = {
-  data: any;
+  data: TransactionData | null;
   ids?: string[];
   updateTransaction: (values: UpdateTransactionValues) => void;
 };
@@ -48,10 +65,12 @@ export function TransactionDetails({
   ids,
   updateTransaction,
 }: Props) {
-  const [data, setData] = useState(initialData);
+  // Use initialData directly, only maintain local state for fetched data
+  const [fetchedData, setFetchedData] = useState<TransactionData | null>(null);
+  const data = initialData ?? fetchedData;
   const [transactionId, setTransactionId] = useQueryState("id");
   const { toast } = useToast();
-  const [isLoading, setLoading] = useState(true);
+  const [isLoading, setLoading] = useState(!initialData);
 
   useHotkeys("esc", () => setTransactionId(null));
 
@@ -82,25 +101,18 @@ export function TransactionDetails({
   );
 
   useEffect(() => {
-    if (initialData) {
-      setData(initialData);
-      setLoading(false);
-    }
-  }, [initialData]);
-
-  useEffect(() => {
-    async function fetchData() {
+    async function doFetch() {
       try {
         // TODO: Implement getTransactionQuery
         // Stub: Simulating API call with setTimeout
         setTimeout(() => {
-          setData({
-            ...data,
+          setFetchedData({
+            id: "stub-id",
             name: "Stubbed Transaction",
             amount: 100,
             currency: "USD",
             date: new Date().toISOString(),
-            category: { slug: "expense", name: "Expense" },
+            category: { id: "1", slug: "expense", name: "Expense", color: "#000" },
             bank_account: {
               name: "Stubbed Bank",
               bank_connection: { logo_url: "https://example.com/logo.png" },
@@ -114,7 +126,7 @@ export function TransactionDetails({
     }
 
     if (!data) {
-      fetchData();
+      doFetch();
     }
   }, [data]);
 

@@ -17,7 +17,7 @@ export async function getGoogleCalendarClient() {
 
   const oauth2Client = new google.auth.OAuth2(
     process.env.GOOGLE_CLIENT_ID,
-    process.env.GOOGLE_CLIENT_SECRET
+    process.env.GOOGLE_CLIENT_SECRET,
   );
 
   oauth2Client.setCredentials({
@@ -38,7 +38,7 @@ export async function getGoogleCalendarClient() {
         await calendarDb.updateIntegration(user.id, "GOOGLE", {
           accessToken: credentials.access_token ?? integration.accessToken,
           expiresAt: credentials.expiry_date
-            ? new Date(credentials.expiry_date).toISOString()
+            ? new Date(credentials.expiry_date)
             : undefined,
         });
 
@@ -62,7 +62,7 @@ export async function getGoogleCalendarClientWithRefresh(userId: string) {
 
   const oauth2Client = new google.auth.OAuth2(
     process.env.GOOGLE_CLIENT_ID,
-    process.env.GOOGLE_CLIENT_SECRET
+    process.env.GOOGLE_CLIENT_SECRET,
   );
 
   oauth2Client.setCredentials({
@@ -83,7 +83,7 @@ export async function getGoogleCalendarClientWithRefresh(userId: string) {
         await calendarDb.updateIntegration(userId, "GOOGLE", {
           accessToken: credentials.access_token ?? integration.accessToken,
           expiresAt: credentials.expiry_date
-            ? new Date(credentials.expiry_date).toISOString()
+            ? new Date(credentials.expiry_date)
             : undefined,
         });
 
@@ -120,7 +120,10 @@ export function mapGoogleEventToDb(event: any, calendarId: string) {
     transparency: event.transparency ?? null,
     sequence: event.sequence ?? null,
     recurringEventId: event.recurringEventId ?? null,
-    originalStartTime: event.originalStartTime?.dateTime ?? event.originalStartTime?.date ?? null,
+    originalStartTime:
+      event.originalStartTime?.dateTime ??
+      event.originalStartTime?.date ??
+      null,
     recurrence: event.recurrence ?? null,
     guestsCanInviteOthers: event.guestsCanInviteOthers ?? null,
     guestsCanModify: event.guestsCanModify ?? null,

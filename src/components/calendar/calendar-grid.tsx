@@ -1,5 +1,5 @@
 "use client";
-import { useCalendar } from "@/store/calendar-context";
+import { useCalendarStore } from "@/store/calendar";
 import type { CalendarEvent } from "@/types/calendar";
 import {
   addDays,
@@ -25,8 +25,10 @@ const CalendarGrid: FC<CalendarGridProps> = ({
   calendars: _calendars,
   events,
 }) => {
-  const { currentWeekStartDate, visibleCalendars, userTimeZone } =
-    useCalendar();
+  const currentWeekStartDate = useCalendarStore((s) => s.currentWeekStartDate);
+  const visibleCalendars = useCalendarStore((s) => s.visibleCalendars);
+  const userTimeZone = useCalendarStore((s) => s.userTimeZone);
+
   const gridRef = useRef<HTMLDivElement>(null);
   const startOfWeekDate = startOfWeek(currentWeekStartDate, {
     weekStartsOn: 1,
@@ -62,8 +64,6 @@ const CalendarGrid: FC<CalendarGridProps> = ({
   }, [userTimeZone]);
 
   const hours = Array.from({ length: 24 }, (_, i) => i);
-
-  // TODO: Implement storing events in the database using UTC
 
   return (
     <div className={`flex flex-col h-full overflow-hidden ${className}`}>

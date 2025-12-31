@@ -3,7 +3,18 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import type { Task, Tag } from "@/db/schema";
 
-interface TaskWithTags extends Task {
+// Query Keys Factory
+export const taskQueryKeys = {
+  all: ["tasks"] as const,
+  detail: (id: string) => ["tasks", id] as const,
+  tags: {
+    all: ["tags"] as const,
+    detail: (id: string) => ["tags", id] as const,
+  },
+};
+
+// Types
+export interface TaskWithTags extends Task {
   tags: { id: string; title: string }[];
 }
 
@@ -23,10 +34,20 @@ interface TagResponse {
   tag: Tag;
 }
 
+// Update input type - consolidated for all task updates
+export interface TaskUpdateInput {
+  taskId: string;
+  title?: string;
+  body?: string;
+  dueAt?: string | null;
+  completed?: boolean;
+  tags?: string[];
+}
+
 // Tasks Queries
 export function useTasks() {
   return useQuery<TasksResponse>({
-    queryKey: ["tasks"],
+    queryKey: taskQueryKeys.all,
     queryFn: async () => {
       const response = await fetch("/api/tasks");
       if (!response.ok) throw new Error("Failed to fetch tasks");
@@ -39,7 +60,11 @@ export function useTasks() {
 export function useCreateTask() {
   const queryClient = useQueryClient();
 
-  return useMutation<TaskResponse, Error, { title: string; body?: string; dueAt?: string }>({
+  return useMutation<
+    TaskResponse,
+    Error,
+    { title: string; body?: string; dueAt?: string }
+  >({
     mutationFn: async (data) => {
       const response = await fetch("/api/tasks", {
         method: "POST",
@@ -49,16 +74,72 @@ export function useCreateTask() {
       if (!response.ok) throw new Error("Failed to create task");
       return response.json();
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["tasks"] });
+    onMutate: async (newTask) => {
+      // Cancel outgoing refetches
+      await queryClient.cancelQueries({ queryKey: taskQueryKeys.all });
+
+      // Snapshot previous value
+      const previousTasks = queryClient.getQueryData<TasksResponse>(
+        taskQueryKeys.all,
+      );
+
+      // Optimistically add the new task
+      queryClient.setQueryData<TasksResponse>(taskQueryKeys.all, (old) => ({
+        tasks: [
+          ...(old?.tasks ?? []),
+          {
+            id: `temp-${Date.now()}`,
+            title: newTask.title,
+            body: newTask.body ?? null,
+            dueAt: newTask.dueAt ? new Date(newTask.dueAt) : null,
+            completedAt: null,
+            completedBy: null,
+            createdAt: new Date(),
+            createdBy: "",
+            updatedAt: new Date(),
+            updatedBy: "",
+            taskStatus: "pending",
+            taskPosition: null,
+            headerId: null,
+            projectId: null,
+            assignedTo: null,
+            deletedAt: null,
+            deletedBy: null,
+            blockedBy: null,
+            contactId: null,
+            scheduledFor: null,
+            result: null,
+            actualDuration: null,
+            estimatedDuration: null,
+            tags: [],
+          } as TaskWithTags,
+        ],
+      }));
+
+      return { previousTasks };
+    },
+    onError: (_err, _variables, context) => {
+      if (context?.previousTasks) {
+        queryClient.setQueryData(taskQueryKeys.all, context.previousTasks);
+      }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: taskQueryKeys.all });
     },
   });
 }
 
+/**
+ * Consolidated update hook - handles all task updates including:
+ * - title/body updates
+ * - due date updates
+ * - completion toggle
+ * - tags updates
+ */
 export function useUpdateTask() {
   const queryClient = useQueryClient();
 
-  return useMutation<TaskResponse, Error, { taskId: string; title?: string; body?: string; dueAt?: string | null; completed?: boolean; tags?: string[] }>({
+  return useMutation<TaskResponse, Error, TaskUpdateInput>({
     mutationFn: async ({ taskId, ...data }) => {
       const response = await fetch(`/api/tasks/${taskId}`, {
         method: "PUT",
@@ -68,8 +149,44 @@ export function useUpdateTask() {
       if (!response.ok) throw new Error("Failed to update task");
       return response.json();
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["tasks"] });
+    onMutate: async (update) => {
+      await queryClient.cancelQueries({ queryKey: taskQueryKeys.all });
+
+      const previousTasks = queryClient.getQueryData<TasksResponse>(
+        taskQueryKeys.all,
+      );
+
+      queryClient.setQueryData<TasksResponse>(taskQueryKeys.all, (old) => ({
+        tasks:
+          old?.tasks.map((task) => {
+            if (task.id !== update.taskId) return task;
+
+            const updatedTask = { ...task };
+
+            if (update.title !== undefined) updatedTask.title = update.title;
+            if (update.body !== undefined) updatedTask.body = update.body;
+            if (update.dueAt !== undefined) {
+              updatedTask.dueAt = update.dueAt ? new Date(update.dueAt) : null;
+            }
+            if (update.completed !== undefined) {
+              updatedTask.completedAt = update.completed ? new Date() : null;
+            }
+            // Note: tags update is more complex, we optimistically update if we have tag data
+            // The server will return the actual tags
+
+            return updatedTask;
+          }) ?? [],
+      }));
+
+      return { previousTasks };
+    },
+    onError: (_err, _variables, context) => {
+      if (context?.previousTasks) {
+        queryClient.setQueryData(taskQueryKeys.all, context.previousTasks);
+      }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: taskQueryKeys.all });
     },
   });
 }
@@ -85,73 +202,91 @@ export function useDeleteTask() {
       if (!response.ok) throw new Error("Failed to delete task");
       return response.json();
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["tasks"] });
+    onMutate: async (taskId) => {
+      await queryClient.cancelQueries({ queryKey: taskQueryKeys.all });
+
+      const previousTasks = queryClient.getQueryData<TasksResponse>(
+        taskQueryKeys.all,
+      );
+
+      queryClient.setQueryData<TasksResponse>(taskQueryKeys.all, (old) => ({
+        tasks: old?.tasks.filter((task) => task.id !== taskId) ?? [],
+      }));
+
+      return { previousTasks };
+    },
+    onError: (_err, _variables, context) => {
+      if (context?.previousTasks) {
+        queryClient.setQueryData(taskQueryKeys.all, context.previousTasks);
+      }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: taskQueryKeys.all });
     },
   });
 }
 
-export function useToggleTask() {
-  const queryClient = useQueryClient();
+// Convenience hooks that wrap useUpdateTask for backwards compatibility
+// These are thin wrappers that make the API cleaner for specific use cases
 
-  return useMutation<TaskResponse, Error, { taskId: string; completed: boolean }>({
-    mutationFn: async ({ taskId, completed }) => {
-      const response = await fetch(`/api/tasks/${taskId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ completed }),
-      });
-      if (!response.ok) throw new Error("Failed to toggle task");
-      return response.json();
+export function useToggleTask() {
+  const updateTask = useUpdateTask();
+
+  return {
+    ...updateTask,
+    mutate: ({ taskId, completed }: { taskId: string; completed: boolean }) => {
+      updateTask.mutate({ taskId, completed });
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["tasks"] });
+    mutateAsync: ({
+      taskId,
+      completed,
+    }: {
+      taskId: string;
+      completed: boolean;
+    }) => {
+      return updateTask.mutateAsync({ taskId, completed });
     },
-  });
+  };
 }
 
 export function useUpdateTaskDueDate() {
-  const queryClient = useQueryClient();
+  const updateTask = useUpdateTask();
 
-  return useMutation<TaskResponse, Error, { taskId: string; dueAt: string | null }>({
-    mutationFn: async ({ taskId, dueAt }) => {
-      const response = await fetch(`/api/tasks/${taskId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ dueAt }),
-      });
-      if (!response.ok) throw new Error("Failed to update task due date");
-      return response.json();
+  return {
+    ...updateTask,
+    mutate: ({ taskId, dueAt }: { taskId: string; dueAt: string | null }) => {
+      updateTask.mutate({ taskId, dueAt });
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["tasks"] });
+    mutateAsync: ({
+      taskId,
+      dueAt,
+    }: {
+      taskId: string;
+      dueAt: string | null;
+    }) => {
+      return updateTask.mutateAsync({ taskId, dueAt });
     },
-  });
+  };
 }
 
 export function useUpdateTaskTags() {
-  const queryClient = useQueryClient();
+  const updateTask = useUpdateTask();
 
-  return useMutation<TaskResponse, Error, { taskId: string; tags: string[] }>({
-    mutationFn: async ({ taskId, tags }) => {
-      const response = await fetch(`/api/tasks/${taskId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ tags }),
-      });
-      if (!response.ok) throw new Error("Failed to update task tags");
-      return response.json();
+  return {
+    ...updateTask,
+    mutate: ({ taskId, tags }: { taskId: string; tags: string[] }) => {
+      updateTask.mutate({ taskId, tags });
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["tasks"] });
+    mutateAsync: ({ taskId, tags }: { taskId: string; tags: string[] }) => {
+      return updateTask.mutateAsync({ taskId, tags });
     },
-  });
+  };
 }
 
 // Tags Queries
 export function useTags() {
   return useQuery<TagsResponse>({
-    queryKey: ["tags"],
+    queryKey: taskQueryKeys.tags.all,
     queryFn: async () => {
       const response = await fetch("/api/tags");
       if (!response.ok) throw new Error("Failed to fetch tags");
@@ -174,8 +309,33 @@ export function useCreateTag() {
       if (!response.ok) throw new Error("Failed to create tag");
       return response.json();
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["tags"] });
+    onMutate: async (newTag) => {
+      await queryClient.cancelQueries({ queryKey: taskQueryKeys.tags.all });
+
+      const previousTags = queryClient.getQueryData<TagsResponse>(
+        taskQueryKeys.tags.all,
+      );
+
+      queryClient.setQueryData<TagsResponse>(taskQueryKeys.tags.all, (old) => ({
+        tags: [
+          ...(old?.tags ?? []),
+          {
+            id: `temp-${Date.now()}`,
+            title: newTag.title,
+            userId: null,
+          } as Tag,
+        ],
+      }));
+
+      return { previousTags };
+    },
+    onError: (_err, _variables, context) => {
+      if (context?.previousTags) {
+        queryClient.setQueryData(taskQueryKeys.tags.all, context.previousTags);
+      }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: taskQueryKeys.tags.all });
     },
   });
 }
@@ -193,8 +353,29 @@ export function useUpdateTag() {
       if (!response.ok) throw new Error("Failed to update tag");
       return response.json();
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["tags"] });
+    onMutate: async ({ tagId, title }) => {
+      await queryClient.cancelQueries({ queryKey: taskQueryKeys.tags.all });
+
+      const previousTags = queryClient.getQueryData<TagsResponse>(
+        taskQueryKeys.tags.all,
+      );
+
+      queryClient.setQueryData<TagsResponse>(taskQueryKeys.tags.all, (old) => ({
+        tags:
+          old?.tags.map((tag) =>
+            tag.id === tagId ? { ...tag, title } : tag,
+          ) ?? [],
+      }));
+
+      return { previousTags };
+    },
+    onError: (_err, _variables, context) => {
+      if (context?.previousTags) {
+        queryClient.setQueryData(taskQueryKeys.tags.all, context.previousTags);
+      }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: taskQueryKeys.tags.all });
     },
   });
 }
@@ -210,9 +391,43 @@ export function useDeleteTag() {
       if (!response.ok) throw new Error("Failed to delete tag");
       return response.json();
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["tags"] });
-      queryClient.invalidateQueries({ queryKey: ["tasks"] });
+    onMutate: async (tagId) => {
+      await queryClient.cancelQueries({ queryKey: taskQueryKeys.tags.all });
+      await queryClient.cancelQueries({ queryKey: taskQueryKeys.all });
+
+      const previousTags = queryClient.getQueryData<TagsResponse>(
+        taskQueryKeys.tags.all,
+      );
+      const previousTasks = queryClient.getQueryData<TasksResponse>(
+        taskQueryKeys.all,
+      );
+
+      queryClient.setQueryData<TagsResponse>(taskQueryKeys.tags.all, (old) => ({
+        tags: old?.tags.filter((tag) => tag.id !== tagId) ?? [],
+      }));
+
+      // Also remove tag from all tasks
+      queryClient.setQueryData<TasksResponse>(taskQueryKeys.all, (old) => ({
+        tasks:
+          old?.tasks.map((task) => ({
+            ...task,
+            tags: task.tags.filter((tag) => tag.id !== tagId),
+          })) ?? [],
+      }));
+
+      return { previousTags, previousTasks };
+    },
+    onError: (_err, _variables, context) => {
+      if (context?.previousTags) {
+        queryClient.setQueryData(taskQueryKeys.tags.all, context.previousTags);
+      }
+      if (context?.previousTasks) {
+        queryClient.setQueryData(taskQueryKeys.all, context.previousTasks);
+      }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: taskQueryKeys.tags.all });
+      queryClient.invalidateQueries({ queryKey: taskQueryKeys.all });
     },
   });
 }

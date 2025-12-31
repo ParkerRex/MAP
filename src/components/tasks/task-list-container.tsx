@@ -1,31 +1,28 @@
 "use client";
-import type { Tag, Task } from "@/types";
+import type { TaskWithTags } from "@/types";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Reorder } from "framer-motion";
 import type { FC } from "react";
-import React from "react";
 import TaskItem from "./task-item";
 
+type SimpleTag = { id: string; title: string };
+
 interface TaskListContainerProps {
-  tasks: Task[];
-  filteredTasks: Task[];
+  filteredTasks: TaskWithTags[];
   highlightedTaskId: string | null;
-  selectedTask: Task | null;
+  selectedTask: TaskWithTags | null;
   searchQuery: string;
-  handleTaskClick: (task: Task) => void;
-  handleTaskDoubleClick: (task: Task) => void;
-  toggleTaskCompletion: (task: Task) => void;
+  handleTaskClick: (task: TaskWithTags) => void;
+  handleTaskDoubleClick: (task: TaskWithTags) => void;
+  toggleTaskCompletion: (task: TaskWithTags) => void;
   handleDelete: (taskId: string) => void;
-  setSelectedTask: (task: Task | null) => void;
-  setTasks: (tasks: Task[]) => void;
+  setSelectedTask: (task: TaskWithTags | null) => void;
   updateTaskDueDate: (taskId: string, dueDate: string) => Promise<void>;
-  getAllTags: () => Promise<Tag[]>;
-  createTag: (name: string) => Promise<Tag>;
+  getAllTags: () => Promise<SimpleTag[]>;
+  createTag: (title: string) => Promise<SimpleTag>;
   updateTaskTags: (taskId: string, tags: string[]) => Promise<void>;
 }
 
 const TaskListContainer: FC<TaskListContainerProps> = ({
-  tasks,
   filteredTasks,
   highlightedTaskId,
   selectedTask,
@@ -35,10 +32,10 @@ const TaskListContainer: FC<TaskListContainerProps> = ({
   toggleTaskCompletion,
   handleDelete,
   setSelectedTask,
-  setTasks,
   updateTaskDueDate,
   getAllTags,
   createTag,
+  updateTaskTags,
 }) => {
   return (
     <ScrollArea className="flex-1 overflow-auto p-4 md:p-6">
@@ -48,18 +45,7 @@ const TaskListContainer: FC<TaskListContainerProps> = ({
             We can&apos;t find your task!
           </div>
         ) : (
-          <Reorder.Group
-            axis="y"
-            values={filteredTasks}
-            onReorder={(newOrder) => {
-              const updatedTasks = tasks.map((task) => {
-                const newPosition = newOrder.findIndex((t) => t.id === task.id);
-                return newPosition !== -1 ? newOrder[newPosition] : task;
-              });
-              setTasks(updatedTasks);
-            }}
-            className="grid gap-2"
-          >
+          <div className="grid gap-2">
             {filteredTasks.map((task) => (
               <TaskItem
                 key={task.id}
@@ -78,7 +64,7 @@ const TaskListContainer: FC<TaskListContainerProps> = ({
                 updateTaskTags={updateTaskTags}
               />
             ))}
-          </Reorder.Group>
+          </div>
         )}
       </div>
     </ScrollArea>

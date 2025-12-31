@@ -1,26 +1,14 @@
 // Calendar and event types
-export * from './calendar';
+export * from "./calendar";
 
 // Goal-related types
-export * from './goals';
-
-// Health-related types
-export * from './health';
+export * from "./goals";
 
 // Note and folder types
-export * from './notes';
-
-// Project-related types
-export * from './projects';
+export * from "./notes";
 
 // Task-related types
-export * from './tasks';
+export * from "./tasks";
 
 // Weather-related types
-export * from './weather';
-
-// Workout-related types
-export * from './workouts';
-
-// Job-related types
-export * from './jobs';
+export * from "./weather";

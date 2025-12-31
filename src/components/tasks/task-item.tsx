@@ -1,5 +1,5 @@
 "use client";
-import type { Tag as TagType, Task } from "@/types";
+import type { Tag as TagType, TaskWithTags } from "@/types";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Calendar as DatePicker } from "@/components/ui/calendar";
@@ -29,18 +29,18 @@ import type React from "react";
 import type { FC } from "react";
 
 interface TaskItemProps {
-  task: Task;
+  task: TaskWithTags;
   highlightedTaskId: string | null;
-  selectedTask: Task | null;
+  selectedTask: TaskWithTags | null;
   searchQuery: string;
-  handleTaskClick: (task: Task) => void;
-  handleTaskDoubleClick: (task: Task) => void;
-  toggleTaskCompletion: (task: Task) => void;
+  handleTaskClick: (task: TaskWithTags) => void;
+  handleTaskDoubleClick: (task: TaskWithTags) => void;
+  toggleTaskCompletion: (task: TaskWithTags) => void;
   handleDelete: (taskId: string) => void;
-  setSelectedTask: (task: Task | null) => void;
+  setSelectedTask: (task: TaskWithTags | null) => void;
   updateTaskDueDate: (taskId: string, dueDate: string) => Promise<void>;
-  getAllTags: () => Promise<TagType[]>;
-  createTag: (title: string) => Promise<TagType>;
+  getAllTags: () => Promise<{ id: string; title: string }[]>;
+  createTag: (title: string) => Promise<{ id: string; title: string }>;
   updateTaskTags: (taskId: string, tags: string[]) => Promise<void>;
 }
 
@@ -60,7 +60,7 @@ const TaskItem: FC<TaskItemProps> = ({
   updateTaskTags,
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const [localDueDate, setLocalDueDate] = useState(task.due_at);
+  const [localDueDate, setLocalDueDate] = useState(task.dueAt);
   const [title, setTitle] = useState(task.title);
   const [body, setBody] = useState(task.body || "");
   const [tags, setTags] = useState<string[]>(task.tags?.map((tag) => tag.title) ?? []);
@@ -157,7 +157,7 @@ const TaskItem: FC<TaskItemProps> = ({
           >
             <div className="flex items-center gap-2">
               <Checkbox
-                checked={!!task.completed_at}
+                checked={!!task.completedAt}
                 onCheckedChange={() => toggleTaskCompletion(task)}
               />
               <Input
@@ -289,7 +289,7 @@ const TaskItem: FC<TaskItemProps> = ({
           </ContextMenuItem>
           <ContextMenuSeparator />
           <ContextMenuItem onSelect={() => toggleTaskCompletion(task)}>
-            {task.completed_at ? "Mark Incomplete" : "Mark Complete"}
+            {task.completedAt ? "Mark Incomplete" : "Mark Complete"}
           </ContextMenuItem>
         </ContextMenuContent>
       </ContextMenu>

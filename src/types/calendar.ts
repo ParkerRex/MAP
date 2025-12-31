@@ -1,7 +1,8 @@
 import type { calendar_v3 } from "googleapis";
 
 // Extend the Google Calendar API types for our specific needs
-export interface ExtendedCalendarListEntry extends calendar_v3.Schema$CalendarListEntry {
+export interface ExtendedCalendarListEntry
+  extends calendar_v3.Schema$CalendarListEntry {
   nextSyncToken?: string;
 }
 
@@ -46,34 +47,6 @@ export const createEventSchema: Partial<calendar_v3.Schema$Event> = {
 };
 
 export type CreateEventInput = typeof createEventSchema;
-
-export interface CalendarContextType {
-  events: calendar_v3.Schema$Event[];
-  calendars: ExtendedCalendarListEntry[];
-  selectedEvent: ExtendedEvent | null;
-  setSelectedEvent: (event: ExtendedEvent | null) => void;
-  visibleCalendars: Set<string>;
-  toggleCalendarVisibility: (calendarId: string) => void;
-  selectedCalendar: string | null;
-  setSelectedCalendar: (calendarId: string | null) => void;
-  currentWeekStartDate: Date;
-  setCurrentWeekStartDate: (date: Date) => void;
-  createEvent: (calendarId: string, eventData: any) => Promise<calendar_v3.Schema$Event>;
-  updateEvent: (
-    calendarId: string,
-    eventId: string,
-    eventData: any,
-  ) => Promise<calendar_v3.Schema$Event>;
-  deleteEvent: (calendarId: string, eventId: string) => Promise<void>;
-  userTimeZone: string;
-  syncEvents: () => Promise<{
-    success: boolean;
-    calendarsSynced?: number;
-    eventsSynced?: number;
-    error?: string;
-    details?: any;
-  }>;
-}
 
 export interface SyncResult {
   calendars_synced: number;

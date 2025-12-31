@@ -1,5 +1,6 @@
 "use client";
-import { useCalendar } from "@/store/calendar-context";
+import { useCalendars } from "@/hooks/use-calendar";
+import { useCalendarStore } from "@/store/calendar";
 import {
   ContextMenu,
   ContextMenuContent,
@@ -22,7 +23,9 @@ const CalendarEventComponent: React.FC<CalendarEventProps> = ({
   events,
   dayIndex: _dayIndex,
 }) => {
-  const { setSelectedEvent, calendars } = useCalendar();
+  const setSelectedEvent = useCalendarStore((s) => s.setSelectedEvent);
+  const { data: calendarsData } = useCalendars();
+  const calendars = calendarsData?.calendars ?? [];
 
   const handleEventClick = (event: calendar_v3.Schema$Event) => {
     setSelectedEvent(event);

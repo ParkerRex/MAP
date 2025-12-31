@@ -54,7 +54,7 @@ const GoalsComponent = ({
 }: GoalsComponentProps & {
   className?: string;
 }) => {
-  const [countdown, setCountdown] = useState("");
+  const [countdown, setCountdown] = useState(() => formatDateDifference(getNextQuarterStartDate()));
   const currentQuarter = getCurrentQuarter();
 
   const { data: statsData } = useGoalStats();
@@ -64,7 +64,6 @@ const GoalsComponent = ({
 
   useEffect(() => {
     const nextQuarterStartDate = getNextQuarterStartDate();
-    setCountdown(formatDateDifference(nextQuarterStartDate));
 
     const intervalId = setInterval(
       () => {

@@ -1,6 +1,6 @@
 "use client";
 import { useWeekNavigation } from "@/hooks/use-week-navigation";
-import { useCalendar } from "@/store/calendar-context";
+import { useCalendarStore } from "@/store/calendar";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent } from "@/components/ui/tooltip";
 import { TooltipTrigger } from "@radix-ui/react-tooltip";
@@ -18,7 +18,7 @@ const CalendarToolbar: React.FC<CalendarToolbarProps> = ({
   className,
   ...props
 }) => {
-  const { currentWeekStartDate, userTimeZone: _userTimeZone } = useCalendar();
+  const currentWeekStartDate = useCalendarStore((s) => s.currentWeekStartDate);
   const { handleNextWeek, handleCurrentWeek, handlePreviousWeek } =
     useWeekNavigation();
 

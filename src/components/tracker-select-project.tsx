@@ -7,7 +7,7 @@ import { Combobox, type Option } from "@/components/ui/combobox";
 import { useToast } from "@/components/ui/use-toast";
 // TODO: Implement useAction
 // import { useAction } from "next-safe-action/hooks";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 export function TrackerSelectProject({
   setParams,
@@ -18,7 +18,12 @@ export function TrackerSelectProject({
 }) {
   const { toast: _toast } = useToast();
   const [value, setValue] = useState<Option | undefined>(undefined);
-  const [data, setData] = useState<Option[]>([]);
+  // Initialize with default data
+  const [data, setData] = useState<Option[]>([
+    { id: "1", name: "Project A" },
+    { id: "2", name: "Project B" },
+    { id: "3", name: "Project C" },
+  ]);
   const [isLoading, setLoading] = useState(false);
 
   // TODO: Implement createProjectAction
@@ -59,10 +64,6 @@ export function TrackerSelectProject({
     setParams({ projectId: project.id });
   };
 
-  // Initial load of fake data
-  useEffect(() => {
-    onChangeValue("");
-  }, []);
 
   return (
     <Combobox

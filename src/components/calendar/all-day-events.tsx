@@ -1,4 +1,6 @@
-import { useCalendar } from "@/store/calendar-context";
+"use client";
+import { useCalendars } from "@/hooks/use-calendar";
+import { useCalendarStore } from "@/store/calendar";
 import { Button } from "@/components/ui/button";
 import {
   ContextMenu,
@@ -20,7 +22,9 @@ export default function CalendarAllDayEvents({
   daysOfWeek,
 }: CalendarAllDayEventsProps) {
   const [isExpanded, setIsExpanded] = useState(false);
-  const { setSelectedEvent, calendars } = useCalendar();
+  const setSelectedEvent = useCalendarStore((s) => s.setSelectedEvent);
+  const { data: calendarsData } = useCalendars();
+  const calendars = calendarsData?.calendars ?? [];
 
   const toggleExpand = () => setIsExpanded(!isExpanded);
 
@@ -42,8 +46,7 @@ export default function CalendarAllDayEvents({
   const hiddenEventsCount = allDayEvents.length - visibleEvents.length;
 
   const getEventSpan = (_event: calendar_v3.Schema$Event) => {
-    // Implement the logic to calculate event span
-    return 1; // Default to 1 day span
+    return 1;
   };
 
   return (

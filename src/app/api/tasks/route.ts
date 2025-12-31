@@ -1,55 +1,53 @@
 import { NextRequest, NextResponse } from "next/server";
 import { tasksDb } from "@/db/tasks";
 import { getUser } from "@/lib/auth";
+import {
+  handleApiError,
+  unauthorized,
+  validationError,
+} from "@/lib/api/errors";
+import { createTaskSchema } from "@/lib/validations/tasks";
 
 export async function GET() {
   try {
     const user = await getUser();
-
     if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      throw unauthorized();
     }
 
     const tasks = await tasksDb.getTasks();
     return NextResponse.json({ tasks });
   } catch (error) {
-    console.error("Failed to fetch tasks:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch tasks" },
-      { status: 500 },
-    );
+    return handleApiError(error);
   }
 }
 
 export async function POST(request: NextRequest) {
   try {
     const user = await getUser();
-
     if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      throw unauthorized();
     }
 
     const body = await request.json();
-    const { title, body: taskBody, dueAt } = body;
+    const parsed = createTaskSchema.safeParse(body);
 
-    if (!title || title.trim() === "") {
-      return NextResponse.json({ error: "Title is required" }, { status: 400 });
+    if (!parsed.success) {
+      throw validationError("Invalid input", {
+        errors: parsed.error.flatten(),
+      });
     }
 
     const task = await tasksDb.createTask({
-      title,
-      body: taskBody,
-      dueAt: dueAt ? new Date(dueAt) : null,
+      title: parsed.data.title,
+      body: parsed.data.body ?? null,
+      dueAt: parsed.data.dueAt ? new Date(parsed.data.dueAt) : null,
       createdBy: user.id,
       updatedBy: user.id,
     });
 
     return NextResponse.json({ task });
   } catch (error) {
-    console.error("Failed to create task:", error);
-    return NextResponse.json(
-      { error: "Failed to create task" },
-      { status: 500 },
-    );
+    return handleApiError(error);
   }
 }

@@ -1,11 +1,11 @@
 "use client";
-import { useCalendar } from "@/store/calendar-context";
+import { useCalendarStore } from "@/store/calendar";
 import { format, getHours, getMinutes } from "date-fns";
 import { toZonedTime } from "date-fns-tz";
 import { useEffect, useState } from "react";
 
 const CurrentTimeIndicator = () => {
-  const { userTimeZone } = useCalendar();
+  const userTimeZone = useCalendarStore((s) => s.userTimeZone);
   const [currentTime, setCurrentTime] = useState(() => toZonedTime(new Date(), userTimeZone));
 
   useEffect(() => {

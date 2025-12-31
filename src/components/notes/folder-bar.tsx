@@ -44,10 +44,10 @@ export default function FolderBar({ folders, notes }: FolderBarProps) {
 
   React.useEffect(() => {
     if (selectedFolderId) {
-      const folderNotes = notes.filter((note) => note.folder_id === selectedFolderId);
+      const folderNotes = notes.filter((note) => note.folderId === selectedFolderId);
       if (folderNotes.length > 0) {
         const mostRecentNote = folderNotes.sort(
-          (a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime(),
+          (a, b) => new Date(b.updatedAt ?? b.createdAt).getTime() - new Date(a.updatedAt ?? a.createdAt).getTime(),
         )[0];
         setSelectedNote(mostRecentNote);
       }

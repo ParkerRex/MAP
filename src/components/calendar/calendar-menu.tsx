@@ -1,6 +1,7 @@
 "use client";
+import { useCalendars } from "@/hooks/use-calendar";
 import { useWeekNavigation } from "@/hooks/use-week-navigation";
-import { useCalendar } from "@/store/calendar-context";
+import { useCalendarStore } from "@/store/calendar";
 import { Calendar as UIDatePicker } from "@/components/ui/calendar";
 import { Separator } from "@/components/ui/separator";
 import { startOfWeek } from "date-fns";
@@ -13,19 +14,19 @@ export default function CalendarMenu({
 }: {
   className?: string;
 }) {
-  const {
-    visibleCalendars,
-    toggleCalendarVisibility,
-    calendars,
-    currentWeekStartDate,
-    setCurrentWeekStartDate,
-    userTimeZone: _userTimeZone,
-  } = useCalendar();
+  const { data: calendarsData } = useCalendars();
+  const calendars = calendarsData?.calendars ?? [];
+
+  const visibleCalendars = useCalendarStore((s) => s.visibleCalendars);
+  const toggleCalendarVisibility = useCalendarStore((s) => s.toggleCalendarVisibility);
+  const currentWeekStartDate = useCalendarStore((s) => s.currentWeekStartDate);
+  const setCurrentWeekStartDate = useCalendarStore((s) => s.setCurrentWeekStartDate);
+
   const { handleSetWeek } = useWeekNavigation();
 
   const handleDateSelect = (date: Date | undefined) => {
     if (date) {
-      const weekStartDate = startOfWeek(date, { weekStartsOn: 1 }); // 1 represents Monday
+      const weekStartDate = startOfWeek(date, { weekStartsOn: 1 });
       setCurrentWeekStartDate(weekStartDate);
       handleSetWeek(weekStartDate);
     }

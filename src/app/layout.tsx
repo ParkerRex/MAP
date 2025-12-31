@@ -3,6 +3,7 @@ import { Sidebar } from "@/components/sidebar";
 import { cn } from "@/components/ui/cn";
 import { GeistMono } from "geist/font/mono";
 import { GeistSans } from "geist/font/sans";
+import { Providers } from "./providers";
 import "@/styles/globals.css";
 
 export default function RootLayout({
@@ -19,13 +20,15 @@ export default function RootLayout({
           GeistMono.variable,
         )}
       >
-        <div className="relative">
-          <Sidebar />
-          <div className="mx-4 md:ml-[95px] md:mr-10 pb-8">
-            <Header />
-            {children}
+        <Providers>
+          <div className="relative">
+            <Sidebar />
+            <div className="mx-4 md:ml-[95px] md:mr-10 pb-8">
+              <Header />
+              {children}
+            </div>
           </div>
-        </div>
+        </Providers>
       </body>
     </html>
   );

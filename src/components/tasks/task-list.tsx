@@ -6,33 +6,32 @@ import {
   useDeleteTag,
   useDeleteTask,
   useTags,
+  useTasks,
   useToggleTask,
   useUpdateTag,
   useUpdateTaskDueDate,
   useUpdateTaskTags,
 } from "@/hooks/use-tasks";
-import type { Task } from "@/types";
-import type { Tag as TagType } from "@/types";
+import type { TaskWithTags, Tag as TagType } from "@/types";
 import { useMemo, useState } from "react";
 import TagFilter from "./tag-filter";
 import TaskListHeader from "./task-header";
 import TaskListContainer from "./task-list-container";
 
-interface TaskListProps {
-  initialTasks: Task[];
-  initialTags: TagType[];
-}
-
-const TaskList: React.FC<TaskListProps> = ({ initialTasks, initialTags }) => {
+const TaskList: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [newTagTitle, setNewTagTitle] = useState("");
   const [isEditingTag, setIsEditingTag] = useState<string | null>(null);
   const [editTagTitle, setEditTagTitle] = useState<string>("");
-  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+  const [selectedTask, setSelectedTask] = useState<TaskWithTags | null>(null);
 
-  const [tasks, setTasks] = useState(initialTasks);
-  const [tags, setTags] = useState(initialTags);
+  // Use TanStack Query directly - no local state copy
+  const { data: tasksData } = useTasks();
+  const { data: tagsData } = useTags();
+
+  const tasks = tasksData?.tasks ?? [];
+  const tags = tagsData?.tags ?? [];
 
   const createTask = useCreateTask();
   const deleteTask = useDeleteTask();
@@ -42,7 +41,6 @@ const TaskList: React.FC<TaskListProps> = ({ initialTasks, initialTags }) => {
   const updateTag = useUpdateTag();
   const updateTaskDueDate = useUpdateTaskDueDate();
   const updateTaskTags = useUpdateTaskTags();
-  const { refetch: refetchTags } = useTags();
 
   const handleCreateTask = async (formData: FormData) => {
     const title = formData.get("title") as string;
@@ -52,19 +50,12 @@ const TaskList: React.FC<TaskListProps> = ({ initialTasks, initialTags }) => {
 
   const handleDeleteTask = async (taskId: string) => {
     deleteTask.mutate(taskId);
-    setTasks((prev) => prev.filter((t) => t.id !== taskId));
+    // No manual state update - TanStack Query invalidates cache on success
   };
 
-  const handleToggleTask = async (task: Task) => {
+  const handleToggleTask = async (task: TaskWithTags) => {
     const newCompleted = !task.completedAt;
     toggleTask.mutate({ taskId: task.id, completed: newCompleted });
-    setTasks((prev) =>
-      prev.map((t) =>
-        t.id === task.id
-          ? { ...t, completedAt: newCompleted ? new Date().toISOString() : null }
-          : t
-      )
-    );
   };
 
   const handleCreateTag = async () => {
@@ -73,16 +64,27 @@ const TaskList: React.FC<TaskListProps> = ({ initialTasks, initialTags }) => {
     setNewTagTitle("");
   };
 
+  const handleCreateTagForTask = async (title: string): Promise<{ id: string; title: string }> => {
+    return new Promise((resolve) => {
+      createTag.mutate(
+        { title },
+        {
+          onSuccess: (data) => {
+            resolve({ id: data.tag.id, title: data.tag.title });
+          },
+        }
+      );
+    });
+  };
+
   const handleDeleteTag = async (tagId: string) => {
     deleteTagMutation.mutate(tagId);
-    setTags((prev) => prev.filter((t) => t.id !== tagId));
+    // No manual state update - TanStack Query invalidates cache on success
   };
 
   const handleUpdateTag = async (tagId: string, newTitle: string) => {
     updateTag.mutate({ tagId, title: newTitle });
-    setTags((prev) =>
-      prev.map((t) => (t.id === tagId ? { ...t, title: newTitle } : t))
-    );
+    // No manual state update - TanStack Query invalidates cache on success
   };
 
   const handleUpdateTaskDueDate = async (taskId: string, dueDate: string) => {
@@ -104,7 +106,7 @@ const TaskList: React.FC<TaskListProps> = ({ initialTasks, initialTags }) => {
     }
   };
 
-  const handleTaskSelection = (task: Task) => {
+  const handleTaskSelection = (task: TaskWithTags) => {
     setSelectedTask(task);
   };
 
@@ -156,7 +158,6 @@ const TaskList: React.FC<TaskListProps> = ({ initialTasks, initialTags }) => {
         taskId={selectedTask?.id}
       />
       <TaskListContainer
-        tasks={tasks}
         filteredTasks={filteredTasks}
         highlightedTaskId={null}
         selectedTask={selectedTask}
@@ -164,15 +165,11 @@ const TaskList: React.FC<TaskListProps> = ({ initialTasks, initialTags }) => {
         handleTaskClick={handleTaskSelection}
         handleTaskDoubleClick={() => {}}
         setSelectedTask={setSelectedTask}
-        setTasks={setTasks}
         handleDelete={handleDeleteTask}
         toggleTaskCompletion={handleToggleTask}
         updateTaskDueDate={handleUpdateTaskDueDate}
-        getAllTags={async () => {
-          const result = await refetchTags();
-          return result.data?.tags ?? [];
-        }}
-        createTag={handleCreateTag}
+        getAllTags={async () => tags.map((t) => ({ id: t.id, title: t.title }))}
+        createTag={handleCreateTagForTask}
         updateTaskTags={handleUpdateTaskTags}
       />
     </div>

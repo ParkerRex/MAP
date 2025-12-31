@@ -1,23 +1,10 @@
 import type { LucideIcon } from "lucide-react";
+import type { Note as DrizzleNote, Folder as DrizzleFolder } from "@/db/schema";
 
-export type Note = {
-  id: string;
-  title: string;
-  content: string;
-  user_id: string;
-  created_at: string;
-  updated_at: string;
-  folder_id: string | null;
-  shared: boolean;
-};
+export type Note = DrizzleNote;
 
-export type Folder = {
-  id: string;
-  name: string;
-  user_id: string;
-  created_at: string;
-  updated_at: string;
-  notesCount: number;
+export type Folder = DrizzleFolder & {
+  notesCount?: number;
 };
 
 export interface FolderBarProps {
