@@ -10,11 +10,7 @@ export async function InsightsWidget() {
   return (
     <div>
       <div className="mt-8 overflow-auto scrollbar-hide pb-28 aspect-square">
-        {chat ? (
-          <ChatList messages={getUIStateFromAIState(chat)} />
-        ) : (
-          <InsightList />
-        )}
+        {chat ? <ChatList messages={getUIStateFromAIState(chat)} /> : <InsightList />}
       </div>
       <InsightInput />
     </div>

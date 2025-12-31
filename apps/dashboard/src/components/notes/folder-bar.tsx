@@ -1,10 +1,6 @@
 "use client";
 
-import {
-  addFolder,
-  deleteFolder,
-  renameFolder,
-} from "@/actions/notes/note-actions";
+import { addFolder, deleteFolder, renameFolder } from "@/actions/notes/note-actions";
 import { createClient } from "@map/supabase/client";
 import { Button } from "@map/ui/button";
 import { cn } from "@map/ui/cn";
@@ -37,15 +33,11 @@ const FilledFolder: React.FC<React.ComponentProps<LucideIcon>> = (props) => (
 
 export default function FolderBar({ folders, notes }: FolderBarProps) {
   const [view, setView] = React.useState<"all" | "folder">("all");
-  const [selectedFolderId, setSelectedFolderId] = React.useState<string | null>(
-    null,
-  );
+  const [selectedFolderId, setSelectedFolderId] = React.useState<string | null>(null);
   const [selectedNote, setSelectedNote] = React.useState<Note | null>(null);
   const [newFolderName, setNewFolderName] = React.useState("");
   const [renameFolderName, setRenameFolderName] = React.useState("");
-  const [editingFolderId, setEditingFolderId] = React.useState<string | null>(
-    null,
-  );
+  const [editingFolderId, setEditingFolderId] = React.useState<string | null>(null);
   const [userId, setUserId] = React.useState<string | null>(null);
 
   React.useEffect(() => {
@@ -62,13 +54,10 @@ export default function FolderBar({ folders, notes }: FolderBarProps) {
 
   React.useEffect(() => {
     if (selectedFolderId) {
-      const folderNotes = notes.filter(
-        (note) => note.folder_id === selectedFolderId,
-      );
+      const folderNotes = notes.filter((note) => note.folder_id === selectedFolderId);
       if (folderNotes.length > 0) {
         const mostRecentNote = folderNotes.sort(
-          (a, b) =>
-            new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime(),
+          (a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime(),
         )[0];
         setSelectedNote(mostRecentNote);
       }
@@ -98,10 +87,7 @@ export default function FolderBar({ folders, notes }: FolderBarProps) {
     setView("folder");
   };
 
-  const handleFolderKeyDown = (
-    e: React.KeyboardEvent,
-    folderId: string | null,
-  ) => {
+  const handleFolderKeyDown = (e: React.KeyboardEvent, folderId: string | null) => {
     if (e.key === "Enter" || e.key === " ") {
       e.preventDefault();
       handleFolderSelect(folderId);
@@ -159,10 +145,7 @@ export default function FolderBar({ folders, notes }: FolderBarProps) {
                         className="text-sm font-medium"
                       />
                     ) : (
-                      <span
-                        className="text-sm font-medium"
-                        style={{ userSelect: "none" }}
-                      >
+                      <span className="text-sm font-medium" style={{ userSelect: "none" }}>
                         {link.title}
                       </span>
                     )}
@@ -228,10 +211,7 @@ export default function FolderBar({ folders, notes }: FolderBarProps) {
                 placeholder="New folder name"
                 className="flex-1"
               />
-              <Button
-                onClick={handleAddFolder}
-                className="flex w-20 max-w-[150px]"
-              >
+              <Button onClick={handleAddFolder} className="flex w-20 max-w-[150px]">
                 Add Folder
               </Button>
             </div>

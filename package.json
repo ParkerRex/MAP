@@ -1,7 +1,7 @@
 {
   "name": "map",
   "private": true,
-  "workspaces": ["packages/*", "apps/*", "packages/email/*"],
+  "workspaces": ["packages/*", "apps/*"],
   "scripts": {
     "build": "turbo run build",
     "clean": "git clean -xdf node_modules",
@@ -13,20 +13,18 @@
     "dev:api": "turbo dev --filter=@map/api",
     "dev:dashboard": "turbo dev --filter=@map/dashboard",
     "build:dashboard": "turbo build --filter=@map/dashboard",
-    "dev:express": "turbo dev --filter=@map/express",
     "dev:website": "turbo dev --filter=@map/website ",
     "dev:desktop": "turbo dev --filter=@map/desktop",
-    "jobs:dashboard": "turbo jobs --filter=@map/dashboard",
     "format": "biome format --write .",
     "lint": "turbo lint && manypkg check",
-    "typecheck": "turbo typecheck",
-    "deploy": "turbo run clean && turbo run build && pm2 restart all"
+    "typecheck": "turbo typecheck"
   },
   "dependencies": {
-    "@biomejs/biome": "1.8.3",
-    "@manypkg/cli": "^0.21.4",
-    "turbo": "2.0.10",
-    "typescript": "^5.5.4"
+    "@biomejs/biome": "2.3.10",
+    "@manypkg/cli": "^0.25.1",
+    "supabase": "^2.70.5",
+    "turbo": "2.7.2",
+    "typescript": "^5.9.3"
   },
   "packageManager": "bun@1.1.16",
   "resolutions": {

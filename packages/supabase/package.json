@@ -10,20 +10,21 @@
     "db:generate": "supabase gen types --lang=typescript --project-id urxakpsnywfnqsanjjbu --schema public > src/types/db.ts"
   },
   "dependencies": {
-    "@supabase/ssr": "^0.4.0",
-    "react": "^18.3.1",
+    "@supabase/ssr": "^0.8.0",
+    "react": "^19.2.3",
     "server-only": "^0.0.1",
-    "supabase": "^1.187.10"
+    "supabase": "^2.70.5"
   },
   "devDependencies": {
-    "@supabase/supabase-js": "^2.45.0",
-    "typescript": "^5.5.4"
+    "@supabase/supabase-js": "^2.89.0",
+    "typescript": "^5.9.3"
   },
   "exports": {
     "./server": "./src/client/server.ts",
     "./client": "./src/client/client.ts",
     "./mutations": "./src/mutations/index.ts",
     "./middleware": "./src/client/middleware.ts",
+    "./calendar-mutations": "./src/calendar-mutations.ts",
     "./queries": "./src/queries/index.ts",
     "./cached-queries": "./src/queries/cached-queries.ts",
     "./storage": "./src/utils/storage.ts",

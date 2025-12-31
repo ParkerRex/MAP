@@ -1,8 +1,5 @@
 "use client";
-import {
-  formatForDisplay,
-  safeParseDate,
-} from "@/app/calendar/utils/dateUtils";
+
 import type { Note } from "@/types/notes";
 import { Button } from "@map/ui/button";
 import { cn } from "@map/ui/cn";
@@ -18,10 +15,10 @@ import {
 } from "@map/ui/context-menu";
 import { Input } from "@map/ui/input";
 import { ScrollArea } from "@map/ui/scroll-area";
+import { format, formatDistanceToNow, parseISO } from "date-fns";
 import { AnimatePresence, motion } from "framer-motion";
 import { Plus, Trash } from "lucide-react";
 import { Leaf, Search } from "lucide-react";
-import { DateTime } from "luxon";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   addNoteToFolder,
@@ -66,9 +63,7 @@ export default function NoteList({
         filtered = localNotes.filter((note) => note.shared);
         break;
       case "folder":
-        filtered = localNotes.filter(
-          (note) => note.folder_id === selectedFolderId,
-        );
+        filtered = localNotes.filter((note) => note.folder_id === selectedFolderId);
         break;
       default:
         filtered = localNotes;
@@ -81,17 +76,13 @@ export default function NoteList({
       );
     }
     return filtered.sort(
-      (a, b) =>
-        safeParseDate(b.updated_at).toMillis() -
-        safeParseDate(a.updated_at).toMillis(),
+      (a, b) => parseISO(b.updated_at).getTime() - parseISO(a.updated_at).getTime(),
     );
   }, [localNotes, view, selectedFolderId, searchQuery]);
 
   const handleMoveNote = async (noteId: string, newFolderId: string) => {
     const movedNote = await moveNoteToFolder(noteId, newFolderId);
-    setLocalNotes((prevNotes) =>
-      prevNotes.filter((note) => note.id !== noteId),
-    );
+    setLocalNotes((prevNotes) => prevNotes.filter((note) => note.id !== noteId));
     setSelectedNote(null);
   };
 
@@ -113,9 +104,7 @@ export default function NoteList({
 
   const handleDeleteNote = async (noteId: string) => {
     await deleteNote(noteId);
-    setLocalNotes((prevNotes) =>
-      prevNotes.filter((note) => note.id !== noteId),
-    );
+    setLocalNotes((prevNotes) => prevNotes.filter((note) => note.id !== noteId));
     setSelectedNote(null);
   };
 
@@ -134,28 +123,23 @@ export default function NoteList({
   };
 
   const formatTimestamp = (date: string) => {
-    const now = DateTime.now();
-    const noteDate = safeParseDate(date);
-    const diffInMinutes = now.diff(noteDate, "minutes").minutes;
+    const noteDate = parseISO(date);
+    const now = new Date();
+    const diffInMinutes = Math.floor((now.getTime() - noteDate.getTime()) / (1000 * 60));
 
     if (diffInMinutes < 1) {
       return "Just now";
     }
     if (diffInMinutes < 60) {
-      return `${Math.floor(diffInMinutes)} minute${diffInMinutes > 1 ? "s" : ""} ago`;
+      return formatDistanceToNow(noteDate, { addSuffix: true });
     }
-    const diffInHours = now.diff(noteDate, "hours").hours;
-    if (diffInHours < 24) {
-      return `${Math.floor(diffInHours)} hour${diffInHours > 1 ? "s" : ""} ago`;
+    if (diffInMinutes < 24 * 60) {
+      return formatDistanceToNow(noteDate, { addSuffix: true });
     }
-    const diffInDays = now.diff(noteDate, "days").days;
-    if (diffInDays < 2) {
-      return "1 day ago";
+    if (diffInMinutes < 7 * 24 * 60) {
+      return formatDistanceToNow(noteDate, { addSuffix: true });
     }
-    if (diffInDays < 7) {
-      return `${Math.floor(diffInDays)} days ago`;
-    }
-    return formatForDisplay(date, "MMM d");
+    return format(noteDate, "MMM d");
   };
 
   return (
@@ -220,10 +204,7 @@ export default function NoteList({
                         <div className="flex w-full flex-col gap-1">
                           <div className="flex items-center">
                             <div className="flex items-center gap-2">
-                              <div
-                                className="font-semibold"
-                                style={{ userSelect: "none" }}
-                              >
+                              <div className="font-semibold" style={{ userSelect: "none" }}>
                                 {highlightText(note.title, searchQuery)}
                               </div>
                               <div
@@ -243,40 +224,27 @@ export default function NoteList({
                             className="line-clamp-2 text-xs text-muted-foreground"
                             style={{ userSelect: "none" }}
                           >
-                            {highlightText(
-                              note.content.substring(0, 300),
-                              searchQuery,
-                            )}
+                            {highlightText(note.content.substring(0, 300), searchQuery)}
                           </div>
                         </div>
                       </button>
                     </ContextMenuTrigger>
                     <ContextMenuContent>
-                      <ContextMenuItem onSelect={handleNewNote}>
-                        New Note
-                      </ContextMenuItem>
-                      <ContextMenuItem
-                        onSelect={() => handleDuplicateNote(note)}
-                      >
+                      <ContextMenuItem onSelect={handleNewNote}>New Note</ContextMenuItem>
+                      <ContextMenuItem onSelect={() => handleDuplicateNote(note)}>
                         Duplicate Note
                       </ContextMenuItem>
-                      <ContextMenuItem
-                        onSelect={() => handleDeleteNote(note.id)}
-                      >
+                      <ContextMenuItem onSelect={() => handleDeleteNote(note.id)}>
                         Delete Note
                       </ContextMenuItem>
                       <ContextMenuSeparator />
                       <ContextMenuSub>
-                        <ContextMenuSubTrigger>
-                          Move to Folder
-                        </ContextMenuSubTrigger>
+                        <ContextMenuSubTrigger>Move to Folder</ContextMenuSubTrigger>
                         <ContextMenuSubContent>
                           {folders.map((folder) => (
                             <ContextMenuItem
                               key={folder.id}
-                              onSelect={() =>
-                                handleMoveNote(note.id, folder.id)
-                              }
+                              onSelect={() => handleMoveNote(note.id, folder.id)}
                             >
                               {folder.name}
                             </ContextMenuItem>

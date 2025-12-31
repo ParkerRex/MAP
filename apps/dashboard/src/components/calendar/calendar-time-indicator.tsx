@@ -1,23 +1,22 @@
 "use client";
 import { useCalendar } from "@/store/calendar-context";
-import { DateTime } from "luxon";
+import { format, getHours, getMinutes, setSeconds } from "date-fns";
+import { utcToZonedTime, zonedTimeToUtc } from "date-fns-tz";
 import { useEffect, useState } from "react";
 
 const CurrentTimeIndicator = () => {
   const { userTimeZone } = useCalendar();
-  const [currentTime, setCurrentTime] = useState(
-    DateTime.now().setZone(userTimeZone),
-  );
+  const [currentTime, setCurrentTime] = useState(() => utcToZonedTime(new Date(), userTimeZone));
 
   useEffect(() => {
     const timer = setInterval(() => {
-      setCurrentTime(DateTime.now().setZone(userTimeZone));
+      setCurrentTime(utcToZonedTime(new Date(), userTimeZone));
     }, 1000);
 
     return () => clearInterval(timer);
   }, [userTimeZone]);
 
-  const topOffset = currentTime.hour * 4 + currentTime.minute / 15 + 0.5;
+  const topOffset = getHours(currentTime) * 4 + getMinutes(currentTime) / 15 + 0.5;
 
   return (
     <div
@@ -26,7 +25,7 @@ const CurrentTimeIndicator = () => {
     >
       <div className="w-16 flex-shrink-0 text-right pr-2">
         <span className="text-[10px] text-red-500 font-mono">
-          {currentTime.toFormat("h:mm:ss a")}
+          {format(currentTime, "h:mm:ss a")}
         </span>
       </div>
       <div className="flex-grow border-t border-red-500 border-dotted" />

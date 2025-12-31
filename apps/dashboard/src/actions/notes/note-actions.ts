@@ -1,9 +1,8 @@
-// Break these into separate small functions
 "use server";
 
 import type { Note } from "@/types/notes";
-import { formatForDatabase, formatForDisplay } from "@/utils/date-utils";
 import { createClient } from "@map/supabase/server";
+import { format, parseISO } from "date-fns";
 import { unstable_noStore as noStore, revalidatePath } from "next/cache";
 
 export const addNote = async (formData: FormData) => {
@@ -104,10 +103,7 @@ export const renameFolder = async (folderId: string, newName: string) => {
 export const deleteFolder = async (folderId: string) => {
   const supabase = createClient();
 
-  const { data, error } = await supabase
-    .from("folder")
-    .delete()
-    .eq("id", folderId);
+  const { data, error } = await supabase.from("folder").delete().eq("id", folderId);
 
   if (error) throw error;
 
@@ -159,7 +155,7 @@ export const updateNote = async (
 ) => {
   const supabase = createClient();
 
-  const now = formatForDatabase(new Date());
+  const now = format(new Date(), "yyyy-MM-dd'T'HH:mm:ss.SSSxxx");
 
   const { data, error } = await supabase
     .from("note")

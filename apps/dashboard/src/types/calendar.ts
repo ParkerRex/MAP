@@ -1,8 +1,7 @@
 import type { calendar_v3 } from "googleapis";
 
 // Extend the Google Calendar API types for our specific needs
-export interface ExtendedCalendarListEntry
-  extends calendar_v3.Schema$CalendarListEntry {
+export interface ExtendedCalendarListEntry extends calendar_v3.Schema$CalendarListEntry {
   nextSyncToken?: string;
 }
 
@@ -49,22 +48,31 @@ export const createEventSchema: Partial<calendar_v3.Schema$Event> = {
 export type CreateEventInput = typeof createEventSchema;
 
 export interface CalendarContextType {
-  currentWeekStartDate: Date;
-  setCurrentWeekStartDate: (date: Date) => void;
-  selectedCalendar: string | null;
-  setSelectedCalendar: React.Dispatch<React.SetStateAction<string | null>>;
   events: calendar_v3.Schema$Event[];
-  selectedEvent: calendar_v3.Schema$Event | null;
-  setSelectedEvent: React.Dispatch<
-    React.SetStateAction<calendar_v3.Schema$Event | null>
-  >;
-  createEvent: (event: Partial<calendar_v3.Schema$Event>) => void;
-  updateEvent: (event: calendar_v3.Schema$Event) => void;
-  deleteEvent: (event: calendar_v3.Schema$Event) => void;
+  calendars: ExtendedCalendarListEntry[];
+  selectedEvent: ExtendedEvent | null;
+  setSelectedEvent: (event: ExtendedEvent | null) => void;
   visibleCalendars: Set<string>;
   toggleCalendarVisibility: (calendarId: string) => void;
-  calendars: calendar_v3.Schema$CalendarListEntry[];
+  selectedCalendar: string | null;
+  setSelectedCalendar: (calendarId: string | null) => void;
+  currentWeekStartDate: Date;
+  setCurrentWeekStartDate: (date: Date) => void;
+  createEvent: (calendarId: string, eventData: any) => Promise<calendar_v3.Schema$Event>;
+  updateEvent: (
+    calendarId: string,
+    eventId: string,
+    eventData: any,
+  ) => Promise<calendar_v3.Schema$Event>;
+  deleteEvent: (calendarId: string, eventId: string) => Promise<void>;
   userTimeZone: string;
+  syncEvents: () => Promise<{
+    success: boolean;
+    calendarsSynced?: number;
+    eventsSynced?: number;
+    error?: string;
+    details?: any;
+  }>;
 }
 
 export interface SyncResult {

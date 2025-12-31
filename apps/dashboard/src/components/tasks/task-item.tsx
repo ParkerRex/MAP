@@ -1,10 +1,5 @@
 "use client";
 import type { Tag as TagType, Task } from "@/types";
-import {
-  formatForDatabase,
-  formatForDisplay,
-  safeParseDate,
-} from "@/utils/date-utils";
 import { Badge } from "@map/ui/badge";
 import { Button } from "@map/ui/button";
 import { Calendar as DatePicker } from "@map/ui/calendar";
@@ -26,9 +21,9 @@ import {
 } from "@map/ui/dropdown-menu";
 import { Input } from "@map/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@map/ui/popover";
+import { differenceInDays, format, parseISO } from "date-fns";
 import { AnimatePresence, Reorder, motion } from "framer-motion";
 import { Calendar, Flag, Tag, X } from "lucide-react";
-import { DateTime } from "luxon";
 import { useEffect, useState } from "react";
 import type React from "react";
 import type { FC } from "react";
@@ -68,9 +63,7 @@ const TaskItem: FC<TaskItemProps> = ({
   const [localDueDate, setLocalDueDate] = useState(task.due_at);
   const [title, setTitle] = useState(task.title);
   const [body, setBody] = useState(task.body || "");
-  const [tags, setTags] = useState<string[]>(
-    task.tags?.map((tag) => tag.title) ?? [],
-  );
+  const [tags, setTags] = useState<string[]>(task.tags?.map((tag) => tag.title) ?? []);
   const [newTag, setNewTag] = useState("");
   const [availableTags, setAvailableTags] = useState<string[]>([]);
 
@@ -84,12 +77,10 @@ const TaskItem: FC<TaskItemProps> = ({
 
   const handleDateChange = async (date: Date) => {
     if (task.id) {
-      const formattedDate = formatForDatabase(date);
-      if (formattedDate) {
-        await updateTaskDueDate(task.id, formattedDate);
-        setLocalDueDate(formattedDate);
-        setIsPopoverOpen(false);
-      }
+      const formattedDate = format(date, "yyyy-MM-dd'T'HH:mm:ss.SSSxxx");
+      await updateTaskDueDate(task.id, formattedDate);
+      setLocalDueDate(formattedDate);
+      setIsPopoverOpen(false);
     }
   };
 
@@ -117,18 +108,16 @@ const TaskItem: FC<TaskItemProps> = ({
   };
 
   const handleTagSelect = (tag: string) => {
-    setTags((prev) =>
-      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag],
-    );
+    setTags((prev) => (prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]));
   };
 
   const getCountdownText = (dueDate: string | undefined) => {
     if (!dueDate) return null;
-    const date = safeParseDate(dueDate);
-    if (!date.isValid) return null;
+    const date = parseISO(dueDate);
+    if (isNaN(date.getTime())) return null;
 
-    const now = DateTime.local();
-    const diff = date.diff(now, "days").days;
+    const now = new Date();
+    const diff = differenceInDays(date, now);
 
     if (diff === 0) {
       return <span className="text-red-500">today</span>;
@@ -136,16 +125,16 @@ const TaskItem: FC<TaskItemProps> = ({
     if (diff === 1) {
       return <span className="text-red-500">1 day left</span>;
     }
-    return <span className="text-gray-500">{Math.floor(diff)} days left</span>;
+    return <span className="text-gray-500">{diff} days left</span>;
   };
 
   const getCountdownClass = (dueDate: string | undefined) => {
     if (!dueDate) return "";
-    const date = safeParseDate(dueDate);
-    if (!date.isValid) return "";
+    const date = parseISO(dueDate);
+    if (isNaN(date.getTime())) return "";
 
-    const now = DateTime.local();
-    const diff = date.diff(now, "days").days;
+    const now = new Date();
+    const diff = differenceInDays(date, now);
 
     if (diff <= 1) {
       return "text-red-500";
@@ -178,27 +167,25 @@ const TaskItem: FC<TaskItemProps> = ({
                 className="text-sm bg-none text-black dark:text-white border-none rounded-md placeholder-gray-400 dark:placeholder-white"
               />
               <AnimatePresence>
-                {selectedTask?.id !== task.id &&
-                  task.tags &&
-                  task.tags.length > 0 && (
-                    <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      transition={{ duration: 0.15 }}
-                      className="flex"
-                    >
-                      {task.tags.map((tag) => (
-                        <Badge
-                          key={tag.id}
-                          variant="outline"
-                          className="flex items-center text-gray-500 bg-opacity-50 dark:text-white"
-                        >
-                          {tag.title}
-                        </Badge>
-                      ))}
-                    </motion.div>
-                  )}
+                {selectedTask?.id !== task.id && task.tags && task.tags.length > 0 && (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.15 }}
+                    className="flex"
+                  >
+                    {task.tags.map((tag) => (
+                      <Badge
+                        key={tag.id}
+                        variant="outline"
+                        className="flex items-center text-gray-500 bg-opacity-50 dark:text-white"
+                      >
+                        {tag.title}
+                      </Badge>
+                    ))}
+                  </motion.div>
+                )}
               </AnimatePresence>
               <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
                 <PopoverTrigger asChild>
@@ -206,11 +193,7 @@ const TaskItem: FC<TaskItemProps> = ({
                 </PopoverTrigger>
                 <PopoverContent>
                   <DatePicker
-                    selected={
-                      localDueDate
-                        ? safeParseDate(localDueDate).toJSDate()
-                        : new Date()
-                    }
+                    selected={localDueDate ? parseISO(localDueDate) : new Date()}
                     onDayClick={handleDateChange}
                   />
                 </PopoverContent>
@@ -300,9 +283,7 @@ const TaskItem: FC<TaskItemProps> = ({
           </motion.div>
         </ContextMenuTrigger>
         <ContextMenuContent>
-          <ContextMenuItem onSelect={() => setSelectedTask(task)}>
-            View Task
-          </ContextMenuItem>
+          <ContextMenuItem onSelect={() => setSelectedTask(task)}>View Task</ContextMenuItem>
           <ContextMenuItem onSelect={() => task.id && handleDelete(task.id)}>
             Delete Task
           </ContextMenuItem>

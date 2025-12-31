@@ -1,7 +1,6 @@
 import type { UpdateTransactionValues } from "@/actions/schema";
 // TODO: Implement updateSimilarTransactionsAction
 // import { updateSimilarTransactionsAction } from "@/actions/update-similar-transactions-action";
-import { useI18n } from "@/locales/client";
 import { createClient } from "@map/supabase/client";
 // TODO: Implement getTransactionQuery
 // import { getTransactionQuery } from "@map/supabase/queries";
@@ -10,12 +9,7 @@ import { createClient } from "@map/supabase/client";
 //   getCurrentUserTeamQuery,
 //   getSimilarTransactions,
 // } from "@map/supabase/queries";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@map/ui/accordion";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@map/ui/accordion";
 import { cn } from "@map/ui/cn";
 import { Label } from "@map/ui/label";
 import { Skeleton } from "@map/ui/skeleton";
@@ -36,17 +30,10 @@ import { TransactionBankAccount } from "./transaction-bank-account";
 type Props = {
   data: any;
   ids?: string[];
-  updateTransaction: (
-    values: UpdateTransactionValues,
-    optimisticData: any,
-  ) => void;
+  updateTransaction: (values: UpdateTransactionValues, optimisticData: any) => void;
 };
 
-export function TransactionDetails({
-  data: initialData,
-  ids,
-  updateTransaction,
-}: Props) {
+export function TransactionDetails({ data: initialData, ids, updateTransaction }: Props) {
   const [data, setData] = useState(initialData);
   const [transactionId, setTransactionId] = useQueryState("id");
   const { toast } = useToast();
@@ -128,10 +115,7 @@ export function TransactionDetails({
     slug: string;
     color: string;
   }) => {
-    updateTransaction(
-      { id: data?.id, category_slug: category.slug },
-      { category },
-    );
+    updateTransaction({ id: data?.id, category_slug: category.slug }, { category });
 
     // TODO: Implement getCurrentUserTeamQuery and getSimilarTransactions
     // const user = await getCurrentUserTeamQuery(supabase);
@@ -205,11 +189,7 @@ export function TransactionDetails({
           )}
 
           <h2 className="mt-6 mb-3">
-            {isLoading ? (
-              <Skeleton className="w-[35%] h-[22px] rounded-md mb-2" />
-            ) : (
-              data?.name
-            )}
+            {isLoading ? <Skeleton className="w-[35%] h-[22px] rounded-md mb-2" /> : data?.name}
           </h2>
           <div className="flex justify-between items-center">
             <div className="flex flex-col w-full space-y-1">
@@ -222,17 +202,13 @@ export function TransactionDetails({
                     data?.category?.slug === "income" && "text-[#00C969]",
                   )}
                 >
-                  <FormatAmount
-                    amount={data?.amount}
-                    currency={data?.currency}
-                  />
+                  <FormatAmount amount={data?.amount} currency={data?.currency} />
                 </span>
               )}
               <div className="h-3">
                 {data?.vat > 0 && (
                   <span className="text-[#606060] text-xs">
-                    VAT{" "}
-                    <FormatAmount amount={data.vat} currency={data.currency} />
+                    VAT <FormatAmount amount={data.vat} currency={data.currency} />
                   </span>
                 )}
               </div>
@@ -269,10 +245,7 @@ export function TransactionDetails({
             isLoading={isLoading}
             selectedId={data?.assigned?.id ?? undefined}
             onSelect={(user) => {
-              updateTransaction(
-                { assigned_id: user?.id, id: data?.id },
-                { assigned: user },
-              );
+              updateTransaction({ assigned_id: user?.id, id: data?.id }, { assigned: user });
             }}
           />
         </div>
@@ -282,11 +255,7 @@ export function TransactionDetails({
         <AccordionItem value="note">
           <AccordionTrigger>Note</AccordionTrigger>
           <AccordionContent>
-            <Note
-              id={data?.id}
-              defaultValue={data?.note}
-              updateTransaction={updateTransaction}
-            />
+            <Note id={data?.id} defaultValue={data?.note} updateTransaction={updateTransaction} />
           </AccordionContent>
         </AccordionItem>
       </Accordion>

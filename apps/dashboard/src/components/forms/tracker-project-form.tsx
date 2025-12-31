@@ -1,7 +1,5 @@
 "use client";
 
-import { useCurrentLocale } from "@/locales/client";
-import { uniqueCurrencies } from "@map/location/src/currencies";
 import { Button } from "@map/ui/button";
 import { Collapsible, CollapsibleContent } from "@map/ui/collapsible";
 import {
@@ -14,13 +12,7 @@ import {
   FormMessage,
 } from "@map/ui/form";
 import { Input } from "@map/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@map/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@map/ui/select";
 import { Switch } from "@map/ui/switch";
 import { Textarea } from "@map/ui/textarea";
 import { CurrencyInput } from "headless-currency-input";
@@ -49,9 +41,7 @@ export function TrackerProjectForm({ onSubmit, isSaving, form }) {
                   spellCheck="false"
                 />
               </FormControl>
-              <FormDescription>
-                This is the project display name.
-              </FormDescription>
+              <FormDescription>This is the project display name.</FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -66,9 +56,7 @@ export function TrackerProjectForm({ onSubmit, isSaving, form }) {
               <FormControl>
                 <Textarea className="resize-none" {...field} />
               </FormControl>
-              <FormDescription>
-                Add a short description about the project.
-              </FormDescription>
+              <FormDescription>Add a short description about the project.</FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -95,8 +83,7 @@ export function TrackerProjectForm({ onSubmit, isSaving, form }) {
                   />
                 </FormControl>
                 <FormDescription>
-                  Set a goal for how long your project should take to complete
-                  in hours.
+                  Set a goal for how long your project should take to complete in hours.
                 </FormDescription>
                 <FormMessage />
               </FormItem>
@@ -109,10 +96,7 @@ export function TrackerProjectForm({ onSubmit, isSaving, form }) {
             render={({ field }) => (
               <FormItem className="w-full">
                 <FormLabel>Status</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue />
@@ -182,10 +166,7 @@ export function TrackerProjectForm({ onSubmit, isSaving, form }) {
                 render={({ field }) => (
                   <FormItem className="w-full">
                     <FormLabel>Currency</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue />

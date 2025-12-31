@@ -2,8 +2,8 @@
 
 import { Assistant } from "@/components/assistant";
 import { motion } from "framer-motion";
-import Image from "next/image";
-import keyboard from "public/keyboard.png";
+// import Image from "next/image";
+// import keyboard from "public/keyboard.png";
 
 export function Keyboard() {
   return (
@@ -21,7 +21,7 @@ export function Keyboard() {
 
       <div className="h-full w-[500px] duration-200 ease-out transition-all absolute left-[1px] right-[1px] top-[1px] z-[15] bottom-[1px] bg-background/80" />
 
-      <Image
+      {/* <Image
         src={keyboard}
         alt="Download Map"
         width={1092}
@@ -29,7 +29,7 @@ export function Keyboard() {
         className="z-10 relative"
         quality={100}
         priority
-      />
+      /> */}
     </div>
   );
 }

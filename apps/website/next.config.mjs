@@ -17,20 +17,6 @@ const config = {
       },
     ],
   },
-  async redirects() {
-    return [
-      {
-        source: "/en/(.*)",
-        destination: "/",
-        permanent: true,
-      },
-      {
-        source: "/public-beta",
-        destination: "/",
-        permanent: true,
-      },
-    ];
-  },
 };
 
 export default config;

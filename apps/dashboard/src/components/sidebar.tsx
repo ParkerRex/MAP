@@ -1,25 +1,29 @@
-import { Cookies } from "@/utils/constants";
-import { Icons } from "@map/ui/icons";
-import { cookies } from "next/headers";
+import { Calendar, Home, Settings } from "lucide-react";
 import Link from "next/link";
-import { Suspense } from "react";
-import { MainMenu } from "./main-menu";
 
 export function Sidebar() {
-  const initialItems = cookies().has(Cookies.MenuConfig)
-    ? JSON.parse(cookies().get(Cookies.MenuConfig)?.value)
-    : null;
-
   return (
-    <aside className="h-screen flex-shrink-0 flex-col justify-between fixed top-0 ml-4 pb-4 items-center hidden md:flex">
-      <div className="flex flex-col items-center justify-center">
-        <div className="mt-6 todesktop:mt-[35px]">
-          <Link href="/">
-            <Icons.LogoSmall />
+    <nav className="w-64 bg-gray-100 p-4">
+      <ul className="space-y-2">
+        <li>
+          <Link
+            href="/calendar"
+            className="flex items-center space-x-2 p-2 hover:bg-gray-200 rounded"
+          >
+            <Calendar className="h-5 w-5" />
+            <span>Calendar</span>
           </Link>
-        </div>
-        <MainMenu initialItems={initialItems} />
-      </div>
-    </aside>
+        </li>
+        <li>
+          <Link
+            href="/settings"
+            className="flex items-center space-x-2 p-2 hover:bg-gray-200 rounded"
+          >
+            <Settings className="h-5 w-5" />
+            <span>Settings</span>
+          </Link>
+        </li>
+      </ul>
+    </nav>
   );
 }

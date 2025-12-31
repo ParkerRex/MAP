@@ -1,6 +1,5 @@
 "use client";
 
-import { useCurrentLocale } from "@/locales/client";
 import { formatAmount } from "@/utils/format";
 
 type Props = {
@@ -16,10 +15,10 @@ export function FormatAmount({
   maximumFractionDigits,
   minimumFractionDigits,
 }: Props) {
-  const locale = useCurrentLocale();
+  // Removed const locale = useCurrentLocale();
 
   return formatAmount({
-    locale,
+    // Removed locale,
     amount: amount,
     currency: currency,
     maximumFractionDigits,
