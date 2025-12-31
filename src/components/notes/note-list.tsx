@@ -20,7 +20,12 @@ import { format, formatDistanceToNow, parseISO } from "date-fns";
 import { AnimatePresence, motion } from "framer-motion";
 import { Plus, Trash } from "lucide-react";
 import { Leaf, Search } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
+
+interface Folder {
+  id: string;
+  name: string;
+}
 
 interface NoteListProps {
   notes: Note[];
@@ -30,19 +35,19 @@ interface NoteListProps {
   setSelectedFolderId: (id: string | null) => void;
   selectedNote: Note | null;
   setSelectedNote: (note: Note | null) => void;
-  folders: any[];
+  folders: Folder[];
 }
 
 export default function NoteList({
   notes = [],
   view,
   selectedFolderId,
+  setSelectedFolderId: _setSelectedFolderId,
   selectedNote,
   setSelectedNote,
   folders,
 }: NoteListProps) {
   const [searchQuery, setSearchQuery] = useState("");
-  const titleInputRef = useRef<HTMLInputElement>(null);
 
   const createNote = useCreateNote();
   const updateNote = useUpdateNote();
@@ -166,7 +171,7 @@ export default function NoteList({
           {filteredNotes.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
               <Leaf className="h-8 w-8 mb-2" />
-              <p>You've got no notes</p>
+              <p>You&apos;ve got no notes</p>
             </div>
           ) : (
             <AnimatePresence initial={false}>

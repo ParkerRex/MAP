@@ -6,7 +6,7 @@ import {
   integrations,
   syncLogs,
   calendarEventAttendees,
-  calendarColorDefinitions,
+  calendarSyncTokens,
   type NewCalendarEvent,
   type NewCalendar,
 } from "./schema";
@@ -167,7 +167,7 @@ export const calendarDb = {
   async updateIntegration(
     userId: string,
     provider: "GOOGLE" | "WHOOP",
-    data: { accessToken?: string; refreshToken?: string; expiresAt?: string },
+    data: { accessToken?: string; refreshToken?: string; expiresAt?: Date },
   ) {
     const result = await db
       .update(integrations)
@@ -187,7 +187,7 @@ export const calendarDb = {
     provider: "GOOGLE" | "WHOOP";
     accessToken: string;
     refreshToken?: string;
-    expiresAt?: string;
+    expiresAt?: Date;
   }) {
     const existing = await this.getIntegration(data.userId, data.provider);
     if (existing) {
@@ -234,9 +234,26 @@ export const calendarDb = {
     return result[0];
   },
 
-  // Colors
-  async getColors() {
-    return db.select().from(calendarColorDefinitions);
+  // Sync Tokens
+  async getSyncToken(calendarId: string) {
+    const result = await db
+      .select()
+      .from(calendarSyncTokens)
+      .where(eq(calendarSyncTokens.calendarId, calendarId))
+      .limit(1);
+    return result[0]?.syncToken ?? null;
+  },
+
+  async upsertSyncToken(calendarId: string, syncToken: string) {
+    const result = await db
+      .insert(calendarSyncTokens)
+      .values({ calendarId, syncToken })
+      .onConflictDoUpdate({
+        target: calendarSyncTokens.calendarId,
+        set: { syncToken },
+      })
+      .returning();
+    return result[0];
   },
 
   // Attendees

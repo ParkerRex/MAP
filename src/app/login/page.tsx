@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 };
 
 export default async function Page() {
-  const { device } = userAgent({ headers: headers() });
+  const { device: _device } = userAgent({ headers: headers() });
 
   const signInOption = <GoogleSignIn />;
 
@@ -46,7 +46,7 @@ export default async function Page() {
 
             {/* Terms and Privacy Policy */}
             <p className="text-xs text-[#878787]">
-              By clicking continue, you acknowledge that you have read and agree to map's{" "}
+              By clicking continue, you acknowledge that you have read and agree to map&apos;s{" "}
               <a href="https://mapthemap.com/terms" className="underline">
                 Terms of Service
               </a>{" "}

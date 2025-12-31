@@ -41,7 +41,7 @@ export function InboxSettingsModal({
           <DialogHeader className="mb-8">
             <DialogTitle>Settings</DialogTitle>
             <DialogDescription>
-              Make changes to your inbox here. Click save when you're done.
+              Make changes to your inbox here. Click save when you&apos;re done.
             </DialogDescription>
           </DialogHeader>
 

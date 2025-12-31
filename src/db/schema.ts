@@ -281,20 +281,10 @@ export const calendarEventAttendees = pgTable(
   }),
 );
 
-// Calendar Event Reminders
-export const calendarEventReminders = pgTable("calendar_event_reminders", {
-  eventId: text("event_id").notNull(),
-  calendarId: text("calendar_id").notNull(),
-  method: text("method").notNull(),
-  minutes: integer("minutes").notNull(),
-});
-
-// Calendar Color Definitions
-export const calendarColorDefinitions = pgTable("calendar_color_definitions", {
-  id: text("id").primaryKey(),
-  kind: text("kind").notNull(),
-  background: text("background"),
-  foreground: text("foreground"),
+// Calendar Sync Tokens
+export const calendarSyncTokens = pgTable("calendar_sync_tokens", {
+  calendarId: text("calendar_id").primaryKey(),
+  syncToken: text("sync_token").notNull(),
 });
 
 // Sync Logs
@@ -316,12 +306,18 @@ export const preferences = pgTable("preferences", {
   dismissedWelcomeChecklist: boolean("dismissed_welcome_checklist"),
   dismissedReferralCard: boolean("dismissed_referral_card"),
   shownWelcomeDialog: boolean("shown_welcome_dialog"),
+  autoAddConferencingPromptViewed: boolean(
+    "auto_add_conferencing_prompt_viewed",
+  ),
+  autoChangeTimeZonesPromptEnabled: boolean(
+    "auto_change_time_zones_prompt_enabled",
+  ),
 });
 
 // Contacts
 export const contacts = pgTable("contacts", {
   id: uuid("id").primaryKey().defaultRandom(),
-  accountId: text("account_id").notNull(),
+  accountId: uuid("account_id").notNull(),
   resourceName: text("resource_name").notNull(),
   displayName: text("display_name"),
   email: text("email"),
@@ -356,3 +352,6 @@ export type Header = typeof headers.$inferSelect;
 export type NewHeader = typeof headers.$inferInsert;
 export type Preference = typeof preferences.$inferSelect;
 export type Contact = typeof contacts.$inferSelect;
+export type CalendarSyncToken = typeof calendarSyncTokens.$inferSelect;
+export type CalendarAccount = typeof calendarAccounts.$inferSelect;
+export type CalendarEventAttendee = typeof calendarEventAttendees.$inferSelect;

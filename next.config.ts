@@ -1,7 +1,9 @@
-/** @type {import("next").NextConfig} */
-const config = {
+import type { NextConfig } from "next";
+
+const nextConfig: NextConfig = {
   poweredByHeader: false,
   reactStrictMode: true,
+
   images: {
     remotePatterns: [
       {
@@ -10,13 +12,17 @@ const config = {
       },
     ],
   },
+
   transpilePackages: ["@map/ui", "@map/jobs", "@map/tailwind"],
+
   eslint: {
     ignoreDuringBuilds: true,
   },
+
   typescript: {
     ignoreBuildErrors: true,
   },
+
   experimental: {
     instrumentationHook: process.env.NODE_ENV === "production",
     outputFileTracingExcludes: {
@@ -38,3 +44,5 @@ const config = {
     ];
   },
 };
+
+export default nextConfig;

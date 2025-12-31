@@ -22,8 +22,7 @@ export function InboxSearch({ value, onChange, onClear, onArrowDown }: Props) {
         placeholder="Search inbox"
         onKeyDown={(evt) => {
           if (evt.key === "ArrowDown") {
-            // @ts-ignore
-            evt.target?.blur();
+            (evt.target as HTMLInputElement)?.blur();
             evt.preventDefault();
             onArrowDown?.();
           }

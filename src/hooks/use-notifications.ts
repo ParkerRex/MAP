@@ -47,8 +47,8 @@ export function useNotifications() {
 
       headlessService.markNotificationsAsRead({
         messageId: [messageId],
-        listener: (result) => {},
-        onError: (error) => {},
+        listener: (_result) => {},
+        onError: (_error) => {},
       });
     }
   };
@@ -100,7 +100,7 @@ export function useNotifications() {
         },
       });
     }
-  }, [headlessServiceRef.current]);
+  }, [fetchNotifications]);
 
   useEffect(() => {
     if (subscriberId && !headlessServiceRef.current) {

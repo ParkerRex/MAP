@@ -58,7 +58,7 @@ export class AuthManager {
         provider,
         accessToken: tokenData.access_token,
         refreshToken: tokenData.refresh_token,
-        expiresAt: expiresAt.toISOString(),
+        expiresAt,
       });
 
       console.log("Token stored successfully:", {
@@ -143,11 +143,13 @@ export class AuthManager {
     }
   }
 
-  private isTokenExpired(token: TokenData): boolean {
+  private isTokenExpired(token: { expiresAt: Date | null }): boolean {
     if (!token.expiresAt) return false;
     const now = new Date();
-    const expiresAt = new Date(token.expiresAt);
-    return expiresAt <= now || expiresAt.getTime() - now.getTime() < 300000; // 5 minutes buffer
+    return (
+      token.expiresAt <= now ||
+      token.expiresAt.getTime() - now.getTime() < 300000
+    ); // 5 minutes buffer
   }
 
   async hasIntegration(provider: Provider, userId: string): Promise<boolean> {
@@ -164,7 +166,7 @@ export class AuthManager {
     return {
       accessToken: data.accessToken,
       refreshToken: data.refreshToken || "",
-      expiresAt: data.expiresAt || "",
+      expiresAt: data.expiresAt,
     };
   }
 
@@ -223,7 +225,7 @@ export class AuthManager {
 type TokenData = {
   accessToken: string;
   refreshToken: string;
-  expiresAt: string;
+  expiresAt: Date | null;
 };
 
 type TokenResponseData = {

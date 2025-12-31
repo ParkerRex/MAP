@@ -45,7 +45,7 @@ const TaskListContainer: FC<TaskListContainerProps> = ({
       <div className="container mx-auto">
         {filteredTasks.length === 0 ? (
           <div className="text-center text-muted-foreground">
-            We can't find your task!
+            We can&apos;t find your task!
           </div>
         ) : (
           <Reorder.Group
