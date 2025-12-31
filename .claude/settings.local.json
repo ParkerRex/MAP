@@ -4,7 +4,9 @@
       "Bash(bun install)",
       "WebFetch(domain:developers.google.com)",
       "WebFetch(domain:developer.whoop.com)",
-      "Bash(bun run typecheck:*)"
+      "Bash(bun run typecheck:*)",
+      "WebSearch",
+      "Bash(ls:*)"
     ]
   }
 }

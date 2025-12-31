@@ -1,6 +1,6 @@
 import { tasksDb } from "@/db/tasks";
-import { withAuth } from "@/lib/api/with-auth";
 import { validationError } from "@/lib/api/errors";
+import { withAuth } from "@/lib/api/with-auth";
 import { createTaskSchema } from "@/lib/validations/tasks";
 
 export const GET = withAuth(async (user) => {
@@ -14,7 +14,7 @@ export const POST = withAuth(async (user, request) => {
 
   if (!parsed.success) {
     throw validationError("Invalid input", {
-      errors: parsed.error.flatten(),
+      errors: parsed.error.flatten().fieldErrors,
     });
   }
 

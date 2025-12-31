@@ -4,12 +4,12 @@ import { useQuery } from "@tanstack/react-query";
 import type { calendar_v3 } from "googleapis";
 import {
   api,
-  queryKeys,
-  useSimpleMutation,
   type CalendarsResponse,
   type ColorsResponse,
   type EventsResponse,
+  queryKeys,
   type SyncResponse,
+  useSimpleMutation,
 } from "@/lib/api";
 
 // Types
@@ -34,11 +34,7 @@ export function useCalendars() {
   });
 }
 
-export function useEvents(
-  calendarId: string,
-  timeMin: string,
-  timeMax: string,
-) {
+export function useEvents(calendarId: string, timeMin: string, timeMax: string) {
   return useQuery<EventsResponse>({
     queryKey: queryKeys.events.byCalendar(calendarId, timeMin, timeMax),
     queryFn: () => api.calendar.events.list(calendarId, timeMin, timeMax),
@@ -46,18 +42,12 @@ export function useEvents(
   });
 }
 
-export function useMultiCalendarEvents(
-  calendarIds: string[],
-  timeMin: string,
-  timeMax: string,
-) {
+export function useMultiCalendarEvents(calendarIds: string[], timeMin: string, timeMax: string) {
   return useQuery<CalendarEvent[]>({
     queryKey: queryKeys.events.multi(calendarIds, timeMin, timeMax),
     queryFn: async () => {
       const results = await Promise.all(
-        calendarIds.map((calendarId) =>
-          api.calendar.events.list(calendarId, timeMin, timeMax),
-        ),
+        calendarIds.map((calendarId) => api.calendar.events.list(calendarId, timeMin, timeMax)),
       );
       return results.flatMap((r) => r.events);
     },
@@ -75,12 +65,8 @@ export function useColors() {
 
 // Mutations
 export function useCreateEvent() {
-  return useSimpleMutation<
-    { event: CalendarEvent },
-    { calendarId: string; event: CalendarEvent }
-  >({
-    mutationFn: ({ calendarId, event }) =>
-      api.calendar.events.create(calendarId, event),
+  return useSimpleMutation<{ event: CalendarEvent }, { calendarId: string; event: CalendarEvent }>({
+    mutationFn: ({ calendarId, event }) => api.calendar.events.create(calendarId, event),
     invalidateKeys: [queryKeys.events.all],
   });
 }
@@ -97,12 +83,8 @@ export function useUpdateEvent() {
 }
 
 export function useDeleteEvent() {
-  return useSimpleMutation<
-    { success: boolean },
-    { calendarId: string; eventId: string }
-  >({
-    mutationFn: ({ calendarId, eventId }) =>
-      api.calendar.events.delete(eventId, calendarId),
+  return useSimpleMutation<{ success: boolean }, { calendarId: string; eventId: string }>({
+    mutationFn: ({ calendarId, eventId }) => api.calendar.events.delete(eventId, calendarId),
     invalidateKeys: [queryKeys.events.all],
   });
 }

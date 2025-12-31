@@ -1,10 +1,7 @@
 import { calendarDb } from "@/db/calendar";
 import { validationError } from "@/lib/api/errors";
 import { withAuth } from "@/lib/api/with-auth";
-import {
-  getGoogleCalendarClient,
-  mapGoogleEventToDb,
-} from "@/lib/google-calendar";
+import { getGoogleCalendarClient, mapGoogleEventToDb } from "@/lib/google-calendar";
 import { updateCalendarEventSchema } from "@/lib/validations/calendar";
 
 export const GET = withAuth(async (user, request, { params }) => {
@@ -26,11 +23,7 @@ export const PUT = withAuth(async (user, request, { params }) => {
   const { eventId } = await params;
   const { searchParams } = new URL(request.url);
   const calendarId = searchParams.get("calendarId") || "primary";
-  const sendUpdates = searchParams.get("sendUpdates") as
-    | "all"
-    | "externalOnly"
-    | "none"
-    | null;
+  const sendUpdates = searchParams.get("sendUpdates") as "all" | "externalOnly" | "none" | null;
   const body = await request.json();
 
   // Validate input
@@ -55,11 +48,7 @@ export const PUT = withAuth(async (user, request, { params }) => {
   const event = response.data;
 
   if (event.id) {
-    await calendarDb.updateEvent(
-      eventId,
-      calendarId,
-      mapGoogleEventToDb(event, calendarId),
-    );
+    await calendarDb.updateEvent(eventId, calendarId, mapGoogleEventToDb(event, calendarId));
   }
 
   return { event };
@@ -69,11 +58,7 @@ export const DELETE = withAuth(async (user, request, { params }) => {
   const { eventId } = await params;
   const { searchParams } = new URL(request.url);
   const calendarId = searchParams.get("calendarId") || "primary";
-  const sendUpdates = searchParams.get("sendUpdates") as
-    | "all"
-    | "externalOnly"
-    | "none"
-    | null;
+  const sendUpdates = searchParams.get("sendUpdates") as "all" | "externalOnly" | "none" | null;
 
   const calendar = await getGoogleCalendarClient();
 

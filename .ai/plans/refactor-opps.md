@@ -99,29 +99,42 @@ This eliminates redundant pre-delete ownership queries while maintaining correct
 
 ---
 
-## Lower Priority - Cleanup (Pending)
+## Lower Priority - Cleanup (Completed)
 
-### 9. Type Definition Consolidation
-Types are scattered across `src/db/schema.ts`, `src/lib/api/client.ts`, and `src/types/*.ts`.
+### 9. ✅ Type Definition Consolidation
+**Status:** Complete
 
-**Fix:** Establish clear hierarchy with single source of truth.
-
----
-
-### 10. Remove Unused Props
-`src/components/notes/note-display.tsx:10-16` has unused props.
+Created `src/types/tasks.ts` with Task, Tag, and TaskWithTags types. Established clear hierarchy:
+- `src/db/schema.ts` - DB entity types (source of truth)
+- `src/types/*.ts` - Domain types that extend/re-export DB types
+- `src/lib/api/client.ts` - imports from types, re-exports for consumers
 
 ---
 
-### 11. Extract Retry Logic
-`src/app/api/calendar/sync/route.ts:58-81` has custom retry logic.
+### 10. ✅ Remove Unused Props
+**Status:** Complete
 
-**Fix:** Extract to `src/lib/api/retry.ts` for reuse.
+Removed unused `selectedFolderId` and `setSelectedNote` props from `NoteDisplay` component and its caller in `folder-bar.tsx`.
 
 ---
 
-### 12. Standardize Error Detail Formatting
-Different approaches: `parsed.error.flatten()` vs `parsed.error.flatten().fieldErrors`.
+### 11. ✅ Extract Retry Logic
+**Status:** Complete
+
+Created `src/lib/api/retry.ts` with:
+- `sleep(ms)` - delay helper
+- `isRateLimitError(error)` - checks for HTTP 429
+- `getRetryDelay(error, attempt)` - exponential backoff with Retry-After header support
+- `withRetry(fn, context)` - retry wrapper with rate limit handling
+
+Updated calendar sync route to use the extracted module.
+
+---
+
+### 12. ✅ Standardize Error Detail Formatting
+**Status:** Complete
+
+Standardized all validation error responses to use `parsed.error.flatten().fieldErrors` instead of `parsed.error.flatten()`.
 
 ---
 
@@ -137,7 +150,7 @@ Different approaches: `parsed.error.flatten()` vs `parsed.error.flatten().fieldE
 | DRY DB mapping | ✅ Done | Low | Low |
 | SQL aggregation | ✅ Done | Medium | Medium |
 | Ownership checks | ✅ Done | Very Low | Low |
-| Type consolidation | Pending | High | Medium |
-| Remove unused props | Pending | Very Low | Low |
-| Extract retry logic | Pending | Low | Low |
-| Error formatting | Pending | Low | Low |
+| Type consolidation | ✅ Done | High | Medium |
+| Remove unused props | ✅ Done | Very Low | Low |
+| Extract retry logic | ✅ Done | Low | Low |
+| Error formatting | ✅ Done | Low | Low |

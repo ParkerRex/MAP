@@ -1,10 +1,7 @@
 import { calendarDb } from "@/db/calendar";
 import { validationError } from "@/lib/api/errors";
 import { withAuth } from "@/lib/api/with-auth";
-import {
-  getGoogleCalendarClient,
-  mapGoogleEventToDb,
-} from "@/lib/google-calendar";
+import { getGoogleCalendarClient, mapGoogleEventToDb } from "@/lib/google-calendar";
 import { calendarEventSchema } from "@/lib/validations/calendar";
 
 const MAX_CALENDAR_RESULTS = 2500;
@@ -53,15 +50,9 @@ export const GET = withAuth(async (user, request) => {
 export const POST = withAuth(async (user, request) => {
   const { searchParams } = new URL(request.url);
   const calendarId = searchParams.get("calendarId") || "primary";
-  const sendUpdates = searchParams.get("sendUpdates") as
-    | "all"
-    | "externalOnly"
-    | "none"
-    | null;
-  const conferenceDataVersion =
-    searchParams.get("conferenceDataVersion") === "1" ? 1 : undefined;
-  const supportsAttachments =
-    searchParams.get("supportsAttachments") === "true";
+  const sendUpdates = searchParams.get("sendUpdates") as "all" | "externalOnly" | "none" | null;
+  const conferenceDataVersion = searchParams.get("conferenceDataVersion") === "1" ? 1 : undefined;
+  const supportsAttachments = searchParams.get("supportsAttachments") === "true";
   const body = await request.json();
 
   // Validate input

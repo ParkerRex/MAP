@@ -1,8 +1,4 @@
-import {
-  useMutation,
-  useQueryClient,
-  type QueryKey,
-} from "@tanstack/react-query";
+import { type QueryKey, useMutation, useQueryClient } from "@tanstack/react-query";
 
 interface SimpleMutationOptions<TData, TVariables> {
   mutationFn: (variables: TVariables) => Promise<TData>;

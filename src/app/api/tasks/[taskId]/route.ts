@@ -21,7 +21,7 @@ export const PUT = withAuth(async (user, request, { params }) => {
 
   if (!parsed.success) {
     throw validationError("Invalid input", {
-      errors: parsed.error.flatten(),
+      errors: parsed.error.flatten().fieldErrors,
     });
   }
 
@@ -36,11 +36,7 @@ export const PUT = withAuth(async (user, request, { params }) => {
 
   // Handle due date update
   if (dueAt !== undefined) {
-    const task = await tasksDb.updateTaskDueDate(
-      taskId,
-      user.id,
-      dueAt ? new Date(dueAt) : null,
-    );
+    const task = await tasksDb.updateTaskDueDate(taskId, user.id, dueAt ? new Date(dueAt) : null);
     if (!task) throw notFound("Task");
     return { task };
   }

@@ -63,10 +63,7 @@ export const goalsDb = {
   },
 
   async deleteUserGoals(userId: string) {
-    const result = await db
-      .delete(goals)
-      .where(eq(goals.userId, userId))
-      .returning();
+    const result = await db.delete(goals).where(eq(goals.userId, userId)).returning();
     return result;
   },
 };

@@ -5,11 +5,9 @@ import { google } from "googleapis";
 import { type NextRequest, NextResponse } from "next/server";
 import { calendarDb } from "@/db/calendar";
 import { handleApiError, unauthorized, validationError } from "@/lib/api/errors";
+import { withRetry } from "@/lib/api/retry";
 import { getUser } from "@/lib/auth";
 import { mapGoogleEventToDb } from "@/lib/google-calendar";
-
-const MAX_RETRIES = 3;
-const INITIAL_RETRY_DELAY = 1000;
 
 // Validate webhook secret at module load time
 const WEBHOOK_SECRET = process.env.WEBHOOK_SECRET;
@@ -23,61 +21,10 @@ function isValidWebhookRequest(authHeader: string | null): boolean {
   return authHeader === `Bearer ${WEBHOOK_SECRET}`;
 }
 
-// Helper to check if error is a rate limit error (429)
-function isRateLimitError(error: unknown): boolean {
-  const gaxiosError = error as GaxiosError;
-  return gaxiosError?.response?.status === 429;
-}
-
 // Helper to check if syncToken is invalid (410 Gone)
 function isSyncTokenInvalid(error: unknown): boolean {
   const gaxiosError = error as GaxiosError;
   return gaxiosError?.response?.status === 410;
-}
-
-// Helper to get retry delay from Retry-After header or use exponential backoff
-function getRetryDelay(error: unknown, attempt: number): number {
-  const gaxiosError = error as GaxiosError;
-  const retryAfter = gaxiosError?.response?.headers?.["retry-after"];
-  if (retryAfter) {
-    // Retry-After can be seconds or a date
-    const seconds = Number.parseInt(retryAfter, 10);
-    if (!Number.isNaN(seconds)) {
-      return seconds * 1000;
-    }
-  }
-  // Exponential backoff: 1s, 2s, 4s, 8s...
-  return INITIAL_RETRY_DELAY * 2 ** (attempt - 1);
-}
-
-// Sleep helper
-function sleep(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-// Retry wrapper for API calls with rate limit handling
-async function withRetry<T>(fn: () => Promise<T>, context: string): Promise<T> {
-  let attempt = 0;
-  while (attempt < MAX_RETRIES) {
-    attempt++;
-    try {
-      return await fn();
-    } catch (error) {
-      if (isRateLimitError(error)) {
-        const delay = getRetryDelay(error, attempt);
-        console.log(
-          `Rate limited on ${context}, retrying in ${delay}ms (attempt ${attempt}/${MAX_RETRIES})`,
-        );
-        await sleep(delay);
-        continue;
-      }
-      if (attempt >= MAX_RETRIES) {
-        throw error;
-      }
-      await sleep(INITIAL_RETRY_DELAY * attempt);
-    }
-  }
-  throw new Error(`Max retries exceeded for ${context}`);
 }
 
 // Fetch events with sync token handling

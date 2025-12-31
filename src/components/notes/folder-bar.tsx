@@ -221,11 +221,7 @@ export default function FolderBar({ folders, notes }: FolderBarProps) {
         />
       </div>
       <div className="grow">
-        <NoteDisplay
-          note={selectedNote}
-          selectedFolderId={selectedFolderId}
-          setSelectedNote={(note) => setSelectedNote(note as Note | null)}
-        />
+        <NoteDisplay note={selectedNote} />
       </div>
     </div>
   );

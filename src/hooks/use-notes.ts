@@ -3,11 +3,11 @@
 import { useQuery } from "@tanstack/react-query";
 import {
   api,
-  queryKeys,
-  useSimpleMutation,
   type FoldersResponse,
   type NoteResponse,
   type NotesResponse,
+  queryKeys,
+  useSimpleMutation,
 } from "@/lib/api";
 
 // Notes Queries

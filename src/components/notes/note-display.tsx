@@ -6,15 +6,9 @@ import type { Note } from "@/types/notes";
 
 interface NoteDisplayProps {
   note: Note | null;
-  selectedFolderId: string | null;
-  setSelectedNote: (note: Note | null) => void;
 }
 
-export default function NoteDisplay({
-  note,
-  selectedFolderId: _selectedFolderId,
-  setSelectedNote: _setSelectedNote,
-}: NoteDisplayProps) {
+export default function NoteDisplay({ note }: NoteDisplayProps) {
   const titleInputRef = useRef<HTMLInputElement>(null);
 
   return (

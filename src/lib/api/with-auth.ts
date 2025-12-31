@@ -1,4 +1,4 @@
-import { NextResponse, type NextRequest } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import { getUser, type User } from "@/lib/auth";
 import { handleApiError, unauthorized } from "./errors";
 
@@ -32,11 +32,7 @@ type RouteContext = { params: Promise<Record<string, string>> };
  * });
  */
 export function withAuth<T>(
-  handler: (
-    user: User,
-    request: NextRequest,
-    context: RouteContext,
-  ) => Promise<T>,
+  handler: (user: User, request: NextRequest, context: RouteContext) => Promise<T>,
 ) {
   return async (request: NextRequest, context: RouteContext) => {
     try {
