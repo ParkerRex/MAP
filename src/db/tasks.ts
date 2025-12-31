@@ -1,6 +1,6 @@
 import { db } from "./index";
 import { tasks, tags, tagTasks, type NewTask, type NewTag } from "./schema";
-import { eq, sql, inArray } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 
 export const tasksDb = {
   // Tasks
@@ -34,14 +34,18 @@ export const tasksDb = {
           .innerJoin(tags, eq(tagTasks.tagId, tags.id))
           .where(eq(tagTasks.taskId, task.id));
         return { ...task, tags: taskTags };
-      })
+      }),
     );
 
     return tasksWithTags;
   },
 
   async getTaskById(taskId: string) {
-    const result = await db.select().from(tasks).where(eq(tasks.id, taskId)).limit(1);
+    const result = await db
+      .select()
+      .from(tasks)
+      .where(eq(tasks.id, taskId))
+      .limit(1);
     return result[0] ?? null;
   },
 
@@ -62,7 +66,10 @@ export const tasksDb = {
   async deleteTask(taskId: string) {
     // Delete tag associations first
     await db.delete(tagTasks).where(eq(tagTasks.taskId, taskId));
-    const result = await db.delete(tasks).where(eq(tasks.id, taskId)).returning();
+    const result = await db
+      .delete(tasks)
+      .where(eq(tasks.id, taskId))
+      .returning();
     return result[0];
   },
 
@@ -93,7 +100,11 @@ export const tasksDb = {
   },
 
   async getTagById(tagId: string) {
-    const result = await db.select().from(tags).where(eq(tags.id, tagId)).limit(1);
+    const result = await db
+      .select()
+      .from(tags)
+      .where(eq(tags.id, tagId))
+      .limit(1);
     return result[0] ?? null;
   },
 
@@ -125,9 +136,9 @@ export const tasksDb = {
 
     // Insert new associations
     if (tagIds.length > 0) {
-      await db.insert(tagTasks).values(
-        tagIds.map((tagId) => ({ taskId, tagId }))
-      );
+      await db
+        .insert(tagTasks)
+        .values(tagIds.map((tagId) => ({ taskId, tagId })));
     }
 
     return this.getTaskById(taskId);

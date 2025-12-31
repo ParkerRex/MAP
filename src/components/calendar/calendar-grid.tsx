@@ -22,7 +22,7 @@ interface CalendarGridProps {
 
 const CalendarGrid: FC<CalendarGridProps> = ({
   className,
-  calendars,
+  calendars: _calendars,
   events,
 }) => {
   const { currentWeekStartDate, visibleCalendars, userTimeZone } =

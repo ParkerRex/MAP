@@ -1,6 +1,6 @@
 'use client';
 
-import * as RadixToast from '@radix-ui/react-toast';
+import type * as _RadixToast from '@radix-ui/react-toast';
 
 type ToastProps = {
   message: string;

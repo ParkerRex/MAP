@@ -1,3 +1,5 @@
+import { Header } from "@/components/header";
+import { Sidebar } from "@/components/sidebar";
 import { cn } from "@/components/ui/cn";
 import { GeistMono } from "geist/font/mono";
 import { GeistSans } from "geist/font/sans";
@@ -17,8 +19,12 @@ export default function RootLayout({
           GeistMono.variable,
         )}
       >
-        <div className="relative flex min-h-screen flex-col">
-          <div className="flex-1">{children}</div>
+        <div className="relative">
+          <Sidebar />
+          <div className="mx-4 md:ml-[95px] md:mr-10 pb-8">
+            <Header />
+            {children}
+          </div>
         </div>
       </body>
     </html>

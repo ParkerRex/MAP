@@ -11,12 +11,12 @@ import { useEffect, useState } from "react";
 
 export function TrackerSelectProject({
   setParams,
-  teamId,
+  teamId: _teamId,
 }: {
   setParams: (params: { projectId: string | null }) => void;
   teamId: string;
 }) {
-  const { toast } = useToast();
+  const { toast: _toast } = useToast();
   const [value, setValue] = useState<Option | undefined>(undefined);
   const [data, setData] = useState<Option[]>([]);
   const [isLoading, setLoading] = useState(false);

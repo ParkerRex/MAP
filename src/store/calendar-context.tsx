@@ -18,7 +18,7 @@ export const CalendarContext = createContext<CalendarContextType | undefined>(un
 
 export const CalendarProvider: React.FC<{ children: React.ReactNode; userId: string }> = ({
   children,
-  userId,
+  userId: _userId,
 }) => {
   const [currentWeekStartDate, setCurrentWeekStartDate] = useState<Date>(() => new Date());
   const [selectedEvent, setSelectedEvent] = useState<ExtendedEvent | null>(null);

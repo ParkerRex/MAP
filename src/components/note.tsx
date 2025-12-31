@@ -1,11 +1,15 @@
-import type { UpdateTransactionValues } from "@/actions/schema";
 import { Textarea } from "@/components/ui/textarea";
 import { useState } from "react";
+
+type UpdateValues = {
+  id: string;
+  note?: string | null;
+};
 
 type Props = {
   id: string;
   defaultValue: string;
-  updateTransaction: (values: UpdateTransactionValues) => void;
+  updateTransaction: (values: UpdateValues) => void;
 };
 
 export function Note({ id, defaultValue, updateTransaction }: Props) {

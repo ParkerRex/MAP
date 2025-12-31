@@ -40,7 +40,7 @@ export default function ContextPanel({ className }: ContextPanelProps) {
     return { hours, minutes };
   };
 
-  const getCalendarColor = (calendarId: string | null | undefined) => {
+  const _getCalendarColor = (calendarId: string | null | undefined) => {
     const calendar = calendars.find((cal) => cal.id === calendarId);
     return calendar?.backgroundColor || "#DDFFE3";
   };
@@ -62,7 +62,7 @@ export default function ContextPanel({ className }: ContextPanelProps) {
     }
 
     const { hours, minutes } = getTimeUntilNextEvent(nextEvent);
-    const { summary, description } = nextEvent;
+    const { summary, description: _description } = nextEvent;
     const startDate = new Date(
       nextEvent.start?.dateTime || nextEvent.start?.date || "",
     );

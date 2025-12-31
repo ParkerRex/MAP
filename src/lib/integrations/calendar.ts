@@ -1,6 +1,5 @@
-import { type calendar_v3, google } from 'googleapis';
-import { GaxiosError } from 'gaxios';
-import type { CalendarEvent, Calendar } from '@/types';
+import { type calendar_v3, google } from "googleapis";
+import type { CalendarEvent, Calendar } from "@/types";
 
 export class CalendarClient {
   private calendar: calendar_v3.Calendar;
@@ -10,7 +9,7 @@ export class CalendarClient {
   constructor(accessToken: string, timeZone: string, userId: string) {
     const auth = new google.auth.OAuth2();
     auth.setCredentials({ access_token: accessToken });
-    this.calendar = google.calendar({ version: 'v3', auth });
+    this.calendar = google.calendar({ version: "v3", auth });
     this.timeZone = timeZone;
     this.userId = userId;
   }
@@ -44,7 +43,7 @@ export class CalendarClient {
         calendarId,
         singleEvents: true,
         showDeleted: true,
-        orderBy: 'updated',
+        orderBy: "updated",
       };
 
       if (syncToken) {
@@ -107,14 +106,14 @@ export class CalendarClient {
   ): Promise<{ resourceId: string; expiration: string } | null> {
     try {
       if (!/^[A-Za-z0-9\-_\+/=]+$/.test(channelId)) {
-        throw new Error('Invalid channel ID format');
+        throw new Error("Invalid channel ID format");
       }
 
       const response = await this.calendar.events.watch({
         calendarId,
         requestBody: {
           id: channelId,
-          type: 'web_hook',
+          type: "web_hook",
           address: webhookUrl,
         },
       });
@@ -127,7 +126,7 @@ export class CalendarClient {
       if (
         error instanceof Error &&
         error.message ===
-          'Push notifications are not supported by this resource.'
+          "Push notifications are not supported by this resource."
       ) {
         console.log(
           `Push notifications not supported for calendar: ${calendarId}`,

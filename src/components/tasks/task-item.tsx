@@ -23,7 +23,7 @@ import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { differenceInDays, format, parseISO } from "date-fns";
 import { AnimatePresence, Reorder, motion } from "framer-motion";
-import { Calendar, Flag, Tag, X } from "lucide-react";
+import { Calendar, Flag, Tag } from "lucide-react";
 import { useEffect, useState } from "react";
 import type React from "react";
 import type { FC } from "react";
@@ -48,7 +48,7 @@ const TaskItem: FC<TaskItemProps> = ({
   task,
   highlightedTaskId,
   selectedTask,
-  searchQuery,
+  searchQuery: _searchQuery,
   handleTaskClick,
   handleTaskDoubleClick,
   toggleTaskCompletion,
@@ -99,7 +99,7 @@ const TaskItem: FC<TaskItemProps> = ({
     }
   };
 
-  const removeTag = async (tagToRemove: string) => {
+  const _removeTag = async (tagToRemove: string) => {
     const updatedTags = tags.filter((tag) => tag !== tagToRemove);
     setTags(updatedTags);
     if (task.id) {

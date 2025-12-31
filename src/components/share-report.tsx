@@ -19,7 +19,6 @@ import {
   FormDescription,
   FormField,
   FormItem,
-  FormLabel,
   FormMessage,
 } from "@/components/ui/form";
 import { Icons } from "@/components/ui/icons";
@@ -28,7 +27,6 @@ import { useToast } from "@/components/ui/use-toast";
 import { format } from "date-fns";
 import { Loader2 } from "lucide-react";
 import { CalendarIcon } from "lucide-react";
-import { useAction } from "next-safe-action/hooks";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
@@ -75,7 +73,7 @@ export function ShareReport({ defaultValue, type, currency }: Props) {
 
   // Stub out createReport action
   const createReport = {
-    execute: (params: any) => {
+    execute: (params: Record<string, unknown>) => {
       console.log("Creating report with params:", params);
       setTimeout(() => {
         setOpen(false);

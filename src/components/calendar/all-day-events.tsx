@@ -41,7 +41,7 @@ export default function CalendarAllDayEvents({
   const visibleEvents = isExpanded ? allDayEvents : allDayEvents.slice(0, 2);
   const hiddenEventsCount = allDayEvents.length - visibleEvents.length;
 
-  const getEventSpan = (event: calendar_v3.Schema$Event) => {
+  const getEventSpan = (_event: calendar_v3.Schema$Event) => {
     // Implement the logic to calculate event span
     return 1; // Default to 1 day span
   };

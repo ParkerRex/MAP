@@ -17,8 +17,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Plus, Search, Tag } from "lucide-react";
+import { Search, Tag } from "lucide-react";
 import React from "react";
 import type { FC } from "react";
 
@@ -49,7 +48,7 @@ const TaskListHeader: FC<TaskListHeaderProps> = ({
   newTagTitle,
   setNewTagTitle,
   handleCreateTag,
-  handleTaskCreated,
+  handleTaskCreated: _handleTaskCreated,
   handleDeleteTag,
   handleEditTag,
   handleSaveTag,

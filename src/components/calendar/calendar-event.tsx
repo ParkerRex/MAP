@@ -20,7 +20,7 @@ const HOUR_HEIGHT = 64;
 
 const CalendarEventComponent: React.FC<CalendarEventProps> = ({
   events,
-  dayIndex,
+  dayIndex: _dayIndex,
 }) => {
   const { setSelectedEvent, calendars } = useCalendar();
 
@@ -72,7 +72,7 @@ const CalendarEventComponent: React.FC<CalendarEventProps> = ({
     <div className="absolute inset-0">
       {sortedEvents.map((event) => {
         const endDate = new Date(event.end?.dateTime || event.end?.date || "");
-        const isPastEvent = endDate < new Date();
+        const _isPastEvent = endDate < new Date();
         const calendarColor = getCalendarColor(event.organizer?.email);
         const style = calculateEventStyle(event);
 

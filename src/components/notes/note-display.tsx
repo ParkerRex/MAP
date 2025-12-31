@@ -12,8 +12,8 @@ interface NoteDisplayProps {
 
 export default function NoteDisplay({
   note,
-  selectedFolderId,
-  setSelectedNote,
+  selectedFolderId: _selectedFolderId,
+  setSelectedNote: _setSelectedNote,
 }: NoteDisplayProps) {
   const titleInputRef = useRef<HTMLInputElement>(null);
 

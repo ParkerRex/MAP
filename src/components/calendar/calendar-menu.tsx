@@ -19,7 +19,7 @@ export default function CalendarMenu({
     calendars,
     currentWeekStartDate,
     setCurrentWeekStartDate,
-    userTimeZone,
+    userTimeZone: _userTimeZone,
   } = useCalendar();
   const { handleSetWeek } = useWeekNavigation();
 

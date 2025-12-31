@@ -5,7 +5,7 @@ import { NextResponse } from "next/server";
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
-  const state = searchParams.get("state");
+  const _state = searchParams.get("state");
 
   if (!code) {
     return NextResponse.redirect(`${origin}/auth/auth-code-error`);

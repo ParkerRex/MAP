@@ -14,11 +14,11 @@ interface CalendarToolbarProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 const CalendarToolbar: React.FC<CalendarToolbarProps> = ({
-  calendars = [],
+  calendars: _calendars = [],
   className,
   ...props
 }) => {
-  const { currentWeekStartDate, userTimeZone } = useCalendar();
+  const { currentWeekStartDate, userTimeZone: _userTimeZone } = useCalendar();
   const { handleNextWeek, handleCurrentWeek, handlePreviousWeek } =
     useWeekNavigation();
 

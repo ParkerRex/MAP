@@ -1,4 +1,4 @@
-import { Calendar, Home, Settings } from "lucide-react";
+import { Calendar, Settings } from "lucide-react";
 import Link from "next/link";
 
 export function Sidebar() {

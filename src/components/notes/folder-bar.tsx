@@ -98,7 +98,7 @@ export default function FolderBar({ folders, notes }: FolderBarProps) {
     <div className="flex w-full">
       <div id="folders" className="flex flex-col gap-2 p-4 w-[190px]">
         <AnimatePresence initial={false}>
-          {links.map((link, index) => (
+          {links.map((link, _index) => (
             <motion.div
               key={link.id}
               initial={{ height: 0, opacity: 0 }}

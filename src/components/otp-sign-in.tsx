@@ -30,7 +30,7 @@ export function OTPSignIn({ className }: Props) {
     },
   });
 
-  async function onSubmit({ value }: z.infer<typeof formSchema>) {
+  async function onSubmit({ value: _value }: z.infer<typeof formSchema>) {
     setLoading(true);
     // Dev mode: just redirect to home
     router.push("/");

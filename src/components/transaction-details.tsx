@@ -1,4 +1,3 @@
-import type { UpdateTransactionValues } from "@/actions/schema";
 import {
   Accordion,
   AccordionContent,
@@ -15,19 +14,33 @@ import { useQueryState } from "nuqs";
 import { useEffect, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { AssignUser } from "./assign-user";
-
 import { FormatAmount } from "./format-amount";
 import { Note } from "./note";
-import { SelectCategory } from "./select-category";
 import { TransactionBankAccount } from "./transaction-bank-account";
+
+type UpdateTransactionValues = {
+  id: string;
+  category_slug?: string;
+  assigned_id?: string;
+  note?: string | null;
+};
+
+type Category = {
+  id: string;
+  name: string;
+  slug: string;
+  color: string;
+};
+
+// Stub component until SelectCategory is implemented
+function SelectCategory({ id, selected, onChange }: { id: string | null; selected: Category | null; onChange: (cat: Category) => void }) {
+  return <div className="text-sm text-muted-foreground">Category selector placeholder</div>;
+}
 
 type Props = {
   data: any;
   ids?: string[];
-  updateTransaction: (
-    values: UpdateTransactionValues,
-    optimisticData: any,
-  ) => void;
+  updateTransaction: (values: UpdateTransactionValues) => void;
 };
 
 export function TransactionDetails({
@@ -111,10 +124,7 @@ export function TransactionDetails({
     slug: string;
     color: string;
   }) => {
-    updateTransaction(
-      { id: data?.id, category_slug: category.slug },
-      { category },
-    );
+    updateTransaction({ id: data?.id, category_slug: category.slug });
 
     // TODO: Implement getSimilarTransactions
     // Stub: Simulating similar transactions
@@ -242,10 +252,7 @@ export function TransactionDetails({
             isLoading={isLoading}
             selectedId={data?.assigned?.id ?? undefined}
             onSelect={(user) => {
-              updateTransaction(
-                { assigned_id: user?.id, id: data?.id },
-                { assigned: user },
-              );
+              updateTransaction({ assigned_id: user?.id, id: data?.id });
             }}
           />
         </div>

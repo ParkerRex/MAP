@@ -1,7 +1,5 @@
 "use client";
 
-import { setupUserSchema } from "@/actions/schema";
-import { setupUserAction } from "@/actions/setup-user-action";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import {
@@ -16,37 +14,54 @@ import {
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
 import { Loader2 } from "lucide-react";
-import { useAction } from "next-safe-action/hooks";
+import { useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
-import type { z } from "zod";
+import { useRouter } from "next/navigation";
+import { z } from "zod";
+
+const setupUserSchema = z.object({
+  full_name: z.string().min(1, "Name is required"),
+});
+
+type SetupUserValues = z.infer<typeof setupUserSchema>;
 
 export function SetupForm() {
   const { toast } = useToast();
+  const router = useRouter();
 
-  const setupUser = useAction(setupUserAction, {
+  const setupUser = useMutation({
+    mutationFn: async (data: SetupUserValues) => {
+      const response = await fetch("/api/user/setup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) throw new Error("Failed to setup user");
+      return response.json();
+    },
+    onSuccess: () => {
+      router.push("/");
+    },
     onError: () => {
       toast({
         duration: 3500,
-        variant: "error",
-        title: "Something went wrong pleaase try again.",
+        variant: "destructive",
+        title: "Something went wrong please try again.",
       });
     },
   });
 
-  const form = useForm<z.infer<typeof setupUserSchema>>({
+  const form = useForm<SetupUserValues>({
     resolver: zodResolver(setupUserSchema),
     defaultValues: {
       full_name: "",
     },
   });
 
-  const isSubmitting =
-    setupUser.status !== "idle" && setupUser.status !== "hasErrored";
-
   return (
     <Form {...form}>
       <form
-        onSubmit={form.handleSubmit(setupUser.execute)}
+        onSubmit={form.handleSubmit((data) => setupUser.mutate(data))}
         className="space-y-8"
       >
         <FormField
@@ -65,8 +80,8 @@ export function SetupForm() {
             </FormItem>
           )}
         />
-        <Button type="submit" className="w-full" disabled={isSubmitting}>
-          {isSubmitting ? (
+        <Button type="submit" className="w-full" disabled={setupUser.isPending}>
+          {setupUser.isPending ? (
             <Loader2 className="h-4 w-4 animate-spin" />
           ) : (
             <span>Submit</span>

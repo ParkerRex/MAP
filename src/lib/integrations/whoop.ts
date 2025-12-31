@@ -1,4 +1,4 @@
-const WHOOP_API_HOSTNAME = process.env.WHOOP_API_HOSTNAME || '';
+const _WHOOP_API_HOSTNAME = process.env.WHOOP_API_HOSTNAME || "";
 
 export class WhoopClient {
   private accessToken: string;
