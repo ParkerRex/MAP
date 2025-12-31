@@ -1,12 +1,30 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { calendarDb } from "@/db/calendar";
+import {
+  handleApiError,
+  unauthorized,
+  validationError,
+} from "@/lib/api/errors";
 import { getUser } from "@/lib/auth";
-import { getGoogleCalendarClient, mapGoogleEventToDb } from "@/lib/google-calendar";
+import {
+  getGoogleCalendarClient,
+  mapGoogleEventToDb,
+} from "@/lib/google-calendar";
+import { updateCalendarEventSchema } from "@/lib/validations/calendar";
 
 type Params = Promise<{ eventId: string }>;
 
-export async function GET(request: NextRequest, { params }: { params: Params }) {
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Params },
+) {
   try {
+    const user = await getUser();
+
+    if (!user) {
+      throw unauthorized();
+    }
+
     const { eventId } = await params;
     const { searchParams } = new URL(request.url);
     const calendarId = searchParams.get("calendarId") || "primary";
@@ -20,22 +38,33 @@ export async function GET(request: NextRequest, { params }: { params: Params }) 
 
     return NextResponse.json({ event: response.data });
   } catch (error) {
-    console.error("Failed to fetch event:", error);
-    return NextResponse.json({ error: "Failed to fetch event" }, { status: 500 });
+    return handleApiError(error);
   }
 }
 
-export async function PUT(request: NextRequest, { params }: { params: Params }) {
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: Params },
+) {
   try {
+    const user = await getUser();
+
+    if (!user) {
+      throw unauthorized();
+    }
+
     const { eventId } = await params;
     const { searchParams } = new URL(request.url);
     const calendarId = searchParams.get("calendarId") || "primary";
     const body = await request.json();
 
-    const user = await getUser();
+    // Validate input
+    const parsed = updateCalendarEventSchema.safeParse(body);
 
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    if (!parsed.success) {
+      throw validationError("Invalid event data", {
+        errors: parsed.error.flatten().fieldErrors,
+      });
     }
 
     const calendar = await getGoogleCalendarClient();
@@ -43,34 +72,39 @@ export async function PUT(request: NextRequest, { params }: { params: Params }) 
     const response = await calendar.events.update({
       calendarId,
       eventId,
-      requestBody: body,
+      requestBody: parsed.data,
     });
 
     const event = response.data;
 
-    // Update in database
     if (event.id) {
-      await calendarDb.updateEvent(eventId, calendarId, mapGoogleEventToDb(event, calendarId));
+      await calendarDb.updateEvent(
+        eventId,
+        calendarId,
+        mapGoogleEventToDb(event, calendarId),
+      );
     }
 
     return NextResponse.json({ event });
   } catch (error) {
-    console.error("Failed to update event:", error);
-    return NextResponse.json({ error: "Failed to update event" }, { status: 500 });
+    return handleApiError(error);
   }
 }
 
-export async function DELETE(request: NextRequest, { params }: { params: Params }) {
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Params },
+) {
   try {
-    const { eventId } = await params;
-    const { searchParams } = new URL(request.url);
-    const calendarId = searchParams.get("calendarId") || "primary";
-
     const user = await getUser();
 
     if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      throw unauthorized();
     }
+
+    const { eventId } = await params;
+    const { searchParams } = new URL(request.url);
+    const calendarId = searchParams.get("calendarId") || "primary";
 
     const calendar = await getGoogleCalendarClient();
 
@@ -79,12 +113,10 @@ export async function DELETE(request: NextRequest, { params }: { params: Params 
       eventId,
     });
 
-    // Delete from database
     await calendarDb.deleteEvent(eventId, calendarId);
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Failed to delete event:", error);
-    return NextResponse.json({ error: "Failed to delete event" }, { status: 500 });
+    return handleApiError(error);
   }
 }

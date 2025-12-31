@@ -1,6 +1,11 @@
 import { addDays } from "date-fns";
 import { type NextRequest, NextResponse } from "next/server";
 import { goalsDb } from "@/db/goals";
+import {
+  handleApiError,
+  unauthorized,
+  validationError,
+} from "@/lib/api/errors";
 import { getUser } from "@/lib/auth";
 
 export async function GET() {
@@ -8,14 +13,13 @@ export async function GET() {
     const user = await getUser();
 
     if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      throw unauthorized();
     }
 
     const goals = await goalsDb.getGoals(user.id);
     return NextResponse.json({ goals });
   } catch (error) {
-    console.error("Failed to fetch goals:", error);
-    return NextResponse.json({ error: "Failed to fetch goals" }, { status: 500 });
+    return handleApiError(error);
   }
 }
 
@@ -24,14 +28,14 @@ export async function POST(request: NextRequest) {
     const user = await getUser();
 
     if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      throw unauthorized();
     }
 
     const body = await request.json();
     const { title, dueAt } = body;
 
     if (!title) {
-      return NextResponse.json({ error: "Title is required" }, { status: 400 });
+      throw validationError("Title is required");
     }
 
     const goal = await goalsDb.createGoal({
@@ -43,8 +47,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ goal });
   } catch (error) {
-    console.error("Failed to create goal:", error);
-    return NextResponse.json({ error: "Failed to create goal" }, { status: 500 });
+    return handleApiError(error);
   }
 }
 
@@ -53,13 +56,12 @@ export async function DELETE() {
     const user = await getUser();
 
     if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      throw unauthorized();
     }
 
     await goalsDb.deleteUserGoals(user.id);
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Failed to delete goals:", error);
-    return NextResponse.json({ error: "Failed to delete goals" }, { status: 500 });
+    return handleApiError(error);
   }
 }

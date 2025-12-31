@@ -1,6 +1,10 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { tasksDb } from "@/db/tasks";
-import { handleApiError, unauthorized, validationError } from "@/lib/api/errors";
+import {
+  handleApiError,
+  unauthorized,
+  validationError,
+} from "@/lib/api/errors";
 import { getUser } from "@/lib/auth";
 import { createTaskSchema } from "@/lib/validations/tasks";
 
@@ -11,7 +15,7 @@ export async function GET() {
       throw unauthorized();
     }
 
-    const tasks = await tasksDb.getTasks();
+    const tasks = await tasksDb.getTasks(user.id);
     return NextResponse.json({ tasks });
   } catch (error) {
     return handleApiError(error);

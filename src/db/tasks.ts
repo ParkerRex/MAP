@@ -1,8 +1,7 @@
-import { eq, isNull } from "drizzle-orm";
+import { and, eq, isNull } from "drizzle-orm";
 import { db } from "./index";
 import { type NewTag, type NewTask, tags, tagTasks, tasks } from "./schema";
 
-// Type for task with tags
 export interface TaskWithTags {
   id: string;
   title: string;
@@ -31,15 +30,9 @@ export interface TaskWithTags {
 }
 
 export const tasksDb = {
-  /**
-   * Get all tasks with their tags using a single query with LEFT JOIN
-   * This fixes the N+1 query problem where we were fetching tags separately for each task
-   */
-  async getTasks(): Promise<TaskWithTags[]> {
-    // Single query with LEFT JOINs to get tasks and their tags
+  async getTasks(userId: string): Promise<TaskWithTags[]> {
     const result = await db
       .select({
-        // Task fields
         id: tasks.id,
         title: tasks.title,
         body: tasks.body,
@@ -63,16 +56,14 @@ export const tasksDb = {
         result: tasks.result,
         actualDuration: tasks.actualDuration,
         estimatedDuration: tasks.estimatedDuration,
-        // Tag fields (may be null if task has no tags)
         tagId: tags.id,
         tagTitle: tags.title,
       })
       .from(tasks)
       .leftJoin(tagTasks, eq(tasks.id, tagTasks.taskId))
       .leftJoin(tags, eq(tagTasks.tagId, tags.id))
-      .where(isNull(tasks.deletedAt));
+      .where(and(eq(tasks.createdBy, userId), isNull(tasks.deletedAt)));
 
-    // Group results by task ID to combine tags
     const taskMap = new Map<string, TaskWithTags>();
 
     for (const row of result) {
@@ -105,7 +96,6 @@ export const tasksDb = {
         });
       }
 
-      // Add tag if present (LEFT JOIN may produce null tags)
       if (row.tagId && row.tagTitle) {
         taskMap.get(row.id)!.tags.push({
           id: row.tagId,
@@ -117,15 +107,19 @@ export const tasksDb = {
     return Array.from(taskMap.values());
   },
 
-  async getTaskById(taskId: string) {
-    const result = await db.select().from(tasks).where(eq(tasks.id, taskId)).limit(1);
+  async getTaskById(taskId: string, userId: string) {
+    const result = await db
+      .select()
+      .from(tasks)
+      .where(and(eq(tasks.id, taskId), eq(tasks.createdBy, userId)))
+      .limit(1);
     return result[0] ?? null;
   },
 
-  /**
-   * Get a single task with its tags
-   */
-  async getTaskWithTags(taskId: string): Promise<TaskWithTags | null> {
+  async getTaskWithTags(
+    taskId: string,
+    userId: string,
+  ): Promise<TaskWithTags | null> {
     const result = await db
       .select({
         id: tasks.id,
@@ -157,7 +151,7 @@ export const tasksDb = {
       .from(tasks)
       .leftJoin(tagTasks, eq(tasks.id, tagTasks.taskId))
       .leftJoin(tags, eq(tagTasks.tagId, tags.id))
-      .where(eq(tasks.id, taskId));
+      .where(and(eq(tasks.id, taskId), eq(tasks.createdBy, userId)));
 
     if (result.length === 0) return null;
 
@@ -202,50 +196,60 @@ export const tasksDb = {
     return result[0];
   },
 
-  async updateTask(taskId: string, data: Partial<NewTask>) {
+  async updateTask(taskId: string, userId: string, data: Partial<NewTask>) {
     const result = await db
       .update(tasks)
       .set({ ...data, updatedAt: new Date() })
-      .where(eq(tasks.id, taskId))
+      .where(and(eq(tasks.id, taskId), eq(tasks.createdBy, userId)))
       .returning();
-    return result[0];
+    return result[0] ?? null;
   },
 
-  async deleteTask(taskId: string) {
-    // Delete tag associations first
+  async deleteTask(taskId: string, userId: string) {
+    // Verify ownership first
+    const task = await this.getTaskById(taskId, userId);
+    if (!task) return null;
+
     await db.delete(tagTasks).where(eq(tagTasks.taskId, taskId));
-    const result = await db.delete(tasks).where(eq(tasks.id, taskId)).returning();
-    return result[0];
+    const result = await db
+      .delete(tasks)
+      .where(and(eq(tasks.id, taskId), eq(tasks.createdBy, userId)))
+      .returning();
+    return result[0] ?? null;
   },
 
-  async toggleTaskComplete(taskId: string, complete: boolean) {
+  async toggleTaskComplete(taskId: string, userId: string, complete: boolean) {
     const result = await db
       .update(tasks)
       .set({
         completedAt: complete ? new Date() : null,
         updatedAt: new Date(),
       })
-      .where(eq(tasks.id, taskId))
+      .where(and(eq(tasks.id, taskId), eq(tasks.createdBy, userId)))
       .returning();
-    return result[0];
+    return result[0] ?? null;
   },
 
-  async updateTaskDueDate(taskId: string, dueAt: Date | null) {
+  async updateTaskDueDate(taskId: string, userId: string, dueAt: Date | null) {
     const result = await db
       .update(tasks)
       .set({ dueAt, updatedAt: new Date() })
-      .where(eq(tasks.id, taskId))
+      .where(and(eq(tasks.id, taskId), eq(tasks.createdBy, userId)))
       .returning();
-    return result[0];
+    return result[0] ?? null;
   },
 
-  // Tags
-  async getTags() {
-    return db.select().from(tags);
+  // Tags - user-scoped
+  async getTags(userId: string) {
+    return db.select().from(tags).where(eq(tags.userId, userId));
   },
 
-  async getTagById(tagId: string) {
-    const result = await db.select().from(tags).where(eq(tags.id, tagId)).limit(1);
+  async getTagById(tagId: string, userId: string) {
+    const result = await db
+      .select()
+      .from(tags)
+      .where(and(eq(tags.id, tagId), eq(tags.userId, userId)))
+      .limit(1);
     return result[0] ?? null;
   },
 
@@ -254,29 +258,41 @@ export const tasksDb = {
     return result[0];
   },
 
-  async updateTag(tagId: string, title: string) {
-    const result = await db.update(tags).set({ title }).where(eq(tags.id, tagId)).returning();
-    return result[0];
+  async updateTag(tagId: string, userId: string, title: string) {
+    const result = await db
+      .update(tags)
+      .set({ title })
+      .where(and(eq(tags.id, tagId), eq(tags.userId, userId)))
+      .returning();
+    return result[0] ?? null;
   },
 
-  async deleteTag(tagId: string) {
-    // Delete tag associations first
+  async deleteTag(tagId: string, userId: string) {
+    // Verify ownership first
+    const tag = await this.getTagById(tagId, userId);
+    if (!tag) return null;
+
     await db.delete(tagTasks).where(eq(tagTasks.tagId, tagId));
-    const result = await db.delete(tags).where(eq(tags.id, tagId)).returning();
-    return result[0];
+    const result = await db
+      .delete(tags)
+      .where(and(eq(tags.id, tagId), eq(tags.userId, userId)))
+      .returning();
+    return result[0] ?? null;
   },
 
-  // Tag-Task associations
-  async updateTaskTags(taskId: string, tagIds: string[]) {
-    // Delete existing associations
+  async updateTaskTags(taskId: string, userId: string, tagIds: string[]) {
+    // Verify task ownership first
+    const task = await this.getTaskById(taskId, userId);
+    if (!task) return null;
+
     await db.delete(tagTasks).where(eq(tagTasks.taskId, taskId));
 
-    // Insert new associations
     if (tagIds.length > 0) {
-      await db.insert(tagTasks).values(tagIds.map((tagId) => ({ taskId, tagId })));
+      await db
+        .insert(tagTasks)
+        .values(tagIds.map((tagId) => ({ taskId, tagId })));
     }
 
-    // Return the task with updated tags
-    return this.getTaskWithTags(taskId);
+    return this.getTaskWithTags(taskId, userId);
   },
 };

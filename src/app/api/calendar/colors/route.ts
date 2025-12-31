@@ -1,23 +1,21 @@
-import { unstable_cache } from "next/cache";
 import { NextResponse } from "next/server";
 import { getGoogleCalendarClient } from "@/lib/google-calendar";
-
-const getColorsFromGoogle = unstable_cache(
-  async () => {
-    const calendar = await getGoogleCalendarClient();
-    const response = await calendar.colors.get();
-    return response.data;
-  },
-  ["calendar-colors"],
-  { revalidate: 600 }, // 10 minutes
-);
+import { handleApiError, unauthorized } from "@/lib/api/errors";
+import { getUser } from "@/lib/auth";
 
 export async function GET() {
   try {
-    const colors = await getColorsFromGoogle();
-    return NextResponse.json({ colors });
+    const user = await getUser();
+
+    if (!user) {
+      throw unauthorized();
+    }
+
+    const calendar = await getGoogleCalendarClient();
+    const response = await calendar.colors.get();
+
+    return NextResponse.json({ colors: response.data });
   } catch (error) {
-    console.error("Failed to fetch colors:", error);
-    return NextResponse.json({ error: "Failed to fetch colors" }, { status: 500 });
+    return handleApiError(error);
   }
 }

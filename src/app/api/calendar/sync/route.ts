@@ -2,11 +2,28 @@ import { addMonths, subMonths } from "date-fns";
 import { google } from "googleapis";
 import { type NextRequest, NextResponse } from "next/server";
 import { calendarDb } from "@/db/calendar";
+import {
+  handleApiError,
+  unauthorized,
+  validationError,
+} from "@/lib/api/errors";
 import { getUser } from "@/lib/auth";
 import { mapGoogleEventToDb } from "@/lib/google-calendar";
 
 const MAX_RETRIES = 3;
 const RETRY_DELAY = 5000;
+
+// Validate webhook secret at module load time
+const WEBHOOK_SECRET = process.env.WEBHOOK_SECRET;
+
+function isValidWebhookRequest(authHeader: string | null): boolean {
+  // Webhook secret must be set and non-empty
+  if (!WEBHOOK_SECRET || WEBHOOK_SECRET.length < 32) {
+    return false;
+  }
+  // Auth header must match exactly
+  return authHeader === `Bearer ${WEBHOOK_SECRET}`;
+}
 
 async function syncUserCalendars(userId: string) {
   const integration = await calendarDb.getIntegration(userId, "GOOGLE");
@@ -41,7 +58,9 @@ async function syncUserCalendars(userId: string) {
 
         await calendarDb.updateIntegration(userId, "GOOGLE", {
           accessToken: credentials.access_token ?? integration.accessToken,
-          expiresAt: credentials.expiry_date ? new Date(credentials.expiry_date) : undefined,
+          expiresAt: credentials.expiry_date
+            ? new Date(credentials.expiry_date)
+            : undefined,
         });
 
         oauth2Client.setCredentials(credentials);
@@ -60,7 +79,6 @@ async function syncUserCalendars(userId: string) {
   const calendar = google.calendar({ version: "v3", auth: oauth2Client });
 
   try {
-    // Get all calendars
     const calendarListResponse = await calendar.calendarList.list({
       maxResults: 250,
     });
@@ -71,7 +89,6 @@ async function syncUserCalendars(userId: string) {
     const timeMin = subMonths(new Date(), 6).toISOString();
     const timeMax = addMonths(new Date(), 6).toISOString();
 
-    // Sync events for each calendar
     for (const cal of calendars) {
       if (!cal.id) continue;
 
@@ -92,7 +109,6 @@ async function syncUserCalendars(userId: string) {
 
           const eventData = mapGoogleEventToDb(event, cal.id);
 
-          // Upsert event
           const existing = await calendarDb.getEventById(event.id, cal.id);
           if (existing) {
             await calendarDb.updateEvent(event.id, cal.id, eventData);
@@ -129,7 +145,11 @@ async function syncUserCalendars(userId: string) {
   }
 }
 
-async function retrySync(userId: string, maxRetries = MAX_RETRIES, delay = RETRY_DELAY) {
+async function retrySync(
+  userId: string,
+  maxRetries = MAX_RETRIES,
+  delay = RETRY_DELAY,
+) {
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     const result = await syncUserCalendars(userId);
 
@@ -148,32 +168,30 @@ async function retrySync(userId: string, maxRetries = MAX_RETRIES, delay = RETRY
 export async function POST(request: NextRequest) {
   try {
     const authHeader = request.headers.get("authorization");
-    const webhookSecret = process.env.WEBHOOK_SECRET;
 
-    // Check for webhook secret (for external triggers)
-    if (webhookSecret && authHeader === `Bearer ${webhookSecret}`) {
+    // Check for valid webhook request
+    if (isValidWebhookRequest(authHeader)) {
       const body = await request.json();
       const userId = body.record?.id || body.userId;
 
-      if (!userId) {
-        return NextResponse.json({ error: "User ID required" }, { status: 400 });
+      if (!userId || typeof userId !== "string") {
+        throw validationError("Valid user ID required");
       }
 
       const result = await retrySync(userId);
       return NextResponse.json(result);
     }
 
-    // Otherwise, use authenticated user
+    // Otherwise, require authenticated user
     const user = await getUser();
 
     if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      throw unauthorized();
     }
 
     const result = await retrySync(user.id);
     return NextResponse.json(result);
   } catch (error) {
-    console.error("Sync error:", error);
-    return NextResponse.json({ error: "Failed to sync calendars" }, { status: 500 });
+    return handleApiError(error);
   }
 }

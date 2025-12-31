@@ -1,17 +1,32 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { calendarDb } from "@/db/calendar";
+import {
+  handleApiError,
+  unauthorized,
+  validationError,
+} from "@/lib/api/errors";
 import { getUser } from "@/lib/auth";
-import { getGoogleCalendarClient, mapGoogleEventToDb } from "@/lib/google-calendar";
+import {
+  getGoogleCalendarClient,
+  mapGoogleEventToDb,
+} from "@/lib/google-calendar";
+import { calendarEventSchema } from "@/lib/validations/calendar";
 
 export async function GET(request: NextRequest) {
   try {
+    const user = await getUser();
+
+    if (!user) {
+      throw unauthorized();
+    }
+
     const { searchParams } = new URL(request.url);
     const calendarId = searchParams.get("calendarId") || "primary";
     const timeMin = searchParams.get("timeMin");
     const timeMax = searchParams.get("timeMax");
 
     if (!timeMin || !timeMax) {
-      return NextResponse.json({ error: "timeMin and timeMax are required" }, { status: 400 });
+      throw validationError("timeMin and timeMax are required");
     }
 
     const calendar = await getGoogleCalendarClient();
@@ -29,40 +44,46 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ events });
   } catch (error) {
-    console.error("Failed to fetch events:", error);
-    return NextResponse.json({ error: "Failed to fetch events" }, { status: 500 });
+    return handleApiError(error);
   }
 }
 
 export async function POST(request: NextRequest) {
   try {
+    const user = await getUser();
+
+    if (!user) {
+      throw unauthorized();
+    }
+
     const { searchParams } = new URL(request.url);
     const calendarId = searchParams.get("calendarId") || "primary";
     const body = await request.json();
 
-    const user = await getUser();
+    // Validate input
+    const parsed = calendarEventSchema.safeParse(body);
 
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    if (!parsed.success) {
+      throw validationError("Invalid event data", {
+        errors: parsed.error.flatten().fieldErrors,
+      });
     }
 
     const calendar = await getGoogleCalendarClient();
 
     const response = await calendar.events.insert({
       calendarId,
-      requestBody: body,
+      requestBody: parsed.data,
     });
 
     const event = response.data;
 
-    // Save to database
     if (event.id) {
       await calendarDb.createEvent(mapGoogleEventToDb(event, calendarId));
     }
 
     return NextResponse.json({ event });
   } catch (error) {
-    console.error("Failed to create event:", error);
-    return NextResponse.json({ error: "Failed to create event" }, { status: 500 });
+    return handleApiError(error);
   }
 }

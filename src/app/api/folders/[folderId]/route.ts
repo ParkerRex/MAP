@@ -1,46 +1,66 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { notesDb } from "@/db/notes";
+import {
+  handleApiError,
+  notFound,
+  unauthorized,
+  validationError,
+} from "@/lib/api/errors";
 import { getUser } from "@/lib/auth";
 
 type Params = Promise<{ folderId: string }>;
 
-export async function PUT(request: NextRequest, { params }: { params: Params }) {
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: Params },
+) {
   try {
     const { folderId } = await params;
     const user = await getUser();
 
     if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      throw unauthorized();
     }
 
     const body = await request.json();
     const { name } = body;
 
     if (!name) {
-      return NextResponse.json({ error: "Name is required" }, { status: 400 });
+      throw validationError("Name is required");
     }
 
-    const folder = await notesDb.updateFolder(folderId, name);
+    const folder = await notesDb.updateFolder(folderId, user.id, name);
+
+    if (!folder) {
+      throw notFound("Folder");
+    }
+
     return NextResponse.json({ folder });
   } catch (error) {
-    console.error("Failed to update folder:", error);
-    return NextResponse.json({ error: "Failed to update folder" }, { status: 500 });
+    return handleApiError(error);
   }
 }
 
-export async function DELETE(request: NextRequest, { params }: { params: Params }) {
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Params },
+) {
   try {
     const { folderId } = await params;
     const user = await getUser();
 
     if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      throw unauthorized();
     }
 
-    await notesDb.deleteFolder(folderId);
+    const deleted = await notesDb.deleteFolder(folderId, user.id);
+
+    if (!deleted) {
+      throw notFound("Folder");
+    }
+
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Failed to delete folder:", error);
-    return NextResponse.json({ error: "Failed to delete folder" }, { status: 500 });
+    return handleApiError(error);
   }
 }

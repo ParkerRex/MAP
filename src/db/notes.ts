@@ -1,4 +1,4 @@
-import { eq, sql } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import { db } from "./index";
 import { folders, type NewFolder, type NewNote, notes } from "./schema";
 
@@ -8,8 +8,12 @@ export const notesDb = {
     return db.select().from(notes).where(eq(notes.userId, userId));
   },
 
-  async getNoteById(noteId: string) {
-    const result = await db.select().from(notes).where(eq(notes.id, noteId)).limit(1);
+  async getNoteById(noteId: string, userId: string) {
+    const result = await db
+      .select()
+      .from(notes)
+      .where(and(eq(notes.id, noteId), eq(notes.userId, userId)))
+      .limit(1);
     return result[0] ?? null;
   },
 
@@ -18,28 +22,39 @@ export const notesDb = {
     return result[0];
   },
 
-  async updateNote(noteId: string, data: { title?: string; content?: string }) {
+  async updateNote(
+    noteId: string,
+    userId: string,
+    data: { title?: string; content?: string },
+  ) {
     const result = await db
       .update(notes)
       .set({ ...data, updatedAt: new Date() })
-      .where(eq(notes.id, noteId))
+      .where(and(eq(notes.id, noteId), eq(notes.userId, userId)))
       .returning();
-    return result[0];
+    return result[0] ?? null;
   },
 
-  async deleteNote(noteId: string) {
-    const result = await db.delete(notes).where(eq(notes.id, noteId)).returning();
-    return result[0];
+  async deleteNote(noteId: string, userId: string) {
+    const result = await db
+      .delete(notes)
+      .where(and(eq(notes.id, noteId), eq(notes.userId, userId)))
+      .returning();
+    return result[0] ?? null;
   },
 
-  async moveNoteToFolder(noteId: string, folderId: string) {
-    const result = await db.update(notes).set({ folderId }).where(eq(notes.id, noteId)).returning();
-    return result[0];
+  async moveNoteToFolder(noteId: string, userId: string, folderId: string) {
+    const result = await db
+      .update(notes)
+      .set({ folderId })
+      .where(and(eq(notes.id, noteId), eq(notes.userId, userId)))
+      .returning();
+    return result[0] ?? null;
   },
 
-  async duplicateNote(noteId: string) {
-    const original = await this.getNoteById(noteId);
-    if (!original) throw new Error("Note not found");
+  async duplicateNote(noteId: string, userId: string) {
+    const original = await this.getNoteById(noteId, userId);
+    if (!original) return null;
 
     return this.createNote({
       title: `${original.title} (Copy)`,
@@ -68,8 +83,12 @@ export const notesDb = {
     return result;
   },
 
-  async getFolderById(folderId: string) {
-    const result = await db.select().from(folders).where(eq(folders.id, folderId)).limit(1);
+  async getFolderById(folderId: string, userId: string) {
+    const result = await db
+      .select()
+      .from(folders)
+      .where(and(eq(folders.id, folderId), eq(folders.userId, userId)))
+      .limit(1);
     return result[0] ?? null;
   },
 
@@ -78,30 +97,38 @@ export const notesDb = {
     return result[0];
   },
 
-  async updateFolder(folderId: string, name: string) {
+  async updateFolder(folderId: string, userId: string, name: string) {
     const result = await db
       .update(folders)
       .set({ name, updatedAt: new Date() })
-      .where(eq(folders.id, folderId))
+      .where(and(eq(folders.id, folderId), eq(folders.userId, userId)))
       .returning();
-    return result[0];
+    return result[0] ?? null;
   },
 
-  async deleteFolder(folderId: string) {
+  async deleteFolder(folderId: string, userId: string) {
+    // Verify ownership first
+    const folder = await this.getFolderById(folderId, userId);
+    if (!folder) return null;
+
     // Delete all notes in folder first
     await db.delete(notes).where(eq(notes.folderId, folderId));
-    const result = await db.delete(folders).where(eq(folders.id, folderId)).returning();
-    return result[0];
+    const result = await db
+      .delete(folders)
+      .where(and(eq(folders.id, folderId), eq(folders.userId, userId)))
+      .returning();
+    return result[0] ?? null;
   },
 
   async ensureCoachNotesFolder(userId: string) {
-    // Check if exists
-    const existing = await db.select().from(folders).where(eq(folders.userId, userId)).limit(1);
+    const existing = await db
+      .select()
+      .from(folders)
+      .where(eq(folders.userId, userId));
 
     const coachFolder = existing.find((f) => f.name === "Coach Notes");
     if (coachFolder) return coachFolder;
 
-    // Create if not exists
     return this.createFolder({ name: "Coach Notes", userId });
   },
 };

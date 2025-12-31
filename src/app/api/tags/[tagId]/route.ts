@@ -1,46 +1,66 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { tasksDb } from "@/db/tasks";
+import {
+  handleApiError,
+  notFound,
+  unauthorized,
+  validationError,
+} from "@/lib/api/errors";
 import { getUser } from "@/lib/auth";
 
 type Params = Promise<{ tagId: string }>;
 
-export async function PUT(request: NextRequest, { params }: { params: Params }) {
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: Params },
+) {
   try {
     const { tagId } = await params;
     const user = await getUser();
 
     if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      throw unauthorized();
     }
 
     const body = await request.json();
     const { title } = body;
 
     if (!title) {
-      return NextResponse.json({ error: "Title is required" }, { status: 400 });
+      throw validationError("Title is required");
     }
 
-    const tag = await tasksDb.updateTag(tagId, title);
+    const tag = await tasksDb.updateTag(tagId, user.id, title);
+
+    if (!tag) {
+      throw notFound("Tag");
+    }
+
     return NextResponse.json({ tag });
   } catch (error) {
-    console.error("Failed to update tag:", error);
-    return NextResponse.json({ error: "Failed to update tag" }, { status: 500 });
+    return handleApiError(error);
   }
 }
 
-export async function DELETE(request: NextRequest, { params }: { params: Params }) {
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Params },
+) {
   try {
     const { tagId } = await params;
     const user = await getUser();
 
     if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      throw unauthorized();
     }
 
-    await tasksDb.deleteTag(tagId);
+    const deleted = await tasksDb.deleteTag(tagId, user.id);
+
+    if (!deleted) {
+      throw notFound("Tag");
+    }
+
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Failed to delete tag:", error);
-    return NextResponse.json({ error: "Failed to delete tag" }, { status: 500 });
+    return handleApiError(error);
   }
 }

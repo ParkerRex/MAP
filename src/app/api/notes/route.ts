@@ -1,5 +1,10 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { notesDb } from "@/db/notes";
+import {
+  handleApiError,
+  unauthorized,
+  validationError,
+} from "@/lib/api/errors";
 import { getUser } from "@/lib/auth";
 
 export async function GET() {
@@ -7,14 +12,13 @@ export async function GET() {
     const user = await getUser();
 
     if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      throw unauthorized();
     }
 
     const notes = await notesDb.getNotes(user.id);
     return NextResponse.json({ notes });
   } catch (error) {
-    console.error("Failed to fetch notes:", error);
-    return NextResponse.json({ error: "Failed to fetch notes" }, { status: 500 });
+    return handleApiError(error);
   }
 }
 
@@ -23,18 +27,18 @@ export async function POST(request: NextRequest) {
     const user = await getUser();
 
     if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      throw unauthorized();
     }
 
     const body = await request.json();
     const { title, content, folderId } = body;
 
     if (!title) {
-      return NextResponse.json({ error: "Title is required" }, { status: 400 });
+      throw validationError("Title is required");
     }
 
     if (!folderId) {
-      return NextResponse.json({ error: "Folder ID is required" }, { status: 400 });
+      throw validationError("Folder ID is required");
     }
 
     const note = await notesDb.createNote({
@@ -46,7 +50,6 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ note });
   } catch (error) {
-    console.error("Failed to create note:", error);
-    return NextResponse.json({ error: "Failed to create note" }, { status: 500 });
+    return handleApiError(error);
   }
 }

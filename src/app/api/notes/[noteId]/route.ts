@@ -1,68 +1,88 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { notesDb } from "@/db/notes";
+import { handleApiError, notFound, unauthorized } from "@/lib/api/errors";
 import { getUser } from "@/lib/auth";
 
 type Params = Promise<{ noteId: string }>;
 
-export async function GET(request: NextRequest, { params }: { params: Params }) {
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Params },
+) {
   try {
     const { noteId } = await params;
     const user = await getUser();
 
     if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      throw unauthorized();
     }
 
-    const note = await notesDb.getNoteById(noteId);
+    const note = await notesDb.getNoteById(noteId, user.id);
 
     if (!note) {
-      return NextResponse.json({ error: "Note not found" }, { status: 404 });
+      throw notFound("Note");
     }
 
     return NextResponse.json({ note });
   } catch (error) {
-    console.error("Failed to fetch note:", error);
-    return NextResponse.json({ error: "Failed to fetch note" }, { status: 500 });
+    return handleApiError(error);
   }
 }
 
-export async function PUT(request: NextRequest, { params }: { params: Params }) {
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: Params },
+) {
   try {
     const { noteId } = await params;
     const user = await getUser();
 
     if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      throw unauthorized();
     }
 
     const body = await request.json();
     const { title, content, folderId } = body;
 
     if (folderId) {
-      await notesDb.moveNoteToFolder(noteId, folderId);
+      const moved = await notesDb.moveNoteToFolder(noteId, user.id, folderId);
+      if (!moved) {
+        throw notFound("Note");
+      }
     }
 
-    const note = await notesDb.updateNote(noteId, { title, content });
+    const note = await notesDb.updateNote(noteId, user.id, { title, content });
+
+    if (!note) {
+      throw notFound("Note");
+    }
+
     return NextResponse.json({ note });
   } catch (error) {
-    console.error("Failed to update note:", error);
-    return NextResponse.json({ error: "Failed to update note" }, { status: 500 });
+    return handleApiError(error);
   }
 }
 
-export async function DELETE(request: NextRequest, { params }: { params: Params }) {
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Params },
+) {
   try {
     const { noteId } = await params;
     const user = await getUser();
 
     if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      throw unauthorized();
     }
 
-    await notesDb.deleteNote(noteId);
+    const deleted = await notesDb.deleteNote(noteId, user.id);
+
+    if (!deleted) {
+      throw notFound("Note");
+    }
+
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Failed to delete note:", error);
-    return NextResponse.json({ error: "Failed to delete note" }, { status: 500 });
+    return handleApiError(error);
   }
 }
