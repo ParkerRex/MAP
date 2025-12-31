@@ -4,6 +4,7 @@
 node_modules
 .pnp
 .pnp.js
+.yarn/install-state.gz
 
 # testing
 coverage
@@ -12,10 +13,6 @@ coverage
 .next/
 out/
 next-env.d.ts
-
-# expo
-.expo/
-dist/
 
 # production
 build
@@ -31,7 +28,6 @@ yarn-error.log*
 .pnpm-debug.log*
 
 # local env files
-.env
 .env*.local
 
 # vercel
@@ -39,20 +35,3 @@ yarn-error.log*
 
 # typescript
 *.tsbuildinfo
-
-# turbo
-.turbo
-
-# react-email
-.react-email
-packages/email/public
-!packages/email/public/.gitkeep
-!packages/email/.react-email/.gitkeep
-
-# Storybook
-storybook-static
-tailwind.css
-
-# Supabase
-.branches
-.temp

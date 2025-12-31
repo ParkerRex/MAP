@@ -189,31 +189,33 @@ export const integrations = pgTable("integrations", {
   provider: integrationProviderEnum("provider").notNull(),
   accessToken: text("access_token").notNull(),
   refreshToken: text("refresh_token"),
-  expiresAt: text("expires_at"),
+  expiresAt: timestamp("expires_at", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
-  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }),
 });
 
 // Calendar Accounts
 export const calendarAccounts = pgTable("calendar_accounts", {
-  id: text("id").primaryKey(),
+  id: uuid("id").primaryKey().defaultRandom(),
   email: text("email").notNull(),
   provider: text("provider").notNull(),
-  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
 });
 
 // Calendars
 export const calendars = pgTable("calendars", {
   id: text("id").primaryKey(),
-  accountId: text("account_id").notNull(),
+  accountId: uuid("account_id").notNull(),
   provider: text("provider").notNull(),
   summary: text("summary"),
   description: text("description"),
   backgroundColor: text("background_color"),
   foregroundColor: text("foreground_color"),
   colorId: text("color_id"),
-  selected: boolean("selected"),
-  isPrimary: boolean("is_primary"),
+  selected: boolean("selected").default(true),
+  isPrimary: boolean("is_primary").default(false),
   accessRole: text("access_role"),
   timeZone: text("time_zone"),
   etag: text("etag"),
@@ -261,17 +263,23 @@ export const calendarEvents = pgTable(
 );
 
 // Calendar Event Attendees
-export const calendarEventAttendees = pgTable("calendar_event_attendees", {
-  eventId: text("event_id").notNull(),
-  calendarId: text("calendar_id").notNull(),
-  email: text("email").notNull(),
-  displayName: text("display_name"),
-  responseStatus: text("response_status"),
-  isOrganizer: boolean("is_organizer"),
-  isSelf: boolean("is_self"),
-  optional: boolean("optional"),
-  contactId: text("contact_id"),
-});
+export const calendarEventAttendees = pgTable(
+  "calendar_event_attendees",
+  {
+    calendarId: text("calendar_id").notNull(),
+    eventId: text("event_id").notNull(),
+    email: text("email").notNull(),
+    displayName: text("display_name"),
+    responseStatus: text("response_status"),
+    isOrganizer: boolean("is_organizer"),
+    isSelf: boolean("is_self"),
+    optional: boolean("optional"),
+    contactId: uuid("contact_id"),
+  },
+  (table) => ({
+    pk: primaryKey({ columns: [table.calendarId, table.eventId, table.email] }),
+  }),
+);
 
 // Calendar Event Reminders
 export const calendarEventReminders = pgTable("calendar_event_reminders", {
