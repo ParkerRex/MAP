@@ -1,8 +1,37 @@
 import { type QueryKey, useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "@/components/ui/use-toast";
+import { ApiError } from "./errors";
 
-interface SimpleMutationOptions<TData, TVariables> {
-  mutationFn: (variables: TVariables) => Promise<TData>;
+function getErrorMessage(error: unknown): string {
+  if (error instanceof ApiError) {
+    // Include details if available
+    if (error.details && typeof error.details === "object") {
+      const fieldErrors = Object.entries(error.details)
+        .map(([field, msg]) => `${field}: ${msg}`)
+        .join(", ");
+      if (fieldErrors) {
+        return `${error.message} (${fieldErrors})`;
+      }
+    }
+    return error.message;
+  }
+  if (error instanceof Error) {
+    return error.message;
+  }
+  return "An unexpected error occurred";
+}
+
+interface SimpleMutationOptions<TData, TVariables = void> {
+  mutationFn: TVariables extends void
+    ? () => Promise<TData>
+    : (variables: TVariables) => Promise<TData>;
   invalidateKeys: QueryKey[];
+  /** Custom success message for toast */
+  successMessage?: string;
+  /** Custom error message prefix */
+  errorMessage?: string;
+  /** Disable default error toast */
+  disableErrorToast?: boolean;
 }
 
 interface OptimisticMutationOptions<TData, TVariables, TContext> {
@@ -13,6 +42,10 @@ interface OptimisticMutationOptions<TData, TVariables, TContext> {
     onMutate: (variables: TVariables) => TContext;
     onError: (context: TContext | undefined) => void;
   };
+  /** Custom error message prefix */
+  errorMessage?: string;
+  /** Disable default error toast */
+  disableErrorToast?: boolean;
 }
 
 /**
@@ -26,16 +59,29 @@ interface OptimisticMutationOptions<TData, TVariables, TContext> {
  *   });
  * }
  */
-export function useSimpleMutation<TData, TVariables>(
+export function useSimpleMutation<TData, TVariables = void>(
   options: SimpleMutationOptions<TData, TVariables>,
 ) {
   const queryClient = useQueryClient();
 
-  return useMutation({
-    mutationFn: options.mutationFn,
+  return useMutation<TData, Error, TVariables>({
+    mutationFn: options.mutationFn as (variables: TVariables) => Promise<TData>,
     onSuccess: () => {
       for (const key of options.invalidateKeys) {
         queryClient.invalidateQueries({ queryKey: key });
+      }
+      if (options.successMessage) {
+        toast({ description: options.successMessage });
+      }
+    },
+    onError: (error) => {
+      if (!options.disableErrorToast) {
+        const message = getErrorMessage(error);
+        toast({
+          variant: "destructive",
+          title: options.errorMessage ?? "Error",
+          description: message,
+        });
       }
     },
   });
@@ -78,8 +124,16 @@ export function useOptimisticMutation<TData, TVariables, TContext>(
       });
       return options.optimistic.onMutate(variables);
     },
-    onError: (_, __, context) => {
+    onError: (error, _, context) => {
       options.optimistic.onError(context);
+      if (!options.disableErrorToast) {
+        const message = getErrorMessage(error);
+        toast({
+          variant: "destructive",
+          title: options.errorMessage ?? "Error",
+          description: message,
+        });
+      }
     },
     onSettled: () => {
       for (const key of options.invalidateKeys) {

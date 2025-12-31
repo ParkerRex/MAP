@@ -1,8 +1,8 @@
 "use client";
 
-import { Search, Tag } from "lucide-react";
+import { Loader2, Search, Tag, X } from "lucide-react";
 import type { FC } from "react";
-import React from "react";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   ContextMenu,
@@ -24,9 +24,11 @@ import type { Tag as TagType } from "@/types";
 interface TaskListHeaderProps {
   searchQuery: string;
   setSearchQuery: (query: string) => void;
+  isSearching?: boolean;
   tags: TagType[];
   selectedTags: string[];
   handleTagSelect: (tag: string) => void;
+  onClearTagFilters?: () => void;
   newTagTitle: string;
   setNewTagTitle: (title: string) => void;
   handleCreateTag: () => void;
@@ -42,9 +44,11 @@ interface TaskListHeaderProps {
 const TaskListHeader: FC<TaskListHeaderProps> = ({
   searchQuery,
   setSearchQuery,
+  isSearching = false,
   tags,
   selectedTags,
   handleTagSelect,
+  onClearTagFilters,
   newTagTitle,
   setNewTagTitle,
   handleCreateTag,
@@ -62,7 +66,11 @@ const TaskListHeader: FC<TaskListHeaderProps> = ({
         <h1 className="text-2xl font-bold">Tasks</h1>
         <div className="flex items-center gap-4">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+            {isSearching ? (
+              <Loader2 className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground animate-spin" />
+            ) : (
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+            )}
             <Input
               className="pl-10 pr-4 py-2 rounded-md bg-muted focus:outline-hidden focus:ring-2 focus:ring-primary-500 focus:ring-opacity-50 transition-colors"
               placeholder="Search tasks..."
@@ -73,13 +81,36 @@ const TaskListHeader: FC<TaskListHeaderProps> = ({
           </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button className="flex items-center gap-2" variant="outline">
+              <Button
+                className="flex items-center gap-2"
+                variant={selectedTags.length > 0 ? "secondary" : "outline"}
+              >
                 <Tag className="w-5 h-5" />
                 <span>Tags</span>
+                {selectedTags.length > 0 && (
+                  <Badge variant="default" className="ml-1 h-5 px-1.5 text-xs">
+                    {selectedTags.length}
+                  </Badge>
+                )}
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
-              <DropdownMenuLabel>Filter by tags</DropdownMenuLabel>
+              <div className="flex items-center justify-between px-2">
+                <DropdownMenuLabel className="px-0">Filter by tags</DropdownMenuLabel>
+                {selectedTags.length > 0 && onClearTagFilters && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-6 px-2 text-xs"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      onClearTagFilters();
+                    }}
+                  >
+                    Clear all
+                  </Button>
+                )}
+              </div>
               <DropdownMenuSeparator />
               {tags.map((tag) => (
                 <ContextMenu key={tag.id}>
@@ -128,6 +159,22 @@ const TaskListHeader: FC<TaskListHeaderProps> = ({
               </div>
             </DropdownMenuContent>
           </DropdownMenu>
+          {/* Show selected tags as removable chips */}
+          {selectedTags.length > 0 && (
+            <div className="flex flex-wrap gap-1">
+              {selectedTags.map((tag) => (
+                <Badge
+                  key={tag}
+                  variant="secondary"
+                  className="flex items-center gap-1 pl-2 pr-1 cursor-pointer hover:bg-secondary/80"
+                  onClick={() => handleTagSelect(tag)}
+                >
+                  {tag}
+                  <X className="h-3 w-3" />
+                </Badge>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </header>
