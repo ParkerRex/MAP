@@ -113,6 +113,83 @@ export const calendarColorDefinitions = pgTable("calendar_color_definitions", {
   foreground: text("foreground"),
 });
 
+// Folders
+export const folders = pgTable("folder", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  name: text("name").notNull(),
+  userId: uuid("user_id").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at"),
+});
+
+// Notes
+export const notes = pgTable("notes", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  title: text("title"),
+  content: text("content"),
+  folderId: uuid("folder_id").notNull(),
+  userId: uuid("user_id").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at"),
+});
+
+// Goals
+export const goalCategoryEnum = pgEnum("goal_categories", ["health", "career", "personal", "financial", "social", "other"]);
+export const goalStatusEnum = pgEnum("goal_status", ["not_started", "in_progress", "completed", "abandoned"]);
+
+export const goals = pgTable("goals", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  title: text("title"),
+  completed: boolean("completed").default(false),
+  dueAt: timestamp("due_at").notNull(),
+  userId: uuid("user_id").notNull(),
+  goalCategory: goalCategoryEnum("goal_category").default("other"),
+  goalStatus: goalStatusEnum("goal_status").default("not_started"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at"),
+});
+
+// Tasks
+export const taskStatusEnum = pgEnum("task_status", ["todo", "in_progress", "done", "blocked"]);
+
+export const tasks = pgTable("tasks", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  title: text("title").notNull(),
+  body: text("body"),
+  dueAt: timestamp("due_at"),
+  completedAt: timestamp("completed_at"),
+  completedBy: uuid("completed_by"),
+  createdAt: timestamp("created_at").defaultNow(),
+  createdBy: uuid("created_by").notNull(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+  updatedBy: uuid("updated_by").notNull(),
+  deletedAt: timestamp("deleted_at"),
+  deletedBy: uuid("deleted_by"),
+  taskStatus: taskStatusEnum("task_status").default("todo"),
+  taskPosition: integer("task_position"),
+  headerId: uuid("header_id"),
+  projectId: uuid("project_id"),
+  assignedTo: uuid("assigned_to"),
+  blockedBy: uuid("blocked_by"),
+  contactId: uuid("contact_id"),
+  scheduledFor: timestamp("scheduled_for"),
+  result: text("result"),
+});
+
+// Tags
+export const tags = pgTable("tags", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  title: text("title").notNull(),
+  userId: uuid("user_id"),
+});
+
+// Tag Tasks (junction table)
+export const tagTasks = pgTable("tag_tasks", {
+  tagId: uuid("tag_id").notNull(),
+  taskId: uuid("task_id").notNull(),
+  parentId: uuid("parent_id"),
+});
+
 // Types
 export type CalendarEvent = typeof calendarEvents.$inferSelect;
 export type NewCalendarEvent = typeof calendarEvents.$inferInsert;
@@ -120,3 +197,13 @@ export type Calendar = typeof calendars.$inferSelect;
 export type NewCalendar = typeof calendars.$inferInsert;
 export type Integration = typeof integrations.$inferSelect;
 export type SyncLog = typeof syncLogs.$inferSelect;
+export type Folder = typeof folders.$inferSelect;
+export type NewFolder = typeof folders.$inferInsert;
+export type Note = typeof notes.$inferSelect;
+export type NewNote = typeof notes.$inferInsert;
+export type Goal = typeof goals.$inferSelect;
+export type NewGoal = typeof goals.$inferInsert;
+export type Task = typeof tasks.$inferSelect;
+export type NewTask = typeof tasks.$inferInsert;
+export type Tag = typeof tags.$inferSelect;
+export type NewTag = typeof tags.$inferInsert;
