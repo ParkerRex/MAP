@@ -1,103 +1,72 @@
-import type { Client } from "../types";
+import { db, schema } from "../db";
+import { eq, asc, desc, isNull, and } from "drizzle-orm";
 
-// Existing queries
-export async function getUserQuery(supabase: Client, userId: string) {
-  return supabase.from("users").select("*").eq("id", userId).throwOnError();
+const { users, goals, tasks, projects, headers, folders, notes, tags, tagTasks, calendars, calendarEvents, integrations } = schema;
+
+export async function getUserQuery(userId: string) {
+	const result = await db.select().from(users).where(eq(users.id, userId)).limit(1);
+	return result[0] || null;
 }
 
-export async function getGoalsQuery(supabase: Client, userId: string) {
-  return supabase
-    .from("goals")
-    .select("*")
-    .eq("user_id", userId)
-    .order("due_at", { ascending: true })
-    .throwOnError();
+export async function getGoalsQuery(userId: string) {
+	return db.select().from(goals).where(eq(goals.userId, userId)).orderBy(asc(goals.dueAt));
 }
 
-export async function getTasksQuery(supabase: Client, userId: string) {
-  return supabase
-    .from("tasks")
-    .select(`
-      *,
-      project:project_id(*),
-      header:header_id(*),
-      assigned:assigned_to(*)
-    `)
-    .eq("created_by", userId)
-    .order("due_at", { ascending: true })
-    .throwOnError();
+export async function getTasksQuery(userId: string) {
+	return db
+		.select()
+		.from(tasks)
+		.where(and(eq(tasks.createdBy, userId), isNull(tasks.deletedAt)))
+		.orderBy(asc(tasks.dueAt));
 }
 
-export async function getProjectsQuery(supabase: Client, userId: string) {
-  return supabase
-    .from("projects")
-    .select("*")
-    .eq("user_id", userId)
-    .order("created_at", { ascending: false })
-    .throwOnError();
+export async function getProjectsQuery(userId: string) {
+	return db
+		.select()
+		.from(projects)
+		.where(and(eq(projects.userId, userId), isNull(projects.deletedAt)))
+		.orderBy(desc(projects.createdAt));
 }
 
-// New query stubs
-
-export async function getCalendarEventsQuery(supabase: Client, userId: string) {
-  return supabase
-    .from("calendar_events")
-    .select("*")
-    .eq("user_id", userId)
-    .order("start_time", { ascending: true })
-    .throwOnError();
+export async function getHeadersQuery(userId: string) {
+	return db
+		.select()
+		.from(headers)
+		.where(and(eq(headers.userId, userId), isNull(headers.deletedAt)));
 }
 
-export async function getCalendarsQuery(supabase: Client, userId: string) {
-  return supabase
-    .from("calendars")
-    .select("*")
-    .eq("user_id", userId)
-    .throwOnError();
+export async function getFoldersQuery(userId: string) {
+	return db.select().from(folders).where(eq(folders.userId, userId));
 }
 
-export async function getFoldersQuery(supabase: Client, userId: string) {
-  return supabase
-    .from("folder")
-    .select("*")
-    .eq("user_id", userId)
-    .throwOnError();
+export async function getNotesQuery(userId: string) {
+	return db
+		.select()
+		.from(notes)
+		.where(eq(notes.userId, userId))
+		.orderBy(desc(notes.updatedAt));
 }
 
-export async function getHeadersQuery(supabase: Client, userId: string) {
-  return supabase
-    .from("headers")
-    .select("*")
-    .eq("user_id", userId)
-    .is("deleted_at", null)
-    .throwOnError();
+export async function getTagsQuery(userId: string) {
+	return db.select().from(tags).where(eq(tags.userId, userId));
 }
 
-export async function getIntegrationsQuery(supabase: Client, userId: string) {
-  return supabase
-    .from("integrations")
-    .select("*")
-    .eq("user_id", userId)
-    .throwOnError();
+export async function getTagTasksQuery(taskId: string) {
+	return db.select().from(tagTasks).where(eq(tagTasks.taskId, taskId));
 }
 
-export async function getNotesQuery(supabase: Client, userId: string) {
-  return supabase
-    .from("notes")
-    .select("*")
-    .eq("user_id", userId)
-    .order("updated_at", { ascending: false })
-    .throwOnError();
+export async function getCalendarsQuery(accountId: string) {
+	return db.select().from(calendars).where(eq(calendars.accountId, accountId));
 }
 
-export async function getTagsQuery(supabase: Client, userId: string) {
-  return supabase.from("tags").select("*").eq("user_id", userId).throwOnError();
+export async function getCalendarEventsQuery(calendarId: string) {
+	return db
+		.select()
+		.from(calendarEvents)
+		.where(eq(calendarEvents.calendarId, calendarId))
+		.orderBy(asc(calendarEvents.startTime));
 }
 
-export async function getTagTasksQuery(supabase: Client, taskId: string) {
-  return supabase
-    .from("tag_tasks")
-    .select("*")
-    .eq("task_id", taskId)
-    .throwOnError();
+export async function getIntegrationsQuery(userId: string) {
+	return db.select().from(integrations).where(eq(integrations.userId, userId));
 }

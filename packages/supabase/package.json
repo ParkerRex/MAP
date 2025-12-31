@@ -6,17 +6,15 @@
     "clean": "rm -rf .turbo node_modules",
     "lint": "biome check .",
     "format": "biome format --write .",
-    "typecheck": "tsc --noEmit",
-    "db:generate": "supabase gen types --lang=typescript --project-id urxakpsnywfnqsanjjbu --schema public > src/types/db.ts"
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@supabase/ssr": "^0.8.0",
+    "drizzle-orm": "^0.38.3",
+    "postgres": "^3.4.5",
     "react": "^19.2.3",
-    "server-only": "^0.0.1",
-    "supabase": "^2.70.5"
+    "server-only": "^0.0.1"
   },
   "devDependencies": {
-    "@supabase/supabase-js": "^2.89.0",
     "typescript": "^5.9.3"
   },
   "exports": {
@@ -28,6 +26,7 @@
     "./queries": "./src/queries/index.ts",
     "./cached-queries": "./src/queries/cached-queries.ts",
     "./storage": "./src/utils/storage.ts",
-    "./types": "./src/types/index.ts"
+    "./types": "./src/types/index.ts",
+    "./dev-user": "./src/dev-user.ts"
   }
 }

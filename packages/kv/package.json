@@ -10,7 +10,7 @@
 		"typecheck": "tsc --noEmit"
 	},
 	"dependencies": {
-		"@upstash/redis": "^1.36.0",
+		"ioredis": "^5.4.1",
 		"server-only": "^0.0.1"
 	}
 }

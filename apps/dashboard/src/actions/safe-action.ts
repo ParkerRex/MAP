@@ -1,97 +1,94 @@
-// TODO: ADD ANALYTICS CHECK BACK ONCE THATS SETUP
 import { logger } from "@/utils/logger";
-import { client as RedisClient } from "@map/kv";
-import { getUser } from "@map/supabase/cached-queries";
-import { createClient } from "@map/supabase/server";
-import { Ratelimit } from "@upstash/ratelimit";
-import {
-  DEFAULT_SERVER_ERROR_MESSAGE,
-  createSafeActionClient,
-} from "next-safe-action";
+import { DEV_USER, db, schema } from "@map/supabase/server";
+import { DEFAULT_SERVER_ERROR_MESSAGE, createSafeActionClient } from "next-safe-action";
 import { headers } from "next/headers";
 import { z } from "zod";
 
-const ratelimit = new Ratelimit({
-  limiter: Ratelimit.fixedWindow(10, "10s"),
-  redis: RedisClient,
-});
+// Simple in-memory rate limiting for dev
+const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
+
+async function rateLimit(key: string, limit = 10, windowSeconds = 10) {
+	const now = Date.now();
+	const entry = rateLimitMap.get(key);
+
+	if (!entry || now > entry.resetAt) {
+		rateLimitMap.set(key, { count: 1, resetAt: now + windowSeconds * 1000 });
+		return { success: true, remaining: limit - 1 };
+	}
+
+	if (entry.count >= limit) {
+		return { success: false, remaining: 0 };
+	}
+
+	entry.count++;
+	return { success: true, remaining: limit - entry.count };
+}
 
 export const actionClient = createSafeActionClient({
-  handleReturnedServerError(e) {
-    if (e instanceof Error) {
-      return e.message;
-    }
-
-    return DEFAULT_SERVER_ERROR_MESSAGE;
-  },
+	handleReturnedServerError(e) {
+		if (e instanceof Error) {
+			return e.message;
+		}
+		return DEFAULT_SERVER_ERROR_MESSAGE;
+	},
 });
 
 export const actionClientWithMeta = createSafeActionClient({
-  handleReturnedServerError(e) {
-    if (e instanceof Error) {
-      return e.message;
-    }
-
-    return DEFAULT_SERVER_ERROR_MESSAGE;
-  },
-  defineMetadataSchema() {
-    return z.object({
-      name: z.string(),
-      track: z
-        .object({
-          event: z.string(),
-          channel: z.string(),
-        })
-        .optional(),
-    });
-  },
+	handleReturnedServerError(e) {
+		if (e instanceof Error) {
+			return e.message;
+		}
+		return DEFAULT_SERVER_ERROR_MESSAGE;
+	},
+	defineMetadataSchema() {
+		return z.object({
+			name: z.string(),
+			track: z
+				.object({
+					event: z.string(),
+					channel: z.string(),
+				})
+				.optional(),
+		});
+	},
 });
 
 export const authActionClient = actionClientWithMeta
-  .use(async ({ next, clientInput, metadata }) => {
-    const result = await next({ ctx: {} });
+	.use(async ({ next, clientInput, metadata }) => {
+		const result = await next({ ctx: {} });
 
-    if (process.env.NODE_ENV === "development") {
-      logger("Input ->", clientInput);
-      logger("Result ->", result.data);
-      logger("Metadata ->", metadata);
+		if (process.env.NODE_ENV === "development") {
+			logger("Input ->", clientInput);
+			logger("Result ->", result.data);
+			logger("Metadata ->", metadata);
+		}
 
-      return result;
-    }
+		return result;
+	})
+	.use(async ({ next, metadata }) => {
+		const ip = headers().get("x-forwarded-for") || "localhost";
 
-    return result;
-  })
-  .use(async ({ next, metadata }) => {
-    const ip = headers().get("x-forwarded-for");
+		const { success, remaining } = await rateLimit(`${ip}-${metadata.name}`);
 
-    const { success, remaining } = await ratelimit.limit(
-      `${ip}-${metadata.name}`,
-    );
+		if (!success) {
+			throw new Error("Too many requests");
+		}
 
-    if (!success) {
-      throw new Error("Too many requests");
-    }
-
-    return next({
-      ctx: {
-        ratelimit: {
-          remaining,
-        },
-      },
-    });
-  })
-  .use(async ({ next, metadata }) => {
-    const user = await getUser();
-    const supabase = createClient();
-
-    if (!user?.data) {
-      throw new Error("Unauthorized");
-    }
-
-    return next({
-      ctx: {
-        supabase,
-        user: user.data,
-      },
-    });
-  });
+		return next({
+			ctx: {
+				ratelimit: {
+					remaining,
+				},
+			},
+		});
+	})
+	.use(async ({ next }) => {
+		// In dev mode, always use dev user - no auth check
+		return next({
+			ctx: {
+				db,
+				schema,
+				user: DEV_USER,
+			},
+		});
+	});
