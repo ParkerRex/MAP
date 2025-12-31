@@ -30,7 +30,13 @@ export const queryKeys = {
     byCalendar: (calendarId: string, timeMin: string, timeMax: string) =>
       ["events", calendarId, timeMin, timeMax] as const,
     multi: (calendarIds: string[], timeMin: string, timeMax: string) =>
-      ["events", "multi", calendarIds.sort().join(","), timeMin, timeMax] as const,
+      [
+        "events",
+        "multi",
+        calendarIds.sort().join(","),
+        timeMin,
+        timeMax,
+      ] as const,
   },
   whoop: {
     profile: ["whoop", "profile"] as const,
@@ -45,6 +51,10 @@ export const queryKeys = {
   },
   google: {
     status: ["google", "status"] as const,
+  },
+  claude: {
+    status: ["claude", "status"] as const,
+    all: ["claude"] as const,
   },
   auth: {
     me: ["auth", "me"] as const,

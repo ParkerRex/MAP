@@ -27,6 +27,8 @@ struct LLMSourceSelection: View {
                     switch self.llmSource {
                     case .openai:
                         self.onboardingNavigationPath.append(customView: OpenAIAPIKey())
+                    case .claude:
+                        self.onboardingNavigationPath.append(customView: ClaudeAuthView())
                     case .fog:
                         self.onboardingNavigationPath.append(customView: FogInformationView())
                     case .local:

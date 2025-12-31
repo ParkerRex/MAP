@@ -12,7 +12,11 @@ import {
 } from "drizzle-orm/pg-core";
 
 // Enums
-export const integrationProviderEnum = pgEnum("integration_provider", ["GOOGLE", "WHOOP"]);
+export const integrationProviderEnum = pgEnum("integration_provider", [
+  "GOOGLE",
+  "WHOOP",
+  "CLAUDE",
+]);
 export const goalCategoryEnum = pgEnum("goal_categories", [
   "health",
   "work",
@@ -20,13 +24,23 @@ export const goalCategoryEnum = pgEnum("goal_categories", [
   "family",
   "spiritual",
 ]);
-export const goalStatusEnum = pgEnum("goal_status", ["pending", "in_progress", "completed"]);
-export const taskStatusEnum = pgEnum("task_status", ["pending", "in_progress", "completed"]);
+export const goalStatusEnum = pgEnum("goal_status", [
+  "pending",
+  "in_progress",
+  "completed",
+]);
+export const taskStatusEnum = pgEnum("task_status", [
+  "pending",
+  "in_progress",
+  "completed",
+]);
 
 // Users
 export const users = pgTable("users", {
   id: uuid("id").primaryKey().defaultRandom(),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
   email: text("email").notNull().unique(),
   passwordHash: text("password_hash"),
   displayName: text("display_name"),
@@ -44,7 +58,9 @@ export const sessions = pgTable("sessions", {
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
   expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
 });
 
 // Folders
@@ -68,7 +84,9 @@ export const notes = pgTable("notes", {
   content: text("content"),
   folderId: uuid("folder_id").notNull(),
   userId: uuid("user_id").notNull(),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }),
 });
 
@@ -84,7 +102,9 @@ export const projects = pgTable("projects", {
   description: text("description"),
   projectPosition: integer("project_position"),
   userId: uuid("user_id").notNull(),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }),
   deletedAt: timestamp("deleted_at", { withTimezone: true }),
 });
@@ -94,7 +114,9 @@ export const headers = pgTable("headers", {
   id: uuid("id").primaryKey().defaultRandom(),
   title: text("title").notNull(),
   userId: uuid("user_id").notNull(),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }),
   deletedAt: timestamp("deleted_at", { withTimezone: true }),
 });
@@ -108,7 +130,9 @@ export const goals = pgTable("goals", {
   userId: uuid("user_id").notNull(),
   goalCategory: goalCategoryEnum("goal_category").default("personal"),
   goalStatus: goalStatusEnum("goal_status").default("pending"),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }),
 });
 
@@ -120,9 +144,13 @@ export const tasks = pgTable("tasks", {
   dueAt: timestamp("due_at", { withTimezone: true }),
   completedAt: timestamp("completed_at", { withTimezone: true }),
   completedBy: uuid("completed_by"),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
   createdBy: uuid("created_by").notNull(),
-  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
   updatedBy: uuid("updated_by").notNull(),
   deletedAt: timestamp("deleted_at", { withTimezone: true }),
   deletedBy: uuid("deleted_by"),
@@ -188,7 +216,9 @@ export const calendarAccounts = pgTable("calendar_accounts", {
     .references(() => users.id, { onDelete: "cascade" }),
   email: text("email").notNull(),
   provider: text("provider").notNull(),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
 });
 
 // Calendars
@@ -293,8 +323,12 @@ export const preferences = pgTable("preferences", {
   dismissedWelcomeChecklist: boolean("dismissed_welcome_checklist"),
   dismissedReferralCard: boolean("dismissed_referral_card"),
   shownWelcomeDialog: boolean("shown_welcome_dialog"),
-  autoAddConferencingPromptViewed: boolean("auto_add_conferencing_prompt_viewed"),
-  autoChangeTimeZonesPromptEnabled: boolean("auto_change_time_zones_prompt_enabled"),
+  autoAddConferencingPromptViewed: boolean(
+    "auto_add_conferencing_prompt_viewed",
+  ),
+  autoChangeTimeZonesPromptEnabled: boolean(
+    "auto_change_time_zones_prompt_enabled",
+  ),
 });
 
 // Contacts
@@ -330,7 +364,9 @@ export const whoopCycles = pgTable("whoop_cycles", {
   kilojoule: text("kilojoule"),
   averageHeartRate: integer("average_heart_rate"),
   maxHeartRate: integer("max_heart_rate"),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }),
 });
 
@@ -349,7 +385,9 @@ export const whoopRecovery = pgTable("whoop_recovery", {
   hrvRmssd: text("hrv_rmssd"), // ms
   spo2Percentage: text("spo2_percentage"), // % blood oxygen
   skinTempCelsius: text("skin_temp_celsius"), // °C
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }),
 });
 
@@ -382,7 +420,9 @@ export const whoopSleep = pgTable("whoop_sleep", {
   sleepPerformancePercentage: text("sleep_performance_percentage"),
   sleepConsistencyPercentage: text("sleep_consistency_percentage"),
   sleepEfficiencyPercentage: text("sleep_efficiency_percentage"),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }),
 });
 
@@ -413,7 +453,9 @@ export const whoopWorkouts = pgTable("whoop_workouts", {
   zoneThreeMs: integer("zone_three_ms"),
   zoneFourMs: integer("zone_four_ms"),
   zoneFiveMs: integer("zone_five_ms"),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }),
 });
 
@@ -428,7 +470,9 @@ export const whoopProfiles = pgTable("whoop_profiles", {
   weightKilogram: text("weight_kilogram"),
   maxHeartRate: integer("max_heart_rate"),
   lastSyncedAt: timestamp("last_synced_at", { withTimezone: true }),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }),
 });
 

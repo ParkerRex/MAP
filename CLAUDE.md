@@ -185,3 +185,39 @@ WHOOP health data integration in `src/lib/whoop.ts`:
 WHOOP_CLIENT_ID=your_client_id
 WHOOP_CLIENT_SECRET=your_client_secret
 ```
+
+## Claude Integration
+
+Claude AI integration for health data analysis in `src/lib/claude.ts`:
+- OAuth 2.0 with PKCE for Claude Max/Claude Code subscriptions
+- Chat proxy with streaming support for both web and iOS
+- Automatic token refresh (8-hour token lifetime)
+
+**OAuth Details**:
+- Client ID: `9d1c250a-e61b-44d9-88ed-5944d1962f5e` (official Claude Code client)
+- Auth URL: `https://claude.ai/oauth/authorize`
+- Token URL: `https://console.anthropic.com/v1/oauth/token`
+- Scopes: `user:inference user:profile`
+- Security: PKCE required (public client, no secret)
+
+**API Routes** (`/api/claude/`):
+- `GET /auth` - Initiate OAuth flow with PKCE
+- `GET /callback` - Handle OAuth callback, store tokens
+- `GET /status` - Check if Claude is connected
+- `POST /disconnect` - Remove Claude integration
+- `POST /chat` - Chat proxy (supports streaming for iOS)
+
+**Hooks** (`src/hooks/use-claude.ts`):
+- `useClaudeStatus()` - Check connection status
+- `useClaudeDisconnect()` - Remove connection
+- `useClaudeConnect()` - Initiate OAuth flow
+
+**iOS Integration**:
+- `ClaudeAPIClient.swift` - Calls web backend proxy
+- `ClaudeAuthView.swift` - OAuth onboarding view
+- LLMSource enum includes `.claude` case
+
+**Environment Variables**:
+```
+CLAUDE_CLIENT_ID=9d1c250a-e61b-44d9-88ed-5944d1962f5e
+```

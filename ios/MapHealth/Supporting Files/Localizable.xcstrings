@@ -385,6 +385,50 @@
         }
       }
     },
+    "CLAUDE_LLM_LABEL" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Claude AI"
+          }
+        }
+      }
+    },
+    "CLAUDE_AUTH_TITLE" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Connect Claude"
+          }
+        }
+      }
+    },
+    "CLAUDE_AUTH_SUBTITLE" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sign in with your Claude Max or Claude Code subscription to use Claude for health analysis."
+          }
+        }
+      }
+    },
+    "CLAUDE_AUTH_BUTTON" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sign in with Claude"
+          }
+        }
+      }
+    },
     "RESET" : {
       "extractionState" : "stale",
       "localizations" : {
