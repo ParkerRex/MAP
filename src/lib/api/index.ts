@@ -33,12 +33,6 @@ export type {
   // Input types
   CreateTaskInput,
   UpdateTaskInput,
-  CreateNoteInput,
-  UpdateNoteInput,
-  CreateFolderInput,
-  UpdateFolderInput,
-  CreateGoalInput,
-  UpdateGoalInput,
   CreateTagInput,
   UpdateTagInput,
 } from "./client";

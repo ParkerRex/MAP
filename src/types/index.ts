@@ -9,6 +9,3 @@ export * from "./notes";
 
 // Task-related types
 export * from "./tasks";
-
-// Weather-related types
-export * from "./weather";
