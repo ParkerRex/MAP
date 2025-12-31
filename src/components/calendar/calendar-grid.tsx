@@ -62,7 +62,7 @@ const CalendarGrid: FC<CalendarGridProps> = ({
   return (
     <div className={`flex flex-col h-full overflow-hidden ${className}`}>
       <div className="flex sticky top-0 z-10 bg-white dark:bg-black border-b border-gray-200 dark:border-gray-800">
-        <div className="w-16 flex-shrink-0" />
+        <div className="w-16 shrink-0" />
         {daysOfWeek.map((day) => (
           <div key={day.toISOString()} className="flex-1 text-center p-2">
             <div className="text-sm text-gray-600 dark:text-gray-400">{format(day, "EEE")}</div>
@@ -84,15 +84,15 @@ const CalendarGrid: FC<CalendarGridProps> = ({
         calendars={calendars}
         setSelectedEvent={setSelectedEvent}
       />
-      <div className="flex flex-grow overflow-y-auto" ref={gridRef}>
-        <div className="w-16 flex-shrink-0">
+      <div className="flex grow overflow-y-auto" ref={gridRef}>
+        <div className="w-16 shrink-0">
           {hours.map((hour) => (
             <div key={hour} className="h-16 text-xs text-gray-500 text-right pr-2">
               {format(new Date().setHours(hour, 0, 0, 0), "h a")}
             </div>
           ))}
         </div>
-        <div className="flex-grow grid grid-cols-7 relative">
+        <div className="grow grid grid-cols-7 relative">
           {daysOfWeek.map((day, dayIndex) => (
             <div key={day.toISOString()} className="relative">
               {hours.map((hour) => (

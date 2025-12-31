@@ -220,7 +220,7 @@ export default function FolderBar({ folders, notes }: FolderBarProps) {
           note={null}
         />
       </div>
-      <div className="flex-grow">
+      <div className="grow">
         <NoteDisplay
           note={selectedNote}
           selectedFolderId={selectedFolderId}

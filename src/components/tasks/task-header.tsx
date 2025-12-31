@@ -64,7 +64,7 @@ const TaskListHeader: FC<TaskListHeaderProps> = ({
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
             <Input
-              className="pl-10 pr-4 py-2 rounded-md bg-muted focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-opacity-50 transition-colors"
+              className="pl-10 pr-4 py-2 rounded-md bg-muted focus:outline-hidden focus:ring-2 focus:ring-primary-500 focus:ring-opacity-50 transition-colors"
               placeholder="Search tasks..."
               type="search"
               value={searchQuery}

@@ -62,9 +62,9 @@ export default function CalendarAllDayEvents({
       <div
         className={`transition-all duration-300 ease-in-out ${isExpanded ? "max-h-[1000px]" : "max-h-24"} overflow-hidden`}
       >
-        <div className="flex border-b border-gray-200 min-h-[2rem]">
-          <div className="w-16 flex-shrink-0" />
-          <div className="flex-grow grid grid-cols-7">
+        <div className="flex border-b border-gray-200 min-h-8">
+          <div className="w-16 shrink-0" />
+          <div className="grow grid grid-cols-7">
             {daysOfWeek.map((day) => (
               <div key={day.toISOString()} className="border-r border-gray-200 p-1">
                 {visibleEvents

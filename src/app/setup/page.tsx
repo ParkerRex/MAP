@@ -18,7 +18,7 @@ export default function Page() {
 
       <div className="flex min-h-screen justify-center items-center overflow-hidden p-6 md:p-0">
         <div className="relative z-20 m-auto flex w-full max-w-[380px] flex-col">
-          <div className="pb-4 bg-gradient-to-r from-primary dark:via-primary dark:to-[#848484] to-[#000] inline-block text-transparent bg-clip-text">
+          <div className="pb-4 bg-linear-to-r from-primary dark:via-primary dark:to-[#848484] to-[#000] inline-block text-transparent bg-clip-text">
             <h1 className="font-medium pb-1 text-3xl">Setup your account.</h1>
           </div>
 

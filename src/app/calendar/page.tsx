@@ -69,13 +69,13 @@ export default function CalendarPage() {
         currentWeekStartDate={currentWeekStartDate}
         setCurrentWeekStartDate={setCurrentWeekStartDate}
       />
-      <main className="flex flex-col flex-grow overflow-hidden">
+      <main className="flex flex-col grow overflow-hidden">
         <CalendarToolbar
           currentWeekStartDate={currentWeekStartDate}
           setCurrentWeekStartDate={setCurrentWeekStartDate}
         />
         <CalendarGrid
-          className="flex-grow overflow-hidden"
+          className="grow overflow-hidden"
           calendars={calendars}
           events={visibleEvents}
           currentWeekStartDate={currentWeekStartDate}

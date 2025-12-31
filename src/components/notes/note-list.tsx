@@ -150,7 +150,7 @@ export default function NoteList({
       </div>
       <div
         id="searchbar"
-        className="bg-background/95 p-4 backdrop-blur supports-[backdrop-filter]:bg-background/60 w-64"
+        className="bg-background/95 p-4 backdrop-blur-sm supports-backdrop-filter:bg-background/60 w-64"
       >
         <form>
           <div className="relative">

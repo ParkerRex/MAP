@@ -26,7 +26,7 @@ export default function NoteDisplay({
 
   return (
     <div className="flex flex-col h-full">
-      <div className="p-4 space-y-4 flex-shrink-0">
+      <div className="p-4 space-y-4 shrink-0">
         {note ? (
           <>
             <Input
@@ -36,7 +36,7 @@ export default function NoteDisplay({
             />
             <button
               type="button"
-              className="text-sm text-muted-foreground hover:underline focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              className="text-sm text-muted-foreground hover:underline focus:outline-hidden focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
               tabIndex={0}
             >
               Date placeholder
@@ -47,7 +47,7 @@ export default function NoteDisplay({
         )}
       </div>
       {note && (
-        <div className="flex-grow overflow-hidden p-4">
+        <div className="grow overflow-hidden p-4">
           <Textarea className="w-full h-full resize-none" placeholder="Start typing your note..." />
         </div>
       )}
