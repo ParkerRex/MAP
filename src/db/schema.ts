@@ -41,12 +41,25 @@ export const users = pgTable("users", {
     .notNull()
     .defaultNow(),
   email: text("email").notNull().unique(),
+  passwordHash: text("password_hash"),
   displayName: text("display_name"),
   firstName: text("first_name"),
   lastName: text("last_name"),
   locale: text("locale"),
   profilePhotoUrl: text("profile_photo_url"),
   status: text("status").notNull().default("active"),
+});
+
+// Sessions
+export const sessions = pgTable("sessions", {
+  id: text("id").primaryKey(),
+  userId: uuid("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
 });
 
 // Folders
@@ -355,3 +368,5 @@ export type Contact = typeof contacts.$inferSelect;
 export type CalendarSyncToken = typeof calendarSyncTokens.$inferSelect;
 export type CalendarAccount = typeof calendarAccounts.$inferSelect;
 export type CalendarEventAttendee = typeof calendarEventAttendees.$inferSelect;
+export type Session = typeof sessions.$inferSelect;
+export type NewSession = typeof sessions.$inferInsert;

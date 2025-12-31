@@ -3,14 +3,13 @@ services:
     image: postgres:16-alpine
     container_name: map-postgres
     ports:
-      - "5432:5432"
+      - "5434:5432"
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: map_dev
     volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./scripts/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - map_postgres_data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 5s
@@ -21,9 +20,9 @@ services:
     image: redis:7-alpine
     container_name: map-redis
     ports:
-      - "6379:6379"
+      - "6380:6379"
     volumes:
-      - redis_data:/data
+      - map_redis_data:/data
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s
@@ -31,5 +30,5 @@ services:
       retries: 5
 
 volumes:
-  postgres_data:
-  redis_data:
+  map_postgres_data:
+  map_redis_data:
