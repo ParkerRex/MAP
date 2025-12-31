@@ -22,7 +22,6 @@ export const env = createEnv({
     LOOPS_API_KEY: z.string(),
     NOVU_API_KEY: z.string(),
     RESEND_API_KEY: z.string(),
-    OPENPANEL_SECRET_KEY: z.string(),
   },
   /**
    * Specify your client-side environment variables schema here.
@@ -33,8 +32,6 @@ export const env = createEnv({
     NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string(),
     NEXT_PUBLIC_NOVU_APPLICATION_IDENTIFIER: z.string(),
     NEXT_PUBLIC_SUPABASE_ID: z.string(),
-    NEXT_PUBLIC_TRIGGER_API_KEY: z.string(),
-    NEXT_PUBLIC_OPENPANEL_CLIENT_ID: z.string(),
   },
   /**
    * Destructure all variables from `process.env` to make sure they aren't tree-shaken away.
@@ -53,12 +50,8 @@ export const env = createEnv({
     UPSTASH_REDIS_REST_TOKEN: process.env.UPSTASH_REDIS_REST_TOKEN,
     NEXT_PUBLIC_NOVU_APPLICATION_IDENTIFIER:
       process.env.NEXT_PUBLIC_NOVU_APPLICATION_IDENTIFIER,
-    NEXT_PUBLIC_TRIGGER_API_KEY: process.env.NEXT_PUBLIC_TRIGGER_API_KEY,
     SUPABASE_SERVICE_KEY: process.env.SUPABASE_SERVICE_KEY,
     OPENAI_API_KEY: process.env.OPENAI_API_KEY,
-    NEXT_PUBLIC_OPENPANEL_CLIENT_ID:
-      process.env.NEXT_PUBLIC_OPENPANEL_CLIENT_ID,
-    OPENPANEL_SECRET_KEY: process.env.OPENPANEL_SECRET_KEY,
   },
   skipValidation: !!process.env.CI || !!process.env.SKIP_ENV_VALIDATION,
 });
