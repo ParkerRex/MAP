@@ -28,6 +28,7 @@ Use **Drizzle ORM** for all database operations. Organize queries and mutations 
 - `src/db/tasks.ts` - task queries/mutations
 - `src/db/notes.ts` - note queries/mutations
 - `src/db/goals.ts` - goal queries/mutations
+- `src/db/whoop.ts` - WHOOP health data queries/mutations
 
 **Important**: All queries that access user data must include `userId` parameter and verify ownership in the WHERE clause using `and(eq(table.id, id), eq(table.userId, userId))`.
 
@@ -85,3 +86,35 @@ Create Zod schemas in `src/lib/validations/` for all API inputs:
 - `calendar.ts` - Calendar event schemas
 
 Always validate request body before processing.
+
+## WHOOP Integration
+
+WHOOP health data integration in `src/lib/whoop.ts`:
+- OAuth 2.0 flow with automatic token refresh
+- v2 API client for cycles, recovery, sleep, workouts
+- Sport ID mapping for 100+ activity types
+
+**Database Tables** (in `src/db/schema.ts`):
+- `whoopCycles` - Physiological cycles with strain data
+- `whoopRecovery` - Recovery scores, HRV, resting HR, SpO2
+- `whoopSleep` - Sleep stages, duration, performance metrics
+- `whoopWorkouts` - Workout strain, HR zones, distance
+- `whoopProfiles` - Cached user profile and body measurements
+
+**API Routes** (`/api/whoop/`):
+- `GET /auth` - Initiate OAuth flow
+- `GET /callback` - Handle OAuth callback
+- `POST /disconnect` - Disconnect and cleanup data
+- `POST /sync` - Sync 30 days of WHOOP data
+- `GET /profile`, `/cycles`, `/recovery`, `/sleep`, `/workouts`
+
+**Hooks** (`src/hooks/use-whoop.ts`):
+- `useWhoopProfile()`, `useWhoopRecovery()`, `useWhoopCycles()`
+- `useWhoopSleep()`, `useWhoopWorkouts()`
+- `useWhoopSync()`, `useWhoopDisconnect()`
+
+**Environment Variables**:
+```
+WHOOP_CLIENT_ID=your_client_id
+WHOOP_CLIENT_SECRET=your_client_secret
+```
