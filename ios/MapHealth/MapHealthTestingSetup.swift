@@ -1,11 +1,7 @@
-
-
-
-import OSLog
+import MapHealthCore
 import OSLog
 @_spi(Internal) import SpeziKeychainStorage
 import SwiftUI
-
 
 private struct MapHealthAppTestingSetup: ViewModifier {
     @AppStorage(StorageKeys.onboardingFlowComplete) var completedOnboardingFlow = false
@@ -32,7 +28,6 @@ private struct MapHealthAppTestingSetup: ViewModifier {
             }
     }
 }
-
 
 extension View {
     func testingSetup() -> some View {

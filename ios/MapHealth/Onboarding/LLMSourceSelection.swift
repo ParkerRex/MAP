@@ -1,7 +1,4 @@
-
-
-
-import SpeziOnboarding
+import MapHealthCore
 import SpeziOnboarding
 import SpeziViews
 import SwiftUI
@@ -9,7 +6,7 @@ import SwiftUI
 struct LLMSourceSelection: View {
     @Environment(ManagedNavigationStack.Path.self) private var onboardingNavigationPath
     @AppStorage(StorageKeys.llmSource) private var llmSource = StorageKeys.Defaults.llmSource
-    
+
     var body: some View {
         OnboardingView(
             content: {
@@ -39,7 +36,7 @@ struct LLMSourceSelection: View {
             }
         )
     }
-    
+
     private var sourceSelector: some View {
         Picker("LLM_SOURCE_PICKER_LABEL", selection: $llmSource) {
             ForEach(LLMSource.allCases) { source in
@@ -51,7 +48,6 @@ struct LLMSourceSelection: View {
         .accessibilityIdentifier("llmSourcePicker")
     }
 }
-
 
 #if DEBUG
 #Preview {

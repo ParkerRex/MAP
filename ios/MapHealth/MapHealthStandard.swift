@@ -1,3 +1,4 @@
+import MapHealthCore
 import Spezi
 import SpeziHealthKit
 import SwiftUI

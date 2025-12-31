@@ -1,16 +1,11 @@
-
-
-
-import SpeziOnboarding
+import MapHealthCore
 import SpeziOnboarding
 import SpeziViews
 import SwiftUI
 
-
 struct Disclaimer: View {
     @Environment(ManagedNavigationStack.Path.self) private var onboardingNavigationPath
-    
-    
+
     var body: some View {
         SequentialOnboardingView(
             title: "INTERESTING_MODULES_TITLE".moduleLocalized,
@@ -40,7 +35,6 @@ struct Disclaimer: View {
         )
     }
 }
-
 
 #if DEBUG
 #Preview {

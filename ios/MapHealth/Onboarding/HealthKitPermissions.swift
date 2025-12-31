@@ -1,20 +1,15 @@
-
-
-
-import OSLog
+import MapHealthCore
 import OSLog
 import SpeziHealthKit
 import SpeziOnboarding
 import SpeziViews
 import SwiftUI
 
-
 struct HealthKitPermissions: View {
     @Environment(HealthKit.self) var healthKitDataSource
     @Environment(ManagedNavigationStack.Path.self) private var onboardingNavigationPath
     @State var healthKitProcessing = false
     let logger = Logger(subsystem: "MapHealth", category: "Onboarding")
-
 
     var body: some View {
         OnboardingView(
@@ -58,7 +53,6 @@ struct HealthKitPermissions: View {
             .navigationBarBackButtonHidden(healthKitProcessing)
     }
 }
-
 
 #if DEBUG
 #Preview {

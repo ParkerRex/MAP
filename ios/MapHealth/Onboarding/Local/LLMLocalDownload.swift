@@ -1,14 +1,10 @@
-
-
-
-import SpeziLLMLocalDownload
+import MapHealthCore
 import SpeziLLMLocalDownload
 import SpeziViews
 import SwiftUI
 
 struct LLMLocalDownload: View {
     @Environment(ManagedNavigationStack.Path.self) private var onboardingNavigationPath
-
 
     var body: some View {
         LLMLocalDownloadView(
@@ -19,7 +15,6 @@ struct LLMLocalDownload: View {
         }
     }
 }
-
 
 #if DEBUG
 #Preview {

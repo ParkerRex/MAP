@@ -1,17 +1,12 @@
-
-
-
-import SpeziLLMFog
+import MapHealthCore
 import SpeziLLMFog
 import SpeziViews
 import SwiftUI
-
 
 struct FogModelSelectionView: View {
     @Environment(ManagedNavigationStack.Path.self) private var onboardingNavigationPath
     @AppStorage(StorageKeys.fogModel) private var fogModel = LLMFogParameters.FogModelType.llama3_1_8B
 
-    
     var body: some View {
         LLMFogModelOnboardingStep(
             actionText: "FOG_MODEL_SAVE_ACTION",

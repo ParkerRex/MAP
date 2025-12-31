@@ -1,4 +1,5 @@
 import HealthKit
+import MapHealthCore
 import Spezi
 import SpeziHealthKit
 import SpeziKeychainStorage
@@ -16,7 +17,11 @@ class MapHealthAppDelegate: SpeziAppDelegate {
                 self.healthKit
             }
             LLMRunner {
-                LLMOpenAIPlatform(configuration: .init(authToken: .keychain(tag: .openAIKey, username: "com.map.health")))
+                LLMOpenAIPlatform(
+                    configuration: .init(
+                        authToken: .keychain(tag: .openAIKey, username: "com.map.health")
+                    )
+                )
                 LLMFogPlatform(configuration: .init(host: "spezillmfog.local", connectionType: .http, authToken: .none))
                 LLMLocalPlatform()
                 LLMMockPlatform()
@@ -47,7 +52,7 @@ class MapHealthAppDelegate: SpeziAppDelegate {
                     .walkingHeartRateAverage,
                     .heartRateVariabilitySDNN,
                     .vo2Max,
-                    .oxygenSaturation,
+                    .bloodOxygen,
 
                     // Body
                     .bodyMass,
@@ -57,7 +62,7 @@ class MapHealthAppDelegate: SpeziAppDelegate {
                     .height,
 
                     // Sleep-related
-                    .respiratoryRate,
+                    .respiratoryRate
                 ]
             )
             RequestReadAccess(category: [.sleepAnalysis, .mindfulSession])

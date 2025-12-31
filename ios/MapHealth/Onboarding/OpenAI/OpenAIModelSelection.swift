@@ -1,17 +1,12 @@
-
-
-
-import SpeziLLMOpenAI
+import MapHealthCore
 import SpeziLLMOpenAI
 import SpeziViews
 import SwiftUI
-
 
 struct OpenAIModelSelection: View {
     @Environment(ManagedNavigationStack.Path.self) private var onboardingNavigationPath
     @AppStorage(StorageKeys.openAIModel) private var openAIModel = LLMOpenAIParameters.ModelType.gpt4o
 
-    
     var body: some View {
         LLMOpenAIModelOnboardingStep(
             actionText: "OPEN_AI_MODEL_SAVE_ACTION",

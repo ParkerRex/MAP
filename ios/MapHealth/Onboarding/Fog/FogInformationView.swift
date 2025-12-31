@@ -1,36 +1,35 @@
-
-
-
-import SpeziOnboarding
+import MapHealthCore
 import SpeziOnboarding
 import SpeziViews
 import SwiftUI
 
-
 struct FogInformationView: View {
     @Environment(ManagedNavigationStack.Path.self) private var onboardingNavigationPath
-
 
     var body: some View {
         OnboardingView(
             title: "LLM Fog Mode".moduleLocalized,
-            subtitle: "Run LLMs locally. Keep data inside your network.".moduleLocalized,
+            subtitle: "Run LLMs locally. Keep data inside your network."
+                .moduleLocalized,
             areas: [
                 .init(
                     iconSymbol: "network.badge.shield.half.filled",
                     title: "Private by Design".moduleLocalized,
-                    description: "All LLM inference happens directly within your network - nothing is sent to remote servers.".moduleLocalized
+                    description: "All LLM inference happens directly within your network - nothing is sent to remote servers."
+                        .moduleLocalized
                 ),
                 .init(
                     iconSymbol: "server.rack",
                     title: "Local Fog Nodes".moduleLocalized,
-                    description: "Computation is performed on so-called fog nodes, running directly inside your own network.".moduleLocalized
+                    description: "Computation is performed on so-called fog nodes, running directly inside your own network."
+                        .moduleLocalized
                 ),
                 .init(
                     iconSymbol: "exclamationmark.circle.fill",
                     title: "Setup Required".moduleLocalized,
                     description: """
-                    A fog node must be configured in your local network. Please consult the Map Health docs for setup instructions.
+                    A fog node must be configured in your local network. Please consult the Map Health docs for
+                    setup instructions.
                     """.moduleLocalized
                 )
             ],
@@ -44,9 +43,9 @@ struct FogInformationView: View {
     }
 }
 
-
 #if DEBUG
 #Preview {
     FogInformationView()
 }
 #endif
+

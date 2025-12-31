@@ -1,15 +1,10 @@
-
-
-
-import SpeziOnboarding
+import MapHealthCore
 import SpeziOnboarding
 import SpeziViews
 import SwiftUI
 
-
 struct Welcome: View {
     @Environment(ManagedNavigationStack.Path.self) private var onboardingNavigationPath
-
 
     var body: some View {
         OnboardingView(
@@ -39,7 +34,6 @@ struct Welcome: View {
         )
     }
 }
-
 
 #if DEBUG
 #Preview {

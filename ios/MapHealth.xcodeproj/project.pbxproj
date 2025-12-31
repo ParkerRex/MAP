@@ -21,6 +21,7 @@
 		27859C222A34F2BF00397C85 /* XCTestExtensions in Frameworks */ = {isa = PBXBuildFile; productRef = 27859C212A34F2BF00397C85 /* XCTestExtensions */; };
 		27859C252A34F2D000397C85 /* XCTHealthKit in Frameworks */ = {isa = PBXBuildFile; productRef = 27859C242A34F2D000397C85 /* XCTHealthKit */; };
 		27859C282A34F2DE00397C85 /* XCTRuntimeAssertions in Frameworks */ = {isa = PBXBuildFile; productRef = 27859C272A34F2DE00397C85 /* XCTRuntimeAssertions */; };
+		5FA52E092F05A4FB00203C33 /* MapHealthCore in Frameworks */ = {isa = PBXBuildFile; productRef = 5FA52E082F05A4FB00203C33 /* MapHealthCore */; };
 		63E247642DC9B77C0044A0BB /* SpeziKeychainStorage in Frameworks */ = {isa = PBXBuildFile; productRef = 63E247632DC9B77C0044A0BB /* SpeziKeychainStorage */; };
 		65A230B62E78C1F100FFD061 /* SpeziLLM in Frameworks */ = {isa = PBXBuildFile; productRef = 65A230B52E78C1F100FFD061 /* SpeziLLM */; };
 		65A230B82E78C1F100FFD061 /* SpeziLLMFog in Frameworks */ = {isa = PBXBuildFile; productRef = 65A230B72E78C1F100FFD061 /* SpeziLLMFog */; };
@@ -98,6 +99,7 @@
 				65A230B62E78C1F100FFD061 /* SpeziLLM in Frameworks */,
 				1035661B2E77634300CE14BF /* SpeziLLMLocal in Frameworks */,
 				103566172E77634300CE14BF /* SpeziLLM in Frameworks */,
+				5FA52E092F05A4FB00203C33 /* MapHealthCore in Frameworks */,
 				65A230BC2E78C1F100FFD061 /* SpeziLLMLocalDownload in Frameworks */,
 				27859C072A34F17800397C85 /* SpeziOnboarding in Frameworks */,
 				27859C012A34F15E00397C85 /* XCTSpezi in Frameworks */,
@@ -232,6 +234,7 @@
 				65A230B92E78C1F100FFD061 /* SpeziLLMLocal */,
 				65A230BB2E78C1F100FFD061 /* SpeziLLMLocalDownload */,
 				65A230BD2E78C1F100FFD061 /* SpeziLLMOpenAI */,
+				5FA52E082F05A4FB00203C33 /* MapHealthCore */,
 			);
 			productName = TemplateApplication;
 			productReference = 653A254D283387FE005D4D48 /* MapHealth.app */;
@@ -279,6 +282,7 @@
 				27859C262A34F2DE00397C85 /* XCRemoteSwiftPackageReference "XCTRuntimeAssertions" */,
 				65A230B42E78C1F100FFD061 /* XCRemoteSwiftPackageReference "SpeziLLM" */,
 				65A230BF2E78C29800FFD061 /* XCRemoteSwiftPackageReference "SwiftLintPlugins" */,
+				5FA52E072F05A4FB00203C33 /* XCLocalSwiftPackageReference "../ios" */,
 			);
 			productRefGroup = 653A254E283387FE005D4D48 /* Products */;
 			projectDirPath = "";
@@ -540,12 +544,13 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "";
-				DEVELOPMENT_TEAM = 637867499T;
+				DEVELOPMENT_TEAM = WV4649EMC2;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "MapHealth/Supporting Files/Info.plist";
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_NSCameraUsageDescription = "This message should never appear. Please adjust this when you start using camera information. We have to put this in here as ResearchKit has the possibility to use it and not putting it here returns an error on AppStore Connect.";
+				INFOPLIST_KEY_NSHealthClinicalHealthRecordsShareUsageDescription = "For the delivery of positive health results. ";
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "MapHealth allows users to interact with their health data using natural language, including querying sleep, step count, active energy, exercise minutes, heart rate, and body mass.";
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "MapHealth allows users to interact with their health data using natural language, including querying sleep, step count, active energy, exercise minutes, heart rate, and body mass.";
 				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "MapHealth uses local network access to discover nearby fog nodes.";
@@ -564,7 +569,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 0.5.0;
-				PRODUCT_BUNDLE_IDENTIFIER = edu.stanford.bdhg.healthgpt;
+				PRODUCT_BUNDLE_IDENTIFIER = com.parkerrex.maphealth;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -712,12 +717,13 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "";
-				DEVELOPMENT_TEAM = 637867499T;
+				DEVELOPMENT_TEAM = WV4649EMC2;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "MapHealth/Supporting Files/Info.plist";
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_NSCameraUsageDescription = "This message should never appear. Please adjust this when you start using camera information. We have to put this in here as ResearchKit has the possibility to use it and not putting it here returns an error on AppStore Connect.";
+				INFOPLIST_KEY_NSHealthClinicalHealthRecordsShareUsageDescription = "For the delivery of positive health results. ";
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "MapHealth allows users to interact with their health data using natural language, including querying sleep, step count, active energy, exercise minutes, heart rate, and body mass.";
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "MapHealth allows users to interact with their health data using natural language, including querying sleep, step count, active energy, exercise minutes, heart rate, and body mass.";
 				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "MapHealth uses local network access to discover nearby fog nodes.";
@@ -736,7 +742,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 0.5.0;
-				PRODUCT_BUNDLE_IDENTIFIER = edu.stanford.bdhg.healthgpt;
+				PRODUCT_BUNDLE_IDENTIFIER = com.parkerrex.maphealth;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -757,17 +763,16 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = "MapHealth/Supporting Files/MapHealth.entitlements";
 				CODE_SIGN_IDENTITY = "Apple Development";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
-				CODE_SIGN_STYLE = Manual;
+				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "";
-				DEVELOPMENT_TEAM = "";
-				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = 637867499T;
+				DEVELOPMENT_TEAM = WV4649EMC2;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "MapHealth/Supporting Files/Info.plist";
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_NSCameraUsageDescription = "This message should never appear. Please adjust this when you start using camera information. We have to put this in here as ResearchKit has the possibility to use it and not putting it here returns an error on AppStore Connect.";
+				INFOPLIST_KEY_NSHealthClinicalHealthRecordsShareUsageDescription = "For the delivery of positive health results. ";
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "MapHealth allows users to interact with their health data using natural language, including querying sleep, step count, active energy, exercise minutes, heart rate, and body mass.";
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "MapHealth allows users to interact with their health data using natural language, including querying sleep, step count, active energy, exercise minutes, heart rate, and body mass.";
 				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "MapHealth uses local network access to discover nearby fog nodes.";
@@ -786,10 +791,9 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 0.5.0;
-				PRODUCT_BUNDLE_IDENTIFIER = edu.stanford.bdhg.healthgpt;
+				PRODUCT_BUNDLE_IDENTIFIER = com.parkerrex.maphealth;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
-				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = MapHealth;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
@@ -845,6 +849,13 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		5FA52E072F05A4FB00203C33 /* XCLocalSwiftPackageReference "../ios" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ../ios;
+		};
+/* End XCLocalSwiftPackageReference section */
 
 /* Begin XCRemoteSwiftPackageReference section */
 		27859BFD2A34F15E00397C85 /* XCRemoteSwiftPackageReference "Spezi" */ = {
@@ -986,6 +997,10 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 27859C262A34F2DE00397C85 /* XCRemoteSwiftPackageReference "XCTRuntimeAssertions" */;
 			productName = XCTRuntimeAssertions;
+		};
+		5FA52E082F05A4FB00203C33 /* MapHealthCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = MapHealthCore;
 		};
 		63E247632DC9B77C0044A0BB /* SpeziKeychainStorage */ = {
 			isa = XCSwiftPackageProductDependency;
