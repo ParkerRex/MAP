@@ -23,18 +23,14 @@ html, body {
   --chart-color-awake: #FBBF24;
 }
 
-@media (prefers-color-scheme: light) {
-  ::selection {
-    background-color: black;
-    color: #F9FAFB;
-  }
+::selection {
+  background-color: black;
+  color: white;
 }
 
-@media (prefers-color-scheme: dark) {
-  ::selection {
-    background-color: white;
-    color: black;
-  }
+.dark ::selection {
+  background-color: white;
+  color: black;
 }
 
 .scrollbar-hide::-webkit-scrollbar {

@@ -13,12 +13,6 @@ const nextConfig: NextConfig = {
     ],
   },
 
-  transpilePackages: ["@map/ui", "@map/jobs", "@map/tailwind"],
-
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
-
   typescript: {
     ignoreBuildErrors: true,
   },
