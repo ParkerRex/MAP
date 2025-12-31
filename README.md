@@ -1,20 +1,29 @@
-# Map - Personal Productivity Platform
+# MAP - Personal Productivity Platform
 
-A personal productivity dashboard with calendar, notes, tasks, and goals.
+A personal productivity dashboard integrating calendar, tasks, notes, and health data into one unified interface.
 
-## Architecture
+## Features
 
-Single Next.js app with:
-- **Database**: PostgreSQL with Drizzle ORM (Docker on port 5434)
-- **Cache**: Redis with ioredis (Docker on port 6380)
-- **Auth**: Session-based with HTTP-only cookies (bcrypt password hashing)
-- **Data fetching**: TanStack Query + API routes
-- **Validation**: Zod schemas for all API inputs
+- **Calendar** - Week view with Google Calendar sync, event management
+- **Tasks** - Task management with tags, due dates, and bulk actions
+- **Notes** - Folder-organized notes with search
+- **Health** - WHOOP integration for recovery, strain, sleep, and workout data
+- **Goals** - Goal tracking with completion stats
+
+## Tech Stack
+
+- **Framework**: Next.js 16 (App Router)
+- **Database**: PostgreSQL with Drizzle ORM
+- **Auth**: Session-based with HTTP-only cookies
+- **Data Fetching**: TanStack Query + API routes
+- **Styling**: Tailwind CSS 4 + Radix UI
+- **Validation**: Zod schemas
+- **Package Manager**: Bun
 
 ## Getting Started
 
 ```bash
-# Start Docker services (Postgres + Redis)
+# Start Docker services (Postgres)
 docker-compose up -d
 
 # Install dependencies
@@ -27,112 +36,122 @@ bun run db:push
 bun run dev
 ```
 
-Dashboard runs on http://localhost:3001
-
-## Authentication
-
-Simple email/password authentication:
-- `POST /api/auth/register` - Create account
-- `POST /api/auth/login` - Login
-- `POST /api/auth/logout` - Logout
-- `GET /api/auth/me` - Get current user
-
-Sessions stored in database with 30-day expiry. Passwords hashed with bcrypt (12 rounds).
+Dashboard runs on http://localhost:3000
 
 ## Project Structure
 
 ```
 src/
-├── app/              # Next.js app router pages + API routes
-│   ├── api/          # API route handlers
-│   ├── login/        # Login page
-│   └── signup/       # Signup page
-├── components/       # React components
-│   └── ui/           # Shadcn UI components
-├── db/               # Drizzle ORM queries/mutations
-├── hooks/            # React hooks (TanStack Query)
+├── app/                    # Next.js pages + API routes
+│   ├── api/                # REST API endpoints
+│   ├── calendar/           # Calendar page
+│   ├── tasks/              # Tasks page
+│   ├── notes/              # Notes page
+│   ├── health/             # Health dashboard
+│   ├── login/              # Login page
+│   └── signup/             # Signup page
+├── components/
+│   ├── calendar/           # Calendar components
+│   ├── tasks/              # Task components
+│   ├── notes/              # Note components
+│   └── ui/                 # Radix UI primitives
+├── db/                     # Drizzle ORM queries
+├── hooks/                  # React Query hooks
+│   ├── use-auth.ts         # Authentication
+│   ├── use-calendar.ts     # Calendar data
+│   ├── use-tasks.ts        # Tasks data
+│   ├── use-notes.ts        # Notes data
+│   └── use-whoop.ts        # WHOOP health data
 ├── lib/
-│   ├── api/          # API client, error handling
-│   ├── auth/         # Session & password utilities
-│   └── validations/  # Zod schemas
-└── types/            # TypeScript types
+│   ├── api/                # API client + error handling
+│   ├── auth/               # Session management
+│   └── validations/        # Zod schemas
+└── types/                  # TypeScript types
 ```
+
+## Authentication
+
+Email/password authentication with session cookies:
+
+| Route | Method | Description |
+|-------|--------|-------------|
+| `/api/auth/register` | POST | Create account |
+| `/api/auth/login` | POST | Login |
+| `/api/auth/logout` | POST | Logout |
+| `/api/auth/me` | GET | Get current user |
+
+Sessions stored in database with 30-day expiry. Passwords hashed with bcrypt.
 
 ## Integrations
 
 ### Google Calendar
 
-OAuth 2.0 integration for syncing Google Calendar events.
+OAuth 2.0 integration for calendar sync.
 
 **Setup:**
 1. Create OAuth credentials in [Google Cloud Console](https://console.cloud.google.com/apis/credentials)
-2. Add authorized redirect URI: `{APP_URL}/api/google/callback`
+2. Add redirect URI: `{APP_URL}/api/google/callback`
 3. Set environment variables:
    ```
    GOOGLE_CLIENT_ID=your_client_id
    GOOGLE_CLIENT_SECRET=your_client_secret
    ```
 
-**User Flow:**
-1. Visit `/calendar` → Shows "Connect Google Calendar" card
-2. Click connect → Redirects to Google OAuth consent
-3. Approve → Redirects back, auto-syncs calendars
-4. View and manage calendar events
-
-**OAuth Routes:**
+**Routes:**
 | Route | Method | Description |
 |-------|--------|-------------|
-| `/api/google/auth` | GET | Initiates OAuth flow |
-| `/api/google/callback` | GET | Handles OAuth callback |
-| `/api/google/status` | GET | Check if connected |
+| `/api/google/auth` | GET | Initiate OAuth |
+| `/api/google/callback` | GET | OAuth callback |
+| `/api/google/status` | GET | Connection status |
+| `/api/calendar/sync` | POST | Sync calendars |
+| `/api/calendar/events` | GET, POST | List/create events |
+| `/api/calendar/events/[id]` | PUT, DELETE | Update/delete event |
 
 ### WHOOP
 
-OAuth 2.0 integration for health/fitness data (recovery, strain, sleep).
+OAuth 2.0 integration for health/fitness data.
 
-**OAuth Routes:**
+**Setup:**
+1. Create app in [WHOOP Developer Portal](https://developer.whoop.com/)
+2. Add redirect URI: `{APP_URL}/api/whoop/callback`
+3. Set environment variables:
+   ```
+   WHOOP_CLIENT_ID=your_client_id
+   WHOOP_CLIENT_SECRET=your_client_secret
+   ```
+
+**Routes:**
 | Route | Method | Description |
 |-------|--------|-------------|
-| `/api/whoop/auth` | GET | Initiates OAuth flow |
-| `/api/whoop/callback` | GET | Handles OAuth callback |
-| `/api/whoop/profile` | GET | Check connection status |
+| `/api/whoop/auth` | GET | Initiate OAuth |
+| `/api/whoop/callback` | GET | OAuth callback |
+| `/api/whoop/sync` | POST | Sync health data |
+| `/api/whoop/profile` | GET | User profile |
+| `/api/whoop/recovery` | GET | Recovery scores |
+| `/api/whoop/sleep` | GET | Sleep data |
+| `/api/whoop/cycles` | GET | Strain cycles |
+| `/api/whoop/workouts` | GET | Workout data |
+| `/api/whoop/disconnect` | POST | Disconnect account |
 
 ## API Routes
 
-All API routes require authentication (except auth routes). Protected resources verify ownership via userId.
+All routes require authentication. Resources verify ownership via userId.
 
 | Route | Methods | Description |
 |-------|---------|-------------|
-| `/api/auth/*` | POST/GET | Authentication |
-| `/api/google/*` | GET | Google Calendar OAuth |
-| `/api/whoop/*` | GET | WHOOP OAuth |
-| `/api/tasks` | GET, POST | Tasks CRUD |
+| `/api/tasks` | GET, POST | List/create tasks |
 | `/api/tasks/[id]` | GET, PUT, DELETE | Single task |
-| `/api/notes` | GET, POST | Notes CRUD |
-| `/api/notes/[id]` | GET, PUT, DELETE | Single note |
-| `/api/goals` | GET, POST, DELETE | Goals CRUD |
-| `/api/goals/[id]` | PUT, DELETE | Single goal |
-| `/api/folders` | GET, POST | Folders CRUD |
-| `/api/folders/[id]` | PUT, DELETE | Single folder |
-| `/api/tags` | GET, POST | Tags CRUD |
+| `/api/tasks/bulk` | PUT, DELETE | Bulk operations |
+| `/api/tags` | GET, POST | List/create tags |
 | `/api/tags/[id]` | PUT, DELETE | Single tag |
-| `/api/calendar/*` | Various | Google Calendar sync & events |
-
-## Data Flow
-
-```
-UI Components
-    ↓
-Custom Hooks (use-tasks, use-notes, use-calendar, use-goals)
-    ↓
-TanStack Query (useQuery/useMutation)
-    ↓
-API Routes (/api/*) → Zod validation → Auth check
-    ↓
-Drizzle ORM (src/db/*) → Ownership verification
-    ↓
-PostgreSQL
-```
+| `/api/notes` | GET, POST | List/create notes |
+| `/api/notes/[id]` | GET, PUT, DELETE | Single note |
+| `/api/notes/[id]/duplicate` | POST | Duplicate note |
+| `/api/folders` | GET, POST | List/create folders |
+| `/api/folders/[id]` | PUT, DELETE | Single folder |
+| `/api/goals` | GET, POST, DELETE | List/create/delete all goals |
+| `/api/goals/[id]` | PUT, DELETE | Single goal |
+| `/api/goals/stats` | GET | Goal statistics |
 
 ## Scripts
 
@@ -143,4 +162,25 @@ bun run lint       # Lint with Biome
 bun run typecheck  # TypeScript check
 bun run db:push    # Push schema to database
 bun run db:studio  # Open Drizzle Studio
+```
+
+## Environment Variables
+
+```bash
+# Database
+DATABASE_URL=postgres://...
+
+# Auth
+SESSION_SECRET=your_session_secret
+
+# Google Calendar
+GOOGLE_CLIENT_ID=your_client_id
+GOOGLE_CLIENT_SECRET=your_client_secret
+
+# WHOOP
+WHOOP_CLIENT_ID=your_client_id
+WHOOP_CLIENT_SECRET=your_client_secret
+
+# App
+NEXT_PUBLIC_APP_URL=http://localhost:3000
 ```
