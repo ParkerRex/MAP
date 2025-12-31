@@ -1,16 +1,12 @@
 import "server-only";
 
-// Re-export constants from shared file
-export { DEV_USER_ID, DEV_USER, type User } from "./auth-constants";
+import { getSession, type SessionUser } from "./auth/session";
 
-import { DEV_USER } from "./auth-constants";
-import type { User } from "./auth-constants";
+export type User = SessionUser;
 
-// Get the current authenticated user
-// In production, this would verify a session token
+// Get the current authenticated user from session
 export async function getUser(): Promise<User | null> {
-  // For development, always return the dev user
-  return DEV_USER;
+  return getSession();
 }
 
 // Require authentication - throws if not authenticated
@@ -21,3 +17,7 @@ export async function requireUser(): Promise<User> {
   }
   return user;
 }
+
+// Re-export session utilities
+export { createSession, deleteSession, refreshSession } from "./auth/session";
+export { hashPassword, verifyPassword } from "./auth/password";
