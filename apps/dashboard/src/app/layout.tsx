@@ -1,4 +1,4 @@
-import { cn } from "@map/ui/cn";
+import { cn } from "@/components/ui/cn";
 import { GeistMono } from "geist/font/mono";
 import { GeistSans } from "geist/font/sans";
 import "@/styles/globals.css";

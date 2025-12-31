@@ -1,7 +1,7 @@
 "use client";
 
 import { useTrackerStore } from "@/store/tracker";
-import { cn } from "@map/ui/cn";
+import { cn } from "@/components/ui/cn";
 import {
   eachDayOfInterval,
   eachWeekOfInterval,

@@ -1,7 +1,7 @@
 "use client";
 
-import { Button } from "@map/ui/button";
-import { Icons } from "@map/ui/icons";
+import { Button } from "@/components/ui/button";
+import { Icons } from "@/components/ui/icons";
 
 export function DesktopCommandMenuSignIn() {
   return (

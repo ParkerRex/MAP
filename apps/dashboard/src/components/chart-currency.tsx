@@ -1,5 +1,4 @@
-// TODO: Implement getBankAccountsCurrencies in @midday/supabase/cached-queries
-// import { getBankAccountsCurrencies } from "@midday/supabase/cached-queries";
+// TODO: Implement getBankAccountsCurrencies
 import { SelectChartCurrency } from "./select-chart-currency";
 
 type Props = {

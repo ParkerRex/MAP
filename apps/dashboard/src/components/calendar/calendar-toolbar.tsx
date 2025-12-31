@@ -1,8 +1,8 @@
 "use client";
 import { useWeekNavigation } from "@/hooks/use-week-navigation";
 import { useCalendar } from "@/store/calendar-context";
-import { Button } from "@map/ui/button";
-import { Tooltip, TooltipContent } from "@map/ui/tooltip";
+import { Button } from "@/components/ui/button";
+import { Tooltip, TooltipContent } from "@/components/ui/tooltip";
 import { TooltipTrigger } from "@radix-ui/react-tooltip";
 import { format, getWeek } from "date-fns";
 import type { calendar_v3 } from "googleapis";

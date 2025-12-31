@@ -1,5 +1,5 @@
 import { SetupForm } from "@/components/setup-form";
-import { Icons } from "@map/ui/icons";
+import { Icons } from "@/components/ui/icons";
 import type { Metadata } from "next";
 import Link from "next/link";
 

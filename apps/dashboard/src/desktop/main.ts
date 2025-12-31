@@ -1,5 +1,4 @@
 // Import necessary modules and functions
-import { createClient } from "@/lib/db/client";
 import {
   globalShortcut,
   nativeWindow,
@@ -55,18 +54,8 @@ async function main() {
       if (window.location.pathname !== "/desktop/command") {
         // TODO: Fix redirect from middleware if command
         window.location.pathname = "/desktop/command";
-      } else {
-        // Check authentication status
-        const supabase = createClient();
-        const {
-          data: { session },
-        } = await supabase.auth.getSession();
-
-        // Redirect to home if not authenticated
-        if (!session) {
-          window.location.pathname = "/";
-        }
       }
+      // Dev mode: skip session check, assume authenticated
     }
   });
 }

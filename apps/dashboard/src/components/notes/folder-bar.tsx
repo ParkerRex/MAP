@@ -1,8 +1,8 @@
 "use client";
 
 import { useCreateFolder, useDeleteFolder, useUpdateFolder } from "@/hooks/use-notes";
-import { Button } from "@map/ui/button";
-import { cn } from "@map/ui/cn";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/components/ui/cn";
 import {
   ContextMenu,
   ContextMenuContent,
@@ -12,10 +12,10 @@ import {
   ContextMenuSubContent,
   ContextMenuSubTrigger,
   ContextMenuTrigger,
-} from "@map/ui/context-menu";
-import { Input } from "@map/ui/input";
-import { Popover, PopoverContent, PopoverTrigger } from "@map/ui/popover";
-import { Separator } from "@map/ui/separator";
+} from "@/components/ui/context-menu";
+import { Input } from "@/components/ui/input";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Separator } from "@/components/ui/separator";
 import { AnimatePresence, motion } from "framer-motion";
 import { CirclePlus, Folder } from "lucide-react";
 import type { LucideIcon } from "lucide-react";

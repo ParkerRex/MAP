@@ -1,10 +1,10 @@
-import { Icons } from "@map/ui/icons";
+import { Icons } from "@/components/ui/icons";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@map/ui/tooltip";
+} from "@/components/ui/tooltip";
 
 type Props = {
   fullfilled: boolean;

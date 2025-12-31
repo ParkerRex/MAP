@@ -1,12 +1,12 @@
 "use client";
 
-import { cn } from "@map/ui/cn";
+import { cn } from "@/components/ui/cn";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@map/ui/tooltip";
+} from "@/components/ui/tooltip";
 import { todesktopUpdater } from "@todesktop/client-core";
 import { isDesktopApp } from "@todesktop/client-core/platform/todesktop";
 import { AnimatePresence, motion } from "framer-motion";

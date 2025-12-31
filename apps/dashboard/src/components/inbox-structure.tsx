@@ -1,5 +1,5 @@
-import { Tabs } from "@map/ui/tabs";
-import { TooltipProvider } from "@map/ui/tooltip";
+import { Tabs } from "@/components/ui/tabs";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import { useQueryState } from "nuqs";
 import { InboxDetailsSkeleton } from "./inbox-details-skeleton";
 import { InboxListSkeleton } from "./inbox-list-skeleton";

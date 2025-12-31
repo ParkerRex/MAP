@@ -1,7 +1,7 @@
 "use client";
 
-import { cn } from "@map/ui/cn";
-import { Icons } from "@map/ui/icons";
+import { cn } from "@/components/ui/cn";
+import { Icons } from "@/components/ui/icons";
 import { webContents } from "@todesktop/client-core";
 import { useEffect, useState } from "react";
 

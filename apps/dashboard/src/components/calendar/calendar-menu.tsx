@@ -1,8 +1,8 @@
 "use client";
 import { useWeekNavigation } from "@/hooks/use-week-navigation";
 import { useCalendar } from "@/store/calendar-context";
-import { Calendar as UIDatePicker } from "@map/ui/calendar";
-import { Separator } from "@map/ui/separator";
+import { Calendar as UIDatePicker } from "@/components/ui/calendar";
+import { Separator } from "@/components/ui/separator";
 import { startOfWeek } from "date-fns";
 import { Eye, EyeOff } from "lucide-react";
 import { useCallback } from "react";

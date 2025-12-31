@@ -1,16 +1,16 @@
 "use client";
 import type { Tag as TagType, Task } from "@/types";
-import { Badge } from "@map/ui/badge";
-import { Button } from "@map/ui/button";
-import { Calendar as DatePicker } from "@map/ui/calendar";
-import { Checkbox } from "@map/ui/checkbox";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Calendar as DatePicker } from "@/components/ui/calendar";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   ContextMenu,
   ContextMenuContent,
   ContextMenuItem,
   ContextMenuSeparator,
   ContextMenuTrigger,
-} from "@map/ui/context-menu";
+} from "@/components/ui/context-menu";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -18,9 +18,9 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@map/ui/dropdown-menu";
-import { Input } from "@map/ui/input";
-import { Popover, PopoverContent, PopoverTrigger } from "@map/ui/popover";
+} from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { differenceInDays, format, parseISO } from "date-fns";
 import { AnimatePresence, Reorder, motion } from "framer-motion";
 import { Calendar, Flag, Tag, X } from "lucide-react";

@@ -1,11 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { notesDb } from "@/db/notes";
-import { createClient } from "@/lib/db/server";
+import { getUser } from "@/lib/auth";
 
 export async function GET() {
   try {
-    const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const user = await getUser();
 
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -15,14 +14,16 @@ export async function GET() {
     return NextResponse.json({ notes });
   } catch (error) {
     console.error("Failed to fetch notes:", error);
-    return NextResponse.json({ error: "Failed to fetch notes" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to fetch notes" },
+      { status: 500 },
+    );
   }
 }
 
 export async function POST(request: NextRequest) {
   try {
-    const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const user = await getUser();
 
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -36,7 +37,10 @@ export async function POST(request: NextRequest) {
     }
 
     if (!folderId) {
-      return NextResponse.json({ error: "Folder ID is required" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Folder ID is required" },
+        { status: 400 },
+      );
     }
 
     const note = await notesDb.createNote({
@@ -49,6 +53,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ note });
   } catch (error) {
     console.error("Failed to create note:", error);
-    return NextResponse.json({ error: "Failed to create note" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to create note" },
+      { status: 500 },
+    );
   }
 }

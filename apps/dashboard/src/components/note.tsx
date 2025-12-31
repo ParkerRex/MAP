@@ -1,5 +1,5 @@
 import type { UpdateTransactionValues } from "@/actions/schema";
-import { Textarea } from "@map/ui/textarea";
+import { Textarea } from "@/components/ui/textarea";
 import { useState } from "react";
 
 type Props = {

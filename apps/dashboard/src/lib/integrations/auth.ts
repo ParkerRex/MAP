@@ -1,8 +1,6 @@
 import { CalendarSyncService } from "@/services/CalendarSyncService";
-import { Database } from "@/utils/supabase/database.types";
-import { createClient } from "@/lib/db/server";
-import type { SupabaseClient } from "@supabase/supabase-js";
-import { CalendarClient } from "./calendar";
+import { calendarDb } from "@/db/calendar";
+import { getUser } from "@/lib/auth";
 
 type Provider = "GOOGLE" | "WHOOP";
 
@@ -43,12 +41,6 @@ const configs: Record<Provider, OAuthConfig> = {
 };
 
 export class AuthManager {
-  private supabase: SupabaseClient;
-
-  constructor() {
-    this.supabase = createClient();
-  }
-
   async storeToken(
     provider: Provider,
     userId: string,
@@ -61,23 +53,13 @@ export class AuthManager {
     const expiresAt = new Date(Date.now() + tokenData.expires_in * 1000);
 
     try {
-      const { error } = await this.supabase.from("integration").upsert(
-        {
-          user_id: userId,
-          provider: provider,
-          access_token: tokenData.access_token,
-          refresh_token: tokenData.refresh_token,
-          expires_at: expiresAt.toISOString(),
-        },
-        {
-          onConflict: "user_id,provider",
-        },
-      );
-
-      if (error) {
-        console.error("Supabase error storing token:", error);
-        throw new Error(`Failed to store integration token: ${error.message}`);
-      }
+      await calendarDb.upsertIntegration({
+        userId,
+        provider,
+        accessToken: tokenData.access_token,
+        refreshToken: tokenData.refresh_token,
+        expiresAt: expiresAt.toISOString(),
+      });
 
       console.log("Token stored successfully:", {
         provider,
@@ -97,17 +79,7 @@ export class AuthManager {
     userId: string,
   ): Promise<string | null> {
     try {
-      const { data, error } = await this.supabase
-        .from("integration")
-        .select("access_token, refresh_token, expires_at")
-        .eq("user_id", userId)
-        .eq("provider", provider)
-        .single();
-
-      if (error) {
-        console.error("Error fetching token:", error);
-        return null;
-      }
+      const data = await calendarDb.getIntegration(userId, provider);
 
       if (!data) {
         console.error("No token found for user and provider");
@@ -116,10 +88,13 @@ export class AuthManager {
 
       if (this.isTokenExpired(data)) {
         // Token has expired, refresh it
-        return this.refreshToken(provider, data.refresh_token, userId);
+        if (data.refreshToken) {
+          return this.refreshToken(provider, data.refreshToken, userId);
+        }
+        return null;
       }
 
-      return data.access_token;
+      return data.accessToken;
     } catch (error) {
       console.error("Error in getAccessToken:", error);
       return null;
@@ -169,49 +144,34 @@ export class AuthManager {
   }
 
   private isTokenExpired(token: TokenData): boolean {
+    if (!token.expiresAt) return false;
     const now = new Date();
-    const expiresAt = new Date(token.expires_at);
+    const expiresAt = new Date(token.expiresAt);
     return expiresAt <= now || expiresAt.getTime() - now.getTime() < 300000; // 5 minutes buffer
   }
 
   async hasIntegration(provider: Provider, userId: string): Promise<boolean> {
-    const { data, error } = await this.supabase
-      .from("integration")
-      .select("id")
-      .eq("provider", provider)
-      .eq("user_id", userId)
-      .single();
-
-    if (error) {
-      console.error("Error checking integration:", error);
-      return false;
-    }
-
-    return !!data;
+    return calendarDb.hasIntegration(userId, provider);
   }
 
   async retrieveToken(
     provider: Provider,
     userId: string,
   ): Promise<TokenData | null> {
-    const { data, error } = await this.supabase
-      .from("integration")
-      .select("access_token, refresh_token, expires_at")
-      .eq("provider", provider)
-      .eq("user_id", userId)
-      .single();
+    const data = await calendarDb.getIntegration(userId, provider);
+    if (!data) return null;
 
-    if (error) {
-      console.error("Error retrieving token:", error);
-      return null;
-    }
-    return data;
+    return {
+      accessToken: data.accessToken,
+      refreshToken: data.refreshToken || "",
+      expiresAt: data.expiresAt || "",
+    };
   }
 
   async exchangeCodeForToken(
     provider: Provider,
     code: string,
-    state: string | null,
+    _state: string | null,
   ): Promise<void> {
     try {
       const config = configs[provider];
@@ -236,13 +196,12 @@ export class AuthManager {
         throw new Error("No access token returned");
       }
 
-      const { data: userData, error: userError } =
-        await this.supabase.auth.getUser();
-      if (userError || !userData.user) {
+      const user = await getUser();
+      if (!user) {
         throw new Error("No authenticated user found");
       }
 
-      await this.storeToken(provider, userData.user.id, {
+      await this.storeToken(provider, user.id, {
         access_token: data.access_token,
         refresh_token: data.refresh_token || "",
         expires_in: data.expires_in,
@@ -250,7 +209,7 @@ export class AuthManager {
 
       if (provider === "GOOGLE") {
         const calendarSyncService = new CalendarSyncService();
-        await calendarSyncService.syncCalendar(userData.user.id);
+        await calendarSyncService.syncCalendar(user.id);
       }
     } catch (error) {
       console.error("Error in exchangeCodeForToken:", error);
@@ -262,9 +221,9 @@ export class AuthManager {
 }
 
 type TokenData = {
-  access_token: string;
-  refresh_token: string;
-  expires_at: string;
+  accessToken: string;
+  refreshToken: string;
+  expiresAt: string;
 };
 
 type TokenResponseData = {

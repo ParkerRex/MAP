@@ -1,4 +1,4 @@
-import { cn } from "@map/ui/cn";
+import { cn } from "@/components/ui/cn";
 import { LoaderIcon } from "lucide-react";
 
 export default function FullScreenLoading({

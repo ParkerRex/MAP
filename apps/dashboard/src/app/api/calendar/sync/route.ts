@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { google } from "googleapis";
 import { calendarDb } from "@/db/calendar";
 import { mapGoogleEventToDb } from "@/lib/google-calendar";
+import { getUser } from "@/lib/auth";
 import { subMonths, addMonths } from "date-fns";
 
 const MAX_RETRIES = 3;
@@ -165,11 +166,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Otherwise, use authenticated user
-    const { createClient } = await import("@/lib/db/server");
-    const supabase = createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    const user = await getUser();
 
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

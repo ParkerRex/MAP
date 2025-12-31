@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@map/ui/button";
+import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
 export default function ErrorPage({

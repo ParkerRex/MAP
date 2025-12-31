@@ -1,4 +1,4 @@
-import { Input } from "@map/ui/input";
+import { Input } from "@/components/ui/input";
 import { useState } from "react";
 
 const toHHMMSS = (secs: number) => {

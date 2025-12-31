@@ -1,11 +1,11 @@
 import { useCalendar } from "@/store/calendar-context";
-import { Button } from "@map/ui/button";
+import { Button } from "@/components/ui/button";
 import {
   ContextMenu,
   ContextMenuContent,
   ContextMenuItem,
   ContextMenuTrigger,
-} from "@map/ui/context-menu";
+} from "@/components/ui/context-menu";
 import type { calendar_v3 } from "googleapis";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import React, { useState } from "react";

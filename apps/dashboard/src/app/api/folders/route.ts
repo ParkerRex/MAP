@@ -1,11 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { notesDb } from "@/db/notes";
-import { createClient } from "@/lib/db/server";
+import { getUser } from "@/lib/auth";
 
 export async function GET() {
   try {
-    const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const user = await getUser();
 
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -15,14 +14,16 @@ export async function GET() {
     return NextResponse.json({ folders });
   } catch (error) {
     console.error("Failed to fetch folders:", error);
-    return NextResponse.json({ error: "Failed to fetch folders" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to fetch folders" },
+      { status: 500 },
+    );
   }
 }
 
 export async function POST(request: NextRequest) {
   try {
-    const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const user = await getUser();
 
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -39,6 +40,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ folder });
   } catch (error) {
     console.error("Failed to create folder:", error);
-    return NextResponse.json({ error: "Failed to create folder" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to create folder" },
+      { status: 500 },
+    );
   }
 }

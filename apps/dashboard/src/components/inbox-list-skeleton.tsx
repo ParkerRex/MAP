@@ -1,5 +1,5 @@
-import { cn } from "@map/ui/cn";
-import { Skeleton } from "@map/ui/skeleton";
+import { cn } from "@/components/ui/cn";
+import { Skeleton } from "@/components/ui/skeleton";
 
 type InboxSkeletonProps = {
   numberOfItems: number;

@@ -1,11 +1,10 @@
 import { NextResponse } from "next/server";
 import { goalsDb } from "@/db/goals";
-import { createClient } from "@/lib/db/server";
+import { getUser } from "@/lib/auth";
 
 export async function GET() {
   try {
-    const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const user = await getUser();
 
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -15,6 +14,9 @@ export async function GET() {
     return NextResponse.json({ stats });
   } catch (error) {
     console.error("Failed to fetch goal stats:", error);
-    return NextResponse.json({ error: "Failed to fetch goal stats" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to fetch goal stats" },
+      { status: 500 },
+    );
   }
 }

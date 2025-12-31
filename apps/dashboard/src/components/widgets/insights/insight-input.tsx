@@ -1,8 +1,8 @@
 "use client";
 
 import { useAssistantStore } from "@/store/assistant";
-import { Icons } from "@map/ui/icons";
-import { Input } from "@map/ui/input";
+import { Icons } from "@/components/ui/icons";
+import { Input } from "@/components/ui/input";
 
 export function InsightInput() {
   const { setOpen } = useAssistantStore();

@@ -1,6 +1,4 @@
 import { Cookies } from "@/utils/constants";
-import { getSession } from "@/lib/db/cached-queries";
-import { createClient } from "@/lib/db/server";
 import { addYears } from "date-fns";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
@@ -9,7 +7,7 @@ import type { NextRequest } from "next/server";
 export const preferredRegion = ["sfo1", "iad1"];
 
 export async function GET(req: NextRequest) {
-  const cookieStore = cookies();
+  const cookieStore = await cookies();
   const requestUrl = new URL(req.url);
   const code = requestUrl.searchParams.get("code");
   const client = requestUrl.searchParams.get("client");
@@ -26,12 +24,8 @@ export async function GET(req: NextRequest) {
     });
   }
 
-  if (code) {
-    const supabase = createClient(cookieStore);
-    await supabase.auth.exchangeCodeForSession(code);
-
-    await getSession();
-  }
+  // Dev mode: no actual OAuth code exchange needed
+  // Just set the provider cookie and redirect
 
   if (returnTo) {
     return NextResponse.redirect(`${requestUrl.origin}/${returnTo}`);

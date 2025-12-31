@@ -1,4 +1,4 @@
-import { Avatar, AvatarImage } from "@map/ui/avatar";
+import { Avatar, AvatarImage } from "@/components/ui/avatar";
 
 // TODO; SWAP OUT THE DEFAULT IMAGE
 

@@ -1,4 +1,4 @@
-import type { BadgeProps } from "@map/ui/badge";
+import type { BadgeProps } from "@/components/ui/badge";
 import type { Task } from "@/types";
 
 export function getTaskStatus(task: Task) {

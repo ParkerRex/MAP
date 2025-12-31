@@ -1,6 +1,6 @@
-import { Button } from "@map/ui/button";
-import { cn } from "@map/ui/cn";
-import { Icons } from "@map/ui/icons";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/components/ui/cn";
+import { Icons } from "@/components/ui/icons";
 import {
   addDays,
   addMonths,

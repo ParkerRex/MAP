@@ -3,8 +3,8 @@
 // TODO: Implement createReportAction in @/actions/report/create-report-action
 // import { createReportAction } from "@/actions/report/create-report-action";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Button } from "@map/ui/button";
-import { Calendar } from "@map/ui/calendar";
+import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
 import {
   Dialog,
   DialogContent,
@@ -12,7 +12,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@map/ui/dialog";
+} from "@/components/ui/dialog";
 import {
   Form,
   FormControl,
@@ -21,10 +21,10 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@map/ui/form";
-import { Icons } from "@map/ui/icons";
-import { Popover, PopoverContent, PopoverTrigger } from "@map/ui/popover";
-import { useToast } from "@map/ui/use-toast";
+} from "@/components/ui/form";
+import { Icons } from "@/components/ui/icons";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { useToast } from "@/components/ui/use-toast";
 import { format } from "date-fns";
 import { Loader2 } from "lucide-react";
 import { CalendarIcon } from "lucide-react";

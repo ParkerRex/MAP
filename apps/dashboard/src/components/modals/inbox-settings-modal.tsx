@@ -1,14 +1,14 @@
 "use client";
 
-import { Button } from "@map/ui/button";
+import { Button } from "@/components/ui/button";
 import {
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "@map/ui/dialog";
-import { Dialog } from "@map/ui/dialog";
-import { Icons } from "@map/ui/icons";
+} from "@/components/ui/dialog";
+import { Dialog } from "@/components/ui/dialog";
+import { Icons } from "@/components/ui/icons";
 import { useState } from "react";
 import { InboxSettings } from "../inbox-settings";
 

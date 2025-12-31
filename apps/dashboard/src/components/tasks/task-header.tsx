@@ -1,13 +1,13 @@
 "use client";
 
 import type { Tag as TagType } from "@/types";
-import { Button } from "@map/ui/button";
+import { Button } from "@/components/ui/button";
 import {
   ContextMenu,
   ContextMenuContent,
   ContextMenuItem,
   ContextMenuTrigger,
-} from "@map/ui/context-menu";
+} from "@/components/ui/context-menu";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -15,9 +15,9 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@map/ui/dropdown-menu";
-import { Input } from "@map/ui/input";
-import { Popover, PopoverContent, PopoverTrigger } from "@map/ui/popover";
+} from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Plus, Search, Tag } from "lucide-react";
 import React from "react";
 import type { FC } from "react";

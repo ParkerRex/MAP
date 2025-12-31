@@ -1,14 +1,7 @@
-import { AI } from "@/actions/ai/chat";
-import { Assistant } from "@/components/assistant";
-import { getUser } from "@/lib/db/cached-queries";
-import { nanoid } from "nanoid";
-
-export default async function Page() {
-  const user = await getUser();
-
+export default function Page() {
   return (
-    <AI initialAIState={{ user: user.data, messages: [], chatId: nanoid() }}>
-      <Assistant />
-    </AI>
+    <div className="flex items-center justify-center h-screen">
+      <p className="text-muted-foreground">Command palette coming soon</p>
+    </div>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 import type { Tag, Task } from "@/types";
-import { ScrollArea } from "@map/ui/scroll-area";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Reorder } from "framer-motion";
 import type { FC } from "react";
 import React from "react";

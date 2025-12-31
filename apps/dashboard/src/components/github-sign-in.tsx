@@ -1,53 +1,19 @@
 "use client";
 
-import { createClient } from "@/lib/db/client";
-import { Button } from "@map/ui/button";
-import { Icons } from "@map/ui/icons";
-import { isDesktopApp } from "@todesktop/client-core/platform/todesktop";
+import { Button } from "@/components/ui/button";
+import { Icons } from "@/components/ui/icons";
 import { Loader2 } from "lucide-react";
-import { useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 export function GithubSignIn() {
   const [isLoading, setLoading] = useState(false);
-  const supabase = createClient();
-  const searchParams = useSearchParams();
-  const returnTo = searchParams.get("return_to");
+  const router = useRouter();
 
   const handleSignIn = async () => {
     setLoading(true);
-
-    if (isDesktopApp()) {
-      const redirectTo = new URL("/api/auth/callback", window.location.origin);
-
-      redirectTo.searchParams.append("provider", "github");
-      redirectTo.searchParams.append("client", "desktop");
-
-      await supabase.auth.signInWithOAuth({
-        provider: "github",
-        options: {
-          redirectTo: redirectTo.toString(),
-          queryParams: {
-            client: "desktop",
-          },
-        },
-      });
-    } else {
-      const redirectTo = new URL("/api/auth/callback", window.location.origin);
-
-      if (returnTo) {
-        redirectTo.searchParams.append("return_to", returnTo);
-      }
-
-      redirectTo.searchParams.append("provider", "github");
-
-      await supabase.auth.signInWithOAuth({
-        provider: "github",
-        options: {
-          redirectTo: redirectTo.toString(),
-        },
-      });
-    }
+    // Dev mode: just redirect to home
+    router.push("/");
   };
 
   return (

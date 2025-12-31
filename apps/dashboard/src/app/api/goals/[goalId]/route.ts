@@ -1,14 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { goalsDb } from "@/db/goals";
-import { createClient } from "@/lib/db/server";
+import { getUser } from "@/lib/auth";
 
 type Params = Promise<{ goalId: string }>;
 
-export async function PUT(request: NextRequest, { params }: { params: Params }) {
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: Params },
+) {
   try {
     const { goalId } = await params;
-    const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const user = await getUser();
 
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -32,15 +34,20 @@ export async function PUT(request: NextRequest, { params }: { params: Params }) 
     return NextResponse.json({ goal });
   } catch (error) {
     console.error("Failed to update goal:", error);
-    return NextResponse.json({ error: "Failed to update goal" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to update goal" },
+      { status: 500 },
+    );
   }
 }
 
-export async function DELETE(request: NextRequest, { params }: { params: Params }) {
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Params },
+) {
   try {
     const { goalId } = await params;
-    const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const user = await getUser();
 
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -50,6 +57,9 @@ export async function DELETE(request: NextRequest, { params }: { params: Params 
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Failed to delete goal:", error);
-    return NextResponse.json({ error: "Failed to delete goal" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to delete goal" },
+      { status: 500 },
+    );
   }
 }

@@ -1,5 +1,5 @@
-import { Icons } from "@map/ui/icons";
-import { Input } from "@map/ui/input";
+import { Icons } from "@/components/ui/icons";
+import { Input } from "@/components/ui/input";
 import { useHotkeys } from "react-hotkeys-hook";
 
 type Props = {

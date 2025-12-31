@@ -2,8 +2,8 @@
 
 import { useCreateNote, useDeleteNote, useDuplicateNote, useUpdateNote } from "@/hooks/use-notes";
 import type { Note } from "@/types/notes";
-import { Button } from "@map/ui/button";
-import { cn } from "@map/ui/cn";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/components/ui/cn";
 import {
   ContextMenu,
   ContextMenuContent,
@@ -13,9 +13,9 @@ import {
   ContextMenuSubContent,
   ContextMenuSubTrigger,
   ContextMenuTrigger,
-} from "@map/ui/context-menu";
-import { Input } from "@map/ui/input";
-import { ScrollArea } from "@map/ui/scroll-area";
+} from "@/components/ui/context-menu";
+import { Input } from "@/components/ui/input";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { format, formatDistanceToNow, parseISO } from "date-fns";
 import { AnimatePresence, motion } from "framer-motion";
 import { Plus, Trash } from "lucide-react";

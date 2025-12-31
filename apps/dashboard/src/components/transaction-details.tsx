@@ -1,22 +1,16 @@
 import type { UpdateTransactionValues } from "@/actions/schema";
-// TODO: Implement updateSimilarTransactionsAction
-// import { updateSimilarTransactionsAction } from "@/actions/update-similar-transactions-action";
-import { createClient } from "@/lib/db/client";
-// TODO: Implement getTransactionQuery
-// import { getTransactionQuery } from "@/lib/db/queries";
-// TODO: Implement getCurrentUserTeamQuery and getSimilarTransactions
-// import {
-//   getCurrentUserTeamQuery,
-//   getSimilarTransactions,
-// } from "@/lib/db/queries";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@map/ui/accordion";
-import { cn } from "@map/ui/cn";
-import { Label } from "@map/ui/label";
-import { Skeleton } from "@map/ui/skeleton";
-import { ToastAction } from "@map/ui/toast";
-import { useToast } from "@map/ui/use-toast";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import { cn } from "@/components/ui/cn";
+import { Label } from "@/components/ui/label";
+import { Skeleton } from "@/components/ui/skeleton";
+import { ToastAction } from "@/components/ui/toast";
+import { useToast } from "@/components/ui/use-toast";
 import { format } from "date-fns";
-import { useAction } from "next-safe-action/hooks";
 import { useQueryState } from "nuqs";
 import { useEffect, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
@@ -30,18 +24,21 @@ import { TransactionBankAccount } from "./transaction-bank-account";
 type Props = {
   data: any;
   ids?: string[];
-  updateTransaction: (values: UpdateTransactionValues, optimisticData: any) => void;
+  updateTransaction: (
+    values: UpdateTransactionValues,
+    optimisticData: any,
+  ) => void;
 };
 
-export function TransactionDetails({ data: initialData, ids, updateTransaction }: Props) {
+export function TransactionDetails({
+  data: initialData,
+  ids,
+  updateTransaction,
+}: Props) {
   const [data, setData] = useState(initialData);
   const [transactionId, setTransactionId] = useQueryState("id");
   const { toast } = useToast();
-  const t = useI18n();
-  const supabase = createClient();
   const [isLoading, setLoading] = useState(true);
-  // TODO: Implement updateSimilarTransactionsAction
-  // const updateSimilarTransactions = useAction(updateSimilarTransactionsAction);
 
   useHotkeys("esc", () => setTransactionId(null));
 
@@ -82,7 +79,6 @@ export function TransactionDetails({ data: initialData, ids, updateTransaction }
     async function fetchData() {
       try {
         // TODO: Implement getTransactionQuery
-        // const transaction = await getTransactionQuery(supabase, data?.id);
         // Stub: Simulating API call with setTimeout
         setTimeout(() => {
           setData({
@@ -115,15 +111,12 @@ export function TransactionDetails({ data: initialData, ids, updateTransaction }
     slug: string;
     color: string;
   }) => {
-    updateTransaction({ id: data?.id, category_slug: category.slug }, { category });
+    updateTransaction(
+      { id: data?.id, category_slug: category.slug },
+      { category },
+    );
 
-    // TODO: Implement getCurrentUserTeamQuery and getSimilarTransactions
-    // const user = await getCurrentUserTeamQuery(supabase);
-    // const transactions = await getSimilarTransactions(supabase, {
-    //   name: data?.name,
-    //   teamId: user?.data?.team_id,
-    // });
-
+    // TODO: Implement getSimilarTransactions
     // Stub: Simulating similar transactions
     const transactions = { data: [1, 2, 3] };
 
@@ -142,7 +135,6 @@ export function TransactionDetails({ data: initialData, ids, updateTransaction }
               altText="Yes"
               onClick={() => {
                 // TODO: Implement updateSimilarTransactions
-                // updateSimilarTransactions.execute({ id: data?.id });
                 console.log("Update similar transactions clicked");
               }}
               className="pl-5 pr-5 bg-primary text-primary-foreground hover:bg-primary/90"
@@ -189,7 +181,11 @@ export function TransactionDetails({ data: initialData, ids, updateTransaction }
           )}
 
           <h2 className="mt-6 mb-3">
-            {isLoading ? <Skeleton className="w-[35%] h-[22px] rounded-md mb-2" /> : data?.name}
+            {isLoading ? (
+              <Skeleton className="w-[35%] h-[22px] rounded-md mb-2" />
+            ) : (
+              data?.name
+            )}
           </h2>
           <div className="flex justify-between items-center">
             <div className="flex flex-col w-full space-y-1">
@@ -208,7 +204,8 @@ export function TransactionDetails({ data: initialData, ids, updateTransaction }
               <div className="h-3">
                 {data?.vat > 0 && (
                   <span className="text-[#606060] text-xs">
-                    VAT <FormatAmount amount={data.vat} currency={data.currency} />
+                    VAT{" "}
+                    <FormatAmount amount={data.vat} currency={data.currency} />
                   </span>
                 )}
               </div>
@@ -245,7 +242,10 @@ export function TransactionDetails({ data: initialData, ids, updateTransaction }
             isLoading={isLoading}
             selectedId={data?.assigned?.id ?? undefined}
             onSelect={(user) => {
-              updateTransaction({ assigned_id: user?.id, id: data?.id }, { assigned: user });
+              updateTransaction(
+                { assigned_id: user?.id, id: data?.id },
+                { assigned: user },
+              );
             }}
           />
         </div>
@@ -255,7 +255,11 @@ export function TransactionDetails({ data: initialData, ids, updateTransaction }
         <AccordionItem value="note">
           <AccordionTrigger>Note</AccordionTrigger>
           <AccordionContent>
-            <Note id={data?.id} defaultValue={data?.note} updateTransaction={updateTransaction} />
+            <Note
+              id={data?.id}
+              defaultValue={data?.note}
+              updateTransaction={updateTransaction}
+            />
           </AccordionContent>
         </AccordionItem>
       </Accordion>

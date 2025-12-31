@@ -1,7 +1,7 @@
 // TODO: Modify this to be specific to calendar
 "use client";
 
-import { Button } from "@map/ui/button";
+import { Button } from "@/components/ui/button";
 import { useQueryState } from "nuqs";
 
 export function AddAccountButton() {

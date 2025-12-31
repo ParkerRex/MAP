@@ -5,12 +5,12 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@map/ui/card";
+} from "@/components/ui/card";
 
 import { useDeleteAllGoals, useGoalStats } from "@/hooks/use-goals";
 import type { Goal } from "@/types/goals";
-import { Progress } from "@map/ui/progress";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@map/ui/tooltip";
+import { Progress } from "@/components/ui/progress";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useEffect, useState } from "react";
 import { GiMagicBroom } from "react-icons/gi";
 import AddGoalForm from "./AddGoalForm";

@@ -5,7 +5,7 @@ import {
   ContextMenuContent,
   ContextMenuItem,
   ContextMenuTrigger,
-} from "@map/ui/context-menu";
+} from "@/components/ui/context-menu";
 import type { calendar_v3 } from "googleapis";
 import type React from "react";
 import { useMemo } from "react";

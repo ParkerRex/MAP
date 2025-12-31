@@ -1,13 +1,13 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Button } from "@map/ui/button";
+import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
   FormField,
   FormItem,
   FormLabel,
-} from "@map/ui/form";
-import { Input } from "@map/ui/input";
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { AssignUser } from "../assign-user";

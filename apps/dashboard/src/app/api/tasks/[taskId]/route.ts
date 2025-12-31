@@ -1,14 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { tasksDb } from "@/db/tasks";
-import { createClient } from "@/lib/db/server";
+import { getUser } from "@/lib/auth";
 
 type Params = Promise<{ taskId: string }>;
 
-export async function GET(request: NextRequest, { params }: { params: Params }) {
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Params },
+) {
   try {
     const { taskId } = await params;
-    const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const user = await getUser();
 
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -23,15 +25,20 @@ export async function GET(request: NextRequest, { params }: { params: Params }) 
     return NextResponse.json({ task });
   } catch (error) {
     console.error("Failed to fetch task:", error);
-    return NextResponse.json({ error: "Failed to fetch task" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to fetch task" },
+      { status: 500 },
+    );
   }
 }
 
-export async function PUT(request: NextRequest, { params }: { params: Params }) {
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: Params },
+) {
   try {
     const { taskId } = await params;
-    const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const user = await getUser();
 
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -48,7 +55,10 @@ export async function PUT(request: NextRequest, { params }: { params: Params }) 
 
     // Handle due date update
     if (dueAt !== undefined) {
-      const task = await tasksDb.updateTaskDueDate(taskId, dueAt ? new Date(dueAt) : null);
+      const task = await tasksDb.updateTaskDueDate(
+        taskId,
+        dueAt ? new Date(dueAt) : null,
+      );
       return NextResponse.json({ task });
     }
 
@@ -68,15 +78,20 @@ export async function PUT(request: NextRequest, { params }: { params: Params }) 
     return NextResponse.json({ task });
   } catch (error) {
     console.error("Failed to update task:", error);
-    return NextResponse.json({ error: "Failed to update task" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to update task" },
+      { status: 500 },
+    );
   }
 }
 
-export async function DELETE(request: NextRequest, { params }: { params: Params }) {
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Params },
+) {
   try {
     const { taskId } = await params;
-    const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const user = await getUser();
 
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -86,6 +101,9 @@ export async function DELETE(request: NextRequest, { params }: { params: Params 
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Failed to delete task:", error);
-    return NextResponse.json({ error: "Failed to delete task" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to delete task" },
+      { status: 500 },
+    );
   }
 }

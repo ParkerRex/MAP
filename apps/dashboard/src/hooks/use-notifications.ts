@@ -1,14 +1,11 @@
-import { createClient } from "@/lib/db/client";
-// TODO: Implement getUserQuery
-// import { getUserQuery } from "@/lib/db/queries";
 import { HeadlessService } from "@novu/headless";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { DEV_USER_ID } from "@/lib/auth-constants";
 
 export function useNotifications() {
-  const supabase = createClient();
   const [isLoading, setLoading] = useState(true);
   const [notifications, setNotifications] = useState([]);
-  const [subscriberId, setSubscriberId] = useState();
+  const [subscriberId, setSubscriberId] = useState<string>();
   const headlessServiceRef = useRef<HeadlessService>();
 
   const markAllMessagesAsRead = () => {
@@ -88,23 +85,10 @@ export function useNotifications() {
   };
 
   useEffect(() => {
-    async function fetchUser() {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-
-      const { data: userData } = await getUserQuery(
-        supabase,
-        session?.user?.id,
-      );
-
-      if (userData) {
-        setSubscriberId(`${userData.team_id}_${userData.id}`);
-      }
-    }
-
-    fetchUser();
-  }, [supabase]);
+    // TODO: Get actual user data when auth is set up
+    // For now, use dev user ID
+    setSubscriberId(`dev_${DEV_USER_ID}`);
+  }, []);
 
   useEffect(() => {
     const headlessService = headlessServiceRef.current;

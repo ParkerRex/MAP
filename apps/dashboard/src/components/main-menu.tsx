@@ -2,15 +2,15 @@
 
 import { updateMenuAction } from "@/actions/update-menu-action";
 import { useMenuStore } from "@/store/menu";
-import { Button } from "@map/ui/button";
-import { cn } from "@map/ui/cn";
-import { Icons } from "@map/ui/icons";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/components/ui/cn";
+import { Icons } from "@/components/ui/icons";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@map/ui/tooltip";
+} from "@/components/ui/tooltip";
 import { useClickAway } from "@uidotdev/usehooks";
 import { Reorder, motion, useMotionValue } from "framer-motion";
 import { useAction } from "next-safe-action/hooks";

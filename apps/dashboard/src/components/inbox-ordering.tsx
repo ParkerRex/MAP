@@ -1,13 +1,13 @@
 "use client";
 
-import { Button } from "@map/ui/button";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuTrigger,
-} from "@map/ui/dropdown-menu";
-import { Icons } from "@map/ui/icons";
+} from "@/components/ui/dropdown-menu";
+import { Icons } from "@/components/ui/icons";
 import { useState } from "react";
 
 type Props = {

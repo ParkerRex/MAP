@@ -1,6 +1,6 @@
 "use client";
 
-import { cn } from "@map/ui/cn";
+import { cn } from "@/components/ui/cn";
 
 type CategoryIconProps = {
   color?: string;

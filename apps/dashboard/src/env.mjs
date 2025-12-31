@@ -14,33 +14,28 @@ export const env = createEnv({
    * built with invalid env vars.
    */
   server: {
-    OPENAI_API_KEY: z.string(),
-    SUPABASE_SERVICE_KEY: z.string(),
-    UPSTASH_REDIS_REST_TOKEN: z.string(),
-    UPSTASH_REDIS_REST_URL: z.string(),
-    LOOPS_ENDPOINT: z.string(),
-    LOOPS_API_KEY: z.string(),
-    NOVU_API_KEY: z.string(),
-    RESEND_API_KEY: z.string(),
+    OPENAI_API_KEY: z.string().optional(),
+    DATABASE_URL: z.string().optional(),
+    UPSTASH_REDIS_REST_TOKEN: z.string().optional(),
+    UPSTASH_REDIS_REST_URL: z.string().optional(),
+    LOOPS_ENDPOINT: z.string().optional(),
+    LOOPS_API_KEY: z.string().optional(),
+    NOVU_API_KEY: z.string().optional(),
+    RESEND_API_KEY: z.string().optional(),
   },
   /**
    * Specify your client-side environment variables schema here.
    * For them to be exposed to the client, prefix them with `NEXT_PUBLIC_`.
    */
   client: {
-    NEXT_PUBLIC_SUPABASE_URL: z.string(),
-    NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string(),
-    NEXT_PUBLIC_NOVU_APPLICATION_IDENTIFIER: z.string(),
-    NEXT_PUBLIC_SUPABASE_ID: z.string(),
+    NEXT_PUBLIC_NOVU_APPLICATION_IDENTIFIER: z.string().optional(),
   },
   /**
    * Destructure all variables from `process.env` to make sure they aren't tree-shaken away.
    */
   runtimeEnv: {
     VERCEL_URL: process.env.VERCEL_URL,
-    NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
-    NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-    NEXT_PUBLIC_SUPABASE_ID: process.env.NEXT_PUBLIC_SUPABASE_ID,
+    DATABASE_URL: process.env.DATABASE_URL,
     RESEND_API_KEY: process.env.RESEND_API_KEY,
     PORT: process.env.PORT,
     LOOPS_ENDPOINT: process.env.LOOPS_ENDPOINT,
@@ -50,7 +45,6 @@ export const env = createEnv({
     UPSTASH_REDIS_REST_TOKEN: process.env.UPSTASH_REDIS_REST_TOKEN,
     NEXT_PUBLIC_NOVU_APPLICATION_IDENTIFIER:
       process.env.NEXT_PUBLIC_NOVU_APPLICATION_IDENTIFIER,
-    SUPABASE_SERVICE_KEY: process.env.SUPABASE_SERVICE_KEY,
     OPENAI_API_KEY: process.env.OPENAI_API_KEY,
   },
   skipValidation: !!process.env.CI || !!process.env.SKIP_ENV_VALIDATION,

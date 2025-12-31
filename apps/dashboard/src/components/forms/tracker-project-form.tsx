@@ -1,7 +1,7 @@
 "use client";
 
-import { Button } from "@map/ui/button";
-import { Collapsible, CollapsibleContent } from "@map/ui/collapsible";
+import { Button } from "@/components/ui/button";
+import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
 import {
   Form,
   FormControl,
@@ -10,11 +10,11 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@map/ui/form";
-import { Input } from "@map/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@map/ui/select";
-import { Switch } from "@map/ui/switch";
-import { Textarea } from "@map/ui/textarea";
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { Textarea } from "@/components/ui/textarea";
 import { CurrencyInput } from "headless-currency-input";
 import { Loader2 } from "lucide-react";
 import { useState } from "react";

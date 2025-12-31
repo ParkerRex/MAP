@@ -4,8 +4,8 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 // TODO: Implement getInboxEmail function
 // import { getInboxEmail } from "@map/inbox";
-import { Button } from "@map/ui/button";
-import { Collapsible, CollapsibleContent } from "@map/ui/collapsible";
+import { Button } from "@/components/ui/button";
+import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
 import {
   Form,
   FormControl,
@@ -14,10 +14,10 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@map/ui/form";
-import { Input } from "@map/ui/input";
-import { Label } from "@map/ui/label";
-import { Switch } from "@map/ui/switch";
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import { Loader2 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { z } from "zod"; // Import zod for schema definition

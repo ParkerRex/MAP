@@ -1,4 +1,4 @@
-import { TabsList, TabsTrigger } from "@map/ui/tabs";
+import { TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { parseAsString, useQueryStates } from "nuqs";
 import { startTransition } from "react";
 import { InboxOrdering } from "./inbox-ordering";

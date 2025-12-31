@@ -1,7 +1,7 @@
 "use client";
 
-import { Separator } from "@map/ui/separator";
-import { Skeleton } from "@map/ui/skeleton";
+import { Separator } from "@/components/ui/separator";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export function InboxDetailsSkeleton() {
   return (

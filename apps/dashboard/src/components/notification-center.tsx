@@ -1,11 +1,11 @@
 "use client";
 
 import { useNotifications } from "@/hooks/use-notifications";
-import { Button } from "@map/ui/button";
-import { Icons } from "@map/ui/icons";
-import { Popover, PopoverContent, PopoverTrigger } from "@map/ui/popover";
-import { ScrollArea } from "@map/ui/scroll-area";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@map/ui/tabs";
+import { Button } from "@/components/ui/button";
+import { Icons } from "@/components/ui/icons";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { formatDistanceToNow } from "date-fns";
 import Link from "next/link";
 import { useEffect, useState } from "react";

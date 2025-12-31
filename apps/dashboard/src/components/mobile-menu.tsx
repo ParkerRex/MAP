@@ -1,8 +1,8 @@
 "use client";
 
-import { Button } from "@map/ui/button";
-import { Icons } from "@map/ui/icons";
-import { Sheet, SheetContent, SheetTrigger } from "@map/ui/sheet";
+import { Button } from "@/components/ui/button";
+import { Icons } from "@/components/ui/icons";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useState } from "react";
 import { MainMenu } from "./main-menu";
 

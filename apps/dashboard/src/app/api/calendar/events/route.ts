@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getGoogleCalendarClient, mapGoogleEventToDb } from "@/lib/google-calendar";
+import {
+  getGoogleCalendarClient,
+  mapGoogleEventToDb,
+} from "@/lib/google-calendar";
 import { calendarDb } from "@/db/calendar";
-import { createClient } from "@/lib/db/server";
+import { getUser } from "@/lib/auth";
 
 export async function GET(request: NextRequest) {
   try {
@@ -11,7 +14,10 @@ export async function GET(request: NextRequest) {
     const timeMax = searchParams.get("timeMax");
 
     if (!timeMin || !timeMax) {
-      return NextResponse.json({ error: "timeMin and timeMax are required" }, { status: 400 });
+      return NextResponse.json(
+        { error: "timeMin and timeMax are required" },
+        { status: 400 },
+      );
     }
 
     const calendar = await getGoogleCalendarClient();
@@ -30,7 +36,10 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ events });
   } catch (error) {
     console.error("Failed to fetch events:", error);
-    return NextResponse.json({ error: "Failed to fetch events" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to fetch events" },
+      { status: 500 },
+    );
   }
 }
 
@@ -40,10 +49,7 @@ export async function POST(request: NextRequest) {
     const calendarId = searchParams.get("calendarId") || "primary";
     const body = await request.json();
 
-    const supabase = createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    const user = await getUser();
 
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -66,6 +72,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ event });
   } catch (error) {
     console.error("Failed to create event:", error);
-    return NextResponse.json({ error: "Failed to create event" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to create event" },
+      { status: 500 },
+    );
   }
 }

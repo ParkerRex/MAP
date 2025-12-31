@@ -1,7 +1,7 @@
 "use client";
 import { useUpdateTaskTags } from "@/actions/tasks/clientActions";
 import type { Tag as TagType } from "@/types";
-import { Button } from "@map/ui/button";
+import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import React from "react";
 import type { FC } from "react";

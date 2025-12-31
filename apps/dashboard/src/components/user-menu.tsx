@@ -1,5 +1,5 @@
 import { getUser } from "@/lib/db/cached-queries";
-import { Avatar, AvatarFallback } from "@map/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -9,7 +9,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuShortcut,
   DropdownMenuTrigger,
-} from "@map/ui/dropdown-menu";
+} from "@/components/ui/dropdown-menu";
 import Image from "next/image";
 import Link from "next/link";
 import { SignOut } from "./sign-out";

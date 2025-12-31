@@ -2,11 +2,9 @@
 
 // TODO: Implement createProjectAction
 // import { createProjectAction } from "@/actions/project/create-project-action";
-// TODO: Implement cached queries
-// import { createClient } from "@/lib/db/client";
-// import { getTrackerProjectsQuery } from "@/lib/db/queries";
-import { Combobox, type Option } from "@map/ui/combobox";
-import { useToast } from "@map/ui/use-toast";
+// TODO: Implement tracker projects query
+import { Combobox, type Option } from "@/components/ui/combobox";
+import { useToast } from "@/components/ui/use-toast";
 // TODO: Implement useAction
 // import { useAction } from "next-safe-action/hooks";
 import { useEffect, useState } from "react";
@@ -19,8 +17,6 @@ export function TrackerSelectProject({
   teamId: string;
 }) {
   const { toast } = useToast();
-  // TODO: Implement cached queries
-  // const supabase = createClient();
   const [value, setValue] = useState<Option | undefined>(undefined);
   const [data, setData] = useState<Option[]>([]);
   const [isLoading, setLoading] = useState(false);
@@ -43,16 +39,7 @@ export function TrackerSelectProject({
     setValue({ id: query, name: query });
     setLoading(true);
 
-    // TODO: Implement cached queries
-    // const { data: projectsData } = await getTrackerProjectsQuery(supabase, {
-    //   teamId,
-    //   query,
-    //   search: {
-    //     query: value,
-    //     fuzzy: true,
-    //   },
-    // });
-
+    // TODO: Implement tracker projects query
     // Simulating API call with setTimeout
     setTimeout(() => {
       const fakeProjectsData = [

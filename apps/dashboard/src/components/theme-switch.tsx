@@ -10,7 +10,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@map/ui/select";
+} from "@/components/ui/select";
 
 type Theme = "dark" | "system" | "light";
 

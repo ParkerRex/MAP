@@ -2,7 +2,7 @@
 
 import { useDeleteGoal, useToggleGoal } from "@/hooks/use-goals";
 import type { Goal as TGoal } from "@/types/goals";
-import { Checkbox } from "@map/ui/checkbox";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Cross1Icon } from "@radix-ui/react-icons";
 
 type GoalProps = TGoal;

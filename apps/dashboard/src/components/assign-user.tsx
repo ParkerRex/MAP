@@ -1,17 +1,13 @@
-import { createClient } from "@/lib/db/client";
-// TODO: Implement getCurrentUserTeamQuery and getTeamMembersQuery
-// import {
-//   getCurrentUserTeamQuery,
-//   getTeamMembersQuery,
-// } from "@/lib/db/queries";
+"use client";
+
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@map/ui/select";
-import { Skeleton } from "@map/ui/skeleton";
+} from "@/components/ui/select";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useEffect, useState } from "react";
 import { AssignedUser } from "./assigned-user";
 
@@ -29,7 +25,6 @@ type Props = {
 
 export function AssignUser({ selectedId, isLoading, onSelect }: Props) {
   const [value, setValue] = useState<string>();
-  const supabase = createClient();
   const [users, setUsers] = useState<User[]>([]);
 
   useEffect(() => {
@@ -38,9 +33,7 @@ export function AssignUser({ selectedId, isLoading, onSelect }: Props) {
 
   useEffect(() => {
     async function getUsers() {
-      // TODO: Implement actual API calls
-      // const { data: userData } = await getCurrentUserTeamQuery(supabase);
-
+      // TODO: Implement actual API call to fetch team members
       // Stub: Simulating API call with setTimeout
       setTimeout(() => {
         const stubUsers: User[] = [
@@ -65,7 +58,7 @@ export function AssignUser({ selectedId, isLoading, onSelect }: Props) {
     }
 
     getUsers();
-  }, [supabase]);
+  }, []);
 
   return (
     <div className="relative">

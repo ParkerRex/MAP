@@ -1,16 +1,16 @@
 "use client";
 import { useCalendar } from "@/store/calendar-context";
-import { format, getHours, getMinutes, setSeconds } from "date-fns";
-import { utcToZonedTime, zonedTimeToUtc } from "date-fns-tz";
+import { format, getHours, getMinutes } from "date-fns";
+import { toZonedTime } from "date-fns-tz";
 import { useEffect, useState } from "react";
 
 const CurrentTimeIndicator = () => {
   const { userTimeZone } = useCalendar();
-  const [currentTime, setCurrentTime] = useState(() => utcToZonedTime(new Date(), userTimeZone));
+  const [currentTime, setCurrentTime] = useState(() => toZonedTime(new Date(), userTimeZone));
 
   useEffect(() => {
     const timer = setInterval(() => {
-      setCurrentTime(utcToZonedTime(new Date(), userTimeZone));
+      setCurrentTime(toZonedTime(new Date(), userTimeZone));
     }, 1000);
 
     return () => clearInterval(timer);

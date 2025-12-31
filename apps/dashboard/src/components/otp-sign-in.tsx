@@ -1,15 +1,12 @@
 "use client";
 
-import { verifyOtpAction } from "@/actions/verify-otp-action";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { createClient } from "@/lib/db/client";
-import { Button } from "@map/ui/button";
-import { cn } from "@map/ui/cn";
-import { Form, FormControl, FormField, FormItem } from "@map/ui/form";
-import { Input } from "@map/ui/input";
-import { InputOTP, InputOTPGroup, InputOTPSlot } from "@map/ui/input-otp";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/components/ui/cn";
+import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 import { Loader2 } from "lucide-react";
-import { useAction } from "next-safe-action/hooks";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -23,13 +20,8 @@ type Props = {
 };
 
 export function OTPSignIn({ className }: Props) {
-  const verifyOtp = useAction(verifyOtpAction);
   const [isLoading, setLoading] = useState(false);
-  const [isSent, setSent] = useState(false);
-  const [phone, setPhone] = useState();
-  const [email, setEmail] = useState();
-  const [type, setType] = useState<"email" | "phone">();
-  const supabase = createClient();
+  const router = useRouter();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -40,65 +32,8 @@ export function OTPSignIn({ className }: Props) {
 
   async function onSubmit({ value }: z.infer<typeof formSchema>) {
     setLoading(true);
-
-    const isPhone = value.startsWith("+");
-
-    setType(isPhone ? "phone" : "email");
-
-    if (isPhone) {
-      setPhone(value);
-    } else {
-      setEmail(value);
-    }
-
-    const options = isPhone ? { phone: value } : { email: value };
-
-    await supabase.auth.signInWithOtp(options);
-
-    setSent(true);
-    setLoading(false);
-  }
-
-  async function onComplete(token: string) {
-    if (type) {
-      verifyOtp.execute({
-        type,
-        token,
-        phone,
-        email,
-      });
-    }
-  }
-
-  if (isSent) {
-    return (
-      <div className={cn("flex flex-col space-y-4 items-center", className)}>
-        <InputOTP
-          maxLength={6}
-          onComplete={onComplete}
-          disabled={verifyOtp.status === "executing"}
-          render={({ slots }) => (
-            <InputOTPGroup>
-              {slots.map((slot, index) => (
-                <InputOTPSlot
-                  key={index.toString()}
-                  {...slot}
-                  className="w-[62px] h-[62px]"
-                />
-              ))}
-            </InputOTPGroup>
-          )}
-        />
-
-        <button
-          onClick={() => setSent(false)}
-          type="button"
-          className="text-sm"
-        >
-          Try again
-        </button>
-      </div>
-    );
+    // Dev mode: just redirect to home
+    router.push("/");
   }
 
   return (

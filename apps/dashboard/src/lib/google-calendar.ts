@@ -1,15 +1,18 @@
 import { google } from "googleapis";
-import { createClient } from "@/lib/db/server";
 import { calendarDb } from "@/db/calendar";
+import { getUser } from "@/lib/auth";
 
 export async function getGoogleCalendarClient() {
-  const supabase = createClient();
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
+  const user = await getUser();
 
-  if (!session?.provider_token) {
-    throw new Error("No Google token available");
+  if (!user) {
+    throw new Error("User not authenticated");
+  }
+
+  const integration = await calendarDb.getIntegration(user.id, "GOOGLE");
+
+  if (!integration) {
+    throw new Error("No Google integration found");
   }
 
   const oauth2Client = new google.auth.OAuth2(
@@ -18,8 +21,34 @@ export async function getGoogleCalendarClient() {
   );
 
   oauth2Client.setCredentials({
-    access_token: session.provider_token,
+    access_token: integration.accessToken,
+    refresh_token: integration.refreshToken ?? undefined,
   });
+
+  // Check if token needs refresh
+  if (integration.expiresAt) {
+    const expiresAt = new Date(integration.expiresAt);
+    const now = new Date();
+    const fiveMinutesFromNow = new Date(now.getTime() + 5 * 60 * 1000);
+
+    if (expiresAt < fiveMinutesFromNow && integration.refreshToken) {
+      try {
+        const { credentials } = await oauth2Client.refreshAccessToken();
+
+        await calendarDb.updateIntegration(user.id, "GOOGLE", {
+          accessToken: credentials.access_token ?? integration.accessToken,
+          expiresAt: credentials.expiry_date
+            ? new Date(credentials.expiry_date).toISOString()
+            : undefined,
+        });
+
+        oauth2Client.setCredentials(credentials);
+      } catch (error) {
+        console.error("Failed to refresh token:", error);
+        throw new Error("Failed to refresh Google token");
+      }
+    }
+  }
 
   return google.calendar({ version: "v3", auth: oauth2Client });
 }

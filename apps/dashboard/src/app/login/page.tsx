@@ -1,5 +1,5 @@
 import { GoogleSignIn } from "@/components/google-sign-in";
-import { Icons } from "@map/ui/icons";
+import { Icons } from "@/components/ui/icons";
 import type { Metadata } from "next";
 import { headers } from "next/headers";
 import Link from "next/link";

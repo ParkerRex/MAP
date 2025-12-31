@@ -3,7 +3,7 @@
 import { setupUserSchema } from "@/actions/schema";
 import { setupUserAction } from "@/actions/setup-user-action";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Button } from "@map/ui/button";
+import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -12,9 +12,9 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@map/ui/form";
-import { Input } from "@map/ui/input";
-import { useToast } from "@map/ui/use-toast";
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { useToast } from "@/components/ui/use-toast";
 import { Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import { useForm } from "react-hook-form";

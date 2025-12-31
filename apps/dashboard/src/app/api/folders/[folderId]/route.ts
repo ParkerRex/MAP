@@ -1,14 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { notesDb } from "@/db/notes";
-import { createClient } from "@/lib/db/server";
+import { getUser } from "@/lib/auth";
 
 type Params = Promise<{ folderId: string }>;
 
-export async function PUT(request: NextRequest, { params }: { params: Params }) {
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: Params },
+) {
   try {
     const { folderId } = await params;
-    const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const user = await getUser();
 
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -25,15 +27,20 @@ export async function PUT(request: NextRequest, { params }: { params: Params }) 
     return NextResponse.json({ folder });
   } catch (error) {
     console.error("Failed to update folder:", error);
-    return NextResponse.json({ error: "Failed to update folder" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to update folder" },
+      { status: 500 },
+    );
   }
 }
 
-export async function DELETE(request: NextRequest, { params }: { params: Params }) {
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Params },
+) {
   try {
     const { folderId } = await params;
-    const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const user = await getUser();
 
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -43,6 +50,9 @@ export async function DELETE(request: NextRequest, { params }: { params: Params 
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Failed to delete folder:", error);
-    return NextResponse.json({ error: "Failed to delete folder" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to delete folder" },
+      { status: 500 },
+    );
   }
 }

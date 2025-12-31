@@ -1,12 +1,12 @@
 "use client";
 
-import { Icons } from "@map/ui/icons";
+import { Icons } from "@/components/ui/icons";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@map/ui/tooltip";
+} from "@/components/ui/tooltip";
 
 export function InboxStatus({ item }) {
   if (item.status === "processing" || item.status === "new") {

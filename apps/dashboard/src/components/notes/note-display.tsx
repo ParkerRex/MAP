@@ -1,5 +1,5 @@
-import { Input } from "@map/ui/input";
-import { Textarea } from "@map/ui/textarea";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { useRef } from "react";
 
 import type { Note } from "@/types/notes";

@@ -1,12 +1,12 @@
 "use client";
 
-import { cn } from "@map/ui/cn";
+import { cn } from "@/components/ui/cn";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
-} from "@map/ui/select";
+} from "@/components/ui/select";
 import { useState } from "react";
 
 type Props = {

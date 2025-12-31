@@ -1,7 +1,7 @@
 "use client";
 
-import { cn } from "@map/ui/cn";
-import { Icons } from "@map/ui/icons";
+import { cn } from "@/components/ui/cn";
+import { Icons } from "@/components/ui/icons";
 import { motion } from "framer-motion";
 import { useState } from "react";
 
