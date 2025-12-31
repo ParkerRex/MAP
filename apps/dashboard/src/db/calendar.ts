@@ -23,11 +23,17 @@ export const calendarDb = {
           or(...calendarIds.map((id) => eq(calendarEvents.calendarId, id))),
           or(
             // For timed events
-            and(gte(calendarEvents.startTime, timeMin), lte(calendarEvents.startTime, timeMax)),
+            and(
+              gte(calendarEvents.startTime, timeMin),
+              lte(calendarEvents.startTime, timeMax),
+            ),
             // For all-day events
-            and(gte(calendarEvents.startDate, timeMin.split("T")[0]), lte(calendarEvents.startDate, timeMax.split("T")[0]))
-          )
-        )
+            and(
+              gte(calendarEvents.startDate, timeMin.split("T")[0]),
+              lte(calendarEvents.startDate, timeMax.split("T")[0]),
+            ),
+          ),
+        ),
       );
   },
 
@@ -35,7 +41,12 @@ export const calendarDb = {
     const result = await db
       .select()
       .from(calendarEvents)
-      .where(and(eq(calendarEvents.id, eventId), eq(calendarEvents.calendarId, calendarId)))
+      .where(
+        and(
+          eq(calendarEvents.id, eventId),
+          eq(calendarEvents.calendarId, calendarId),
+        ),
+      )
       .limit(1);
     return result[0] ?? null;
   },
@@ -45,11 +56,20 @@ export const calendarDb = {
     return result[0];
   },
 
-  async updateEvent(eventId: string, calendarId: string, data: Partial<NewCalendarEvent>) {
+  async updateEvent(
+    eventId: string,
+    calendarId: string,
+    data: Partial<NewCalendarEvent>,
+  ) {
     const result = await db
       .update(calendarEvents)
       .set(data)
-      .where(and(eq(calendarEvents.id, eventId), eq(calendarEvents.calendarId, calendarId)))
+      .where(
+        and(
+          eq(calendarEvents.id, eventId),
+          eq(calendarEvents.calendarId, calendarId),
+        ),
+      )
       .returning();
     return result[0];
   },
@@ -57,18 +77,30 @@ export const calendarDb = {
   async deleteEvent(eventId: string, calendarId: string) {
     const result = await db
       .delete(calendarEvents)
-      .where(and(eq(calendarEvents.id, eventId), eq(calendarEvents.calendarId, calendarId)))
+      .where(
+        and(
+          eq(calendarEvents.id, eventId),
+          eq(calendarEvents.calendarId, calendarId),
+        ),
+      )
       .returning();
     return result[0];
   },
 
   // Calendars
   async getCalendarsByAccountId(accountId: string) {
-    return db.select().from(calendars).where(eq(calendars.accountId, accountId));
+    return db
+      .select()
+      .from(calendars)
+      .where(eq(calendars.accountId, accountId));
   },
 
   async getCalendarById(calendarId: string) {
-    const result = await db.select().from(calendars).where(eq(calendars.id, calendarId)).limit(1);
+    const result = await db
+      .select()
+      .from(calendars)
+      .where(eq(calendars.id, calendarId))
+      .limit(1);
     return result[0] ?? null;
   },
 
@@ -95,10 +127,17 @@ export const calendarDb = {
 
   // Calendar Accounts
   async getCalendarAccountsByEmail(email: string) {
-    return db.select().from(calendarAccounts).where(eq(calendarAccounts.email, email));
+    return db
+      .select()
+      .from(calendarAccounts)
+      .where(eq(calendarAccounts.email, email));
   },
 
-  async upsertCalendarAccount(data: { id: string; email: string; provider: string }) {
+  async upsertCalendarAccount(data: {
+    id: string;
+    email: string;
+    provider: string;
+  }) {
     const result = await db
       .insert(calendarAccounts)
       .values(data)
@@ -115,7 +154,12 @@ export const calendarDb = {
     const result = await db
       .select()
       .from(integrations)
-      .where(and(eq(integrations.userId, userId), eq(integrations.provider, provider)))
+      .where(
+        and(
+          eq(integrations.userId, userId),
+          eq(integrations.provider, provider),
+        ),
+      )
       .limit(1);
     return result[0] ?? null;
   },
@@ -123,18 +167,69 @@ export const calendarDb = {
   async updateIntegration(
     userId: string,
     provider: "GOOGLE" | "WHOOP",
-    data: { accessToken?: string; refreshToken?: string; expiresAt?: string }
+    data: { accessToken?: string; refreshToken?: string; expiresAt?: string },
   ) {
     const result = await db
       .update(integrations)
       .set({ ...data, updatedAt: new Date() })
-      .where(and(eq(integrations.userId, userId), eq(integrations.provider, provider)))
+      .where(
+        and(
+          eq(integrations.userId, userId),
+          eq(integrations.provider, provider),
+        ),
+      )
       .returning();
     return result[0];
   },
 
+  async upsertIntegration(data: {
+    userId: string;
+    provider: "GOOGLE" | "WHOOP";
+    accessToken: string;
+    refreshToken?: string;
+    expiresAt?: string;
+  }) {
+    const existing = await this.getIntegration(data.userId, data.provider);
+    if (existing) {
+      return this.updateIntegration(data.userId, data.provider, {
+        accessToken: data.accessToken,
+        refreshToken: data.refreshToken,
+        expiresAt: data.expiresAt,
+      });
+    }
+    const result = await db
+      .insert(integrations)
+      .values({
+        userId: data.userId,
+        provider: data.provider,
+        accessToken: data.accessToken,
+        refreshToken: data.refreshToken,
+        expiresAt: data.expiresAt,
+      })
+      .returning();
+    return result[0];
+  },
+
+  async hasIntegration(userId: string, provider: "GOOGLE" | "WHOOP") {
+    const result = await db
+      .select({ id: integrations.id })
+      .from(integrations)
+      .where(
+        and(
+          eq(integrations.userId, userId),
+          eq(integrations.provider, provider),
+        ),
+      )
+      .limit(1);
+    return result.length > 0;
+  },
+
   // Sync Logs
-  async createSyncLog(data: { userId: string; status: string; message?: string }) {
+  async createSyncLog(data: {
+    userId: string;
+    status: string;
+    message?: string;
+  }) {
     const result = await db.insert(syncLogs).values(data).returning();
     return result[0];
   },
@@ -149,16 +244,37 @@ export const calendarDb = {
     return db
       .select()
       .from(calendarEventAttendees)
-      .where(and(eq(calendarEventAttendees.eventId, eventId), eq(calendarEventAttendees.calendarId, calendarId)));
+      .where(
+        and(
+          eq(calendarEventAttendees.eventId, eventId),
+          eq(calendarEventAttendees.calendarId, calendarId),
+        ),
+      );
   },
 
   async deleteEventAttendees(eventId: string, calendarId: string) {
     return db
       .delete(calendarEventAttendees)
-      .where(and(eq(calendarEventAttendees.eventId, eventId), eq(calendarEventAttendees.calendarId, calendarId)));
+      .where(
+        and(
+          eq(calendarEventAttendees.eventId, eventId),
+          eq(calendarEventAttendees.calendarId, calendarId),
+        ),
+      );
   },
 
-  async insertEventAttendees(attendees: Array<{ eventId: string; calendarId: string; email: string; displayName?: string; responseStatus?: string; isOrganizer?: boolean; isSelf?: boolean; optional?: boolean }>) {
+  async insertEventAttendees(
+    attendees: Array<{
+      eventId: string;
+      calendarId: string;
+      email: string;
+      displayName?: string;
+      responseStatus?: string;
+      isOrganizer?: boolean;
+      isSelf?: boolean;
+      optional?: boolean;
+    }>,
+  ) {
     if (attendees.length === 0) return [];
     return db.insert(calendarEventAttendees).values(attendees).returning();
   },

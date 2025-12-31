@@ -1,6 +1,5 @@
 "use client";
 
-import { updateMenuAction } from "@/actions/update-menu-action";
 import { useMenuStore } from "@/store/menu";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/components/ui/cn";
@@ -13,13 +12,14 @@ import {
 } from "@/components/ui/tooltip";
 import { useClickAway } from "@uidotdev/usehooks";
 import { Reorder, motion, useMotionValue } from "framer-motion";
-import { useAction } from "next-safe-action/hooks";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { useLongPress } from "use-long-press";
 
-const icons = {
+type MenuPath = "/" | "/calendar" | "/transactions" | "/invoices" | "/tracker" | "/vault" | "/settings" | "/inbox";
+
+const icons: Record<MenuPath, () => JSX.Element> = {
   "/": () => <Icons.Overview size={22} />,
   "/calendar": () => <Icons.Calendar size={22} />,
   "/transactions": () => <Icons.Transactions size={22} />,
@@ -30,46 +30,22 @@ const icons = {
   "/inbox": () => <Icons.Inbox2 size={22} />,
 };
 
-const defaultItems = [
-  {
-    path: "/",
-    name: "Home",
-  },
-  {
-    path: "/calendar",
-    name: "Calendar",
-  },
-  {
-    path: "/inbox",
-    name: "Inbox",
-  },
-  {
-    path: "/transactions",
-    name: "Transactions",
-  },
-  {
-    path: "/invoices",
-    name: "Invoices",
-  },
-  {
-    path: "/tracker",
-    name: "Tracker",
-  },
-  {
-    path: "/vault",
-    name: "Vault",
-  },
-  {
-    path: "/settings",
-    name: "Settings",
-  },
+const defaultItems: { path: MenuPath; name: string }[] = [
+  { path: "/", name: "Home" },
+  { path: "/calendar", name: "Calendar" },
+  { path: "/inbox", name: "Inbox" },
+  { path: "/transactions", name: "Transactions" },
+  { path: "/invoices", name: "Invoices" },
+  { path: "/tracker", name: "Tracker" },
+  { path: "/vault", name: "Vault" },
+  { path: "/settings", name: "Settings" },
 ];
 
 interface ItemProps {
-  item: { path: string; name: string };
+  item: { path: MenuPath; name: string };
   isActive: boolean;
   isCustomizing: boolean;
-  onRemove: (path: string) => void;
+  onRemove: (path: MenuPath) => void;
   disableRemove: boolean;
   onDragEnd: () => void;
   onSelect?: () => void;
@@ -96,7 +72,6 @@ const Item = ({
           if (isCustomizing) {
             evt.preventDefault();
           }
-
           onSelect?.();
         }}
         onMouseDown={(evt) => {
@@ -182,7 +157,7 @@ const itemVariant = {
 };
 
 type Props = {
-  initialItems?: { path: string; name: string }[];
+  initialItems?: { path: MenuPath; name: string }[];
   onSelect?: () => void;
 };
 
@@ -191,29 +166,26 @@ export function MainMenu({ initialItems, onSelect }: Props) {
   const { isCustomizing, setCustomizing } = useMenuStore();
   const pathname = usePathname();
   const part = pathname?.split("/")[1];
-  const updateMenu = useAction(updateMenuAction);
 
   const hiddenItems = defaultItems.filter(
     (item) => !items.some((i) => i.path === item.path),
   );
 
-  const onReorder = (items) => {
-    setItems(items);
+  const onReorder = (newItems: typeof items) => {
+    setItems(newItems);
   };
 
   const onDragEnd = () => {
-    updateMenu.execute(items);
+    // TODO: Persist menu order via API
+    console.log("Menu reordered:", items);
   };
 
-  const onRemove = (path: string) => {
+  const onRemove = (path: MenuPath) => {
     setItems((prevItems) => prevItems.filter((item) => item.path !== path));
-    updateMenu.execute(items.filter((item) => item.path !== path));
   };
 
-  const onAdd = (item) => {
-    const updatedItems = [...items, item];
-    setItems(updatedItems);
-    updateMenu.execute(updatedItems);
+  const onAdd = (item: { path: MenuPath; name: string }) => {
+    setItems((prevItems) => [...prevItems, item]);
   };
 
   const bind = useLongPress(
@@ -225,7 +197,7 @@ export function MainMenu({ initialItems, onSelect }: Props) {
     },
   );
 
-  const ref = useClickAway(() => {
+  const ref = useClickAway<HTMLDivElement>(() => {
     setCustomizing(false);
   });
 

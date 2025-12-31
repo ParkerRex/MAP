@@ -1,4 +1,4 @@
-import { getUser } from "@/lib/db/cached-queries";
+import { getUser } from "@/lib/auth";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -16,7 +16,7 @@ import { SignOut } from "./sign-out";
 import { ThemeSwitch } from "./theme-switch";
 
 export async function UserMenu({ onlySignOut }) {
-  const { data: userData } = await getUser();
+  const userData = await getUser();
 
   return (
     <DropdownMenu>
@@ -25,7 +25,7 @@ export async function UserMenu({ onlySignOut }) {
           {userData?.avatar_url && (
             <Image
               src={userData?.avatar_url}
-              alt={userData?.full_name}
+              alt={userData?.full_name ?? "User"}
               width={32}
               height={32}
             />
@@ -43,9 +43,9 @@ export async function UserMenu({ onlySignOut }) {
             <DropdownMenuLabel>
               <div className="flex justify-between items-center">
                 <div className="flex flex-col">
-                  <span className="truncate">{userData.full_name}</span>
+                  <span className="truncate">{userData?.full_name}</span>
                   <span className="truncate text-xs text-[#606060] font-normal">
-                    {userData.email}
+                    {userData?.email}
                   </span>
                 </div>
                 <div className="border py-0.5 px-3 rounded-full text-[11px] font-normal">

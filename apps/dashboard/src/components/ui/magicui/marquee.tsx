@@ -1,4 +1,4 @@
-import { cn } from '@/utils/cn';
+import { cn } from '@/components/ui/cn';
 
 interface MarqueeProps {
   className?: string;

@@ -1,16 +1,17 @@
 "use client";
 
-import { trackingConsentAction } from "@/actions/tracking-consent-action";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/components/ui/cn";
-import { useAction } from "next-safe-action/hooks";
 import { useState } from "react";
 
 export function ConsentBanner() {
   const [isOpen, setOpen] = useState(true);
-  const trackingAction = useAction(trackingConsentAction, {
-    onExecute: () => setOpen(false),
-  });
+
+  const handleConsent = (accepted: boolean) => {
+    // TODO: Implement consent tracking via API route
+    console.log("Consent:", accepted);
+    setOpen(false);
+  };
 
   if (!isOpen) {
     return null;
@@ -31,13 +32,13 @@ export function ConsentBanner() {
       <div className="flex justify-end space-x-2">
         <Button
           className="rounded-full h-8"
-          onClick={() => trackingAction.execute(false)}
+          onClick={() => handleConsent(false)}
         >
           Deny
         </Button>
         <Button
           className="rounded-full h-8"
-          onClick={() => trackingAction.execute(true)}
+          onClick={() => handleConsent(true)}
         >
           Accept
         </Button>

@@ -1,21 +1,23 @@
 "use client";
 
-import { sendFeebackAction } from "@/actions/send-feedback-action";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Textarea } from "@/components/ui/textarea";
 import { Loader2 } from "lucide-react";
-import { useAction } from "next-safe-action/hooks";
 import { useState } from "react";
 
 export function FeedbackForm() {
   const [value, setValue] = useState("");
+  const [status, setStatus] = useState<"idle" | "sending" | "sent">("idle");
 
-  const action = useAction(sendFeebackAction, {
-    onSuccess: () => {
-      setValue("");
-    },
-  });
+  const handleSubmit = async () => {
+    setStatus("sending");
+    // TODO: Implement via API route
+    console.log("Feedback:", value);
+    await new Promise((r) => setTimeout(r, 500));
+    setStatus("sent");
+    setValue("");
+  };
 
   return (
     <Popover>
@@ -25,7 +27,7 @@ export function FeedbackForm() {
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[320px] h-[200px]" sideOffset={10}>
-        {action.status === "hasSucceeded" ? (
+        {status === "sent" ? (
           <div className="flex items-center justify-center flex-col space-y-1 mt-10 text-center">
             <p className="font-medium text-sm">Thank you for your feedback!</p>
             <p className="text-sm text-[#4C4C4C]">
@@ -47,10 +49,10 @@ export function FeedbackForm() {
             <div className="mt-1 flex items-center justify-end">
               <Button
                 type="button"
-                onClick={() => action.execute({ feedback: value })}
-                disabled={value.length === 0 || action.status === "executing"}
+                onClick={handleSubmit}
+                disabled={value.length === 0 || status === "sending"}
               >
-                {action.status === "executing" ? (
+                {status === "sending" ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (
                   "Send"

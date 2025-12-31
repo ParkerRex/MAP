@@ -3,7 +3,7 @@
 import { motion } from 'framer-motion';
 import { type RefObject, useEffect, useId, useState } from 'react';
 
-import { cn } from '@/utils/cn';
+import { cn } from '@/components/ui/cn';
 
 export interface AnimatedBeamProps {
   className?: string;
