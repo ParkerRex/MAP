@@ -1,11 +1,7 @@
 import { addDays } from "date-fns";
 import { type NextRequest, NextResponse } from "next/server";
 import { goalsDb } from "@/db/goals";
-import {
-  handleApiError,
-  unauthorized,
-  validationError,
-} from "@/lib/api/errors";
+import { handleApiError, unauthorized, validationError } from "@/lib/api/errors";
 import { getUser } from "@/lib/auth";
 
 export async function GET() {

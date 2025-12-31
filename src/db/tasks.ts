@@ -116,10 +116,7 @@ export const tasksDb = {
     return result[0] ?? null;
   },
 
-  async getTaskWithTags(
-    taskId: string,
-    userId: string,
-  ): Promise<TaskWithTags | null> {
+  async getTaskWithTags(taskId: string, userId: string): Promise<TaskWithTags | null> {
     const result = await db
       .select({
         id: tasks.id,
@@ -288,9 +285,7 @@ export const tasksDb = {
     await db.delete(tagTasks).where(eq(tagTasks.taskId, taskId));
 
     if (tagIds.length > 0) {
-      await db
-        .insert(tagTasks)
-        .values(tagIds.map((tagId) => ({ taskId, tagId })));
+      await db.insert(tagTasks).values(tagIds.map((tagId) => ({ taskId, tagId })));
     }
 
     return this.getTaskWithTags(taskId, userId);

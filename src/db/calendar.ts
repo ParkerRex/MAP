@@ -70,6 +70,31 @@ export const calendarDb = {
     return db.select().from(calendars).where(eq(calendars.accountId, accountId));
   },
 
+  async getCalendarsByUserId(userId: string) {
+    return db
+      .select({
+        id: calendars.id,
+        accountId: calendars.accountId,
+        provider: calendars.provider,
+        summary: calendars.summary,
+        description: calendars.description,
+        backgroundColor: calendars.backgroundColor,
+        foregroundColor: calendars.foregroundColor,
+        colorId: calendars.colorId,
+        selected: calendars.selected,
+        isPrimary: calendars.isPrimary,
+        accessRole: calendars.accessRole,
+        timeZone: calendars.timeZone,
+        etag: calendars.etag,
+        kind: calendars.kind,
+        emoji: calendars.emoji,
+        subtitle: calendars.subtitle,
+      })
+      .from(calendars)
+      .innerJoin(calendarAccounts, eq(calendars.accountId, calendarAccounts.id))
+      .where(eq(calendarAccounts.userId, userId));
+  },
+
   async getCalendarById(calendarId: string) {
     const result = await db.select().from(calendars).where(eq(calendars.id, calendarId)).limit(1);
     return result[0] ?? null;
@@ -101,13 +126,39 @@ export const calendarDb = {
     return db.select().from(calendarAccounts).where(eq(calendarAccounts.email, email));
   },
 
-  async upsertCalendarAccount(data: { id: string; email: string; provider: string }) {
+  async getCalendarAccountByUserIdAndProvider(userId: string, provider: string) {
+    const result = await db
+      .select()
+      .from(calendarAccounts)
+      .where(and(eq(calendarAccounts.userId, userId), eq(calendarAccounts.provider, provider)))
+      .limit(1);
+    return result[0] ?? null;
+  },
+
+  async upsertCalendarAccount(data: { userId: string; email: string; provider: string }) {
+    // Check if account exists for this user+provider
+    const existing = await this.getCalendarAccountByUserIdAndProvider(data.userId, data.provider);
+
+    if (existing) {
+      // Update email if it changed
+      if (existing.email !== data.email) {
+        const result = await db
+          .update(calendarAccounts)
+          .set({ email: data.email })
+          .where(eq(calendarAccounts.id, existing.id))
+          .returning();
+        return result[0];
+      }
+      return existing;
+    }
+
+    // Create new account
     const result = await db
       .insert(calendarAccounts)
-      .values(data)
-      .onConflictDoUpdate({
-        target: calendarAccounts.id,
-        set: { email: data.email, provider: data.provider },
+      .values({
+        userId: data.userId,
+        email: data.email,
+        provider: data.provider,
       })
       .returning();
     return result[0];

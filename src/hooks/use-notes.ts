@@ -48,11 +48,7 @@ export function useNote(noteId: string) {
 export function useCreateNote() {
   const queryClient = useQueryClient();
 
-  return useMutation<
-    NoteResponse,
-    Error,
-    { title: string; content?: string; folderId: string }
-  >({
+  return useMutation<NoteResponse, Error, { title: string; content?: string; folderId: string }>({
     mutationFn: async (data) => {
       const response = await fetch("/api/notes", {
         method: "POST",
@@ -164,22 +160,20 @@ export function useCreateFolder() {
 export function useUpdateFolder() {
   const queryClient = useQueryClient();
 
-  return useMutation<FolderResponse, Error, { folderId: string; name: string }>(
-    {
-      mutationFn: async ({ folderId, name }) => {
-        const response = await fetch(`/api/folders/${folderId}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ name }),
-        });
-        if (!response.ok) throw new Error("Failed to update folder");
-        return response.json();
-      },
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: queryKeys.folders.all });
-      },
+  return useMutation<FolderResponse, Error, { folderId: string; name: string }>({
+    mutationFn: async ({ folderId, name }) => {
+      const response = await fetch(`/api/folders/${folderId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name }),
+      });
+      if (!response.ok) throw new Error("Failed to update folder");
+      return response.json();
     },
-  );
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.folders.all });
+    },
+  });
 }
 
 export function useDeleteFolder() {

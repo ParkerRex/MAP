@@ -33,12 +33,7 @@ export async function POST() {
 
       await db
         .delete(integrations)
-        .where(
-          and(
-            eq(integrations.userId, user.id),
-            eq(integrations.provider, "WHOOP"),
-          ),
-        );
+        .where(and(eq(integrations.userId, user.id), eq(integrations.provider, "WHOOP")));
     }
 
     return NextResponse.json({ success: true });

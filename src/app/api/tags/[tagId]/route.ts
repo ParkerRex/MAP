@@ -1,19 +1,11 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { tasksDb } from "@/db/tasks";
-import {
-  handleApiError,
-  notFound,
-  unauthorized,
-  validationError,
-} from "@/lib/api/errors";
+import { handleApiError, notFound, unauthorized, validationError } from "@/lib/api/errors";
 import { getUser } from "@/lib/auth";
 
 type Params = Promise<{ tagId: string }>;
 
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: Params },
-) {
+export async function PUT(request: NextRequest, { params }: { params: Params }) {
   try {
     const { tagId } = await params;
     const user = await getUser();
@@ -41,10 +33,7 @@ export async function PUT(
   }
 }
 
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: Params },
-) {
+export async function DELETE(request: NextRequest, { params }: { params: Params }) {
   try {
     const { tagId } = await params;
     const user = await getUser();

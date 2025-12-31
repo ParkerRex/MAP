@@ -1,10 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { notesDb } from "@/db/notes";
-import {
-  handleApiError,
-  unauthorized,
-  validationError,
-} from "@/lib/api/errors";
+import { handleApiError, unauthorized, validationError } from "@/lib/api/errors";
 import { getUser } from "@/lib/auth";
 
 export async function GET() {

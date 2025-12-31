@@ -48,10 +48,7 @@ export const goalsDb = {
   },
 
   async getCompletionStats(userId: string) {
-    const allGoals = await db
-      .select()
-      .from(goals)
-      .where(eq(goals.userId, userId));
+    const allGoals = await db.select().from(goals).where(eq(goals.userId, userId));
     const completedGoals = allGoals.filter((g) => g.completed);
 
     const total = allGoals.length;
@@ -62,10 +59,7 @@ export const goalsDb = {
   },
 
   async deleteUserGoals(userId: string) {
-    const result = await db
-      .delete(goals)
-      .where(eq(goals.userId, userId))
-      .returning();
+    const result = await db.delete(goals).where(eq(goals.userId, userId)).returning();
     return result;
   },
 };

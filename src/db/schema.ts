@@ -183,6 +183,9 @@ export const integrations = pgTable("integrations", {
 // Calendar Accounts
 export const calendarAccounts = pgTable("calendar_accounts", {
   id: uuid("id").primaryKey().defaultRandom(),
+  userId: uuid("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
   email: text("email").notNull(),
   provider: text("provider").notNull(),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),

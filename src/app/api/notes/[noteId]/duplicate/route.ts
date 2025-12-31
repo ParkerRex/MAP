@@ -5,10 +5,7 @@ import { getUser } from "@/lib/auth";
 
 type Params = Promise<{ noteId: string }>;
 
-export async function POST(
-  request: NextRequest,
-  { params }: { params: Params },
-) {
+export async function POST(request: NextRequest, { params }: { params: Params }) {
   try {
     const { noteId } = await params;
     const user = await getUser();

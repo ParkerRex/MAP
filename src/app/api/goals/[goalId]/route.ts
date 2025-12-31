@@ -5,10 +5,7 @@ import { getUser } from "@/lib/auth";
 
 type Params = Promise<{ goalId: string }>;
 
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: Params },
-) {
+export async function PUT(request: NextRequest, { params }: { params: Params }) {
   try {
     const { goalId } = await params;
     const user = await getUser();
@@ -45,10 +42,7 @@ export async function PUT(
   }
 }
 
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: Params },
-) {
+export async function DELETE(request: NextRequest, { params }: { params: Params }) {
   try {
     const { goalId } = await params;
     const user = await getUser();

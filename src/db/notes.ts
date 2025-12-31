@@ -22,11 +22,7 @@ export const notesDb = {
     return result[0];
   },
 
-  async updateNote(
-    noteId: string,
-    userId: string,
-    data: { title?: string; content?: string },
-  ) {
+  async updateNote(noteId: string, userId: string, data: { title?: string; content?: string }) {
     const result = await db
       .update(notes)
       .set({ ...data, updatedAt: new Date() })
@@ -121,10 +117,7 @@ export const notesDb = {
   },
 
   async ensureCoachNotesFolder(userId: string) {
-    const existing = await db
-      .select()
-      .from(folders)
-      .where(eq(folders.userId, userId));
+    const existing = await db.select().from(folders).where(eq(folders.userId, userId));
 
     const coachFolder = existing.find((f) => f.name === "Coach Notes");
     if (coachFolder) return coachFolder;

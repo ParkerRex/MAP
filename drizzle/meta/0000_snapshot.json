@@ -107,11 +107,7 @@
       "compositePrimaryKeys": {
         "calendar_event_attendees_calendar_id_event_id_email_pk": {
           "name": "calendar_event_attendees_calendar_id_event_id_email_pk",
-          "columns": [
-            "calendar_id",
-            "event_id",
-            "email"
-          ]
+          "columns": ["calendar_id", "event_id", "email"]
         }
       },
       "uniqueConstraints": {},
@@ -297,10 +293,7 @@
       "compositePrimaryKeys": {
         "calendar_events_id_calendar_id_pk": {
           "name": "calendar_events_id_calendar_id_pk",
-          "columns": [
-            "id",
-            "calendar_id"
-          ]
+          "columns": ["id", "calendar_id"]
         }
       },
       "uniqueConstraints": {},
@@ -969,12 +962,8 @@
           "name": "sessions_user_id_users_id_fk",
           "tableFrom": "sessions",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1058,10 +1047,7 @@
       "compositePrimaryKeys": {
         "tag_tasks_tag_id_task_id_pk": {
           "name": "tag_tasks_tag_id_task_id_pk",
-          "columns": [
-            "tag_id",
-            "task_id"
-          ]
+          "columns": ["tag_id", "task_id"]
         }
       },
       "uniqueConstraints": {},
@@ -1332,9 +1318,7 @@
         "users_email_unique": {
           "name": "users_email_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "email"
-          ]
+          "columns": ["email"]
         }
       },
       "policies": {},
@@ -1612,12 +1596,8 @@
           "name": "whoop_recovery_cycle_id_whoop_cycles_id_fk",
           "tableFrom": "whoop_recovery",
           "tableTo": "whoop_cycles",
-          "columnsFrom": [
-            "cycle_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["cycle_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1792,12 +1772,8 @@
           "name": "whoop_sleep_cycle_id_whoop_cycles_id_fk",
           "tableFrom": "whoop_sleep",
           "tableTo": "whoop_cycles",
-          "columnsFrom": [
-            "cycle_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["cycle_id"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -1978,48 +1954,27 @@
     "public.goal_categories": {
       "name": "goal_categories",
       "schema": "public",
-      "values": [
-        "health",
-        "work",
-        "personal",
-        "family",
-        "spiritual"
-      ]
+      "values": ["health", "work", "personal", "family", "spiritual"]
     },
     "public.goal_status": {
       "name": "goal_status",
       "schema": "public",
-      "values": [
-        "pending",
-        "in_progress",
-        "completed"
-      ]
+      "values": ["pending", "in_progress", "completed"]
     },
     "public.integration_provider": {
       "name": "integration_provider",
       "schema": "public",
-      "values": [
-        "GOOGLE",
-        "WHOOP"
-      ]
+      "values": ["GOOGLE", "WHOOP"]
     },
     "public.task_status": {
       "name": "task_status",
       "schema": "public",
-      "values": [
-        "pending",
-        "in_progress",
-        "completed"
-      ]
+      "values": ["pending", "in_progress", "completed"]
     },
     "public.whoop_score_state": {
       "name": "whoop_score_state",
       "schema": "public",
-      "values": [
-        "SCORED",
-        "PENDING_SCORE",
-        "UNSCORABLE"
-      ]
+      "values": ["SCORED", "PENDING_SCORE", "UNSCORABLE"]
     }
   },
   "schemas": {},

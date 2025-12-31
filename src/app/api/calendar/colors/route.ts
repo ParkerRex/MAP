@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
-import { getGoogleCalendarClient } from "@/lib/google-calendar";
 import { handleApiError, unauthorized } from "@/lib/api/errors";
 import { getUser } from "@/lib/auth";
+import { getGoogleCalendarClient } from "@/lib/google-calendar";
 
 export async function GET() {
   try {
