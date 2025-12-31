@@ -1,6 +1,5 @@
 "use client";
-import { useCalendars } from "@/hooks/use-calendar";
-import { useCalendarStore } from "@/store/calendar";
+import type { ExtendedEvent } from "@/types/calendar";
 import {
   ContextMenu,
   ContextMenuContent,
@@ -14,6 +13,8 @@ import { useMemo } from "react";
 interface CalendarEventProps {
   events: calendar_v3.Schema$Event[];
   dayIndex: number;
+  calendars: calendar_v3.Schema$CalendarListEntry[];
+  setSelectedEvent: (event: ExtendedEvent | null) => void;
 }
 
 const MINUTES_IN_HOUR = 60;
@@ -22,11 +23,9 @@ const HOUR_HEIGHT = 64;
 const CalendarEventComponent: React.FC<CalendarEventProps> = ({
   events,
   dayIndex: _dayIndex,
+  calendars,
+  setSelectedEvent,
 }) => {
-  const setSelectedEvent = useCalendarStore((s) => s.setSelectedEvent);
-  const { data: calendarsData } = useCalendars();
-  const calendars = calendarsData?.calendars ?? [];
-
   const handleEventClick = (event: calendar_v3.Schema$Event) => {
     setSelectedEvent(event);
   };
@@ -37,7 +36,7 @@ const CalendarEventComponent: React.FC<CalendarEventProps> = ({
   };
 
   const sortedEvents = useMemo(() => {
-    return events.sort((a, b) => {
+    return [...events].sort((a, b) => {
       const startA = new Date(
         a.start?.dateTime || a.start?.date || "",
       ).getTime();
@@ -53,8 +52,6 @@ const CalendarEventComponent: React.FC<CalendarEventProps> = ({
       event.start?.dateTime || event.start?.date || "",
     );
     const endDate = new Date(event.end?.dateTime || event.end?.date || "");
-    const dayStart = new Date(startDate);
-    dayStart.setHours(0, 0, 0, 0);
 
     const top =
       ((startDate.getHours() * 60 + startDate.getMinutes()) / MINUTES_IN_HOUR) *
@@ -74,8 +71,6 @@ const CalendarEventComponent: React.FC<CalendarEventProps> = ({
   return (
     <div className="absolute inset-0">
       {sortedEvents.map((event) => {
-        const endDate = new Date(event.end?.dateTime || event.end?.date || "");
-        const _isPastEvent = endDate < new Date();
         const calendarColor = getCalendarColor(event.organizer?.email);
         const style = calculateEventStyle(event);
 

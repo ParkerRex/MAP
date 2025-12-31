@@ -1,48 +1,37 @@
 "use client";
-import { useCalendars } from "@/hooks/use-calendar";
-import { useWeekNavigation } from "@/hooks/use-week-navigation";
-import { useCalendarStore } from "@/store/calendar";
 import { Calendar as UIDatePicker } from "@/components/ui/calendar";
 import { Separator } from "@/components/ui/separator";
 import { startOfWeek } from "date-fns";
+import type { calendar_v3 } from "googleapis";
 import { Eye, EyeOff } from "lucide-react";
-import { useCallback } from "react";
+
+interface CalendarMenuProps {
+  className?: string;
+  calendars: calendar_v3.Schema$CalendarListEntry[];
+  visibleCalendars: Set<string>;
+  toggleCalendarVisibility: (calendarId: string) => void;
+  currentWeekStartDate: Date;
+  setCurrentWeekStartDate: (date: Date) => void;
+}
 
 export default function CalendarMenu({
   className,
-  ...props
-}: {
-  className?: string;
-}) {
-  const { data: calendarsData } = useCalendars();
-  const calendars = calendarsData?.calendars ?? [];
-
-  const visibleCalendars = useCalendarStore((s) => s.visibleCalendars);
-  const toggleCalendarVisibility = useCalendarStore((s) => s.toggleCalendarVisibility);
-  const currentWeekStartDate = useCalendarStore((s) => s.currentWeekStartDate);
-  const setCurrentWeekStartDate = useCalendarStore((s) => s.setCurrentWeekStartDate);
-
-  const { handleSetWeek } = useWeekNavigation();
-
+  calendars,
+  visibleCalendars,
+  toggleCalendarVisibility,
+  currentWeekStartDate,
+  setCurrentWeekStartDate,
+}: CalendarMenuProps) {
   const handleDateSelect = (date: Date | undefined) => {
     if (date) {
       const weekStartDate = startOfWeek(date, { weekStartsOn: 1 });
       setCurrentWeekStartDate(weekStartDate);
-      handleSetWeek(weekStartDate);
     }
   };
-
-  const handleToggleCalendar = useCallback(
-    (calendarId: string) => {
-      toggleCalendarVisibility(calendarId);
-    },
-    [toggleCalendarVisibility],
-  );
 
   return (
     <section
       className={`h-screen flex flex-col w-[208px] dark:bg-[#1F1F1F] bg-[#F7F7F7] ${className}`}
-      {...props}
     >
       <div className="flex flex-col items-center">
         <UIDatePicker
@@ -78,16 +67,12 @@ export default function CalendarMenu({
                       {visibleCalendars.has(calendar.id || "") ? (
                         <Eye
                           className="w-4 h-4 text-gray-500 cursor-pointer"
-                          onClick={() =>
-                            handleToggleCalendar(calendar.id || "")
-                          }
+                          onClick={() => toggleCalendarVisibility(calendar.id || "")}
                         />
                       ) : (
                         <EyeOff
                           className="w-4 h-4 text-gray-500 cursor-pointer"
-                          onClick={() =>
-                            handleToggleCalendar(calendar.id || "")
-                          }
+                          onClick={() => toggleCalendarVisibility(calendar.id || "")}
                         />
                       )}
                     </span>

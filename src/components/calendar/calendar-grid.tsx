@@ -1,6 +1,5 @@
 "use client";
-import { useCalendarStore } from "@/store/calendar";
-import type { CalendarEvent } from "@/types/calendar";
+import type { CalendarEvent, ExtendedEvent } from "@/types/calendar";
 import {
   addDays,
   eachDayOfInterval,
@@ -18,17 +17,19 @@ interface CalendarGridProps {
   className?: string;
   calendars: calendar_v3.Schema$CalendarListEntry[];
   events: calendar_v3.Schema$Event[];
+  currentWeekStartDate: Date;
+  visibleCalendars: Set<string>;
+  setSelectedEvent: (event: ExtendedEvent | null) => void;
 }
 
 const CalendarGrid: FC<CalendarGridProps> = ({
   className,
-  calendars: _calendars,
+  calendars,
   events,
+  currentWeekStartDate,
+  visibleCalendars,
+  setSelectedEvent,
 }) => {
-  const currentWeekStartDate = useCalendarStore((s) => s.currentWeekStartDate);
-  const visibleCalendars = useCalendarStore((s) => s.visibleCalendars);
-  const userTimeZone = useCalendarStore((s) => s.userTimeZone);
-
   const gridRef = useRef<HTMLDivElement>(null);
   const startOfWeekDate = startOfWeek(currentWeekStartDate, {
     weekStartsOn: 1,
@@ -61,7 +62,7 @@ const CalendarGrid: FC<CalendarGridProps> = ({
       const scrollPosition = currentHour * hourHeight - viewportHeight / 2;
       gridRef.current.scrollTop = scrollPosition;
     }
-  }, [userTimeZone]);
+  }, []);
 
   const hours = Array.from({ length: 24 }, (_, i) => i);
 
@@ -86,7 +87,12 @@ const CalendarGrid: FC<CalendarGridProps> = ({
           </div>
         ))}
       </div>
-      <CalendarAllDayEvents events={allDayEvents} daysOfWeek={daysOfWeek} />
+      <CalendarAllDayEvents
+        events={allDayEvents}
+        daysOfWeek={daysOfWeek}
+        calendars={calendars}
+        setSelectedEvent={setSelectedEvent}
+      />
       <div className="flex flex-grow overflow-y-auto" ref={gridRef}>
         <div className="w-16 flex-shrink-0">
           {hours.map((hour) => (
@@ -115,6 +121,8 @@ const CalendarGrid: FC<CalendarGridProps> = ({
                   return eventStart && isSameDay(eventStart, day);
                 })}
                 dayIndex={dayIndex}
+                calendars={calendars}
+                setSelectedEvent={setSelectedEvent}
               />
             </div>
           ))}

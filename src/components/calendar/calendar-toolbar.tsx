@@ -1,38 +1,44 @@
 "use client";
-import { useWeekNavigation } from "@/hooks/use-week-navigation";
-import { useCalendarStore } from "@/store/calendar";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent } from "@/components/ui/tooltip";
 import { TooltipTrigger } from "@radix-ui/react-tooltip";
-import { format, getWeek } from "date-fns";
-import type { calendar_v3 } from "googleapis";
+import { addWeeks, format, getWeek, startOfWeek, subWeeks } from "date-fns";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import * as React from "react";
 
-interface CalendarToolbarProps extends React.HTMLAttributes<HTMLDivElement> {
-  calendars: calendar_v3.Schema$CalendarListEntry[];
+interface CalendarToolbarProps {
+  className?: string;
+  currentWeekStartDate: Date;
+  setCurrentWeekStartDate: (date: Date) => void;
 }
 
 const CalendarToolbar: React.FC<CalendarToolbarProps> = ({
-  calendars: _calendars = [],
   className,
-  ...props
+  currentWeekStartDate,
+  setCurrentWeekStartDate,
 }) => {
-  const currentWeekStartDate = useCalendarStore((s) => s.currentWeekStartDate);
-  const { handleNextWeek, handleCurrentWeek, handlePreviousWeek } =
-    useWeekNavigation();
+  const handleNextWeek = () => {
+    const newDate = addWeeks(currentWeekStartDate, 1);
+    setCurrentWeekStartDate(startOfWeek(newDate, { weekStartsOn: 1 }));
+  };
 
-  const currentDate = new Date(currentWeekStartDate);
+  const handlePreviousWeek = () => {
+    const newDate = subWeeks(currentWeekStartDate, 1);
+    setCurrentWeekStartDate(startOfWeek(newDate, { weekStartsOn: 1 }));
+  };
 
-  const currentMonth = format(currentDate, "MMMM");
-  const currentDay = format(currentDate, "d");
-  const currentYear = format(currentDate, "yyyy");
-  const currentWeek = `Week ${getWeek(currentDate)}`;
+  const handleCurrentWeek = () => {
+    setCurrentWeekStartDate(startOfWeek(new Date(), { weekStartsOn: 1 }));
+  };
+
+  const currentMonth = format(currentWeekStartDate, "MMMM");
+  const currentDay = format(currentWeekStartDate, "d");
+  const currentYear = format(currentWeekStartDate, "yyyy");
+  const currentWeek = `Week ${getWeek(currentWeekStartDate)}`;
 
   return (
     <div
       className={`flex items-center justify-between space-x-2 p-4 border-b border-[#f0f0f0] dark:border-[#2b2b2b] ${className}`}
-      {...props}
     >
       <div className="flex items-baseline space-x-2">
         <span className="text-3xl font-semibold tracking-tighter -mr-1">

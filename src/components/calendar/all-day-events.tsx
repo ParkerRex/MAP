@@ -1,6 +1,5 @@
 "use client";
-import { useCalendars } from "@/hooks/use-calendar";
-import { useCalendarStore } from "@/store/calendar";
+import type { ExtendedEvent } from "@/types/calendar";
 import { Button } from "@/components/ui/button";
 import {
   ContextMenu,
@@ -10,21 +9,22 @@ import {
 } from "@/components/ui/context-menu";
 import type { calendar_v3 } from "googleapis";
 import { ChevronDown, ChevronUp } from "lucide-react";
-import React, { useState } from "react";
+import { useState } from "react";
 
 interface CalendarAllDayEventsProps {
   events: calendar_v3.Schema$Event[];
   daysOfWeek: Date[];
+  calendars: calendar_v3.Schema$CalendarListEntry[];
+  setSelectedEvent: (event: ExtendedEvent | null) => void;
 }
 
 export default function CalendarAllDayEvents({
   events,
   daysOfWeek,
+  calendars,
+  setSelectedEvent,
 }: CalendarAllDayEventsProps) {
   const [isExpanded, setIsExpanded] = useState(false);
-  const setSelectedEvent = useCalendarStore((s) => s.setSelectedEvent);
-  const { data: calendarsData } = useCalendars();
-  const calendars = calendarsData?.calendars ?? [];
 
   const toggleExpand = () => setIsExpanded(!isExpanded);
 
@@ -44,10 +44,6 @@ export default function CalendarAllDayEvents({
   const allDayEvents = events.filter(isAllDayEvent);
   const visibleEvents = isExpanded ? allDayEvents : allDayEvents.slice(0, 2);
   const hiddenEventsCount = allDayEvents.length - visibleEvents.length;
-
-  const getEventSpan = (_event: calendar_v3.Schema$Event) => {
-    return 1;
-  };
 
   return (
     <div className="border-b border-gray-200">
@@ -97,7 +93,6 @@ export default function CalendarAllDayEvents({
                           style={{
                             backgroundColor: `${getCalendarColor(event.organizer?.email)}33`,
                             borderLeft: `4px solid ${getCalendarColor(event.organizer?.email)}`,
-                            gridColumn: `span ${getEventSpan(event)}`,
                           }}
                           onClick={() => handleEventClick(event)}
                           onKeyDown={(e) => {
