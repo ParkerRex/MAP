@@ -16,6 +16,15 @@ import { ApiError, ErrorCodes } from "./errors";
 
 export type { TaskWithTags };
 
+export interface AuthUser {
+  id: string;
+  email: string;
+  displayName: string | null;
+  firstName: string | null;
+  lastName: string | null;
+  profilePhotoUrl: string | null;
+}
+
 export interface TasksResponse {
   tasks: TaskWithTags[];
 }
@@ -214,6 +223,16 @@ class ApiClient {
       }),
     delete: (id: string) =>
       this.request<{ success: boolean }>("/tasks/" + id, { method: "DELETE" }),
+    bulkUpdate: (taskIds: string[], data: Omit<UpdateTaskInput, "tags">) =>
+      this.request<{ success: boolean }>("/tasks/bulk", {
+        method: "PUT",
+        body: JSON.stringify({ taskIds, ...data }),
+      }),
+    bulkDelete: (taskIds: string[]) =>
+      this.request<{ success: boolean }>("/tasks/bulk", {
+        method: "DELETE",
+        body: JSON.stringify({ taskIds }),
+      }),
   };
 
   tags = {
@@ -326,6 +345,11 @@ class ApiClient {
 
   google = {
     status: () => this.request<{ connected: boolean }>("/google/status"),
+  };
+
+  auth = {
+    me: () => this.request<{ user: AuthUser }>("/auth/me"),
+    logout: () => this.request<{ success: boolean }>("/auth/logout", { method: "POST" }),
   };
 
   whoop = {

@@ -60,17 +60,17 @@ const CalendarGrid: FC<CalendarGridProps> = ({
   const hours = Array.from({ length: 24 }, (_, i) => i);
 
   return (
-    <div className={`flex flex-col h-full overflow-hidden ${className}`}>
-      <div className="flex sticky top-0 z-10 bg-white dark:bg-black border-b border-gray-200 dark:border-gray-800">
-        <div className="w-16 shrink-0" />
+    <div className={`flex h-full flex-col overflow-hidden ${className}`}>
+      <div className="flex min-w-[640px] sticky top-0 z-10 border-b border-border bg-background">
+        <div className="w-12 shrink-0 sm:w-16" />
         {daysOfWeek.map((day) => (
-          <div key={day.toISOString()} className="flex-1 text-center p-2">
-            <div className="text-sm text-gray-600 dark:text-gray-400">{format(day, "EEE")}</div>
+          <div key={day.toISOString()} className="min-w-[80px] flex-1 p-2 text-center">
+            <div className="text-sm text-muted-foreground">{format(day, "EEE")}</div>
             <div
-              className={`mx-auto w-8 h-8 flex items-center justify-center rounded-full ${
+              className={`mx-auto flex h-8 w-8 items-center justify-center rounded-full ${
                 isSameDay(day, new Date())
-                  ? "bg-[#48CA80] text-white"
-                  : "text-gray-900 dark:text-gray-100"
+                  ? "bg-primary text-primary-foreground"
+                  : "text-foreground"
               }`}
             >
               {format(day, "d")}
@@ -84,31 +84,35 @@ const CalendarGrid: FC<CalendarGridProps> = ({
         calendars={calendars}
         setSelectedEvent={setSelectedEvent}
       />
-      <div className="flex grow overflow-y-auto" ref={gridRef}>
-        <div className="w-16 shrink-0">
-          {hours.map((hour) => (
-            <div key={hour} className="h-16 text-xs text-gray-500 text-right pr-2">
-              {format(new Date().setHours(hour, 0, 0, 0), "h a")}
-            </div>
-          ))}
-        </div>
-        <div className="grow grid grid-cols-7 relative">
-          {daysOfWeek.map((day, dayIndex) => (
-            <div key={day.toISOString()} className="relative">
-              {hours.map((hour) => (
-                <div key={hour} className="h-16 border-t border-gray-200 dark:border-gray-700" />
-              ))}
-              <CalendarEventComponent
-                events={regularEvents.filter((event) => {
-                  const eventStart = event.start?.dateTime ? new Date(event.start.dateTime) : null;
-                  return eventStart && isSameDay(eventStart, day);
-                })}
-                dayIndex={dayIndex}
-                calendars={calendars}
-                setSelectedEvent={setSelectedEvent}
-              />
-            </div>
-          ))}
+      <div className="flex flex-1 overflow-auto" ref={gridRef}>
+        <div className="min-w-[640px] flex flex-1">
+          <div className="w-12 shrink-0 sm:w-16">
+            {hours.map((hour) => (
+              <div key={hour} className="h-16 pr-2 text-right text-xs text-muted-foreground">
+                {format(new Date().setHours(hour, 0, 0, 0), "h a")}
+              </div>
+            ))}
+          </div>
+          <div className="relative grid flex-1 grid-cols-7">
+            {daysOfWeek.map((day, dayIndex) => (
+              <div key={day.toISOString()} className="relative min-w-[80px]">
+                {hours.map((hour) => (
+                  <div key={hour} className="h-16 border-t border-border" />
+                ))}
+                <CalendarEventComponent
+                  events={regularEvents.filter((event) => {
+                    const eventStart = event.start?.dateTime
+                      ? new Date(event.start.dateTime)
+                      : null;
+                    return eventStart && isSameDay(eventStart, day);
+                  })}
+                  dayIndex={dayIndex}
+                  calendars={calendars}
+                  setSelectedEvent={setSelectedEvent}
+                />
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </div>

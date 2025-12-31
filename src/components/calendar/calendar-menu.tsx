@@ -31,7 +31,7 @@ export default function CalendarMenu({
 
   return (
     <section
-      className={`h-screen flex flex-col w-[208px] dark:bg-[#1F1F1F] bg-[#F7F7F7] ${className}`}
+      className={`flex h-full w-[208px] flex-col border-r bg-muted/30 dark:bg-muted/10 ${className}`}
     >
       <div className="flex flex-col items-center">
         <UIDatePicker

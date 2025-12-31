@@ -1,7 +1,10 @@
 "use client";
+import { format } from "date-fns";
 import type { calendar_v3 } from "googleapis";
 import { MoveRight } from "lucide-react";
 import type { ExtendedEvent } from "@/types/calendar";
+
+const formatTime = (date: Date) => format(date, "h:mm a");
 
 interface ContextPanelProps {
   className?: string;
@@ -53,10 +56,10 @@ export default function ContextPanel({
     const nextEvent = getNextEvent();
     if (!nextEvent) {
       return (
-        <div className={`w-[256px] min-w-[256px] h-screen bg-white dark:bg-[#262626] ${className}`}>
+        <div className={`h-full w-[256px] border-l bg-muted/30 dark:bg-muted/10 ${className}`}>
           <div className="flex flex-col gap-2 p-4">
             <div className="flex items-center justify-between">
-              <p>No upcoming events</p>
+              <p className="text-sm text-muted-foreground">No upcoming events</p>
             </div>
           </div>
         </div>
@@ -69,18 +72,18 @@ export default function ContextPanel({
     const endDate = new Date(nextEvent.end?.dateTime || nextEvent.end?.date || "");
 
     return (
-      <div className={`w-[256px] min-w-[256px] h-screen bg-white dark:bg-[#262626] ${className}`}>
+      <div className={`h-full w-[256px] border-l bg-muted/30 dark:bg-muted/10 ${className}`}>
         <div className="flex flex-col gap-4 p-4">
           <div className="flex items-center justify-between">
-            <p className="flex items-center justify-between text-[11px]">
+            <p className="text-xs text-muted-foreground">
               Upcoming in {hours}h {minutes}min
             </p>
-            <MoveRight className="size-4" />
+            <MoveRight className="size-4 text-muted-foreground" />
           </div>
-          <div className="bg-gray-100 dark:bg-[#404040] p-4 rounded-lg">
-            <h2 className="text-[11px] font-semibold line-clamp-1">{summary}</h2>
-            <p className="text-[11px]">
-              {startDate.toLocaleTimeString()} - {endDate.toLocaleTimeString()}
+          <div className="rounded-lg bg-muted p-4">
+            <h2 className="line-clamp-1 text-sm font-semibold">{summary}</h2>
+            <p className="text-xs text-muted-foreground">
+              {formatTime(startDate)} - {formatTime(endDate)}
             </p>
           </div>
         </div>
@@ -93,18 +96,18 @@ export default function ContextPanel({
   const endDate = new Date(selectedEvent.end?.dateTime || selectedEvent.end?.date || "");
 
   return (
-    <div className={`w-[256px] min-w-[256px] h-screen bg-white dark:bg-[#262626] ${className}`}>
+    <div className={`h-full w-[256px] border-l bg-muted/30 dark:bg-muted/10 ${className}`}>
       <div className="flex flex-col gap-4 p-4">
         <div className="flex items-center justify-between">
-          <p className="flex items-center justify-between text-[11px]">Event Details</p>
-          <MoveRight className="size-4" />
+          <p className="text-xs text-muted-foreground">Event Details</p>
+          <MoveRight className="size-4 text-muted-foreground" />
         </div>
-        <div className="bg-gray-100 dark:bg-[#404040] p-4 rounded-lg">
-          <h2 className="text-[11px] font-semibold line-clamp-1">{summary}</h2>
-          <p className="text-[11px]">
-            {startDate.toLocaleTimeString()} - {endDate.toLocaleTimeString()}
+        <div className="rounded-lg bg-muted p-4">
+          <h2 className="line-clamp-1 text-sm font-semibold">{summary}</h2>
+          <p className="text-xs text-muted-foreground">
+            {formatTime(startDate)} - {formatTime(endDate)}
           </p>
-          <p className="text-[11px]">{description}</p>
+          {description && <p className="mt-2 text-xs">{description}</p>}
         </div>
       </div>
     </div>

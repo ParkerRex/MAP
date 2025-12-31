@@ -46,4 +46,7 @@ export const queryKeys = {
   google: {
     status: ["google", "status"] as const,
   },
+  auth: {
+    me: ["auth", "me"] as const,
+  },
 } as const;

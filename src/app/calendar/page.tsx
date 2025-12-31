@@ -139,22 +139,23 @@ function CalendarDashboard() {
   };
 
   return (
-    <div className="flex h-screen w-screen overflow-hidden">
+    <div className="flex h-[calc(100vh-4rem)] overflow-hidden">
       <CalendarMenu
-        className="flex-none w-64"
+        className="hidden flex-none lg:flex"
         calendars={calendars}
         visibleCalendars={visibleCalendars}
         toggleCalendarVisibility={toggleCalendarVisibility}
         currentWeekStartDate={currentWeekStartDate}
         setCurrentWeekStartDate={setCurrentWeekStartDate}
       />
-      <main className="flex flex-col grow overflow-hidden">
+      <main className="flex min-w-0 flex-1 flex-col overflow-hidden">
         <CalendarToolbar
           currentWeekStartDate={currentWeekStartDate}
           setCurrentWeekStartDate={setCurrentWeekStartDate}
+          calendars={calendars}
         />
         <CalendarGrid
-          className="grow overflow-hidden"
+          className="min-h-0 flex-1"
           calendars={calendars}
           events={visibleEvents}
           currentWeekStartDate={currentWeekStartDate}
@@ -163,7 +164,7 @@ function CalendarDashboard() {
         />
       </main>
       <ContextPanel
-        className="flex-none w-64"
+        className="hidden flex-none xl:flex"
         selectedEvent={selectedEvent}
         events={events}
         visibleCalendars={visibleCalendars}
