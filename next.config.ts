@@ -23,12 +23,6 @@ const nextConfig: NextConfig = {
     ignoreBuildErrors: true,
   },
 
-  experimental: {
-    outputFileTracingExcludes: {
-      "*": ["node_modules/canvas*"],
-    },
-  },
-
   async headers() {
     return [
       {

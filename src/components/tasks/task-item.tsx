@@ -79,7 +79,7 @@ const TaskItem: FC<TaskItemProps> = ({
     if (task.id) {
       const formattedDate = format(date, "yyyy-MM-dd'T'HH:mm:ss.SSSxxx");
       await updateTaskDueDate(task.id, formattedDate);
-      setLocalDueDate(formattedDate);
+      setLocalDueDate(date);
       setIsPopoverOpen(false);
     }
   };
@@ -111,13 +111,12 @@ const TaskItem: FC<TaskItemProps> = ({
     setTags((prev) => (prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]));
   };
 
-  const getCountdownText = (dueDate: string | undefined) => {
+  const getCountdownText = (dueDate: Date | null | undefined) => {
     if (!dueDate) return null;
-    const date = parseISO(dueDate);
-    if (isNaN(date.getTime())) return null;
+    if (isNaN(dueDate.getTime())) return null;
 
     const now = new Date();
-    const diff = differenceInDays(date, now);
+    const diff = differenceInDays(dueDate, now);
 
     if (diff === 0) {
       return <span className="text-red-500">today</span>;
@@ -128,13 +127,12 @@ const TaskItem: FC<TaskItemProps> = ({
     return <span className="text-gray-500">{diff} days left</span>;
   };
 
-  const getCountdownClass = (dueDate: string | undefined) => {
+  const getCountdownClass = (dueDate: Date | null | undefined) => {
     if (!dueDate) return "";
-    const date = parseISO(dueDate);
-    if (isNaN(date.getTime())) return "";
+    if (isNaN(dueDate.getTime())) return "";
 
     const now = new Date();
-    const diff = differenceInDays(date, now);
+    const diff = differenceInDays(dueDate, now);
 
     if (diff <= 1) {
       return "text-red-500";
@@ -193,7 +191,7 @@ const TaskItem: FC<TaskItemProps> = ({
                 </PopoverTrigger>
                 <PopoverContent>
                   <DatePicker
-                    selected={localDueDate ? parseISO(localDueDate) : new Date()}
+                    selected={localDueDate ?? new Date()}
                     onDayClick={handleDateChange}
                   />
                 </PopoverContent>
