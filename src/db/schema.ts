@@ -306,6 +306,129 @@ export const contacts = pgTable("contacts", {
   type: text("type"),
 });
 
+// WHOOP Score State Enum
+export const whoopScoreStateEnum = pgEnum("whoop_score_state", [
+  "SCORED",
+  "PENDING_SCORE",
+  "UNSCORABLE",
+]);
+
+// WHOOP Cycles (Physiological Cycles)
+export const whoopCycles = pgTable("whoop_cycles", {
+  id: text("id").primaryKey(), // WHOOP cycle ID
+  odataId: text("odata_id"), // Original v1 ID for migration
+  userId: uuid("user_id").notNull(),
+  whoopUserId: text("whoop_user_id").notNull(),
+  start: timestamp("start", { withTimezone: true }).notNull(),
+  end: timestamp("end", { withTimezone: true }),
+  timezoneOffset: text("timezone_offset"),
+  scoreState: whoopScoreStateEnum("score_state").notNull(),
+  strain: text("strain"), // Stored as text to preserve precision
+  kilojoule: text("kilojoule"),
+  averageHeartRate: integer("average_heart_rate"),
+  maxHeartRate: integer("max_heart_rate"),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }),
+});
+
+// WHOOP Recovery
+export const whoopRecovery = pgTable("whoop_recovery", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  cycleId: text("cycle_id")
+    .notNull()
+    .references(() => whoopCycles.id, { onDelete: "cascade" }),
+  sleepId: text("sleep_id"), // UUID from WHOOP
+  userId: uuid("user_id").notNull(),
+  whoopUserId: text("whoop_user_id").notNull(),
+  scoreState: whoopScoreStateEnum("score_state").notNull(),
+  recoveryScore: integer("recovery_score"), // 0-100
+  restingHeartRate: text("resting_heart_rate"), // bpm
+  hrvRmssd: text("hrv_rmssd"), // ms
+  spo2Percentage: text("spo2_percentage"), // % blood oxygen
+  skinTempCelsius: text("skin_temp_celsius"), // °C
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }),
+});
+
+// WHOOP Sleep
+export const whoopSleep = pgTable("whoop_sleep", {
+  id: text("id").primaryKey(), // WHOOP sleep UUID
+  odataId: text("odata_id"), // Original v1 ID
+  cycleId: text("cycle_id").references(() => whoopCycles.id, {
+    onDelete: "set null",
+  }),
+  userId: uuid("user_id").notNull(),
+  whoopUserId: text("whoop_user_id").notNull(),
+  start: timestamp("start", { withTimezone: true }).notNull(),
+  end: timestamp("end", { withTimezone: true }),
+  timezoneOffset: text("timezone_offset"),
+  isNap: boolean("is_nap").default(false),
+  scoreState: whoopScoreStateEnum("score_state").notNull(),
+  // Sleep stages (in milliseconds)
+  totalInBedTime: integer("total_in_bed_time"),
+  totalAwakeTime: integer("total_awake_time"),
+  totalNoDataTime: integer("total_no_data_time"),
+  totalLightSleepTime: integer("total_light_sleep_time"),
+  totalSlowWaveSleepTime: integer("total_slow_wave_sleep_time"),
+  totalRemSleepTime: integer("total_rem_sleep_time"),
+  sleepCycleCount: integer("sleep_cycle_count"),
+  disturbanceCount: integer("disturbance_count"),
+  // Sleep quality metrics
+  sleepNeeded: integer("sleep_needed"), // Baseline + adjustments
+  respiratoryRate: text("respiratory_rate"),
+  sleepPerformancePercentage: text("sleep_performance_percentage"),
+  sleepConsistencyPercentage: text("sleep_consistency_percentage"),
+  sleepEfficiencyPercentage: text("sleep_efficiency_percentage"),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }),
+});
+
+// WHOOP Workouts
+export const whoopWorkouts = pgTable("whoop_workouts", {
+  id: text("id").primaryKey(), // WHOOP workout UUID
+  odataId: text("odata_id"), // Original v1 ID
+  userId: uuid("user_id").notNull(),
+  whoopUserId: text("whoop_user_id").notNull(),
+  start: timestamp("start", { withTimezone: true }).notNull(),
+  end: timestamp("end", { withTimezone: true }),
+  timezoneOffset: text("timezone_offset"),
+  sportId: integer("sport_id"),
+  sportName: text("sport_name"),
+  scoreState: whoopScoreStateEnum("score_state").notNull(),
+  // Workout metrics
+  strain: text("strain"), // 0-21 scale
+  averageHeartRate: integer("average_heart_rate"),
+  maxHeartRate: integer("max_heart_rate"),
+  kilojoule: text("kilojoule"),
+  distanceMeters: text("distance_meters"),
+  altitudeGainMeters: text("altitude_gain_meters"),
+  altitudeLossMeters: text("altitude_loss_meters"),
+  // Heart rate zones (in milliseconds)
+  zoneZeroMs: integer("zone_zero_ms"),
+  zoneOneMs: integer("zone_one_ms"),
+  zoneTwoMs: integer("zone_two_ms"),
+  zoneThreeMs: integer("zone_three_ms"),
+  zoneFourMs: integer("zone_four_ms"),
+  zoneFiveMs: integer("zone_five_ms"),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }),
+});
+
+// WHOOP User Profile (cached from API)
+export const whoopProfiles = pgTable("whoop_profiles", {
+  userId: uuid("user_id").primaryKey(),
+  whoopUserId: text("whoop_user_id").notNull(),
+  email: text("email"),
+  firstName: text("first_name"),
+  lastName: text("last_name"),
+  heightMeter: text("height_meter"),
+  weightKilogram: text("weight_kilogram"),
+  maxHeartRate: integer("max_heart_rate"),
+  lastSyncedAt: timestamp("last_synced_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }),
+});
+
 // Types
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
@@ -337,3 +460,13 @@ export type CalendarAccount = typeof calendarAccounts.$inferSelect;
 export type CalendarEventAttendee = typeof calendarEventAttendees.$inferSelect;
 export type Session = typeof sessions.$inferSelect;
 export type NewSession = typeof sessions.$inferInsert;
+export type WhoopCycle = typeof whoopCycles.$inferSelect;
+export type NewWhoopCycle = typeof whoopCycles.$inferInsert;
+export type WhoopRecovery = typeof whoopRecovery.$inferSelect;
+export type NewWhoopRecovery = typeof whoopRecovery.$inferInsert;
+export type WhoopSleep = typeof whoopSleep.$inferSelect;
+export type NewWhoopSleep = typeof whoopSleep.$inferInsert;
+export type WhoopWorkout = typeof whoopWorkouts.$inferSelect;
+export type NewWhoopWorkout = typeof whoopWorkouts.$inferInsert;
+export type WhoopProfile = typeof whoopProfiles.$inferSelect;
+export type NewWhoopProfile = typeof whoopProfiles.$inferInsert;

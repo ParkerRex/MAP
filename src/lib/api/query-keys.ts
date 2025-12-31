@@ -32,4 +32,18 @@ export const queryKeys = {
     multi: (calendarIds: string[], timeMin: string, timeMax: string) =>
       ["events", "multi", calendarIds.sort().join(","), timeMin, timeMax] as const,
   },
+  whoop: {
+    profile: ["whoop", "profile"] as const,
+    cycles: (startDate?: string, endDate?: string) =>
+      ["whoop", "cycles", startDate, endDate] as const,
+    recovery: ["whoop", "recovery"] as const,
+    sleep: (startDate?: string, endDate?: string) =>
+      ["whoop", "sleep", startDate, endDate] as const,
+    workouts: (startDate?: string, endDate?: string) =>
+      ["whoop", "workouts", startDate, endDate] as const,
+    all: ["whoop"] as const,
+  },
+  google: {
+    status: ["google", "status"] as const,
+  },
 } as const;
