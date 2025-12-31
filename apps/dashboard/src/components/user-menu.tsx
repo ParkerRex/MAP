@@ -1,4 +1,4 @@
-import { getUser } from "@map/supabase/cached-queries";
+import { getUser } from "@/lib/db/cached-queries";
 import { Avatar, AvatarFallback } from "@map/ui/avatar";
 import {
   DropdownMenu,

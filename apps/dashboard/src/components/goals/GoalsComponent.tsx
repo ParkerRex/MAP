@@ -7,21 +7,17 @@ import {
   CardTitle,
 } from "@map/ui/card";
 
+import { useDeleteAllGoals, useGoalStats } from "@/hooks/use-goals";
 import type { Goal } from "@/types/goals";
 import { Progress } from "@map/ui/progress";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@map/ui/tooltip";
 import { useEffect, useOptimistic, useState } from "react";
 import { GiMagicBroom } from "react-icons/gi";
-import {
-  deleteAllGoalsForUser,
-  fetchGoalCompletionStats,
-} from "../../actions/goalActions";
 import AddGoalForm from "./AddGoalForm";
 import ScrollArea from "./ui/ScrollArea";
 
 type GoalsComponentProps = {
   goals: Goal[];
-  userId: string; // Corrected to string
 };
 
 const getCurrentQuarter = () => {
@@ -55,23 +51,17 @@ const formatDateDifference = (endDate: Date) => {
 const GoalsComponent = ({
   goals,
   className,
-  userId,
 }: GoalsComponentProps & {
   className?: string;
 }) => {
   const [optimisticGoals, setOptimisticGoals] = useOptimistic(goals);
   const [countdown, setCountdown] = useState("");
   const currentQuarter = getCurrentQuarter();
-  const [progress, setProgress] = useState(0);
 
-  useEffect(() => {
-    const updateProgress = async () => {
-      const { completionPercentage } = await fetchGoalCompletionStats();
-      setProgress(completionPercentage);
-    };
+  const { data: statsData } = useGoalStats();
+  const deleteAllGoals = useDeleteAllGoals();
 
-    updateProgress();
-  }, [goals]);
+  const progress = statsData?.stats?.completionPercentage ?? 0;
 
   useEffect(() => {
     const nextQuarterStartDate = getNextQuarterStartDate();
@@ -87,9 +77,9 @@ const GoalsComponent = ({
     return () => clearInterval(intervalId);
   }, []);
 
-  const handleClearGoals = async () => {
-    await deleteAllGoalsForUser();
-    setOptimisticGoals([]); // Clear local state after deleting
+  const handleClearGoals = () => {
+    deleteAllGoals.mutate();
+    setOptimisticGoals([]);
   };
 
   return (

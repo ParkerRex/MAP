@@ -1,5 +1,6 @@
-import { createClient } from "@map/supabase/client";
-import { getUserQuery } from "@map/supabase/queries";
+import { createClient } from "@/lib/db/client";
+// TODO: Implement getUserQuery
+// import { getUserQuery } from "@/lib/db/queries";
 import { HeadlessService } from "@novu/headless";
 import { useCallback, useEffect, useRef, useState } from "react";
 

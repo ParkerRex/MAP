@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getGoogleCalendarClient, mapGoogleEventToDb } from "@/lib/google-calendar";
 import { calendarDb } from "@/db/calendar";
-import { createClient } from "@map/supabase/server";
+import { createClient } from "@/lib/db/server";
 
 export async function GET(request: NextRequest) {
   try {

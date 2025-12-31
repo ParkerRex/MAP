@@ -1,4 +1,4 @@
-import { createClient } from "@map/supabase/client";
+import { createClient } from "@/lib/db/client";
 // TODO: Implement getCurrentUserTeamQuery and getTeamMembersQuery
 // import {
 //   getCurrentUserTeamQuery,

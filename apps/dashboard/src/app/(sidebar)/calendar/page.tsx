@@ -3,7 +3,7 @@ import CalendarGrid from "@/components/calendar/calendar-grid";
 import CalendarMenu from "@/components/calendar/calendar-menu";
 import CalendarToolbar from "@/components/calendar/calendar-toolbar";
 import { CalendarProvider, useCalendar } from "@/store/calendar-context";
-import { DEV_USER } from "@map/supabase/server";
+import { DEV_USER } from "@/lib/db/server";
 
 export default function CalendarPage() {
 	return (

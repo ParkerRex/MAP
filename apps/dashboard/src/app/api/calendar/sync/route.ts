@@ -165,7 +165,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Otherwise, use authenticated user
-    const { createClient } = await import("@map/supabase/server");
+    const { createClient } = await import("@/lib/db/server");
     const supabase = createClient();
     const {
       data: { user },

@@ -12,3 +12,7 @@ const client = postgres(connectionString, {
 });
 
 export const db = drizzle(client, { schema });
+
+// Re-export schema and dev user
+export * from "./schema";
+export * from "./dev-user";

@@ -2,7 +2,8 @@
 
 import { authActionClient } from "@/actions/safe-action";
 import { updateInboxSchema } from "@/actions/schema";
-import { updateInboxById } from "@map/supabase/mutations";
+// TODO: Implement updateInboxById in @/lib/db/mutations
+// import { updateInboxById } from "@/lib/db/mutations";
 import { revalidatePath, revalidateTag } from "next/cache";
 
 export const updateInboxAction = authActionClient

@@ -1,5 +1,5 @@
 // Import necessary modules and functions
-import { createClient } from "@map/supabase/client";
+import { createClient } from "@/lib/db/client";
 import {
   globalShortcut,
   nativeWindow,

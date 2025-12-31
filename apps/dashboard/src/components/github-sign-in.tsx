@@ -1,6 +1,6 @@
 "use client";
 
-import { createClient } from "@map/supabase/client";
+import { createClient } from "@/lib/db/client";
 import { Button } from "@map/ui/button";
 import { Icons } from "@map/ui/icons";
 import { isDesktopApp } from "@todesktop/client-core/platform/todesktop";

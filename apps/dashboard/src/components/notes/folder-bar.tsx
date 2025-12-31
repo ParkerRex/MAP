@@ -1,7 +1,6 @@
 "use client";
 
-import { addFolder, deleteFolder, renameFolder } from "@/actions/notes/note-actions";
-import { createClient } from "@map/supabase/client";
+import { useCreateFolder, useDeleteFolder, useUpdateFolder } from "@/hooks/use-notes";
 import { Button } from "@map/ui/button";
 import { cn } from "@map/ui/cn";
 import {
@@ -38,19 +37,10 @@ export default function FolderBar({ folders, notes }: FolderBarProps) {
   const [newFolderName, setNewFolderName] = React.useState("");
   const [renameFolderName, setRenameFolderName] = React.useState("");
   const [editingFolderId, setEditingFolderId] = React.useState<string | null>(null);
-  const [userId, setUserId] = React.useState<string | null>(null);
 
-  React.useEffect(() => {
-    const fetchUserId = async () => {
-      const supabase = createClient();
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      setUserId(user?.id || null);
-    };
-
-    fetchUserId();
-  }, []);
+  const createFolder = useCreateFolder();
+  const updateFolder = useUpdateFolder();
+  const deleteFolderMutation = useDeleteFolder();
 
   React.useEffect(() => {
     if (selectedFolderId) {
@@ -66,20 +56,19 @@ export default function FolderBar({ folders, notes }: FolderBarProps) {
 
   const handleAddFolder = async () => {
     if (newFolderName.trim() === "") return;
-    if (!userId) return;
-    await addFolder(newFolderName, userId);
+    createFolder.mutate({ name: newFolderName });
     setNewFolderName("");
   };
 
   const handleRenameFolder = async (folderId: string) => {
     if (renameFolderName.trim() === "") return;
-    await renameFolder(folderId, renameFolderName);
+    updateFolder.mutate({ folderId, name: renameFolderName });
     setRenameFolderName("");
     setEditingFolderId(null);
   };
 
   const handleDeleteFolder = async (folderId: string) => {
-    await deleteFolder(folderId);
+    deleteFolderMutation.mutate(folderId);
   };
 
   const handleFolderSelect = (folderId: string | null) => {
@@ -228,18 +217,14 @@ export default function FolderBar({ folders, notes }: FolderBarProps) {
           setSelectedNote={setSelectedNote}
           folders={folders}
           note={null}
-          userId={userId || ""}
         />
       </div>
       <div className="flex-grow">
-        {userId && (
-          <NoteDisplay
-            note={selectedNote}
-            selectedFolderId={selectedFolderId}
-            setSelectedNote={(note) => setSelectedNote(note as Note | null)}
-            userId={userId}
-          />
-        )}
+        <NoteDisplay
+          note={selectedNote}
+          selectedFolderId={selectedFolderId}
+          setSelectedNote={(note) => setSelectedNote(note as Note | null)}
+        />
       </div>
     </div>
   );

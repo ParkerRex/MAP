@@ -1,5 +1,5 @@
 import { google } from "googleapis";
-import { createClient } from "@map/supabase/server";
+import { createClient } from "@/lib/db/server";
 import { calendarDb } from "@/db/calendar";
 
 export async function getGoogleCalendarClient() {

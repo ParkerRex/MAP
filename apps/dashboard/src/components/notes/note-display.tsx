@@ -8,14 +8,12 @@ interface NoteDisplayProps {
   note: Note | null;
   selectedFolderId: string | null;
   setSelectedNote: (note: Note | null) => void;
-  userId: string;
 }
 
 export default function NoteDisplay({
   note,
   selectedFolderId,
   setSelectedNote,
-  userId,
 }: NoteDisplayProps) {
   const titleInputRef = useRef<HTMLInputElement>(null);
 

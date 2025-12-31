@@ -1,6 +1,6 @@
 import { CalendarSyncService } from "@/services/CalendarSyncService";
 import { Database } from "@/utils/supabase/database.types";
-import { createClient } from "@map/supabase/server";
+import { createClient } from "@/lib/db/server";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { CalendarClient } from "./calendar";
 

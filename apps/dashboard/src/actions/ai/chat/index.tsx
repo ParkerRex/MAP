@@ -2,12 +2,10 @@
 // TODO: add in our tools.
 import { BotMessage, SpinnerMessage } from "@/components/chat/messages";
 import { openai } from "@ai-sdk/openai";
-import { client as RedisClient } from "@map/kv";
 import {
   // getBankAccountsCurrencies,
   getUser,
-} from "@map/supabase/cached-queries";
-import { Ratelimit } from "@upstash/ratelimit";
+} from "@/lib/db/cached-queries";
 import {
   createAI,
   createStreamableValue,
@@ -29,10 +27,23 @@ import type { AIState, Chat, ClientMessage, UIState } from "../types";
 // import { getRunwayTool } from "./tools/runway";
 // import { getSpendingTool } from "./tools/spending";
 
-const ratelimit = new Ratelimit({
-  limiter: Ratelimit.fixedWindow(10, "10s"),
-  redis: RedisClient,
-});
+// Simple in-memory rate limiting for dev
+const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
+const ratelimit = {
+  limit: async (key: string | null) => {
+    const now = Date.now();
+    const entry = rateLimitMap.get(key ?? "default");
+    if (!entry || now > entry.resetAt) {
+      rateLimitMap.set(key ?? "default", { count: 1, resetAt: now + 10000 });
+      return { success: true };
+    }
+    if (entry.count >= 10) {
+      return { success: false };
+    }
+    entry.count++;
+    return { success: true };
+  },
+};
 
 export async function submitUserMessage(
   content: string,

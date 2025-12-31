@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { tasksDb } from "@/db/tasks";
-import { createClient } from "@map/supabase/server";
+import { createClient } from "@/lib/db/server";
 
 export async function GET() {
   try {

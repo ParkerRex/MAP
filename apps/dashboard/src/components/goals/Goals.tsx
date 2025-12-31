@@ -1,31 +1,22 @@
-import { createClient } from "@map/supabase/server";
+"use client";
+
+import { useGoals } from "@/hooks/use-goals";
 import GoalsComponent from "./GoalsComponent";
 
-const Goals = async () => {
-  const supabase = createClient();
+const Goals = () => {
+  const { data, isLoading } = useGoals();
 
-  const { data: goalsData, error } = await supabase
-    .from("goal")
-    .select("id, title, completed, created_at, updated_at, user_id")
-    .order("completed", {
-      ascending: true,
-    })
-    .order("created_at", {
-      ascending: false,
-    });
-
-  if (error) {
-    console.error(error);
-    // Optionally handle the error more gracefully
+  if (isLoading) {
+    return <div className="animate-pulse">Loading goals...</div>;
   }
 
-  // Ensure goals is always an array
-  const goals = goalsData || [];
+  const goals = data?.goals ?? [];
 
   return (
     <main className="">
-      <GoalsComponent goals={goals} userId={""} />
+      <GoalsComponent goals={goals} />
     </main>
   );
 };
+
 export default Goals;

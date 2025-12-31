@@ -1,5 +1,5 @@
 import { logger } from "@/utils/logger";
-import { DEV_USER, db, schema } from "@map/supabase/server";
+import { DEV_USER, db, schema } from "@/lib/db/server";
 import { DEFAULT_SERVER_ERROR_MESSAGE, createSafeActionClient } from "next-safe-action";
 import { headers } from "next/headers";
 import { z } from "zod";

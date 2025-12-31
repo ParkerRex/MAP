@@ -1,7 +1,7 @@
 "use server";
 // TODO: Full_name?
-import { getSession } from "@map/supabase/cached-queries";
-import { createClient } from "@map/supabase/server";
+import { getSession } from "@/lib/db/cached-queries";
+import { createClient } from "@/lib/db/server";
 import { revalidateTag } from "next/cache";
 import { redirect } from "next/navigation";
 

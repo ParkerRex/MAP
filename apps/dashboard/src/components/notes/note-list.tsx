@@ -1,5 +1,6 @@
 "use client";
 
+import { useCreateNote, useDeleteNote, useDuplicateNote, useUpdateNote } from "@/hooks/use-notes";
 import type { Note } from "@/types/notes";
 import { Button } from "@map/ui/button";
 import { cn } from "@map/ui/cn";
@@ -20,12 +21,6 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Plus, Trash } from "lucide-react";
 import { Leaf, Search } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
-import {
-  addNoteToFolder,
-  deleteNote,
-  duplicateNote,
-  moveNoteToFolder,
-} from "../../actions/notes/note-actions";
 
 interface NoteListProps {
   notes: Note[];
@@ -36,37 +31,35 @@ interface NoteListProps {
   selectedNote: Note | null;
   setSelectedNote: (note: Note | null) => void;
   folders: any[];
-  userId: string;
 }
 
 export default function NoteList({
   notes = [],
   view,
-  userId,
   selectedFolderId,
   selectedNote,
   setSelectedNote,
   folders,
 }: NoteListProps) {
-  const [localNotes, setLocalNotes] = useState(notes);
   const [searchQuery, setSearchQuery] = useState("");
   const titleInputRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    setLocalNotes(notes);
-  }, [notes]);
+  const createNote = useCreateNote();
+  const updateNote = useUpdateNote();
+  const deleteNoteMutation = useDeleteNote();
+  const duplicateNoteMutation = useDuplicateNote();
 
   const filteredNotes = useMemo(() => {
-    let filtered = localNotes;
+    let filtered = notes;
     switch (view) {
       case "shared":
-        filtered = localNotes.filter((note) => note.shared);
+        filtered = notes.filter((note) => note.shared);
         break;
       case "folder":
-        filtered = localNotes.filter((note) => note.folder_id === selectedFolderId);
+        filtered = notes.filter((note) => note.folder_id === selectedFolderId);
         break;
       default:
-        filtered = localNotes;
+        filtered = notes;
     }
     if (searchQuery) {
       filtered = filtered.filter(
@@ -78,33 +71,28 @@ export default function NoteList({
     return filtered.sort(
       (a, b) => parseISO(b.updated_at).getTime() - parseISO(a.updated_at).getTime(),
     );
-  }, [localNotes, view, selectedFolderId, searchQuery]);
+  }, [notes, view, selectedFolderId, searchQuery]);
 
-  const handleMoveNote = async (noteId: string, newFolderId: string) => {
-    const movedNote = await moveNoteToFolder(noteId, newFolderId);
-    setLocalNotes((prevNotes) => prevNotes.filter((note) => note.id !== noteId));
+  const handleMoveNote = (noteId: string, newFolderId: string) => {
+    updateNote.mutate({ noteId, folderId: newFolderId });
     setSelectedNote(null);
   };
 
-  const handleNewNote = async () => {
-    if (!selectedFolderId || !userId) return;
-    const newNote = await addNoteToFolder(
-      "Brand New Note",
-      "Start writing your content here...",
-      userId,
-      selectedFolderId,
-    );
-    setSelectedNote(newNote[0]);
+  const handleNewNote = () => {
+    if (!selectedFolderId) return;
+    createNote.mutate({
+      title: "Brand New Note",
+      content: "Start writing your content here...",
+      folderId: selectedFolderId,
+    });
   };
 
-  const handleDuplicateNote = async (note: Note) => {
-    const duplicatedNote = await duplicateNote(note);
-    setSelectedNote(duplicatedNote[0]);
+  const handleDuplicateNote = (note: Note) => {
+    duplicateNoteMutation.mutate(note.id);
   };
 
-  const handleDeleteNote = async (noteId: string) => {
-    await deleteNote(noteId);
-    setLocalNotes((prevNotes) => prevNotes.filter((note) => note.id !== noteId));
+  const handleDeleteNote = (noteId: string) => {
+    deleteNoteMutation.mutate(noteId);
     setSelectedNote(null);
   };
 

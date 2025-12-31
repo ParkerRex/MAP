@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { notesDb } from "@/db/notes";
-import { createClient } from "@map/supabase/server";
+import { createClient } from "@/lib/db/server";
 
 export async function POST() {
   try {

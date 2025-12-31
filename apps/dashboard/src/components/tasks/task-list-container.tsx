@@ -4,7 +4,6 @@ import { ScrollArea } from "@map/ui/scroll-area";
 import { Reorder } from "framer-motion";
 import type { FC } from "react";
 import React from "react";
-import { updateTaskTags } from "../../actions/tasks/taskActions";
 import TaskItem from "./task-item";
 
 interface TaskListContainerProps {

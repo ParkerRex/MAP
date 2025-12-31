@@ -1,10 +1,10 @@
 "use client";
 
+import { useDeleteGoal, useToggleGoal } from "@/hooks/use-goals";
 import type { Goal as TGoal } from "@/types/goals";
 import { Checkbox } from "@map/ui/checkbox";
 import { Cross1Icon } from "@radix-ui/react-icons";
 import { useTransition } from "react";
-import { checkGoal, deleteGoal } from "../../actions/goalActions";
 
 // TODO: update to use reacthook form and allow user to click label to complete
 
@@ -16,6 +16,8 @@ type GoalProps = TGoal & {
 
 const Goal = ({ id, title, completed, setOptimisticGoals }: GoalProps) => {
   const [isPending, startTransition] = useTransition();
+  const toggleGoal = useToggleGoal();
+  const deleteGoalMutation = useDeleteGoal();
 
   const handleKeyPress = (event: React.KeyboardEvent, action: () => void) => {
     if (event.key === "Enter" || event.key === " ") {
@@ -38,7 +40,7 @@ const Goal = ({ id, title, completed, setOptimisticGoals }: GoalProps) => {
         });
       });
 
-      checkGoal(id, !completed);
+      toggleGoal.mutate({ goalId: String(id), completed: !completed });
     });
   };
 
@@ -71,7 +73,7 @@ const Goal = ({ id, title, completed, setOptimisticGoals }: GoalProps) => {
                 return prev.filter((goal) => goal.id !== id);
               });
 
-              deleteGoal(id);
+              deleteGoalMutation.mutate(String(id));
             });
           }}
           onKeyPress={(e) =>
@@ -81,7 +83,7 @@ const Goal = ({ id, title, completed, setOptimisticGoals }: GoalProps) => {
                   return prev.filter((goal) => goal.id !== id);
                 });
 
-                deleteGoal(id);
+                deleteGoalMutation.mutate(String(id));
               });
             })
           }

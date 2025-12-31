@@ -1,12 +1,22 @@
-import { fetchFolders, fetchNotes } from "@/actions/notes/note-actions";
+"use client";
+
 import FolderBar from "@/components/notes/folder-bar";
-import { DEV_USER } from "@map/supabase/server";
+import { useFolders, useNotes } from "@/hooks/use-notes";
 
-export default async function NotePage() {
-	const [notes, folders] = await Promise.all([fetchNotes(), fetchFolders(DEV_USER.id)]);
+export default function NotePage() {
+	const { data: notesData, isLoading: notesLoading } = useNotes();
+	const { data: foldersData, isLoading: foldersLoading } = useFolders();
 
-	console.log("Fetched notes:", notes);
-	console.log("Fetched folders:", folders);
+	if (notesLoading || foldersLoading) {
+		return (
+			<div className="flex items-center justify-center h-screen">
+				Loading...
+			</div>
+		);
+	}
+
+	const notes = notesData?.notes ?? [];
+	const folders = foldersData?.folders ?? [];
 
 	return (
 		<div className="hidden flex-col md:flex w-full h-screen">

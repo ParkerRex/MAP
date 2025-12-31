@@ -1,12 +1,11 @@
 "use client";
 
+import { useCreateGoal } from "@/hooks/use-goals";
 import type { Goal } from "@/types/goals";
+import { CheckCircleIcon } from "lucide-react";
 import type React from "react";
 import { startTransition, useRef } from "react";
 import { useFormStatus } from "react-dom";
-import { addGoal } from "../../actions/goalActions";
-
-import { CheckCircleIcon } from "lucide-react";
 
 type AddGoalFormProps = {
   setOptimisticGoals: (
@@ -16,21 +15,23 @@ type AddGoalFormProps = {
 
 const AddGoalForm = ({ setOptimisticGoals }: AddGoalFormProps) => {
   const formRef = useRef<HTMLFormElement>(null);
-  const { pending } = useFormStatus(); // This hook is used to manage form submission state
+  const { pending } = useFormStatus();
+  const createGoal = useCreateGoal();
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!formRef.current) return; // Add null check here
+    if (!formRef.current) return;
     const formData = new FormData(formRef.current);
+    const title = formData.get("goaltext") as string;
 
     // Create an optimistic goal to update the UI immediately
     const optimisticGoal: Goal = {
-      id: Date.now(), // Temporary ID for optimistic update
-      title: formData.get("goaltext") as string,
+      id: Date.now(),
+      title,
       completed: false,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
-      user_id: "temp", // Placeholder, adjust as needed
+      user_id: "temp",
     };
 
     // Wrap the optimistic update in startTransition
@@ -38,8 +39,8 @@ const AddGoalForm = ({ setOptimisticGoals }: AddGoalFormProps) => {
       setOptimisticGoals((prev) => [optimisticGoal, ...prev]);
     });
 
-    // Attempt to add the goal to the database
-    await addGoal(formData);
+    // Create the goal via mutation
+    createGoal.mutate({ title });
 
     // Reset the form after submission
     formRef.current?.reset();

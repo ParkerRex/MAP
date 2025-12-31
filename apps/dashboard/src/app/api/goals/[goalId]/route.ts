@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { goalsDb } from "@/db/goals";
-import { createClient } from "@map/supabase/server";
+import { createClient } from "@/lib/db/server";
 
 type Params = Promise<{ goalId: string }>;
 

@@ -1,7 +1,7 @@
 import type { UpdateTransactionValues } from "@/actions/schema";
 // TODO: Implement updateSimilarTransactionsAction
 // import { updateSimilarTransactionsAction } from "@/actions/update-similar-transactions-action";
-import { createClient } from "@map/supabase/client";
+import { createClient } from "@/lib/db/client";
 // TODO: Implement getTransactionQuery
 // import { getTransactionQuery } from "@map/supabase/queries";
 // TODO: Implement getCurrentUserTeamQuery and getSimilarTransactions

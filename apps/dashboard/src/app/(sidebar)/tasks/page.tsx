@@ -1,22 +1,27 @@
-import { getAllTags, getAllTasks } from "@/actions/tasks/taskActions";
+"use client";
+
 import TaskList from "@/components/tasks/task-list";
-import { Suspense } from "react";
+import { useTags, useTasks } from "@/hooks/use-tasks";
 
-export default async function ListsPage() {
-  try {
-    const initialTasks = await getAllTasks();
-    const initialTags = await getAllTags();
+export default function ListsPage() {
+  const { data: tasksData, isLoading: tasksLoading } = useTasks();
+  const { data: tagsData, isLoading: tagsLoading } = useTags();
 
+  if (tasksLoading || tagsLoading) {
     return (
-      <div className="flex flex-col h-full">
-        <h1 className="text-2xl font-bold mb-4">Tasks</h1>
-        <Suspense fallback={<div>Loading...</div>}>
-          <TaskList initialTasks={initialTasks} initialTags={initialTags} />
-        </Suspense>
+      <div className="flex items-center justify-center h-full">
+        Loading...
       </div>
     );
-  } catch (error) {
-    console.error("Error in ListsPage:", error);
-    return <div>An error occurred. Please try again later.</div>;
   }
+
+  const tasks = tasksData?.tasks ?? [];
+  const tags = tagsData?.tags ?? [];
+
+  return (
+    <div className="flex flex-col h-full">
+      <h1 className="text-2xl font-bold mb-4">Tasks</h1>
+      <TaskList initialTasks={tasks} initialTags={tags} />
+    </div>
+  );
 }

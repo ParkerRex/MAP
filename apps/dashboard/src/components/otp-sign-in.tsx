@@ -2,7 +2,7 @@
 
 import { verifyOtpAction } from "@/actions/verify-otp-action";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { createClient } from "@map/supabase/client";
+import { createClient } from "@/lib/db/client";
 import { Button } from "@map/ui/button";
 import { cn } from "@map/ui/cn";
 import { Form, FormControl, FormField, FormItem } from "@map/ui/form";
