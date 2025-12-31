@@ -27,7 +27,24 @@ interface SyncResponse {
   error?: string;
 }
 
+interface GoogleStatusResponse {
+  connected: boolean;
+}
+
 // Queries
+export function useGoogleStatus() {
+  return useQuery<GoogleStatusResponse>({
+    queryKey: queryKeys.google.status,
+    queryFn: async () => {
+      const response = await fetch("/api/google/status");
+      if (!response.ok) {
+        throw new Error("Failed to fetch Google status");
+      }
+      return response.json();
+    },
+  });
+}
+
 export function useCalendars() {
   return useQuery<CalendarsResponse>({
     queryKey: queryKeys.calendars.all,
@@ -41,11 +58,7 @@ export function useCalendars() {
   });
 }
 
-export function useEvents(
-  calendarId: string,
-  timeMin: string,
-  timeMax: string,
-) {
+export function useEvents(calendarId: string, timeMin: string, timeMax: string) {
   return useQuery<EventsResponse>({
     queryKey: queryKeys.events.byCalendar(calendarId, timeMin, timeMax),
     queryFn: async () => {
@@ -64,11 +77,7 @@ export function useEvents(
   });
 }
 
-export function useMultiCalendarEvents(
-  calendarIds: string[],
-  timeMin: string,
-  timeMax: string,
-) {
+export function useMultiCalendarEvents(calendarIds: string[], timeMin: string, timeMax: string) {
   return useQuery<CalendarEvent[]>({
     queryKey: queryKeys.events.multi(calendarIds, timeMin, timeMax),
     queryFn: async () => {
@@ -113,29 +122,24 @@ export function useColors() {
 export function useCreateEvent() {
   const queryClient = useQueryClient();
 
-  return useMutation<
-    { event: CalendarEvent },
-    Error,
-    { calendarId: string; event: CalendarEvent }
-  >({
-    mutationFn: async ({ calendarId, event }) => {
-      const response = await fetch(
-        `/api/calendar/events?calendarId=${calendarId}`,
-        {
+  return useMutation<{ event: CalendarEvent }, Error, { calendarId: string; event: CalendarEvent }>(
+    {
+      mutationFn: async ({ calendarId, event }) => {
+        const response = await fetch(`/api/calendar/events?calendarId=${calendarId}`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(event),
-        },
-      );
-      if (!response.ok) {
-        throw new Error("Failed to create event");
-      }
-      return response.json();
+        });
+        if (!response.ok) {
+          throw new Error("Failed to create event");
+        }
+        return response.json();
+      },
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: queryKeys.events.all });
+      },
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.events.all });
-    },
-  });
+  );
 }
 
 export function useUpdateEvent() {
@@ -147,14 +151,11 @@ export function useUpdateEvent() {
     { calendarId: string; eventId: string; event: Partial<CalendarEvent> }
   >({
     mutationFn: async ({ calendarId, eventId, event }) => {
-      const response = await fetch(
-        `/api/calendar/events/${eventId}?calendarId=${calendarId}`,
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(event),
-        },
-      );
+      const response = await fetch(`/api/calendar/events/${eventId}?calendarId=${calendarId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(event),
+      });
       if (!response.ok) {
         throw new Error("Failed to update event");
       }
@@ -169,18 +170,11 @@ export function useUpdateEvent() {
 export function useDeleteEvent() {
   const queryClient = useQueryClient();
 
-  return useMutation<
-    { success: boolean },
-    Error,
-    { calendarId: string; eventId: string }
-  >({
+  return useMutation<{ success: boolean }, Error, { calendarId: string; eventId: string }>({
     mutationFn: async ({ calendarId, eventId }) => {
-      const response = await fetch(
-        `/api/calendar/events/${eventId}?calendarId=${calendarId}`,
-        {
-          method: "DELETE",
-        },
-      );
+      const response = await fetch(`/api/calendar/events/${eventId}?calendarId=${calendarId}`, {
+        method: "DELETE",
+      });
       if (!response.ok) {
         throw new Error("Failed to delete event");
       }

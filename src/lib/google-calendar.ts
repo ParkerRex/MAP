@@ -3,6 +3,56 @@ import { google } from "googleapis";
 import { calendarDb } from "@/db/calendar";
 import { getUser } from "@/lib/auth";
 
+// Google Calendar OAuth Scopes
+export const GOOGLE_CALENDAR_SCOPES = [
+  "https://www.googleapis.com/auth/calendar.readonly",
+  "https://www.googleapis.com/auth/calendar.events",
+] as const;
+
+// Generate OAuth authorization URL
+export function getGoogleAuthUrl(state: string, redirectUri: string): string {
+  const oauth2Client = new google.auth.OAuth2(
+    process.env.GOOGLE_CLIENT_ID,
+    process.env.GOOGLE_CLIENT_SECRET,
+    redirectUri,
+  );
+
+  return oauth2Client.generateAuthUrl({
+    access_type: "offline",
+    scope: [...GOOGLE_CALENDAR_SCOPES],
+    state,
+    prompt: "consent", // Force consent to ensure we get refresh token
+  });
+}
+
+// Exchange authorization code for tokens
+export async function exchangeGoogleCode(
+  code: string,
+  redirectUri: string,
+): Promise<{
+  access_token: string;
+  refresh_token: string;
+  expiry_date: number;
+}> {
+  const oauth2Client = new google.auth.OAuth2(
+    process.env.GOOGLE_CLIENT_ID,
+    process.env.GOOGLE_CLIENT_SECRET,
+    redirectUri,
+  );
+
+  const { tokens } = await oauth2Client.getToken(code);
+
+  if (!tokens.access_token) {
+    throw new Error("Failed to get access token from Google");
+  }
+
+  return {
+    access_token: tokens.access_token,
+    refresh_token: tokens.refresh_token ?? "",
+    expiry_date: tokens.expiry_date ?? Date.now() + 3600 * 1000,
+  };
+}
+
 async function createOAuth2ClientWithRefresh(
   userId: string,
   integration: {
@@ -32,9 +82,7 @@ async function createOAuth2ClientWithRefresh(
 
       await calendarDb.updateIntegration(userId, "GOOGLE", {
         accessToken: credentials.access_token ?? integration.accessToken,
-        expiresAt: credentials.expiry_date
-          ? new Date(credentials.expiry_date)
-          : undefined,
+        expiresAt: credentials.expiry_date ? new Date(credentials.expiry_date) : undefined,
       });
 
       oauth2Client.setCredentials(credentials);
@@ -57,10 +105,7 @@ export async function getGoogleCalendarClient() {
     throw new Error("No Google integration found");
   }
 
-  const oauth2Client = await createOAuth2ClientWithRefresh(
-    user.id,
-    integration,
-  );
+  const oauth2Client = await createOAuth2ClientWithRefresh(user.id, integration);
 
   return google.calendar({ version: "v3", auth: oauth2Client });
 }
@@ -77,10 +122,7 @@ export async function getGoogleCalendarClientWithRefresh(userId: string) {
   return google.calendar({ version: "v3", auth: oauth2Client });
 }
 
-export function mapGoogleEventToDb(
-  event: calendar_v3.Schema$Event,
-  calendarId: string,
-) {
+export function mapGoogleEventToDb(event: calendar_v3.Schema$Event, calendarId: string) {
   return {
     id: event.id!,
     calendarId,
@@ -102,10 +144,7 @@ export function mapGoogleEventToDb(
     transparency: event.transparency ?? null,
     sequence: event.sequence ?? null,
     recurringEventId: event.recurringEventId ?? null,
-    originalStartTime:
-      event.originalStartTime?.dateTime ??
-      event.originalStartTime?.date ??
-      null,
+    originalStartTime: event.originalStartTime?.dateTime ?? event.originalStartTime?.date ?? null,
     recurrence: event.recurrence ?? null,
     guestsCanInviteOthers: event.guestsCanInviteOthers ?? null,
     guestsCanModify: event.guestsCanModify ?? null,
