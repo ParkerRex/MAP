@@ -58,6 +58,45 @@ src/
 └── types/            # TypeScript types
 ```
 
+## Integrations
+
+### Google Calendar
+
+OAuth 2.0 integration for syncing Google Calendar events.
+
+**Setup:**
+1. Create OAuth credentials in [Google Cloud Console](https://console.cloud.google.com/apis/credentials)
+2. Add authorized redirect URI: `{APP_URL}/api/google/callback`
+3. Set environment variables:
+   ```
+   GOOGLE_CLIENT_ID=your_client_id
+   GOOGLE_CLIENT_SECRET=your_client_secret
+   ```
+
+**User Flow:**
+1. Visit `/calendar` → Shows "Connect Google Calendar" card
+2. Click connect → Redirects to Google OAuth consent
+3. Approve → Redirects back, auto-syncs calendars
+4. View and manage calendar events
+
+**OAuth Routes:**
+| Route | Method | Description |
+|-------|--------|-------------|
+| `/api/google/auth` | GET | Initiates OAuth flow |
+| `/api/google/callback` | GET | Handles OAuth callback |
+| `/api/google/status` | GET | Check if connected |
+
+### WHOOP
+
+OAuth 2.0 integration for health/fitness data (recovery, strain, sleep).
+
+**OAuth Routes:**
+| Route | Method | Description |
+|-------|--------|-------------|
+| `/api/whoop/auth` | GET | Initiates OAuth flow |
+| `/api/whoop/callback` | GET | Handles OAuth callback |
+| `/api/whoop/profile` | GET | Check connection status |
+
 ## API Routes
 
 All API routes require authentication (except auth routes). Protected resources verify ownership via userId.
@@ -65,6 +104,8 @@ All API routes require authentication (except auth routes). Protected resources 
 | Route | Methods | Description |
 |-------|---------|-------------|
 | `/api/auth/*` | POST/GET | Authentication |
+| `/api/google/*` | GET | Google Calendar OAuth |
+| `/api/whoop/*` | GET | WHOOP OAuth |
 | `/api/tasks` | GET, POST | Tasks CRUD |
 | `/api/tasks/[id]` | GET, PUT, DELETE | Single task |
 | `/api/notes` | GET, POST | Notes CRUD |
@@ -75,7 +116,7 @@ All API routes require authentication (except auth routes). Protected resources 
 | `/api/folders/[id]` | PUT, DELETE | Single folder |
 | `/api/tags` | GET, POST | Tags CRUD |
 | `/api/tags/[id]` | PUT, DELETE | Single tag |
-| `/api/calendar/*` | Various | Google Calendar integration |
+| `/api/calendar/*` | Various | Google Calendar sync & events |
 
 ## Data Flow
 

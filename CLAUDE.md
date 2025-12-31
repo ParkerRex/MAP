@@ -87,6 +87,73 @@ Create Zod schemas in `src/lib/validations/` for all API inputs:
 
 Always validate request body before processing.
 
+## OAuth Integrations
+
+OAuth integrations follow a consistent pattern:
+
+### File Structure
+```
+src/
+├── app/api/{provider}/
+│   ├── auth/route.ts      # Initiates OAuth, redirects to provider
+│   ├── callback/route.ts  # Handles callback, stores tokens
+│   └── status/route.ts    # Check if connected
+├── lib/{provider}.ts      # OAuth helpers (getAuthUrl, exchangeCode)
+└── hooks/use-{provider}.ts # Client hooks (useStatus, useMutations)
+```
+
+### OAuth Route Pattern
+```typescript
+// auth/route.ts - Initiate OAuth
+export async function GET() {
+  const user = await getUser();
+  if (!user) throw unauthorized();
+
+  const state = randomBytes(32).toString("hex");
+  const authUrl = getProviderAuthUrl(state, redirectUri);
+
+  const response = NextResponse.redirect(authUrl);
+  response.cookies.set("provider_oauth_state", state, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    maxAge: 60 * 10,
+  });
+  return response;
+}
+```
+
+Tokens stored in `integrations` table with automatic refresh before expiry.
+
+## Google Calendar Integration
+
+Google Calendar integration in `src/lib/google-calendar.ts`:
+- OAuth 2.0 flow with automatic token refresh
+- Full Calendar API v3 support (events, calendars, colors)
+- Incremental sync with syncToken for efficiency
+- Rate limit handling with exponential backoff
+
+**API Routes** (`/api/google/` and `/api/calendar/`):
+- `GET /api/google/auth` - Initiate OAuth flow
+- `GET /api/google/callback` - Handle OAuth callback
+- `GET /api/google/status` - Check if connected
+- `GET /api/calendar/calendars` - List user's calendars
+- `GET/POST /api/calendar/events` - List/create events
+- `PUT/DELETE /api/calendar/events/[id]` - Update/delete events
+- `POST /api/calendar/sync` - Sync calendars (supports incremental)
+
+**Hooks** (`src/hooks/use-calendar.ts`):
+- `useGoogleStatus()` - Check connection status
+- `useCalendars()`, `useEvents()`, `useMultiCalendarEvents()`
+- `useCreateEvent()`, `useUpdateEvent()`, `useDeleteEvent()`
+- `useSyncCalendars()`
+
+**Environment Variables**:
+```
+GOOGLE_CLIENT_ID=your_client_id
+GOOGLE_CLIENT_SECRET=your_client_secret
+```
+
 ## WHOOP Integration
 
 WHOOP health data integration in `src/lib/whoop.ts`:
