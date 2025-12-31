@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 };
 
 export default async function Page() {
-  const { device: _device } = userAgent({ headers: headers() });
+  const { device: _device } = userAgent({ headers: await headers() });
 
   const signInOption = <GoogleSignIn />;
 

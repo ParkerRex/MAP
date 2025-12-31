@@ -24,7 +24,6 @@ const nextConfig: NextConfig = {
   },
 
   experimental: {
-    instrumentationHook: process.env.NODE_ENV === "production",
     outputFileTracingExcludes: {
       "*": ["node_modules/canvas*"],
     },

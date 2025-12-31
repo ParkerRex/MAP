@@ -112,8 +112,8 @@ export default function NoteList({
     );
   };
 
-  const formatTimestamp = (date: string) => {
-    const noteDate = parseISO(date);
+  const formatTimestamp = (date: Date) => {
+    const noteDate = date;
     const now = new Date();
     const diffInMinutes = Math.floor((now.getTime() - noteDate.getTime()) / (1000 * 60));
 

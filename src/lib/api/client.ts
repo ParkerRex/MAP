@@ -101,8 +101,11 @@ export interface UpdateTagInput {
 class ApiClient {
   private baseUrl = "/api";
 
-  private async request<T>(endpoint: string, options?: RequestInit): Promise<T> {
-    const response = await fetch(\`\${this.baseUrl}\${endpoint}\`, {
+  private async request<T>(
+    endpoint: string,
+    options?: RequestInit,
+  ): Promise<T> {
+    const response = await fetch(this.baseUrl + endpoint, {
       ...options,
       headers: {
         "Content-Type": "application/json",
@@ -114,9 +117,9 @@ class ApiClient {
       const error = await response.json().catch(() => ({}));
       throw new ApiError(
         error.error?.code ?? ErrorCodes.REQUEST_FAILED,
-        error.error?.message ?? \`Request failed: \${response.status}\`,
+        error.error?.message ?? "Request failed: " + response.status,
         response.status,
-        error.error?.details
+        error.error?.details,
       );
     }
 
@@ -125,24 +128,36 @@ class ApiClient {
 
   tasks = {
     list: () => this.request<TasksResponse>("/tasks"),
-    get: (id: string) => this.request<TaskResponse>(\`/tasks/\${id}\`),
+    get: (id: string) => this.request<TaskResponse>("/tasks/" + id),
     create: (data: CreateTaskInput) =>
-      this.request<TaskResponse>("/tasks", { method: "POST", body: JSON.stringify(data) }),
+      this.request<TaskResponse>("/tasks", {
+        method: "POST",
+        body: JSON.stringify(data),
+      }),
     update: (id: string, data: UpdateTaskInput) =>
-      this.request<TaskResponse>(\`/tasks/\${id}\`, { method: "PUT", body: JSON.stringify(data) }),
+      this.request<TaskResponse>("/tasks/" + id, {
+        method: "PUT",
+        body: JSON.stringify(data),
+      }),
     delete: (id: string) =>
-      this.request<{ success: boolean }>(\`/tasks/\${id}\`, { method: "DELETE" }),
+      this.request<{ success: boolean }>("/tasks/" + id, { method: "DELETE" }),
   };
 
   tags = {
     list: () => this.request<TagsResponse>("/tags"),
-    get: (id: string) => this.request<TagResponse>(\`/tags/\${id}\`),
+    get: (id: string) => this.request<TagResponse>("/tags/" + id),
     create: (data: CreateTagInput) =>
-      this.request<TagResponse>("/tags", { method: "POST", body: JSON.stringify(data) }),
+      this.request<TagResponse>("/tags", {
+        method: "POST",
+        body: JSON.stringify(data),
+      }),
     update: (id: string, data: UpdateTagInput) =>
-      this.request<TagResponse>(\`/tags/\${id}\`, { method: "PUT", body: JSON.stringify(data) }),
+      this.request<TagResponse>("/tags/" + id, {
+        method: "PUT",
+        body: JSON.stringify(data),
+      }),
     delete: (id: string) =>
-      this.request<{ success: boolean }>(\`/tags/\${id}\`, { method: "DELETE" }),
+      this.request<{ success: boolean }>("/tags/" + id, { method: "DELETE" }),
   };
 }
 
