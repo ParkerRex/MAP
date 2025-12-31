@@ -1,4 +1,4 @@
-import { and, eq } from "drizzle-orm";
+import { and, count, eq, sql } from "drizzle-orm";
 import { db } from "./index";
 import { goals, type NewGoal } from "./schema";
 
@@ -48,18 +48,25 @@ export const goalsDb = {
   },
 
   async getCompletionStats(userId: string) {
-    const allGoals = await db.select().from(goals).where(eq(goals.userId, userId));
-    const completedGoals = allGoals.filter((g) => g.completed);
+    const result = await db
+      .select({
+        total: count(),
+        completed: sql<number>`count(*) filter (where ${goals.completed} = true)`,
+      })
+      .from(goals)
+      .where(eq(goals.userId, userId));
 
-    const total = allGoals.length;
-    const completed = completedGoals.length;
+    const { total, completed } = result[0] ?? { total: 0, completed: 0 };
     const completionPercentage = total === 0 ? 0 : (completed / total) * 100;
 
     return { total, completed, completionPercentage };
   },
 
   async deleteUserGoals(userId: string) {
-    const result = await db.delete(goals).where(eq(goals.userId, userId)).returning();
+    const result = await db
+      .delete(goals)
+      .where(eq(goals.userId, userId))
+      .returning();
     return result;
   },
 };

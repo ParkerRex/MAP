@@ -65,24 +65,37 @@ Refactored hooks to use these factories, reducing boilerplate by 25-50%.
 
 ---
 
-## Medium Priority - Code Quality (Pending)
+### 6. ✅ DRY Up Database Task Mapping
+**Status:** Complete
 
-### 6. DRY Up Database Task Mapping
-`src/db/tasks.ts` has duplicate 30-field SELECT clauses (lines 35-60 and 121-147).
-
-**Fix:** Extract to a constant `taskSelectFields`.
+Extracted shared `taskWithTagsSelect` constant and `rowsToTaskWithTags()` helper function in `src/db/tasks.ts`. Reduced duplicate 23-field SELECT clauses from 2 locations to 1 shared constant.
 
 ---
 
-### 7. Move Stats Calculation to SQL
-`src/db/goals.ts:50-59` fetches all goals then filters in JS.
+### 7. ✅ Move Stats Calculation to SQL
+**Status:** Complete
 
-**Fix:** Use SQL aggregation instead.
+Replaced JS filtering with SQL aggregation in `src/db/goals.ts`:
+```typescript
+const result = await db
+  .select({
+    total: count(),
+    completed: sql<number>`count(*) filter (where ${goals.completed} = true)`,
+  })
+  .from(goals)
+  .where(eq(goals.userId, userId));
+```
 
 ---
 
-### 8. Remove Redundant Ownership Checks
-`src/db/tasks.ts:207` and `src/db/notes.ts:107` query for ownership before deleting, but the DELETE already has a WHERE clause checking userId.
+### 8. ✅ Remove Redundant Ownership Checks
+**Status:** Complete
+
+Refactored delete operations in `src/db/tasks.ts` and `src/db/notes.ts` to:
+1. Delete entity first (with ownership in WHERE clause)
+2. Clean up associations only if delete succeeded
+
+This eliminates redundant pre-delete ownership queries while maintaining correctness.
 
 ---
 
@@ -121,9 +134,9 @@ Different approaches: `parsed.error.flatten()` vs `parsed.error.flatten().fieldE
 | Constants file | ✅ Done | Very Low | Low |
 | Standardize hooks | ✅ Done | Medium | Medium |
 | Mutation factory | ✅ Done | High | High |
-| DRY DB mapping | Pending | Low | Low |
-| SQL aggregation | Pending | Medium | Medium |
-| Ownership checks | Pending | Very Low | Low |
+| DRY DB mapping | ✅ Done | Low | Low |
+| SQL aggregation | ✅ Done | Medium | Medium |
+| Ownership checks | ✅ Done | Very Low | Low |
 | Type consolidation | Pending | High | Medium |
 | Remove unused props | Pending | Very Low | Low |
 | Extract retry logic | Pending | Low | Low |

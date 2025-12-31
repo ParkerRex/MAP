@@ -22,7 +22,11 @@ export const notesDb = {
     return result[0];
   },
 
-  async updateNote(noteId: string, userId: string, data: { title?: string; content?: string }) {
+  async updateNote(
+    noteId: string,
+    userId: string,
+    data: { title?: string; content?: string },
+  ) {
     const result = await db
       .update(notes)
       .set({ ...data, updatedAt: new Date() })
@@ -103,21 +107,25 @@ export const notesDb = {
   },
 
   async deleteFolder(folderId: string, userId: string) {
-    // Verify ownership first
-    const folder = await this.getFolderById(folderId, userId);
-    if (!folder) return null;
-
-    // Delete all notes in folder first
-    await db.delete(notes).where(eq(notes.folderId, folderId));
+    // Delete folder first (ownership verified in WHERE clause)
     const result = await db
       .delete(folders)
       .where(and(eq(folders.id, folderId), eq(folders.userId, userId)))
       .returning();
+
+    // Only delete notes if folder was actually deleted
+    if (result[0]) {
+      await db.delete(notes).where(eq(notes.folderId, folderId));
+    }
+
     return result[0] ?? null;
   },
 
   async ensureCoachNotesFolder(userId: string) {
-    const existing = await db.select().from(folders).where(eq(folders.userId, userId));
+    const existing = await db
+      .select()
+      .from(folders)
+      .where(eq(folders.userId, userId));
 
     const coachFolder = existing.find((f) => f.name === "Coach Notes");
     if (coachFolder) return coachFolder;
