@@ -12,7 +12,6 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@map/supabase": "workspace:*",
     "@map/ui": "workspace:*",
     "@openpanel/nextjs": "^1.1.2",
     "@openstatus/react": "^0.0.3",
