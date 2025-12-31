@@ -77,6 +77,236 @@ xcodebuild test -scheme MapHealth ... | xcbeautify
 
 ---
 
+## Deploying to Physical iPhone from CLI
+
+HealthKit requires a real device for testing (simulator has no health data). Here's how to build and deploy entirely from command line.
+
+### Requirements
+
+| Requirement | How to Get |
+|-------------|------------|
+| Xcode CLI tools | `xcode-select --install` |
+| Apple Developer account | developer.apple.com (free works for dev) |
+| Device registered | One-time Xcode setup or `xcrun devicectl` |
+| Developer Mode on iPhone | Settings → Privacy & Security → Developer Mode |
+| Device connected via USB | Or WiFi after initial pairing |
+
+### Tools Overview
+
+| Tool | iOS Version | Purpose |
+|------|-------------|---------|
+| `xcrun devicectl` | iOS 17+ (Xcode 15+) | Apple's official CLI for devices |
+| `ios-deploy` | iOS < 17 | Community tool, deprecated for iOS 17+ |
+| `ideviceinstaller` | All | libimobiledevice, cross-platform |
+
+### Using xcrun devicectl (Recommended - iOS 17+)
+
+```bash
+# 1. List connected devices
+xcrun devicectl list devices
+
+# Output shows UDID like: 00008110-XXXXXXXXXXXX
+
+# 2. Build for device
+xcodebuild build \
+  -scheme MapHealth \
+  -sdk iphoneos \
+  -destination "generic/platform=iOS" \
+  -derivedDataPath .build \
+  -allowProvisioningUpdates
+
+# 3. Install on device
+xcrun devicectl device install app \
+  --device 00008110-XXXXXXXXXXXX \
+  .build/Build/Products/Debug-iphoneos/MapHealth.app
+
+# 4. Launch app
+xcrun devicectl device process launch \
+  --device 00008110-XXXXXXXXXXXX \
+  com.map.health
+
+# 5. View logs (Xcode 16+ only)
+xcrun devicectl device process launch \
+  --device 00008110-XXXXXXXXXXXX \
+  --console \
+  com.map.health
+```
+
+### Code Signing Options
+
+```bash
+# Option 1: Automatic signing (prompts for Apple ID if needed)
+xcodebuild build \
+  -scheme MapHealth \
+  -sdk iphoneos \
+  -allowProvisioningUpdates \
+  DEVELOPMENT_TEAM="XXXXXXXXXX"
+
+# Option 2: Specific provisioning profile
+xcodebuild build \
+  -scheme MapHealth \
+  -sdk iphoneos \
+  CODE_SIGN_IDENTITY="Apple Development" \
+  PROVISIONING_PROFILE_SPECIFIER="MapHealth Dev" \
+  DEVELOPMENT_TEAM="XXXXXXXXXX"
+
+# Option 3: Export options plist (for archives)
+xcodebuild archive \
+  -scheme MapHealth \
+  -sdk iphoneos \
+  -archivePath .build/MapHealth.xcarchive \
+  -allowProvisioningUpdates
+
+xcodebuild -exportArchive \
+  -archivePath .build/MapHealth.xcarchive \
+  -exportOptionsPlist ExportOptions.plist \
+  -exportPath .build/export
+```
+
+### ExportOptions.plist Example
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>method</key>
+    <string>development</string>
+    <key>teamID</key>
+    <string>XXXXXXXXXX</string>
+    <key>signingStyle</key>
+    <string>automatic</string>
+</dict>
+</plist>
+```
+
+### Deploy Script
+
+Create `ios/scripts/deploy.sh`:
+
+```bash
+#!/bin/bash
+set -e
+
+SCHEME="MapHealth"
+BUNDLE_ID="com.map.health"
+BUILD_DIR=".build"
+
+# Colors
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+NC='\033[0m'
+
+echo -e "${YELLOW}Finding connected devices...${NC}"
+DEVICE=$(xcrun devicectl list devices -j 2>/dev/null | jq -r '.result.devices[0].identifier // empty')
+
+if [ -z "$DEVICE" ]; then
+    echo -e "${RED}No device found. Connect your iPhone via USB.${NC}"
+    exit 1
+fi
+
+DEVICE_NAME=$(xcrun devicectl list devices -j 2>/dev/null | jq -r '.result.devices[0].deviceProperties.name // "iPhone"')
+echo -e "${GREEN}Found: $DEVICE_NAME ($DEVICE)${NC}"
+
+echo -e "${YELLOW}Building for device...${NC}"
+xcodebuild build \
+    -scheme $SCHEME \
+    -sdk iphoneos \
+    -destination "generic/platform=iOS" \
+    -derivedDataPath $BUILD_DIR \
+    -allowProvisioningUpdates \
+    2>&1 | xcbeautify
+
+APP_PATH="$BUILD_DIR/Build/Products/Debug-iphoneos/$SCHEME.app"
+
+if [ ! -d "$APP_PATH" ]; then
+    echo -e "${RED}Build failed - app not found at $APP_PATH${NC}"
+    exit 1
+fi
+
+echo -e "${YELLOW}Installing on $DEVICE_NAME...${NC}"
+xcrun devicectl device install app --device $DEVICE "$APP_PATH"
+
+echo -e "${YELLOW}Launching...${NC}"
+xcrun devicectl device process launch --device $DEVICE $BUNDLE_ID
+
+echo -e "${GREEN}Done! App is running on $DEVICE_NAME${NC}"
+```
+
+Make it executable:
+```bash
+chmod +x ios/scripts/deploy.sh
+```
+
+### Alternative: ios-deploy (iOS < 17)
+
+```bash
+# Install
+brew install ios-deploy
+
+# List devices
+ios-deploy -c
+
+# Install and launch
+ios-deploy --bundle .build/Build/Products/Debug-iphoneos/MapHealth.app
+
+# Install, launch, and show logs
+ios-deploy --bundle .build/Build/Products/Debug-iphoneos/MapHealth.app --debug
+```
+
+### Alternative: ideviceinstaller (Cross-platform)
+
+```bash
+# Install
+brew install libimobiledevice ideviceinstaller
+
+# List devices
+idevice_id -l
+
+# Install IPA
+ideviceinstaller -i MapHealth.ipa
+
+# Uninstall
+ideviceinstaller -U com.map.health
+```
+
+### One-Time Xcode Setup
+
+Before CLI deploys work, you need to do this **once**:
+
+1. Open `MapHealth.xcodeproj` in Xcode
+2. Sign in with Apple ID (Xcode → Settings → Accounts)
+3. Select your Team in Signing & Capabilities
+4. Connect iPhone, trust the computer
+5. Build once to register device with Apple
+
+After this, CLI works forever.
+
+### Troubleshooting
+
+| Error | Solution |
+|-------|----------|
+| "No device found" | Enable Developer Mode on iPhone, trust computer |
+| "Device is locked" | Unlock iPhone screen |
+| "Provisioning profile" | Run with `-allowProvisioningUpdates` or setup in Xcode once |
+| "Code signing" | Add `DEVELOPMENT_TEAM="XXXX"` to build command |
+| "iOS version mismatch" | Update Xcode or use older deployment target |
+
+### WiFi Deployment
+
+After initial USB pairing:
+
+```bash
+# Enable WiFi sync on device (or via Finder)
+# Device will appear in devicectl list even without USB
+
+xcrun devicectl list devices
+# Shows both USB and WiFi-connected devices
+```
+
+---
+
 ## GitHub Actions CI
 
 ### Basic Workflow
@@ -310,6 +540,9 @@ xcodebuild -list
 # Build for simulator
 xcodebuild build -scheme MapHealth -sdk iphonesimulator -destination "platform=iOS Simulator,name=iPhone 15"
 
+# Build for device
+xcodebuild build -scheme MapHealth -sdk iphoneos -destination "generic/platform=iOS" -allowProvisioningUpdates
+
 # Run tests
 xcodebuild test -scheme MapHealth -sdk iphonesimulator -destination "platform=iOS Simulator,name=iPhone 15" CODE_SIGNING_ALLOWED=NO
 
@@ -327,8 +560,39 @@ xcrun simctl boot "iPhone 15"
 # Install app on simulator
 xcrun simctl install booted ./Build/Products/Debug-iphonesimulator/MapHealth.app
 
-# Launch app
+# Launch app on simulator
 xcrun simctl launch booted com.map.health
+
+# === Physical Devices (iOS 17+) ===
+
+# List connected devices
+xcrun devicectl list devices
+
+# List devices as JSON (for scripting)
+xcrun devicectl list devices -j
+
+# Install app on device
+xcrun devicectl device install app --device <UDID> ./path/to/App.app
+
+# Launch app on device
+xcrun devicectl device process launch --device <UDID> com.map.health
+
+# Launch with console output (Xcode 16+)
+xcrun devicectl device process launch --device <UDID> --console com.map.health
+
+# Kill app on device
+xcrun devicectl device process terminate --device <UDID> com.map.health
+
+# === Physical Devices (Legacy - iOS < 17) ===
+
+# List devices
+ios-deploy -c
+
+# Install and run
+ios-deploy --bundle ./path/to/App.app
+
+# Install, run, and debug
+ios-deploy --bundle ./path/to/App.app --debug
 
 # === Package Management ===
 
@@ -346,9 +610,20 @@ swift package show-dependencies
 
 ## References
 
+### Swift Package Manager
 - [Swift Package Manager GitHub](https://github.com/swiftlang/swift-package-manager)
 - [Testing iOS Swift Packages Without Xcode Project](https://www.jessesquires.com/blog/2021/11/03/swift-package-ios-tests/)
 - [Swift Forums: SwiftPM for iOS](https://forums.swift.org/t/swiftpm-swift-build-for-ios/42517)
 - [The Next Chapter in Swift Build Technologies](https://www.swift.org/blog/the-next-chapter-in-swift-build-technologies/)
+
+### Device Deployment
+- [xcrun devicectl - React Native CLI Discussion](https://github.com/react-native-community/cli/issues/2610)
+- [ios-deploy GitHub](https://github.com/ios-control/ios-deploy)
+- [libimobiledevice / ideviceinstaller](https://github.com/libimobiledevice/ideviceinstaller)
+- [SweetPad iOS Devices Docs](https://sweetpad.hyzyla.dev/docs/devices/)
+- [xcodebuild Deploy from Command Line](https://medium.com/xcblog/xcodebuild-deploy-ios-app-from-command-line-c6defff0d8b8)
+
+### CI/CD
 - [GitHub Actions for Xcode](https://qualitycoding.org/github-actions-ci-xcode/)
 - [swift-build GitHub Action](https://github.com/marketplace/actions/swift-build-and-test)
+- [Running iOS UI Tests in GitHub Actions](https://www.technoblather.ca/running-ios-ui-tests-in-github-actions/)
