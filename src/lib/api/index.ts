@@ -11,6 +11,7 @@ export {
   validationError,
   conflict,
 } from "./errors";
+export { queryKeys } from "./query-keys";
 export type {
   // Response types
   TaskWithTags,

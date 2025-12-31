@@ -1,38 +1,26 @@
 "use client";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import type { Task, Tag } from "@/db/schema";
+import type { Tag } from "@/db/schema";
+import {
+  api,
+  queryKeys,
+  type TaskWithTags,
+  type TasksResponse,
+  type TaskResponse,
+  type TagsResponse,
+  type TagResponse,
+} from "@/lib/api";
 
-// Query Keys Factory
+// Re-export for backwards compatibility
 export const taskQueryKeys = {
-  all: ["tasks"] as const,
-  detail: (id: string) => ["tasks", id] as const,
-  tags: {
-    all: ["tags"] as const,
-    detail: (id: string) => ["tags", id] as const,
-  },
+  all: queryKeys.tasks.all,
+  detail: queryKeys.tasks.detail,
+  tags: queryKeys.tags,
 };
 
-// Types
-export interface TaskWithTags extends Task {
-  tags: { id: string; title: string }[];
-}
-
-interface TasksResponse {
-  tasks: TaskWithTags[];
-}
-
-interface TaskResponse {
-  task: Task;
-}
-
-interface TagsResponse {
-  tags: Tag[];
-}
-
-interface TagResponse {
-  tag: Tag;
-}
+// Re-export types for backwards compatibility
+export type { TaskWithTags };
 
 // Update input type - consolidated for all task updates
 export interface TaskUpdateInput {
@@ -47,12 +35,8 @@ export interface TaskUpdateInput {
 // Tasks Queries
 export function useTasks() {
   return useQuery<TasksResponse>({
-    queryKey: taskQueryKeys.all,
-    queryFn: async () => {
-      const response = await fetch("/api/tasks");
-      if (!response.ok) throw new Error("Failed to fetch tasks");
-      return response.json();
-    },
+    queryKey: queryKeys.tasks.all,
+    queryFn: () => api.tasks.list(),
   });
 }
 
