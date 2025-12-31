@@ -1,55 +1,32 @@
-import { type NextRequest, NextResponse } from "next/server";
 import { tasksDb } from "@/db/tasks";
-import { handleApiError, notFound, unauthorized, validationError } from "@/lib/api/errors";
-import { getUser } from "@/lib/auth";
+import { notFound, validationError } from "@/lib/api/errors";
+import { withAuth } from "@/lib/api/with-auth";
 
-type Params = Promise<{ tagId: string }>;
+export const PUT = withAuth(async (user, request, { params }) => {
+  const { tagId } = await params;
+  const body = await request.json();
+  const { title } = body;
 
-export async function PUT(request: NextRequest, { params }: { params: Params }) {
-  try {
-    const { tagId } = await params;
-    const user = await getUser();
-
-    if (!user) {
-      throw unauthorized();
-    }
-
-    const body = await request.json();
-    const { title } = body;
-
-    if (!title) {
-      throw validationError("Title is required");
-    }
-
-    const tag = await tasksDb.updateTag(tagId, user.id, title);
-
-    if (!tag) {
-      throw notFound("Tag");
-    }
-
-    return NextResponse.json({ tag });
-  } catch (error) {
-    return handleApiError(error);
+  if (!title) {
+    throw validationError("Title is required");
   }
-}
 
-export async function DELETE(request: NextRequest, { params }: { params: Params }) {
-  try {
-    const { tagId } = await params;
-    const user = await getUser();
+  const tag = await tasksDb.updateTag(tagId, user.id, title);
 
-    if (!user) {
-      throw unauthorized();
-    }
-
-    const deleted = await tasksDb.deleteTag(tagId, user.id);
-
-    if (!deleted) {
-      throw notFound("Tag");
-    }
-
-    return NextResponse.json({ success: true });
-  } catch (error) {
-    return handleApiError(error);
+  if (!tag) {
+    throw notFound("Tag");
   }
-}
+
+  return { tag };
+});
+
+export const DELETE = withAuth(async (user, _request, { params }) => {
+  const { tagId } = await params;
+  const deleted = await tasksDb.deleteTag(tagId, user.id);
+
+  if (!deleted) {
+    throw notFound("Tag");
+  }
+
+  return { success: true };
+});

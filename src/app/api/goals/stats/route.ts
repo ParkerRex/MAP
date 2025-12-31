@@ -1,19 +1,7 @@
-import { NextResponse } from "next/server";
 import { goalsDb } from "@/db/goals";
-import { handleApiError, unauthorized } from "@/lib/api/errors";
-import { getUser } from "@/lib/auth";
+import { withAuth } from "@/lib/api/with-auth";
 
-export async function GET() {
-  try {
-    const user = await getUser();
-
-    if (!user) {
-      throw unauthorized();
-    }
-
-    const stats = await goalsDb.getCompletionStats(user.id);
-    return NextResponse.json({ stats });
-  } catch (error) {
-    return handleApiError(error);
-  }
-}
+export const GET = withAuth(async (user) => {
+  const stats = await goalsDb.getCompletionStats(user.id);
+  return { stats };
+});

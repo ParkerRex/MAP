@@ -35,4 +35,5 @@ export {
   unauthorized,
   validationError,
 } from "./errors";
+export { useOptimisticMutation, useSimpleMutation } from "./mutation-factory";
 export { queryKeys } from "./query-keys";

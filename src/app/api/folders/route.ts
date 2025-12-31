@@ -1,41 +1,20 @@
-import { type NextRequest, NextResponse } from "next/server";
 import { notesDb } from "@/db/notes";
-import { handleApiError, unauthorized, validationError } from "@/lib/api/errors";
-import { getUser } from "@/lib/auth";
+import { validationError } from "@/lib/api/errors";
+import { withAuth } from "@/lib/api/with-auth";
 
-export async function GET() {
-  try {
-    const user = await getUser();
+export const GET = withAuth(async (user) => {
+  const folders = await notesDb.getFolders(user.id);
+  return { folders };
+});
 
-    if (!user) {
-      throw unauthorized();
-    }
+export const POST = withAuth(async (user, request) => {
+  const body = await request.json();
+  const { name } = body;
 
-    const folders = await notesDb.getFolders(user.id);
-    return NextResponse.json({ folders });
-  } catch (error) {
-    return handleApiError(error);
+  if (!name) {
+    throw validationError("Name is required");
   }
-}
 
-export async function POST(request: NextRequest) {
-  try {
-    const user = await getUser();
-
-    if (!user) {
-      throw unauthorized();
-    }
-
-    const body = await request.json();
-    const { name } = body;
-
-    if (!name) {
-      throw validationError("Name is required");
-    }
-
-    const folder = await notesDb.createFolder({ name, userId: user.id });
-    return NextResponse.json({ folder });
-  } catch (error) {
-    return handleApiError(error);
-  }
-}
+  const folder = await notesDb.createFolder({ name, userId: user.id });
+  return { folder };
+});

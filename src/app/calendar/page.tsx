@@ -3,7 +3,7 @@
 import { startOfWeek } from "date-fns";
 import { Calendar } from "lucide-react";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import ContextPanel from "@/components/calendar/calendar-context-panel";
 import CalendarGrid from "@/components/calendar/calendar-grid";
 import CalendarMenu from "@/components/calendar/calendar-menu";
@@ -47,7 +47,7 @@ function LoadingSkeleton() {
   );
 }
 
-export default function CalendarPage() {
+function CalendarPageContent() {
   const searchParams = useSearchParams();
   const { data: googleStatus, isLoading: isLoadingStatus } = useGoogleStatus();
   const syncMutation = useSyncCalendars();
@@ -78,6 +78,14 @@ export default function CalendarPage() {
   }
 
   return <CalendarDashboard />;
+}
+
+export default function CalendarPage() {
+  return (
+    <Suspense fallback={<LoadingSkeleton />}>
+      <CalendarPageContent />
+    </Suspense>
+  );
 }
 
 function CalendarDashboard() {

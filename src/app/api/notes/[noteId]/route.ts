@@ -1,79 +1,46 @@
-import { type NextRequest, NextResponse } from "next/server";
 import { notesDb } from "@/db/notes";
-import { handleApiError, notFound, unauthorized } from "@/lib/api/errors";
-import { getUser } from "@/lib/auth";
+import { notFound } from "@/lib/api/errors";
+import { withAuth } from "@/lib/api/with-auth";
 
-type Params = Promise<{ noteId: string }>;
+export const GET = withAuth(async (user, _request, { params }) => {
+  const { noteId } = await params;
+  const note = await notesDb.getNoteById(noteId, user.id);
 
-export async function GET(request: NextRequest, { params }: { params: Params }) {
-  try {
-    const { noteId } = await params;
-    const user = await getUser();
+  if (!note) {
+    throw notFound("Note");
+  }
 
-    if (!user) {
-      throw unauthorized();
-    }
+  return { note };
+});
 
-    const note = await notesDb.getNoteById(noteId, user.id);
+export const PUT = withAuth(async (user, request, { params }) => {
+  const { noteId } = await params;
+  const body = await request.json();
+  const { title, content, folderId } = body;
 
-    if (!note) {
+  if (folderId) {
+    const moved = await notesDb.moveNoteToFolder(noteId, user.id, folderId);
+    if (!moved) {
       throw notFound("Note");
     }
-
-    return NextResponse.json({ note });
-  } catch (error) {
-    return handleApiError(error);
   }
-}
 
-export async function PUT(request: NextRequest, { params }: { params: Params }) {
-  try {
-    const { noteId } = await params;
-    const user = await getUser();
+  const note = await notesDb.updateNote(noteId, user.id, { title, content });
 
-    if (!user) {
-      throw unauthorized();
-    }
-
-    const body = await request.json();
-    const { title, content, folderId } = body;
-
-    if (folderId) {
-      const moved = await notesDb.moveNoteToFolder(noteId, user.id, folderId);
-      if (!moved) {
-        throw notFound("Note");
-      }
-    }
-
-    const note = await notesDb.updateNote(noteId, user.id, { title, content });
-
-    if (!note) {
-      throw notFound("Note");
-    }
-
-    return NextResponse.json({ note });
-  } catch (error) {
-    return handleApiError(error);
+  if (!note) {
+    throw notFound("Note");
   }
-}
 
-export async function DELETE(request: NextRequest, { params }: { params: Params }) {
-  try {
-    const { noteId } = await params;
-    const user = await getUser();
+  return { note };
+});
 
-    if (!user) {
-      throw unauthorized();
-    }
+export const DELETE = withAuth(async (user, _request, { params }) => {
+  const { noteId } = await params;
+  const deleted = await notesDb.deleteNote(noteId, user.id);
 
-    const deleted = await notesDb.deleteNote(noteId, user.id);
-
-    if (!deleted) {
-      throw notFound("Note");
-    }
-
-    return NextResponse.json({ success: true });
-  } catch (error) {
-    return handleApiError(error);
+  if (!deleted) {
+    throw notFound("Note");
   }
-}
+
+  return { success: true };
+});

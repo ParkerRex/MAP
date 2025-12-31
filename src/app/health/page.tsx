@@ -2,7 +2,7 @@
 
 import { Activity, Battery, Heart, Moon, RefreshCw, TrendingUp, Unlink, Zap } from "lucide-react";
 import { useSearchParams } from "next/navigation";
-import { useEffect } from "react";
+import { Suspense, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -22,7 +22,7 @@ import {
   useWhoopSync,
   useWhoopWorkouts,
 } from "@/hooks/use-whoop";
-import { getSportName } from "@/lib/whoop";
+import { getSportName } from "@/lib/whoop-utils";
 
 function MetricCard({
   title,
@@ -390,7 +390,7 @@ function HealthDashboard() {
   );
 }
 
-export default function HealthPage() {
+function HealthPageContent() {
   const searchParams = useSearchParams();
   const { data: profileData, isLoading: isLoadingProfile } = useWhoopProfile();
   const syncMutation = useWhoopSync();
@@ -430,5 +430,27 @@ export default function HealthPage() {
     <div className="container mx-auto px-4 py-8">
       {profileData?.connected ? <HealthDashboard /> : <ConnectWhoopCard />}
     </div>
+  );
+}
+
+export default function HealthPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="container mx-auto px-4 py-8">
+          <div className="space-y-6">
+            <Skeleton className="h-8 w-48" />
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+              <MetricCardSkeleton />
+              <MetricCardSkeleton />
+              <MetricCardSkeleton />
+              <MetricCardSkeleton />
+            </div>
+          </div>
+        </div>
+      }
+    >
+      <HealthPageContent />
+    </Suspense>
   );
 }

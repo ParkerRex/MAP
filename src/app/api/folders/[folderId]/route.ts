@@ -1,55 +1,32 @@
-import { type NextRequest, NextResponse } from "next/server";
 import { notesDb } from "@/db/notes";
-import { handleApiError, notFound, unauthorized, validationError } from "@/lib/api/errors";
-import { getUser } from "@/lib/auth";
+import { notFound, validationError } from "@/lib/api/errors";
+import { withAuth } from "@/lib/api/with-auth";
 
-type Params = Promise<{ folderId: string }>;
+export const PUT = withAuth(async (user, request, { params }) => {
+  const { folderId } = await params;
+  const body = await request.json();
+  const { name } = body;
 
-export async function PUT(request: NextRequest, { params }: { params: Params }) {
-  try {
-    const { folderId } = await params;
-    const user = await getUser();
-
-    if (!user) {
-      throw unauthorized();
-    }
-
-    const body = await request.json();
-    const { name } = body;
-
-    if (!name) {
-      throw validationError("Name is required");
-    }
-
-    const folder = await notesDb.updateFolder(folderId, user.id, name);
-
-    if (!folder) {
-      throw notFound("Folder");
-    }
-
-    return NextResponse.json({ folder });
-  } catch (error) {
-    return handleApiError(error);
+  if (!name) {
+    throw validationError("Name is required");
   }
-}
 
-export async function DELETE(request: NextRequest, { params }: { params: Params }) {
-  try {
-    const { folderId } = await params;
-    const user = await getUser();
+  const folder = await notesDb.updateFolder(folderId, user.id, name);
 
-    if (!user) {
-      throw unauthorized();
-    }
-
-    const deleted = await notesDb.deleteFolder(folderId, user.id);
-
-    if (!deleted) {
-      throw notFound("Folder");
-    }
-
-    return NextResponse.json({ success: true });
-  } catch (error) {
-    return handleApiError(error);
+  if (!folder) {
+    throw notFound("Folder");
   }
-}
+
+  return { folder };
+});
+
+export const DELETE = withAuth(async (user, _request, { params }) => {
+  const { folderId } = await params;
+  const deleted = await notesDb.deleteFolder(folderId, user.id);
+
+  if (!deleted) {
+    throw notFound("Folder");
+  }
+
+  return { success: true };
+});

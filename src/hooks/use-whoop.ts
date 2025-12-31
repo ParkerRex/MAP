@@ -1,8 +1,7 @@
 "use client";
 
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { api } from "@/lib/api/client";
-import { queryKeys } from "@/lib/api/query-keys";
+import { useQuery } from "@tanstack/react-query";
+import { api, queryKeys, useSimpleMutation } from "@/lib/api";
 
 export function useWhoopProfile() {
   return useQuery({
@@ -40,26 +39,16 @@ export function useWhoopWorkouts(startDate?: string, endDate?: string) {
 }
 
 export function useWhoopSync() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
+  return useSimpleMutation({
     mutationFn: () => api.whoop.sync(),
-    onSuccess: () => {
-      // Invalidate all WHOOP queries to refetch fresh data
-      queryClient.invalidateQueries({ queryKey: queryKeys.whoop.all });
-    },
+    invalidateKeys: [queryKeys.whoop.all],
   });
 }
 
 export function useWhoopDisconnect() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
+  return useSimpleMutation({
     mutationFn: () => api.whoop.disconnect(),
-    onSuccess: () => {
-      // Invalidate all WHOOP queries
-      queryClient.invalidateQueries({ queryKey: queryKeys.whoop.all });
-    },
+    invalidateKeys: [queryKeys.whoop.all],
   });
 }
 

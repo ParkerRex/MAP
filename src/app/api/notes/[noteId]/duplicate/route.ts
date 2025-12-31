@@ -1,27 +1,14 @@
-import { type NextRequest, NextResponse } from "next/server";
 import { notesDb } from "@/db/notes";
-import { handleApiError, notFound, unauthorized } from "@/lib/api/errors";
-import { getUser } from "@/lib/auth";
+import { notFound } from "@/lib/api/errors";
+import { withAuth } from "@/lib/api/with-auth";
 
-type Params = Promise<{ noteId: string }>;
+export const POST = withAuth(async (user, _request, { params }) => {
+  const { noteId } = await params;
+  const note = await notesDb.duplicateNote(noteId, user.id);
 
-export async function POST(request: NextRequest, { params }: { params: Params }) {
-  try {
-    const { noteId } = await params;
-    const user = await getUser();
-
-    if (!user) {
-      throw unauthorized();
-    }
-
-    const note = await notesDb.duplicateNote(noteId, user.id);
-
-    if (!note) {
-      throw notFound("Note");
-    }
-
-    return NextResponse.json({ note });
-  } catch (error) {
-    return handleApiError(error);
+  if (!note) {
+    throw notFound("Note");
   }
-}
+
+  return { note };
+});
