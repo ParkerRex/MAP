@@ -1,0 +1,32 @@
+
+
+
+import SpeziLLMOpenAI
+import SpeziLLMOpenAI
+import SpeziViews
+import SwiftUI
+
+
+struct OpenAIModelSelection: View {
+    @Environment(ManagedNavigationStack.Path.self) private var onboardingNavigationPath
+    @AppStorage(StorageKeys.openAIModel) private var openAIModel = LLMOpenAIParameters.ModelType.gpt4o
+
+    
+    var body: some View {
+        LLMOpenAIModelOnboardingStep(
+            actionText: "OPEN_AI_MODEL_SAVE_ACTION",
+            models: [
+                .gpt3_5_turbo,
+                .gpt4_turbo,
+                .gpt4o,
+                .o1,
+                .o1_mini,
+                .o3_mini,
+                .o3_mini_high
+            ]
+        ) { model in
+            openAIModel = model
+            onboardingNavigationPath.nextStep()
+        }
+    }
+}

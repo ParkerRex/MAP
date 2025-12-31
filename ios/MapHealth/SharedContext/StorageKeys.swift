@@ -1,0 +1,27 @@
+
+
+
+
+/// Constants shared across the Map Health to access
+/// storage information including the `AppStorage` and `SceneStorage`
+enum StorageKeys {
+    enum Defaults {
+        static let enableTextToSpeech = false
+        static let llmSource = LLMSource.openai
+    }
+
+    // MARK: - Onboarding
+    /// A `Bool` flag indicating of the onboarding was completed.
+    static let onboardingFlowComplete = "onboardingFlow.complete"
+    /// An `LLMSource` flag indicating the source of the model (local vs. OpenAI)
+    static let llmSource = "llmsource"
+    /// An `LLMOpenAIModelType` flag indicating the OpenAI model to use
+    static let openAIModel = "openAI.model"
+    /// A `Bool` flag indicating if messages should be spoken.
+    static let enableTextToSpeech = "settings.enableTextToSpeech"
+    /// Identifier for selecting a fog model.
+    ///
+    /// The value should correspond to the registered model name available on the fog node.
+    /// MapHealth uses this name to resolve and load the correct model.
+    static let fogModel = "fog.model"
+}

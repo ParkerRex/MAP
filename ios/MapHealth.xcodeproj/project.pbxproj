@@ -1,0 +1,1028 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 70;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		103566172E77634300CE14BF /* SpeziLLM in Frameworks */ = {isa = PBXBuildFile; productRef = 103566162E77634300CE14BF /* SpeziLLM */; };
+		103566192E77634300CE14BF /* SpeziLLMFog in Frameworks */ = {isa = PBXBuildFile; productRef = 103566182E77634300CE14BF /* SpeziLLMFog */; };
+		1035661B2E77634300CE14BF /* SpeziLLMLocal in Frameworks */ = {isa = PBXBuildFile; productRef = 1035661A2E77634300CE14BF /* SpeziLLMLocal */; };
+		1035661D2E77634300CE14BF /* SpeziLLMLocalDownload in Frameworks */ = {isa = PBXBuildFile; productRef = 1035661C2E77634300CE14BF /* SpeziLLMLocalDownload */; };
+		1035661F2E77634300CE14BF /* SpeziLLMOpenAI in Frameworks */ = {isa = PBXBuildFile; productRef = 1035661E2E77634300CE14BF /* SpeziLLMOpenAI */; };
+		27859BFF2A34F15E00397C85 /* Spezi in Frameworks */ = {isa = PBXBuildFile; productRef = 27859BFE2A34F15E00397C85 /* Spezi */; };
+		27859C012A34F15E00397C85 /* XCTSpezi in Frameworks */ = {isa = PBXBuildFile; productRef = 27859C002A34F15E00397C85 /* XCTSpezi */; };
+		27859C042A34F16B00397C85 /* SpeziHealthKit in Frameworks */ = {isa = PBXBuildFile; productRef = 27859C032A34F16B00397C85 /* SpeziHealthKit */; };
+		27859C072A34F17800397C85 /* SpeziOnboarding in Frameworks */ = {isa = PBXBuildFile; productRef = 27859C062A34F17800397C85 /* SpeziOnboarding */; };
+		27859C102A34F1A900397C85 /* SpeziLocalStorage in Frameworks */ = {isa = PBXBuildFile; productRef = 27859C0F2A34F1A900397C85 /* SpeziLocalStorage */; };
+		27859C202A34F2BF00397C85 /* XCTestApp in Frameworks */ = {isa = PBXBuildFile; productRef = 27859C1F2A34F2BF00397C85 /* XCTestApp */; };
+		27859C222A34F2BF00397C85 /* XCTestExtensions in Frameworks */ = {isa = PBXBuildFile; productRef = 27859C212A34F2BF00397C85 /* XCTestExtensions */; };
+		27859C252A34F2D000397C85 /* XCTHealthKit in Frameworks */ = {isa = PBXBuildFile; productRef = 27859C242A34F2D000397C85 /* XCTHealthKit */; };
+		27859C282A34F2DE00397C85 /* XCTRuntimeAssertions in Frameworks */ = {isa = PBXBuildFile; productRef = 27859C272A34F2DE00397C85 /* XCTRuntimeAssertions */; };
+		63E247642DC9B77C0044A0BB /* SpeziKeychainStorage in Frameworks */ = {isa = PBXBuildFile; productRef = 63E247632DC9B77C0044A0BB /* SpeziKeychainStorage */; };
+		65A230B62E78C1F100FFD061 /* SpeziLLM in Frameworks */ = {isa = PBXBuildFile; productRef = 65A230B52E78C1F100FFD061 /* SpeziLLM */; };
+		65A230B82E78C1F100FFD061 /* SpeziLLMFog in Frameworks */ = {isa = PBXBuildFile; productRef = 65A230B72E78C1F100FFD061 /* SpeziLLMFog */; };
+		65A230BA2E78C1F100FFD061 /* SpeziLLMLocal in Frameworks */ = {isa = PBXBuildFile; productRef = 65A230B92E78C1F100FFD061 /* SpeziLLMLocal */; };
+		65A230BC2E78C1F100FFD061 /* SpeziLLMLocalDownload in Frameworks */ = {isa = PBXBuildFile; productRef = 65A230BB2E78C1F100FFD061 /* SpeziLLMLocalDownload */; };
+		65A230BE2E78C1F100FFD061 /* SpeziLLMOpenAI in Frameworks */ = {isa = PBXBuildFile; productRef = 65A230BD2E78C1F100FFD061 /* SpeziLLMOpenAI */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		27B2495E2A06590E0091E52C /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 653A2545283387FE005D4D48 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 653A254C283387FE005D4D48;
+			remoteInfo = MapHealth;
+		};
+		2F4E21DB29F0518B0067EE98 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 653A2545283387FE005D4D48 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 653A254C283387FE005D4D48;
+			remoteInfo = MapHealth;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		27B2495A2A06590E0091E52C /* MapHealthTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MapHealthTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		2F4E21D529F0518B0067EE98 /* MapHealthUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MapHealthUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		6509F9492E852EF300F6945C /* MapHealth.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = MapHealth.xctestplan; sourceTree = "<group>"; };
+		653A254D283387FE005D4D48 /* MapHealth.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MapHealth.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		E26542A229E8D70100094BAD /* OpenAI */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = OpenAI; path = "/Users/varunshenoy/Library/Developer/Xcode/DerivedData/TemplateApplication-fhjipkzkgfsoxiezldfjbwynfudi/SourcePackages/checkouts/OpenAI"; sourceTree = "<absolute>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		651C1EC92E86455700EFE8DB /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				"Supporting Files/Info.plist",
+			);
+			target = 653A254C283387FE005D4D48 /* MapHealth */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		103566202E776B2E00CE14BF /* FogNode */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = FogNode; sourceTree = "<group>"; };
+		651C1E6D2E8644BF00EFE8DB /* MapHealthUITests */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = MapHealthUITests; sourceTree = "<group>"; };
+		651C1E712E8644C200EFE8DB /* MapHealthTests */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = MapHealthTests; sourceTree = "<group>"; };
+		651C1EA62E86455700EFE8DB /* MapHealth */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (651C1EC92E86455700EFE8DB /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = MapHealth; sourceTree = "<group>"; };
+/* End PBXFileSystemSynchronizedRootGroup section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		27B249572A06590E0091E52C /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		2F4E21D229F0518B0067EE98 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				27859C202A34F2BF00397C85 /* XCTestApp in Frameworks */,
+				27859C222A34F2BF00397C85 /* XCTestExtensions in Frameworks */,
+				27859C282A34F2DE00397C85 /* XCTRuntimeAssertions in Frameworks */,
+				27859C252A34F2D000397C85 /* XCTHealthKit in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		653A254A283387FE005D4D48 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				65A230BA2E78C1F100FFD061 /* SpeziLLMLocal in Frameworks */,
+				65A230B62E78C1F100FFD061 /* SpeziLLM in Frameworks */,
+				1035661B2E77634300CE14BF /* SpeziLLMLocal in Frameworks */,
+				103566172E77634300CE14BF /* SpeziLLM in Frameworks */,
+				65A230BC2E78C1F100FFD061 /* SpeziLLMLocalDownload in Frameworks */,
+				27859C072A34F17800397C85 /* SpeziOnboarding in Frameworks */,
+				27859C012A34F15E00397C85 /* XCTSpezi in Frameworks */,
+				1035661D2E77634300CE14BF /* SpeziLLMLocalDownload in Frameworks */,
+				27859C042A34F16B00397C85 /* SpeziHealthKit in Frameworks */,
+				63E247642DC9B77C0044A0BB /* SpeziKeychainStorage in Frameworks */,
+				65A230BE2E78C1F100FFD061 /* SpeziLLMOpenAI in Frameworks */,
+				1035661F2E77634300CE14BF /* SpeziLLMOpenAI in Frameworks */,
+				65A230B82E78C1F100FFD061 /* SpeziLLMFog in Frameworks */,
+				27859BFF2A34F15E00397C85 /* Spezi in Frameworks */,
+				27859C102A34F1A900397C85 /* SpeziLocalStorage in Frameworks */,
+				103566192E77634300CE14BF /* SpeziLLMFog in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		653A2544283387FE005D4D48 = {
+			isa = PBXGroup;
+			children = (
+				6509F9492E852EF300F6945C /* MapHealth.xctestplan */,
+				103566202E776B2E00CE14BF /* FogNode */,
+				651C1EA62E86455700EFE8DB /* MapHealth */,
+				651C1E6D2E8644BF00EFE8DB /* MapHealthUITests */,
+				651C1E712E8644C200EFE8DB /* MapHealthTests */,
+				653A254E283387FE005D4D48 /* Products */,
+				653A258B283395A7005D4D48 /* Frameworks */,
+			);
+			sourceTree = "<group>";
+		};
+		653A254E283387FE005D4D48 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				653A254D283387FE005D4D48 /* MapHealth.app */,
+				2F4E21D529F0518B0067EE98 /* MapHealthUITests.xctest */,
+				27B2495A2A06590E0091E52C /* MapHealthTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		653A258B283395A7005D4D48 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				E26542A229E8D70100094BAD /* OpenAI */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		27B249592A06590E0091E52C /* MapHealthTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 27B249632A06590E0091E52C /* Build configuration list for PBXNativeTarget "MapHealthTests" */;
+			buildPhases = (
+				27B249562A06590E0091E52C /* Sources */,
+				27B249572A06590E0091E52C /* Frameworks */,
+				27B249582A06590E0091E52C /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				27B2495F2A06590E0091E52C /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				651C1E712E8644C200EFE8DB /* MapHealthTests */,
+			);
+			name = MapHealthTests;
+			productName = MapHealthTests;
+			productReference = 27B2495A2A06590E0091E52C /* MapHealthTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		2F4E21D429F0518B0067EE98 /* MapHealthUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 2F4E21E029F0518B0067EE98 /* Build configuration list for PBXNativeTarget "MapHealthUITests" */;
+			buildPhases = (
+				2F4E21D129F0518B0067EE98 /* Sources */,
+				2F4E21D229F0518B0067EE98 /* Frameworks */,
+				2F4E21D329F0518B0067EE98 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				2F4E21DC29F0518B0067EE98 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				651C1E6D2E8644BF00EFE8DB /* MapHealthUITests */,
+			);
+			name = MapHealthUITests;
+			packageProductDependencies = (
+				27859C1F2A34F2BF00397C85 /* XCTestApp */,
+				27859C212A34F2BF00397C85 /* XCTestExtensions */,
+				27859C242A34F2D000397C85 /* XCTHealthKit */,
+				27859C272A34F2DE00397C85 /* XCTRuntimeAssertions */,
+			);
+			productName = MapHealthUITests;
+			productReference = 2F4E21D529F0518B0067EE98 /* MapHealthUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+		653A254C283387FE005D4D48 /* MapHealth */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 653A257128338800005D4D48 /* Build configuration list for PBXNativeTarget "MapHealth" */;
+			buildPhases = (
+				653A2549283387FE005D4D48 /* Sources */,
+				653A254A283387FE005D4D48 /* Frameworks */,
+				653A254B283387FE005D4D48 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				65A230C12E78C2AF00FFD061 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				651C1EA62E86455700EFE8DB /* MapHealth */,
+			);
+			name = MapHealth;
+			packageProductDependencies = (
+				27859BFE2A34F15E00397C85 /* Spezi */,
+				27859C002A34F15E00397C85 /* XCTSpezi */,
+				27859C032A34F16B00397C85 /* SpeziHealthKit */,
+				27859C062A34F17800397C85 /* SpeziOnboarding */,
+				27859C0F2A34F1A900397C85 /* SpeziLocalStorage */,
+				63E247632DC9B77C0044A0BB /* SpeziKeychainStorage */,
+				103566162E77634300CE14BF /* SpeziLLM */,
+				103566182E77634300CE14BF /* SpeziLLMFog */,
+				1035661A2E77634300CE14BF /* SpeziLLMLocal */,
+				1035661C2E77634300CE14BF /* SpeziLLMLocalDownload */,
+				1035661E2E77634300CE14BF /* SpeziLLMOpenAI */,
+				65A230B52E78C1F100FFD061 /* SpeziLLM */,
+				65A230B72E78C1F100FFD061 /* SpeziLLMFog */,
+				65A230B92E78C1F100FFD061 /* SpeziLLMLocal */,
+				65A230BB2E78C1F100FFD061 /* SpeziLLMLocalDownload */,
+				65A230BD2E78C1F100FFD061 /* SpeziLLMOpenAI */,
+			);
+			productName = TemplateApplication;
+			productReference = 653A254D283387FE005D4D48 /* MapHealth.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		653A2545283387FE005D4D48 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1430;
+				LastUpgradeCheck = 2600;
+				TargetAttributes = {
+					27B249592A06590E0091E52C = {
+						CreatedOnToolsVersion = 14.3;
+						TestTargetID = 653A254C283387FE005D4D48;
+					};
+					2F4E21D429F0518B0067EE98 = {
+						CreatedOnToolsVersion = 14.3;
+						TestTargetID = 653A254C283387FE005D4D48;
+					};
+					653A254C283387FE005D4D48 = {
+						CreatedOnToolsVersion = 13.4;
+					};
+				};
+			};
+			buildConfigurationList = 653A2548283387FE005D4D48 /* Build configuration list for PBXProject "MapHealth" */;
+			compatibilityVersion = "Xcode 13.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 653A2544283387FE005D4D48;
+			packageReferences = (
+				27859BFD2A34F15E00397C85 /* XCRemoteSwiftPackageReference "Spezi" */,
+				27859C022A34F16A00397C85 /* XCRemoteSwiftPackageReference "SpeziHealthKit" */,
+				27859C052A34F17800397C85 /* XCRemoteSwiftPackageReference "SpeziOnboarding" */,
+				27859C0E2A34F1A900397C85 /* XCRemoteSwiftPackageReference "SpeziStorage" */,
+				27859C1E2A34F2BF00397C85 /* XCRemoteSwiftPackageReference "XCTestExtensions" */,
+				27859C232A34F2D000397C85 /* XCRemoteSwiftPackageReference "XCTHealthKit" */,
+				27859C262A34F2DE00397C85 /* XCRemoteSwiftPackageReference "XCTRuntimeAssertions" */,
+				65A230B42E78C1F100FFD061 /* XCRemoteSwiftPackageReference "SpeziLLM" */,
+				65A230BF2E78C29800FFD061 /* XCRemoteSwiftPackageReference "SwiftLintPlugins" */,
+			);
+			productRefGroup = 653A254E283387FE005D4D48 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				653A254C283387FE005D4D48 /* MapHealth */,
+				2F4E21D429F0518B0067EE98 /* MapHealthUITests */,
+				27B249592A06590E0091E52C /* MapHealthTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		27B249582A06590E0091E52C /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		2F4E21D329F0518B0067EE98 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		653A254B283387FE005D4D48 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		27B249562A06590E0091E52C /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		2F4E21D129F0518B0067EE98 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		653A2549283387FE005D4D48 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		27B2495F2A06590E0091E52C /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 653A254C283387FE005D4D48 /* MapHealth */;
+			targetProxy = 27B2495E2A06590E0091E52C /* PBXContainerItemProxy */;
+		};
+		2F4E21DC29F0518B0067EE98 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 653A254C283387FE005D4D48 /* MapHealth */;
+			targetProxy = 2F4E21DB29F0518B0067EE98 /* PBXContainerItemProxy */;
+		};
+		65A230C12E78C2AF00FFD061 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			productRef = 65A230C02E78C2AF00FFD061 /* SwiftLintBuildToolPlugin */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		27B249602A06590E0091E52C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.stanfordBDHG.MapHealthTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/MapHealth.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/MapHealth";
+			};
+			name = Debug;
+		};
+		27B249612A06590E0091E52C /* Test */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.stanfordBDHG.MapHealthTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/MapHealth.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/MapHealth";
+			};
+			name = Test;
+		};
+		27B249622A06590E0091E52C /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.stanfordBDHG.MapHealthTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/MapHealth.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/MapHealth";
+			};
+			name = Release;
+		};
+		2F4E21DD29F0518B0067EE98 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = edu.stanford.MapHealthUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = MapHealth;
+			};
+			name = Debug;
+		};
+		2F4E21DE29F0518B0067EE98 /* Test */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = edu.stanford.MapHealthUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = MapHealth;
+			};
+			name = Test;
+		};
+		2F4E21DF29F0518B0067EE98 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = edu.stanford.MapHealthUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = MapHealth;
+			};
+			name = Release;
+		};
+		2FEE10302998C89C000822E1 /* Test */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.6;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = TEST;
+				SWIFT_OBJC_INTEROP_MODE = objcxx;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Test;
+		};
+		2FEE10312998C89C000822E1 /* Test */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = "MapHealth Icon";
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "MapHealth/Supporting Files/MapHealth.entitlements";
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "";
+				DEVELOPMENT_TEAM = 637867499T;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "MapHealth/Supporting Files/Info.plist";
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
+				INFOPLIST_KEY_NSCameraUsageDescription = "This message should never appear. Please adjust this when you start using camera information. We have to put this in here as ResearchKit has the possibility to use it and not putting it here returns an error on AppStore Connect.";
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "MapHealth allows users to interact with their health data using natural language, including querying sleep, step count, active energy, exercise minutes, heart rate, and body mass.";
+				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "MapHealth allows users to interact with their health data using natural language, including querying sleep, step count, active energy, exercise minutes, heart rate, and body mass.";
+				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "MapHealth uses local network access to discover nearby fog nodes.";
+				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "This message should never appear. Please adjust this when you start using location information. We have to put this in here as ResearchKit has the possibility to use it and not putting it here returns an error on AppStore Connect.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "This message should never appear. Please adjust this when you start using location information. We have to put this in here as ResearchKit has the possibility to use it and not putting it here returns an error on AppStore Connect.";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "This message should never appear. Please adjust this when you start using microphone information. We have to put this in here as ResearchKit has the possibility to use it and not putting it here returns an error on AppStore Connect.";
+				INFOPLIST_KEY_NSMotionUsageDescription = "This message should never appear. Please adjust this when you start using motion information. We have to put this in here as ResearchKit has the possibility to use it and not putting it here returns an error on AppStore Connect.";
+				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "This message should never appear. Please adjust this when you start using speecg information. We have to put this in here as ResearchKit has the possibility to use it and not putting it here returns an error on AppStore Connect.";
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				INFOPLIST_KEY_UITemplateApplicationlicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UITemplateApplicationlicationSupportsIndirectInputEvents = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 0.5.0;
+				PRODUCT_BUNDLE_IDENTIFIER = edu.stanford.bdhg.healthgpt;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				"SWIFT_ELicenseRef-TemplateApplication_LOC_STRINGS" = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OBJC_INTEROP_MODE = objcxx;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Test;
+		};
+		653A256F28338800005D4D48 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.6;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OBJC_INTEROP_MODE = objcxx;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		653A257028338800005D4D48 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.6;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OBJC_INTEROP_MODE = objcxx;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		653A257228338800005D4D48 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = "MapHealth Icon";
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "MapHealth/Supporting Files/MapHealth.entitlements";
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "";
+				DEVELOPMENT_TEAM = 637867499T;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "MapHealth/Supporting Files/Info.plist";
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
+				INFOPLIST_KEY_NSCameraUsageDescription = "This message should never appear. Please adjust this when you start using camera information. We have to put this in here as ResearchKit has the possibility to use it and not putting it here returns an error on AppStore Connect.";
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "MapHealth allows users to interact with their health data using natural language, including querying sleep, step count, active energy, exercise minutes, heart rate, and body mass.";
+				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "MapHealth allows users to interact with their health data using natural language, including querying sleep, step count, active energy, exercise minutes, heart rate, and body mass.";
+				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "MapHealth uses local network access to discover nearby fog nodes.";
+				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "This message should never appear. Please adjust this when you start using location information. We have to put this in here as ResearchKit has the possibility to use it and not putting it here returns an error on AppStore Connect.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "This message should never appear. Please adjust this when you start using location information. We have to put this in here as ResearchKit has the possibility to use it and not putting it here returns an error on AppStore Connect.";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "This message should never appear. Please adjust this when you start using microphone information. We have to put this in here as ResearchKit has the possibility to use it and not putting it here returns an error on AppStore Connect.";
+				INFOPLIST_KEY_NSMotionUsageDescription = "This message should never appear. Please adjust this when you start using motion information. We have to put this in here as ResearchKit has the possibility to use it and not putting it here returns an error on AppStore Connect.";
+				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "This message should never appear. Please adjust this when you start using speecg information. We have to put this in here as ResearchKit has the possibility to use it and not putting it here returns an error on AppStore Connect.";
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				INFOPLIST_KEY_UITemplateApplicationlicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UITemplateApplicationlicationSupportsIndirectInputEvents = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 0.5.0;
+				PRODUCT_BUNDLE_IDENTIFIER = edu.stanford.bdhg.healthgpt;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				"SWIFT_ELicenseRef-TemplateApplication_LOC_STRINGS" = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OBJC_INTEROP_MODE = objcxx;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		653A257328338800005D4D48 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = "MapHealth Icon";
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "MapHealth/Supporting Files/MapHealth.entitlements";
+				CODE_SIGN_IDENTITY = "Apple Development";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
+				CODE_SIGN_STYLE = Manual;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "";
+				DEVELOPMENT_TEAM = "";
+				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = 637867499T;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "MapHealth/Supporting Files/Info.plist";
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
+				INFOPLIST_KEY_NSCameraUsageDescription = "This message should never appear. Please adjust this when you start using camera information. We have to put this in here as ResearchKit has the possibility to use it and not putting it here returns an error on AppStore Connect.";
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "MapHealth allows users to interact with their health data using natural language, including querying sleep, step count, active energy, exercise minutes, heart rate, and body mass.";
+				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "MapHealth allows users to interact with their health data using natural language, including querying sleep, step count, active energy, exercise minutes, heart rate, and body mass.";
+				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "MapHealth uses local network access to discover nearby fog nodes.";
+				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "This message should never appear. Please adjust this when you start using location information. We have to put this in here as ResearchKit has the possibility to use it and not putting it here returns an error on AppStore Connect.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "This message should never appear. Please adjust this when you start using location information. We have to put this in here as ResearchKit has the possibility to use it and not putting it here returns an error on AppStore Connect.";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "This message should never appear. Please adjust this when you start using microphone information. We have to put this in here as ResearchKit has the possibility to use it and not putting it here returns an error on AppStore Connect.";
+				INFOPLIST_KEY_NSMotionUsageDescription = "This message should never appear. Please adjust this when you start using motion information. We have to put this in here as ResearchKit has the possibility to use it and not putting it here returns an error on AppStore Connect.";
+				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "This message should never appear. Please adjust this when you start using speecg information. We have to put this in here as ResearchKit has the possibility to use it and not putting it here returns an error on AppStore Connect.";
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				INFOPLIST_KEY_UITemplateApplicationlicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UITemplateApplicationlicationSupportsIndirectInputEvents = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 0.5.0;
+				PRODUCT_BUNDLE_IDENTIFIER = edu.stanford.bdhg.healthgpt;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = MapHealth;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				"SWIFT_ELicenseRef-TemplateApplication_LOC_STRINGS" = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OBJC_INTEROP_MODE = objcxx;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		27B249632A06590E0091E52C /* Build configuration list for PBXNativeTarget "MapHealthTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				27B249602A06590E0091E52C /* Debug */,
+				27B249612A06590E0091E52C /* Test */,
+				27B249622A06590E0091E52C /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		2F4E21E029F0518B0067EE98 /* Build configuration list for PBXNativeTarget "MapHealthUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				2F4E21DD29F0518B0067EE98 /* Debug */,
+				2F4E21DE29F0518B0067EE98 /* Test */,
+				2F4E21DF29F0518B0067EE98 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		653A2548283387FE005D4D48 /* Build configuration list for PBXProject "MapHealth" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				653A256F28338800005D4D48 /* Debug */,
+				2FEE10302998C89C000822E1 /* Test */,
+				653A257028338800005D4D48 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		653A257128338800005D4D48 /* Build configuration list for PBXNativeTarget "MapHealth" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				653A257228338800005D4D48 /* Debug */,
+				2FEE10312998C89C000822E1 /* Test */,
+				653A257328338800005D4D48 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		27859BFD2A34F15E00397C85 /* XCRemoteSwiftPackageReference "Spezi" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/StanfordSpezi/Spezi.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.9.0;
+			};
+		};
+		27859C022A34F16A00397C85 /* XCRemoteSwiftPackageReference "SpeziHealthKit" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/StanfordSpezi/SpeziHealthKit.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.2.0;
+			};
+		};
+		27859C052A34F17800397C85 /* XCRemoteSwiftPackageReference "SpeziOnboarding" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/StanfordSpezi/SpeziOnboarding.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.0.0;
+			};
+		};
+		27859C0E2A34F1A900397C85 /* XCRemoteSwiftPackageReference "SpeziStorage" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/StanfordSpezi/SpeziStorage.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.1.0;
+			};
+		};
+		27859C1E2A34F2BF00397C85 /* XCRemoteSwiftPackageReference "XCTestExtensions" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/StanfordBDHG/XCTestExtensions.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.2.0;
+			};
+		};
+		27859C232A34F2D000397C85 /* XCRemoteSwiftPackageReference "XCTHealthKit" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/StanfordBDHG/XCTHealthKit.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.1.0;
+			};
+		};
+		27859C262A34F2DE00397C85 /* XCRemoteSwiftPackageReference "XCTRuntimeAssertions" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/StanfordBDHG/XCTRuntimeAssertions.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.1.0;
+			};
+		};
+		65A230B42E78C1F100FFD061 /* XCRemoteSwiftPackageReference "SpeziLLM" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/StanfordSpezi/SpeziLLM.git";
+			requirement = {
+				kind = upToNextMinorVersion;
+				minimumVersion = 0.12.1;
+			};
+		};
+		65A230BF2E78C29800FFD061 /* XCRemoteSwiftPackageReference "SwiftLintPlugins" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/SimplyDanny/SwiftLintPlugins";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.61.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		103566162E77634300CE14BF /* SpeziLLM */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = SpeziLLM;
+		};
+		103566182E77634300CE14BF /* SpeziLLMFog */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = SpeziLLMFog;
+		};
+		1035661A2E77634300CE14BF /* SpeziLLMLocal */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = SpeziLLMLocal;
+		};
+		1035661C2E77634300CE14BF /* SpeziLLMLocalDownload */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = SpeziLLMLocalDownload;
+		};
+		1035661E2E77634300CE14BF /* SpeziLLMOpenAI */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = SpeziLLMOpenAI;
+		};
+		27859BFE2A34F15E00397C85 /* Spezi */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 27859BFD2A34F15E00397C85 /* XCRemoteSwiftPackageReference "Spezi" */;
+			productName = Spezi;
+		};
+		27859C002A34F15E00397C85 /* XCTSpezi */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 27859BFD2A34F15E00397C85 /* XCRemoteSwiftPackageReference "Spezi" */;
+			productName = XCTSpezi;
+		};
+		27859C032A34F16B00397C85 /* SpeziHealthKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 27859C022A34F16A00397C85 /* XCRemoteSwiftPackageReference "SpeziHealthKit" */;
+			productName = SpeziHealthKit;
+		};
+		27859C062A34F17800397C85 /* SpeziOnboarding */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 27859C052A34F17800397C85 /* XCRemoteSwiftPackageReference "SpeziOnboarding" */;
+			productName = SpeziOnboarding;
+		};
+		27859C0F2A34F1A900397C85 /* SpeziLocalStorage */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 27859C0E2A34F1A900397C85 /* XCRemoteSwiftPackageReference "SpeziStorage" */;
+			productName = SpeziLocalStorage;
+		};
+		27859C1F2A34F2BF00397C85 /* XCTestApp */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 27859C1E2A34F2BF00397C85 /* XCRemoteSwiftPackageReference "XCTestExtensions" */;
+			productName = XCTestApp;
+		};
+		27859C212A34F2BF00397C85 /* XCTestExtensions */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 27859C1E2A34F2BF00397C85 /* XCRemoteSwiftPackageReference "XCTestExtensions" */;
+			productName = XCTestExtensions;
+		};
+		27859C242A34F2D000397C85 /* XCTHealthKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 27859C232A34F2D000397C85 /* XCRemoteSwiftPackageReference "XCTHealthKit" */;
+			productName = XCTHealthKit;
+		};
+		27859C272A34F2DE00397C85 /* XCTRuntimeAssertions */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 27859C262A34F2DE00397C85 /* XCRemoteSwiftPackageReference "XCTRuntimeAssertions" */;
+			productName = XCTRuntimeAssertions;
+		};
+		63E247632DC9B77C0044A0BB /* SpeziKeychainStorage */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 27859C0E2A34F1A900397C85 /* XCRemoteSwiftPackageReference "SpeziStorage" */;
+			productName = SpeziKeychainStorage;
+		};
+		65A230B52E78C1F100FFD061 /* SpeziLLM */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 65A230B42E78C1F100FFD061 /* XCRemoteSwiftPackageReference "SpeziLLM" */;
+			productName = SpeziLLM;
+		};
+		65A230B72E78C1F100FFD061 /* SpeziLLMFog */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 65A230B42E78C1F100FFD061 /* XCRemoteSwiftPackageReference "SpeziLLM" */;
+			productName = SpeziLLMFog;
+		};
+		65A230B92E78C1F100FFD061 /* SpeziLLMLocal */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 65A230B42E78C1F100FFD061 /* XCRemoteSwiftPackageReference "SpeziLLM" */;
+			productName = SpeziLLMLocal;
+		};
+		65A230BB2E78C1F100FFD061 /* SpeziLLMLocalDownload */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 65A230B42E78C1F100FFD061 /* XCRemoteSwiftPackageReference "SpeziLLM" */;
+			productName = SpeziLLMLocalDownload;
+		};
+		65A230BD2E78C1F100FFD061 /* SpeziLLMOpenAI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 65A230B42E78C1F100FFD061 /* XCRemoteSwiftPackageReference "SpeziLLM" */;
+			productName = SpeziLLMOpenAI;
+		};
+		65A230C02E78C2AF00FFD061 /* SwiftLintBuildToolPlugin */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 65A230BF2E78C29800FFD061 /* XCRemoteSwiftPackageReference "SwiftLintPlugins" */;
+			productName = "plugin:SwiftLintBuildToolPlugin";
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = 653A2545283387FE005D4D48 /* Project object */;
+}
