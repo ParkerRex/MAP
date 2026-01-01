@@ -3,13 +3,12 @@ import { google } from "googleapis";
 import { calendarDb } from "@/db/calendar";
 import { getUser } from "@/lib/auth";
 
-// Google OAuth Scopes - includes profile + calendar
+// Google OAuth Scopes - includes profile + full calendar access
 export const GOOGLE_AUTH_SCOPES = [
   "openid",
   "email",
   "profile",
-  "https://www.googleapis.com/auth/calendar.readonly",
-  "https://www.googleapis.com/auth/calendar.events",
+  "https://www.googleapis.com/auth/calendar",
 ] as const;
 
 // Legacy alias for calendar-specific scopes

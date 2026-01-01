@@ -36,6 +36,7 @@ Map Health is a native iOS app that:
 1. **Syncs Apple Health data** to the Map backend
 2. **Provides AI chat** about your health metrics
 3. **Runs background sync** when new health data arrives
+4. **Authenticates with Google Sign-In** and stores the session token in Keychain
 
 ### Technology Stack
 

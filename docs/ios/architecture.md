@@ -127,6 +127,9 @@ public class HealthDataInterpreter: DefaultInitializable, Module, EnvironmentAcc
 
 HTTP client for syncing health data to the backend.
 
+Authentication uses a session token stored in Keychain and sent as a `Bearer` token.
+On 401 responses, the app triggers an inline Google re-auth flow.
+
 ```swift
 public class MapAPIClient {
     public static let shared = MapAPIClient()

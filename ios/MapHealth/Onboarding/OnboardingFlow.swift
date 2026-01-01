@@ -18,51 +18,23 @@ struct OnboardingFlow: View {
 
     var body: some View {
         ManagedNavigationStack(didComplete: $completedOnboardingFlow) {
-            // Check for returning user with valid session
-            if KeychainService.shared.hasSessionToken {
-                // Returning user - skip to disclaimer/LLM selection
-                // (Google auth already complete)
-                Disclaimer()
+            // New user - full onboarding flow
+            Welcome()
+            GoogleSignInView()
+            Disclaimer()
 
-                LLMSourceSelection()
+            LLMSourceSelection()
 
-                if HKHealthStore.isHealthDataAvailable() {
-                    HealthKitPermissions()
-                }
-            } else {
-                // New user - full onboarding flow
-                Welcome()
-                GoogleSignInView()
-                Disclaimer()
-
-                LLMSourceSelection()
-
-                if HKHealthStore.isHealthDataAvailable() {
-                    HealthKitPermissions()
-                }
+            if HKHealthStore.isHealthDataAvailable() {
+                HealthKitPermissions()
             }
         }
         .navigationBarTitleDisplayMode(.inline)
         .interactiveDismissDisabled(!completedOnboardingFlow)
         .onAppear {
-            // If user already has a session token and completed onboarding before,
-            // mark onboarding as complete immediately
+            // Returning users: if token exists, skip onboarding
             if KeychainService.shared.hasSessionToken && !completedOnboardingFlow {
-                // Check if this is truly a returning user by verifying the token
-                Task {
-                    do {
-                        // Try to fetch profile - if successful, user is authenticated
-                        _ = try await MapAPIClient.shared.getProfile()
-                        // Token is valid - auto-complete onboarding for returning users
-                        await MainActor.run {
-                            completedOnboardingFlow = true
-                        }
-                    } catch {
-                        // Token invalid or expired - user needs to re-authenticate
-                        // Clear invalid token and show full onboarding
-                        MapAPIClient.shared.clearAuthToken()
-                    }
-                }
+                completedOnboardingFlow = true
             }
         }
     }

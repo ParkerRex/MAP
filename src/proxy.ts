@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 
-const PUBLIC_PATHS = ["/login", "/signup"];
+const PUBLIC_PATHS = ["/", "/login", "/signup", "/auth/error"];
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -10,10 +10,12 @@ export async function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Check for session cookie
+  // Check for session cookie or Authorization header
   const sessionCookie = request.cookies.get("session");
+  const authHeader = request.headers.get("authorization");
+  const hasSession = sessionCookie?.value || authHeader?.startsWith("Bearer ");
 
-  if (!sessionCookie?.value) {
+  if (!hasSession) {
     // Redirect to login if no session
     const loginUrl = new URL("/login", request.url);
     return NextResponse.redirect(loginUrl);

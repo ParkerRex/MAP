@@ -1,3 +1,4 @@
+import AuthenticationServices
 import MapHealthCore
 import SpeziChat
 import SpeziLLM
@@ -15,11 +16,13 @@ struct HealthChatView: View {
     @AppStorage(StorageKeys.fogModel) private var fogModel = LLMFogParameters.FogModelType.llama3_1_8B
 
     @Environment(HealthDataInterpreter.self) private var healthDataInterpreter
+    @Environment(\.webAuthenticationSession) private var webAuthSession
     @State private var showSettings = false
     @State private var showErrorAlert = false
     @State private var errorMessage = ""
     @State private var modelSettingRefreshId = UUID()
     @State private var messageTaskId = 0
+    @State private var isReauthenticating = false
 
     var body: some View {
         NavigationStack {
@@ -84,6 +87,11 @@ struct HealthChatView: View {
                 self.errorMessage = "Error initializing LLM: \(error.localizedDescription)"
             }
         }
+        .task {
+            MapAPIClient.shared.onAuthenticationRequired = {
+                await startReauthentication()
+            }
+        }
     }
 
     private var settingsButton: some View {
@@ -112,6 +120,47 @@ struct HealthChatView: View {
         VStack {
             Text("Loading...")
             ProgressView()
+        }
+    }
+
+    @MainActor
+    private func startReauthentication() async -> Bool {
+        if isReauthenticating {
+            return false
+        }
+
+        isReauthenticating = true
+        defer { isReauthenticating = false }
+
+        do {
+            let authURL = URL(string: "\(AppConfig.webBaseURL)/api/auth/google?platform=ios")!
+            let callbackScheme = "maphealth"
+
+            let callbackURL = try await webAuthSession.authenticate(
+                using: authURL,
+                callbackURLScheme: callbackScheme,
+                prefersEphemeralWebBrowserSession: false
+            )
+
+            guard let components = URLComponents(url: callbackURL, resolvingAgainstBaseURL: false) else {
+                throw GoogleSignInError.invalidCallback("Invalid callback URL")
+            }
+
+            if let token = components.queryItems?.first(where: { $0.name == "token" })?.value {
+                try KeychainService.shared.saveSessionToken(token)
+                MapAPIClient.shared.setAuthToken(token)
+                return true
+            } else if let error = components.queryItems?.first(where: { $0.name == "error" })?.value {
+                throw GoogleSignInError.authFailed(error)
+            } else {
+                throw GoogleSignInError.authFailed("Unknown error")
+            }
+        } catch ASWebAuthenticationSessionError.canceledLogin {
+            return false
+        } catch {
+            self.showErrorAlert = true
+            self.errorMessage = "Sign-in required: \(error.localizedDescription)"
+            return false
         }
     }
 }

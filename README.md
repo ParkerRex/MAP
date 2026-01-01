@@ -24,7 +24,7 @@ A personal productivity dashboard integrating calendar, tasks, notes, and health
 ### Web
 - **Framework**: Next.js 16 (App Router)
 - **Database**: PostgreSQL with Drizzle ORM
-- **Auth**: Session-based with HTTP-only cookies
+- **Auth**: Google-only OAuth (web uses HTTP-only session cookies, iOS uses Bearer tokens)
 - **Data Fetching**: TanStack Query + API routes
 - **Styling**: Tailwind CSS 4 + Radix UI
 - **Validation**: Zod schemas
@@ -46,6 +46,9 @@ docker-compose up -d
 # Install dependencies
 bun install
 
+# Use the repo's Node version
+source ~/.nvm/nvm.sh && nvm use
+
 # Push database schema
 bun run db:push
 
@@ -53,7 +56,7 @@ bun run db:push
 bun run dev
 ```
 
-Dashboard runs on http://localhost:3000
+Dashboard runs on http://localhost:3000 (or next available port if 3000 is taken)
 
 ### iOS App
 
@@ -80,7 +83,8 @@ src/                            # Web Dashboard
 │   ├── notes/                  # Notes page
 │   ├── health/                 # Health dashboard
 │   ├── login/                  # Login page
-│   └── signup/                 # Signup page
+│   ├── signup/                 # Signup page
+│   └── settings/               # Settings page
 ├── components/
 │   ├── calendar/               # Calendar components
 │   ├── tasks/                  # Task components
@@ -115,16 +119,17 @@ ios/                            # iOS App
 
 ## Authentication
 
-Email/password authentication with session cookies:
+Google-only OAuth for both web and iOS. Web sessions use HTTP-only cookies; iOS sends
+`Authorization: Bearer <session>` and stores the token in Keychain.
 
 | Route | Method | Description |
 |-------|--------|-------------|
-| `/api/auth/register` | POST | Create account |
-| `/api/auth/login` | POST | Login |
+| `/api/auth/google` | GET | Initiate Google Sign-In (includes calendar scopes) |
+| `/api/auth/google/callback` | GET | OAuth callback |
 | `/api/auth/logout` | POST | Logout |
 | `/api/auth/me` | GET | Get current user |
 
-Sessions stored in database with 30-day expiry. Passwords hashed with bcrypt.
+Sessions are stored in the database with a 30-day sliding expiry.
 
 ## Integrations
 
@@ -144,8 +149,6 @@ OAuth 2.0 integration for calendar sync. Calendar OAuth is handled by the unifie
 **Routes:**
 | Route | Method | Description |
 |-------|--------|-------------|
-| `/api/auth/google` | GET | Initiate Google Sign-In (includes calendar scopes) |
-| `/api/auth/google/callback` | GET | OAuth callback |
 | `/api/google/status` | GET | Check if calendar is connected |
 | `/api/calendar/sync` | POST | Sync calendars |
 | `/api/calendar/events` | GET, POST | List/create events |
@@ -179,7 +182,8 @@ OAuth 2.0 integration for health/fitness data.
 
 ## API Routes
 
-All routes require authentication. Resources verify ownership via userId.
+All routes require authentication except public pages (`/`, `/login`, `/signup`, `/auth/error`)
+and the Google OAuth endpoints. Resources verify ownership via userId.
 
 | Route | Methods | Description |
 |-------|---------|-------------|
@@ -213,9 +217,6 @@ bun run db:studio  # Open Drizzle Studio
 ```bash
 # Database
 DATABASE_URL=postgres://...
-
-# Auth
-SESSION_SECRET=your_session_secret
 
 # Google Calendar
 GOOGLE_CLIENT_ID=your_client_id

@@ -95,19 +95,6 @@ struct ClaudeAuthView: View {
     }
 }
 
-// MARK: - App Configuration
-
-enum AppConfig {
-    static let webBaseURL: String = {
-        #if DEBUG
-        // Use Mac's local IP for simulator/device testing
-        return "http://10.0.0.202:3000"
-        #else
-        return "https://app.map.ai"
-        #endif
-    }()
-}
-
 // MARK: - Errors
 
 enum ClaudeAuthError: Error, LocalizedError {
@@ -129,4 +116,3 @@ enum ClaudeAuthError: Error, LocalizedError {
     ClaudeAuthView()
 }
 #endif
-

@@ -19,6 +19,11 @@ struct MapHealthApp: App {
             .sheet(isPresented: !$completedOnboardingFlow) {
                 OnboardingFlow()
             }
+            .task {
+                if KeychainService.shared.hasSessionToken && !completedOnboardingFlow {
+                    completedOnboardingFlow = true
+                }
+            }
             .testingSetup()
             .spezi(appDelegate)
         }
