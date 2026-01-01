@@ -18,6 +18,5 @@ export async function requireUser(): Promise<User> {
   return user;
 }
 
-export { hashPassword, verifyPassword } from "./auth/password";
 // Re-export session utilities
 export { createSession, deleteSession, refreshSession } from "./auth/session";

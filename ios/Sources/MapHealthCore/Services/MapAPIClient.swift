@@ -11,6 +11,11 @@ public class MapAPIClient {
     public init(baseURL: URL = URL(string: "https://app.map.ai")!) {
         self.baseURL = baseURL
         self.session = URLSession.shared
+
+        // Load token from Keychain on init
+        if let storedToken = KeychainService.shared.getSessionToken() {
+            self.authToken = storedToken
+        }
     }
 
     // MARK: - Authentication
@@ -21,10 +26,16 @@ public class MapAPIClient {
 
     public func clearAuthToken() {
         self.authToken = nil
+        try? KeychainService.shared.deleteSessionToken()
     }
 
     public var isAuthenticated: Bool {
         authToken != nil
+    }
+
+    /// Sign out - clears token but preserves local cached data
+    public func signOut() {
+        clearAuthToken()
     }
 
     // MARK: - Health Data Sync

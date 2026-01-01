@@ -3,11 +3,17 @@ import { google } from "googleapis";
 import { calendarDb } from "@/db/calendar";
 import { getUser } from "@/lib/auth";
 
-// Google Calendar OAuth Scopes
-export const GOOGLE_CALENDAR_SCOPES = [
+// Google OAuth Scopes - includes profile + calendar
+export const GOOGLE_AUTH_SCOPES = [
+  "openid",
+  "email",
+  "profile",
   "https://www.googleapis.com/auth/calendar.readonly",
   "https://www.googleapis.com/auth/calendar.events",
 ] as const;
+
+// Legacy alias for calendar-specific scopes
+export const GOOGLE_CALENDAR_SCOPES = GOOGLE_AUTH_SCOPES;
 
 // Generate OAuth authorization URL
 export function getGoogleAuthUrl(state: string, redirectUri: string): string {
@@ -19,10 +25,40 @@ export function getGoogleAuthUrl(state: string, redirectUri: string): string {
 
   return oauth2Client.generateAuthUrl({
     access_type: "offline",
-    scope: [...GOOGLE_CALENDAR_SCOPES],
+    scope: [...GOOGLE_AUTH_SCOPES],
     state,
     prompt: "consent", // Force consent to ensure we get refresh token
   });
+}
+
+// Get user info from Google using access token
+export async function getGoogleUserInfo(accessToken: string): Promise<{
+  sub: string; // Google ID
+  email: string;
+  name?: string;
+  given_name?: string;
+  family_name?: string;
+  picture?: string;
+  locale?: string;
+}> {
+  const oauth2Client = new google.auth.OAuth2(
+    process.env.GOOGLE_CLIENT_ID,
+    process.env.GOOGLE_CLIENT_SECRET,
+  );
+  oauth2Client.setCredentials({ access_token: accessToken });
+
+  const oauth2 = google.oauth2({ version: "v2", auth: oauth2Client });
+  const { data } = await oauth2.userinfo.get();
+
+  return {
+    sub: data.id!, // Google ID
+    email: data.email!,
+    name: data.name ?? undefined,
+    given_name: data.given_name ?? undefined,
+    family_name: data.family_name ?? undefined,
+    picture: data.picture ?? undefined,
+    locale: data.locale ?? undefined,
+  };
 }
 
 // Exchange authorization code for tokens

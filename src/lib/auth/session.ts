@@ -2,7 +2,7 @@ import "server-only";
 
 import { and, eq, gt } from "drizzle-orm";
 import { nanoid } from "nanoid";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { db } from "@/db";
 import { sessions, users } from "@/db/schema";
 
@@ -24,7 +24,15 @@ function getExpiryDate(): Date {
   return date;
 }
 
-export async function createSession(userId: string): Promise<string> {
+/**
+ * Create a session for a user.
+ * By default, sets a cookie for web clients.
+ * Pass skipCookie: true for iOS clients that use Bearer tokens.
+ */
+export async function createSession(
+  userId: string,
+  options?: { skipCookie?: boolean },
+): Promise<string> {
   const sessionId = nanoid(32);
   const expiresAt = getExpiryDate();
 
@@ -34,21 +42,40 @@ export async function createSession(userId: string): Promise<string> {
     expiresAt,
   });
 
-  const cookieStore = await cookies();
-  cookieStore.set(SESSION_COOKIE_NAME, sessionId, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    expires: expiresAt,
-    path: "/",
-  });
+  // Skip cookie for iOS clients (they use Bearer token)
+  if (!options?.skipCookie) {
+    const cookieStore = await cookies();
+    cookieStore.set(SESSION_COOKIE_NAME, sessionId, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      expires: expiresAt,
+      path: "/",
+    });
+  }
 
   return sessionId;
 }
 
-export async function getSession(): Promise<SessionUser | null> {
+/**
+ * Get session ID from either cookie or Authorization header.
+ * Supports both web (cookie) and iOS (Bearer token) clients.
+ */
+async function getSessionId(): Promise<string | null> {
+  // First, check for Bearer token in Authorization header (iOS)
+  const headerStore = await headers();
+  const authHeader = headerStore.get("authorization");
+  if (authHeader?.startsWith("Bearer ")) {
+    return authHeader.slice(7);
+  }
+
+  // Fall back to cookie (web)
   const cookieStore = await cookies();
-  const sessionId = cookieStore.get(SESSION_COOKIE_NAME)?.value;
+  return cookieStore.get(SESSION_COOKIE_NAME)?.value ?? null;
+}
+
+export async function getSession(): Promise<SessionUser | null> {
+  const sessionId = await getSessionId();
 
   if (!sessionId) {
     return null;
@@ -71,20 +98,28 @@ export async function getSession(): Promise<SessionUser | null> {
   return result[0] ?? null;
 }
 
-export async function deleteSession(): Promise<void> {
-  const cookieStore = await cookies();
-  const sessionId = cookieStore.get(SESSION_COOKIE_NAME)?.value;
+/**
+ * Delete the current session.
+ * For iOS, you can optionally pass the session ID directly.
+ */
+export async function deleteSession(sessionIdToDelete?: string): Promise<void> {
+  const sessionId = sessionIdToDelete ?? (await getSessionId());
 
   if (sessionId) {
     await db.delete(sessions).where(eq(sessions.id, sessionId));
   }
 
+  // Clear cookie if it exists (no-op for iOS Bearer token requests)
+  const cookieStore = await cookies();
   cookieStore.delete(SESSION_COOKIE_NAME);
 }
 
+/**
+ * Refresh the session expiry (sliding expiration).
+ * Works for both cookie and Bearer token sessions.
+ */
 export async function refreshSession(): Promise<void> {
-  const cookieStore = await cookies();
-  const sessionId = cookieStore.get(SESSION_COOKIE_NAME)?.value;
+  const sessionId = await getSessionId();
 
   if (!sessionId) {
     return;
@@ -94,11 +129,16 @@ export async function refreshSession(): Promise<void> {
 
   await db.update(sessions).set({ expiresAt }).where(eq(sessions.id, sessionId));
 
-  cookieStore.set(SESSION_COOKIE_NAME, sessionId, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    expires: expiresAt,
-    path: "/",
-  });
+  // Update cookie if using cookie-based auth (web clients)
+  const cookieStore = await cookies();
+  const hasCookie = cookieStore.get(SESSION_COOKIE_NAME)?.value;
+  if (hasCookie) {
+    cookieStore.set(SESSION_COOKIE_NAME, sessionId, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      expires: expiresAt,
+      path: "/",
+    });
+  }
 }
