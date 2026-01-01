@@ -19,7 +19,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <Providers>
           <div className="relative">
             <Sidebar />
-            <div className="mx-4 md:ml-[95px] md:mr-10 pb-8">
+            <div className="mx-4 md:ml-[76px] md:mr-6 pb-8">
               <Header />
               {children}
             </div>
