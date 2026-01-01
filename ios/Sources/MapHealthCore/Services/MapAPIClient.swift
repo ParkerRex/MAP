@@ -1,3 +1,4 @@
+import AuthenticationServices
 import Foundation
 
 /// Client for syncing health data to Map backend
@@ -7,6 +8,9 @@ public class MapAPIClient {
     private let baseURL: URL
     private let session: URLSession
     private var authToken: String?
+
+    /// Callback for when re-authentication is needed (401 response)
+    public var onAuthenticationRequired: (() async -> Bool)?
 
     public init(baseURL: URL = URL(string: "https://app.map.ai")!) {
         self.baseURL = baseURL
@@ -38,63 +42,113 @@ public class MapAPIClient {
         clearAuthToken()
     }
 
+    // MARK: - User Profile
+
+    /// Get the current user's profile
+    public func getProfile() async throws -> UserProfile {
+        return try await request(
+            endpoint: "/api/auth/me",
+            method: "GET",
+            responseType: ProfileResponse.self
+        ).user
+    }
+
     // MARK: - Health Data Sync
 
     /// Sync health data to Map backend
     public func syncHealthData(_ healthData: [HealthData]) async throws -> SyncResponse {
-        let endpoint = baseURL.appendingPathComponent("/api/health/apple-health/sync")
-
-        var request = URLRequest(url: endpoint)
-        request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-
-        if let token = authToken {
-            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-        }
-
         let payload = HealthSyncPayload(
             syncedAt: ISO8601DateFormatter().string(from: Date()),
             deviceId: getDeviceId(),
             healthData: healthData
         )
 
-        request.httpBody = try JSONEncoder().encode(payload)
-
-        let (data, response) = try await session.data(for: request)
-
-        guard let httpResponse = response as? HTTPURLResponse else {
-            throw MapAPIError.invalidResponse
-        }
-
-        guard httpResponse.statusCode == 200 else {
-            throw MapAPIError.httpError(statusCode: httpResponse.statusCode)
-        }
-
-        return try JSONDecoder().decode(SyncResponse.self, from: data)
+        return try await request(
+            endpoint: "/api/health/apple-health/sync",
+            method: "POST",
+            body: payload,
+            responseType: SyncResponse.self
+        )
     }
 
     /// Check if Apple Health is connected for this user
     public func getHealthStatus() async throws -> HealthConnectionStatus {
-        let endpoint = baseURL.appendingPathComponent("/api/health/apple-health/status")
+        return try await request(
+            endpoint: "/api/health/apple-health/status",
+            method: "GET",
+            responseType: HealthConnectionStatus.self
+        )
+    }
 
-        var request = URLRequest(url: endpoint)
-        request.httpMethod = "GET"
+    // MARK: - Generic Request Handler
+
+    private func request<T: Decodable, B: Encodable>(
+        endpoint: String,
+        method: String,
+        body: B? = nil as Empty?,
+        responseType: T.Type,
+        retryOnUnauthorized: Bool = true
+    ) async throws -> T {
+        let url = baseURL.appendingPathComponent(endpoint)
+
+        var request = URLRequest(url: url)
+        request.httpMethod = method
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
 
         if let token = authToken {
             request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         }
 
+        if let body = body {
+            request.httpBody = try JSONEncoder().encode(body)
+        }
+
         let (data, response) = try await session.data(for: request)
 
         guard let httpResponse = response as? HTTPURLResponse else {
             throw MapAPIError.invalidResponse
         }
 
+        // Handle 401 Unauthorized - attempt inline re-auth
+        if httpResponse.statusCode == 401 && retryOnUnauthorized {
+            // Attempt re-authentication
+            if let onAuthRequired = onAuthenticationRequired {
+                let success = await onAuthRequired()
+                if success {
+                    // Retry the request with new token
+                    return try await self.request(
+                        endpoint: endpoint,
+                        method: method,
+                        body: body,
+                        responseType: responseType,
+                        retryOnUnauthorized: false // Don't retry again
+                    )
+                }
+            }
+            throw MapAPIError.unauthorized
+        }
+
         guard httpResponse.statusCode == 200 else {
             throw MapAPIError.httpError(statusCode: httpResponse.statusCode)
         }
 
-        return try JSONDecoder().decode(HealthConnectionStatus.self, from: data)
+        return try JSONDecoder().decode(T.self, from: data)
+    }
+
+    // Overload for requests without body
+    private func request<T: Decodable>(
+        endpoint: String,
+        method: String,
+        responseType: T.Type,
+        retryOnUnauthorized: Bool = true
+    ) async throws -> T {
+        return try await request(
+            endpoint: endpoint,
+            method: method,
+            body: nil as Empty?,
+            responseType: responseType,
+            retryOnUnauthorized: retryOnUnauthorized
+        )
     }
 
     // MARK: - Helpers
@@ -111,7 +165,40 @@ public class MapAPIClient {
     }
 }
 
+// MARK: - Empty type for requests without body
+
+private struct Empty: Encodable {}
+
 // MARK: - Response Types
+
+public struct UserProfile: Codable {
+    public var id: String
+    public var email: String
+    public var displayName: String?
+    public var firstName: String?
+    public var lastName: String?
+    public var profilePhotoUrl: String?
+
+    public init(
+        id: String,
+        email: String,
+        displayName: String? = nil,
+        firstName: String? = nil,
+        lastName: String? = nil,
+        profilePhotoUrl: String? = nil
+    ) {
+        self.id = id
+        self.email = email
+        self.displayName = displayName
+        self.firstName = firstName
+        self.lastName = lastName
+        self.profilePhotoUrl = profilePhotoUrl
+    }
+}
+
+private struct ProfileResponse: Codable {
+    var user: UserProfile
+}
 
 public struct SyncResponse: Codable {
     public var success: Bool

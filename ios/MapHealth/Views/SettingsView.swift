@@ -15,6 +15,8 @@ struct SettingsView: View {
     @State private var path = ManagedNavigationStack.Path()
     @State private var didComplete = false
     @State private var showSignOutAlert = false
+    @State private var userProfile: UserProfile?
+    @State private var isLoadingProfile = false
     @Binding var modelSettingRefreshId: UUID
 
     var body: some View {
@@ -35,6 +37,9 @@ struct SettingsView: View {
                 }
             }
             .accessibilityIdentifier("settingsList")
+            .task {
+                await loadProfile()
+            }
         }
         .onChange(of: self.didComplete) { _, newValue in
             if newValue {
@@ -55,18 +60,43 @@ struct SettingsView: View {
     private var accountSection: some View {
         Section("Account") {
             if MapAPIClient.shared.isAuthenticated {
-                HStack {
-                    Image(systemName: "person.circle.fill")
-                        .font(.system(size: 40))
-                        .foregroundStyle(.secondary)
+                HStack(spacing: 12) {
+                    // Profile photo or placeholder
+                    if let photoUrl = userProfile?.profilePhotoUrl,
+                       let url = URL(string: photoUrl) {
+                        AsyncImage(url: url) { image in
+                            image
+                                .resizable()
+                                .aspectRatio(contentMode: .fill)
+                        } placeholder: {
+                            profilePlaceholder
+                        }
+                        .frame(width: 48, height: 48)
+                        .clipShape(Circle())
+                    } else {
+                        profilePlaceholder
+                    }
 
                     VStack(alignment: .leading, spacing: 2) {
-                        Text("Connected with Google")
-                            .font(.subheadline)
-                            .fontWeight(.medium)
-                        Text("Signed in")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
+                        if isLoadingProfile {
+                            Text("Loading...")
+                                .font(.subheadline)
+                                .foregroundStyle(.secondary)
+                        } else if let profile = userProfile {
+                            Text(profile.displayName ?? profile.email)
+                                .font(.subheadline)
+                                .fontWeight(.medium)
+                            Text(profile.email)
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        } else {
+                            Text("Connected with Google")
+                                .font(.subheadline)
+                                .fontWeight(.medium)
+                            Text("Signed in")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
                     }
 
                     Spacer()
@@ -81,6 +111,12 @@ struct SettingsView: View {
                     .foregroundStyle(.secondary)
             }
         }
+    }
+
+    private var profilePlaceholder: some View {
+        Image(systemName: "person.circle.fill")
+            .font(.system(size: 48))
+            .foregroundStyle(.secondary)
     }
 
     private var changeModelSettings: some View {
@@ -117,6 +153,19 @@ struct SettingsView: View {
         Section("SETTINGS_DISCLAIMER_TITLE") {
             Text("SETTINGS_DISCLAIMER_TEXT")
         }
+    }
+
+    private func loadProfile() async {
+        guard MapAPIClient.shared.isAuthenticated else { return }
+
+        isLoadingProfile = true
+        do {
+            userProfile = try await MapAPIClient.shared.getProfile()
+        } catch {
+            // Profile fetch failed, show fallback UI
+            Logger.standard.error("Failed to load profile: \(error.localizedDescription)")
+        }
+        isLoadingProfile = false
     }
 
     private func signOut() {

@@ -34,11 +34,23 @@ Use **Drizzle ORM** for all database operations. Organize queries and mutations 
 
 ## Authentication
 
+**Google-only authentication** - users sign in exclusively via Google OAuth.
+
 Session-based auth in `src/lib/auth/`:
-- `session.ts` - Session CRUD with HTTP-only cookies
-- `password.ts` - bcrypt password hashing
+- `session.ts` - Session CRUD with HTTP-only cookies (web) and Bearer tokens (iOS)
 
 Use `getUser()` to get current user, `requireUser()` to throw if not authenticated.
+
+**Routes**:
+- `GET /api/auth/google` - Initiate Google OAuth (supports `?platform=ios` for mobile)
+- `GET /api/auth/google/callback` - Handle OAuth callback, create session
+- `GET /api/auth/me` - Get current user
+- `POST /api/auth/logout` - End session
+
+**Session Features**:
+- 30-day sliding expiration (extends on each authenticated request)
+- Dual-platform support: cookies for web, Bearer tokens for iOS
+- Profile synced from Google on every login
 
 ## API Routes
 
@@ -133,10 +145,10 @@ Google Calendar integration in `src/lib/google-calendar.ts`:
 - Incremental sync with syncToken for efficiency
 - Rate limit handling with exponential backoff
 
-**API Routes** (`/api/google/` and `/api/calendar/`):
-- `GET /api/google/auth` - Initiate OAuth flow
-- `GET /api/google/callback` - Handle OAuth callback
-- `GET /api/google/status` - Check if connected
+**Note**: Google Calendar OAuth is handled by the unified auth flow at `/api/auth/google`. Calendar tokens are stored during sign-in.
+
+**API Routes** (`/api/calendar/`):
+- `GET /api/google/status` - Check if Google Calendar is connected
 - `GET /api/calendar/calendars` - List user's calendars
 - `GET/POST /api/calendar/events` - List/create events
 - `PUT/DELETE /api/calendar/events/[id]` - Update/delete events
@@ -147,6 +159,7 @@ Google Calendar integration in `src/lib/google-calendar.ts`:
 - `useCalendars()`, `useEvents()`, `useMultiCalendarEvents()`
 - `useCreateEvent()`, `useUpdateEvent()`, `useDeleteEvent()`
 - `useSyncCalendars()`
+- `useCalendarReconnect()` - Handles calendar access revoked state
 
 **Environment Variables**:
 ```

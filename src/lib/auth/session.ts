@@ -95,7 +95,17 @@ export async function getSession(): Promise<SessionUser | null> {
     .where(and(eq(sessions.id, sessionId), gt(sessions.expiresAt, new Date())))
     .limit(1);
 
-  return result[0] ?? null;
+  const user = result[0] ?? null;
+
+  // Sliding session: refresh expiry on each authenticated request
+  if (user) {
+    // Fire and forget - don't block the response
+    refreshSession().catch(() => {
+      // Silently ignore refresh errors
+    });
+  }
+
+  return user;
 }
 
 /**

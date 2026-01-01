@@ -32,7 +32,9 @@ export const users = pgTable("users", {
   id: uuid("id").primaryKey().defaultRandom(),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   email: text("email").notNull().unique(),
-  googleId: text("google_id").notNull().unique(), // Google's 'sub' claim - primary identifier
+  // Google's 'sub' claim - primary identifier for Google-only auth
+  // Nullable during migration - existing users get linked when they sign in via Google
+  googleId: text("google_id").unique(),
   displayName: text("display_name"),
   firstName: text("first_name"),
   lastName: text("last_name"),

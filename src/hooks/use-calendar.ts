@@ -1,7 +1,8 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type { calendar_v3 } from "googleapis";
+import { useCallback, useState } from "react";
 import {
   api,
   type CalendarsResponse,
@@ -18,6 +19,9 @@ type CalendarEvent = calendar_v3.Schema$Event;
 interface GoogleStatusResponse {
   connected: boolean;
 }
+
+// Error codes that indicate calendar access was revoked
+const CALENDAR_ACCESS_REVOKED_CODES = ["INVALID_GRANT", "TOKEN_EXPIRED", "ACCESS_REVOKED"];
 
 // Queries
 export function useGoogleStatus() {
@@ -94,4 +98,60 @@ export function useSyncCalendars() {
     mutationFn: () => api.calendar.sync(),
     invalidateKeys: [queryKeys.events.all, queryKeys.calendars.all],
   });
+}
+
+// Helper to check if an error indicates calendar access was revoked
+export function isCalendarAccessRevokedError(error: unknown): boolean {
+  if (!error) return false;
+
+  const errorMessage = error instanceof Error ? error.message : String(error);
+  const errorCode =
+    (error as { code?: string })?.code ?? (error as { error?: { code?: string } })?.error?.code;
+
+  return (
+    CALENDAR_ACCESS_REVOKED_CODES.some(
+      (code) => errorMessage.includes(code) || errorCode?.includes(code) === true,
+    ) ||
+    errorMessage.includes("invalid_grant") ||
+    errorMessage.includes("Token has been expired or revoked")
+  );
+}
+
+// Hook to manage calendar reconnection state
+export function useCalendarReconnect() {
+  const [needsReconnect, setNeedsReconnect] = useState(false);
+  const queryClient = useQueryClient();
+
+  const checkForReconnect = useCallback((error: unknown) => {
+    if (isCalendarAccessRevokedError(error)) {
+      setNeedsReconnect(true);
+      return true;
+    }
+    return false;
+  }, []);
+
+  const reconnect = useCallback(() => {
+    // Redirect to Google OAuth to re-authenticate calendar access
+    window.location.href = "/api/auth/google";
+  }, []);
+
+  const dismissReconnect = useCallback(() => {
+    setNeedsReconnect(false);
+  }, []);
+
+  const onReconnectSuccess = useCallback(() => {
+    setNeedsReconnect(false);
+    // Refresh all calendar-related queries
+    queryClient.invalidateQueries({ queryKey: queryKeys.google.status });
+    queryClient.invalidateQueries({ queryKey: queryKeys.calendars.all });
+    queryClient.invalidateQueries({ queryKey: queryKeys.events.all });
+  }, [queryClient]);
+
+  return {
+    needsReconnect,
+    checkForReconnect,
+    reconnect,
+    dismissReconnect,
+    onReconnectSuccess,
+  };
 }

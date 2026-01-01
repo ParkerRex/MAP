@@ -130,11 +130,11 @@ Sessions stored in database with 30-day expiry. Passwords hashed with bcrypt.
 
 ### Google Calendar
 
-OAuth 2.0 integration for calendar sync.
+OAuth 2.0 integration for calendar sync. Calendar OAuth is handled by the unified Google Sign-In flow.
 
 **Setup:**
 1. Create OAuth credentials in [Google Cloud Console](https://console.cloud.google.com/apis/credentials)
-2. Add redirect URI: `{APP_URL}/api/google/callback`
+2. Add redirect URI: `{APP_URL}/api/auth/google/callback`
 3. Set environment variables:
    ```
    GOOGLE_CLIENT_ID=your_client_id
@@ -144,9 +144,9 @@ OAuth 2.0 integration for calendar sync.
 **Routes:**
 | Route | Method | Description |
 |-------|--------|-------------|
-| `/api/google/auth` | GET | Initiate OAuth |
-| `/api/google/callback` | GET | OAuth callback |
-| `/api/google/status` | GET | Connection status |
+| `/api/auth/google` | GET | Initiate Google Sign-In (includes calendar scopes) |
+| `/api/auth/google/callback` | GET | OAuth callback |
+| `/api/google/status` | GET | Check if calendar is connected |
 | `/api/calendar/sync` | POST | Sync calendars |
 | `/api/calendar/events` | GET, POST | List/create events |
 | `/api/calendar/events/[id]` | PUT, DELETE | Update/delete event |
