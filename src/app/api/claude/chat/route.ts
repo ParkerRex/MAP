@@ -1,8 +1,8 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { getUser } from "@/lib/auth";
-import { handleApiError, unauthorized, badRequest } from "@/lib/api/errors";
-import { getClaudeClientForUser, type ClaudeMessage } from "@/lib/claude";
 import { z } from "zod";
+import { badRequest, handleApiError, unauthorized } from "@/lib/api/errors";
+import { getUser } from "@/lib/auth";
+import { type ClaudeMessage, getClaudeClientForUser } from "@/lib/claude";
 
 const chatRequestSchema = z.object({
   messages: z.array(
@@ -64,8 +64,7 @@ export async function POST(request: NextRequest) {
             controller.enqueue(encoder.encode("data: [DONE]\n\n"));
             controller.close();
           } catch (error) {
-            const errorMessage =
-              error instanceof Error ? error.message : "Stream error";
+            const errorMessage = error instanceof Error ? error.message : "Stream error";
             controller.enqueue(
               encoder.encode(
                 `data: ${JSON.stringify({ type: "error", error: { message: errorMessage } })}\n\n`,

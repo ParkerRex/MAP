@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
 import {
   RiCalendarLine,
   RiCheckboxLine,
@@ -9,8 +11,6 @@ import {
   RiSettings4Line,
   RiUserLine,
 } from "react-icons/ri";
-import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/use-auth";
 import { cn } from "./ui/cn";
 import {
@@ -21,12 +21,7 @@ import {
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 import { Icons } from "./ui/icons";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "./ui/tooltip";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/tooltip";
 
 const navItems = [
   { href: "/calendar", label: "Calendar", icon: RiCalendarLine },

@@ -219,10 +219,7 @@ export interface UpdateGoalInput {
 class ApiClient {
   private baseUrl = "/api";
 
-  private async request<T>(
-    endpoint: string,
-    options?: RequestInit,
-  ): Promise<T> {
+  private async request<T>(endpoint: string, options?: RequestInit): Promise<T> {
     const response = await fetch(this.baseUrl + endpoint, {
       ...options,
       headers: {
@@ -284,8 +281,7 @@ class ApiClient {
         method: "PUT",
         body: JSON.stringify(data),
       }),
-    delete: (id: string) =>
-      this.request<{ success: boolean }>("/tags/" + id, { method: "DELETE" }),
+    delete: (id: string) => this.request<{ success: boolean }>("/tags/" + id, { method: "DELETE" }),
   };
 
   notes = {
@@ -344,15 +340,13 @@ class ApiClient {
       }),
     delete: (id: string) =>
       this.request<{ success: boolean }>("/goals/" + id, { method: "DELETE" }),
-    deleteAll: () =>
-      this.request<{ success: boolean }>("/goals", { method: "DELETE" }),
+    deleteAll: () => this.request<{ success: boolean }>("/goals", { method: "DELETE" }),
   };
 
   calendar = {
     listCalendars: () => this.request<CalendarsResponse>("/calendar/calendars"),
     getColors: () => this.request<ColorsResponse>("/calendar/colors"),
-    sync: () =>
-      this.request<SyncResponse>("/calendar/sync", { method: "POST" }),
+    sync: () => this.request<SyncResponse>("/calendar/sync", { method: "POST" }),
     events: {
       list: (calendarId: string, timeMin: string, timeMax: string) =>
         this.request<EventsResponse>(
@@ -363,18 +357,11 @@ class ApiClient {
           `/calendar/events/${eventId}?calendarId=${calendarId}`,
         ),
       create: (calendarId: string, event: Partial<CalendarEvent>) =>
-        this.request<{ event: CalendarEvent }>(
-          `/calendar/events?calendarId=${calendarId}`,
-          {
-            method: "POST",
-            body: JSON.stringify(event),
-          },
-        ),
-      update: (
-        eventId: string,
-        calendarId: string,
-        event: Partial<CalendarEvent>,
-      ) =>
+        this.request<{ event: CalendarEvent }>(`/calendar/events?calendarId=${calendarId}`, {
+          method: "POST",
+          body: JSON.stringify(event),
+        }),
+      update: (eventId: string, calendarId: string, event: Partial<CalendarEvent>) =>
         this.request<{ event: CalendarEvent }>(
           `/calendar/events/${eventId}?calendarId=${calendarId}`,
           {
@@ -383,12 +370,9 @@ class ApiClient {
           },
         ),
       delete: (eventId: string, calendarId: string) =>
-        this.request<{ success: boolean }>(
-          `/calendar/events/${eventId}?calendarId=${calendarId}`,
-          {
-            method: "DELETE",
-          },
-        ),
+        this.request<{ success: boolean }>(`/calendar/events/${eventId}?calendarId=${calendarId}`, {
+          method: "DELETE",
+        }),
     },
   };
 
@@ -398,8 +382,7 @@ class ApiClient {
 
   auth = {
     me: () => this.request<{ user: AuthUser }>("/auth/me"),
-    logout: () =>
-      this.request<{ success: boolean }>("/auth/logout", { method: "POST" }),
+    logout: () => this.request<{ success: boolean }>("/auth/logout", { method: "POST" }),
   };
 
   whoop = {
@@ -435,8 +418,7 @@ class ApiClient {
         `/whoop/workouts${queryString ? `?${queryString}` : ""}`,
       );
     },
-    sync: () =>
-      this.request<WhoopSyncResponse>("/whoop/sync", { method: "POST" }),
+    sync: () => this.request<WhoopSyncResponse>("/whoop/sync", { method: "POST" }),
     disconnect: () =>
       this.request<{ success: boolean }>("/whoop/disconnect", {
         method: "POST",
@@ -444,10 +426,7 @@ class ApiClient {
   };
 
   claude = {
-    status: () =>
-      this.request<{ connected: boolean; expiresAt?: string }>(
-        "/claude/status",
-      ),
+    status: () => this.request<{ connected: boolean; expiresAt?: string }>("/claude/status"),
     disconnect: () =>
       this.request<{ success: boolean }>("/claude/disconnect", {
         method: "POST",

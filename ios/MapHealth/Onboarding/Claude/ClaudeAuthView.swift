@@ -71,8 +71,11 @@ struct ClaudeAuthView: View {
                 )
 
                 // Check if authentication was successful
-                if let components = URLComponents(url: callbackURL, resolvingAgainstBaseURL: false),
-                   components.queryItems?.contains(where: { $0.name == "success" }) == true {
+                guard let components = URLComponents(url: callbackURL, resolvingAgainstBaseURL: false) else {
+                    throw ClaudeAuthError.authFailed("Invalid callback URL")
+                }
+
+                if components.queryItems?.contains(where: { $0.name == "success" }) == true {
                     // Successfully authenticated, proceed to next step
                     onboardingNavigationPath.nextStep()
                 } else if let error = components.queryItems?.first(where: { $0.name == "error" })?.value {
@@ -97,7 +100,8 @@ struct ClaudeAuthView: View {
 enum AppConfig {
     static let webBaseURL: String = {
         #if DEBUG
-        return "http://localhost:3000"
+        // Use Mac's local IP for simulator/device testing
+        return "http://10.0.0.202:3000"
         #else
         return "https://app.map.ai"
         #endif
@@ -125,3 +129,4 @@ enum ClaudeAuthError: Error, LocalizedError {
     ClaudeAuthView()
 }
 #endif
+

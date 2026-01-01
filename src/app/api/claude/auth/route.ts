@@ -1,19 +1,13 @@
 import { randomBytes } from "crypto";
 import { NextResponse } from "next/server";
 import { getUser } from "@/lib/auth";
-import {
-  generateCodeVerifier,
-  generateCodeChallenge,
-  getClaudeAuthUrl,
-} from "@/lib/claude";
+import { generateCodeChallenge, generateCodeVerifier, getClaudeAuthUrl } from "@/lib/claude";
 
 export async function GET() {
   try {
     const user = await getUser();
     if (!user) {
-      return NextResponse.redirect(
-        `${process.env.NEXT_PUBLIC_APP_URL}/login?error=unauthorized`,
-      );
+      return NextResponse.redirect(`${process.env.NEXT_PUBLIC_APP_URL}/login?error=unauthorized`);
     }
 
     // Generate PKCE code verifier and challenge
@@ -50,8 +44,6 @@ export async function GET() {
     return response;
   } catch (error) {
     console.error("Claude auth initiation error:", error);
-    return NextResponse.redirect(
-      `${process.env.NEXT_PUBLIC_APP_URL}/settings?error=auth_failed`,
-    );
+    return NextResponse.redirect(`${process.env.NEXT_PUBLIC_APP_URL}/settings?error=auth_failed`);
   }
 }

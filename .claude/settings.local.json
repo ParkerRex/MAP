@@ -6,7 +6,14 @@
       "WebFetch(domain:developer.whoop.com)",
       "Bash(bun run typecheck:*)",
       "WebSearch",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(git push:*)",
+      "WebFetch(domain:deepwiki.com)",
+      "WebFetch(domain:www.alif.web.id)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(bun run dev)",
+      "Bash(curl:*)"
     ]
   }
 }

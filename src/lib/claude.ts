@@ -137,9 +137,7 @@ export async function exchangeClaudeCode(
 }
 
 // Refresh access token
-export async function refreshClaudeToken(
-  refreshToken: string,
-): Promise<ClaudeTokenResponse> {
+export async function refreshClaudeToken(refreshToken: string): Promise<ClaudeTokenResponse> {
   const response = await fetch(`${CLAUDE_TOKEN_BASE}/v1/oauth/token`, {
     method: "POST",
     headers: {
@@ -233,19 +231,15 @@ export class ClaudeClient {
     system?: string;
     max_tokens?: number;
   }): Promise<ClaudeMessageResponse> {
-    return claudeFetch<ClaudeMessageResponse>(
-      this.accessToken,
-      "/v1/messages",
-      {
-        method: "POST",
-        body: JSON.stringify({
-          model: params.model ?? "claude-sonnet-4-20250514",
-          messages: params.messages,
-          system: params.system,
-          max_tokens: params.max_tokens ?? 4096,
-        }),
-      },
-    );
+    return claudeFetch<ClaudeMessageResponse>(this.accessToken, "/v1/messages", {
+      method: "POST",
+      body: JSON.stringify({
+        model: params.model ?? "claude-sonnet-4-20250514",
+        messages: params.messages,
+        system: params.system,
+        max_tokens: params.max_tokens ?? 4096,
+      }),
+    });
   }
 
   // Create a streaming message
@@ -329,9 +323,7 @@ export async function getClaudeClient(): Promise<ClaudeClient> {
 }
 
 // Get Claude client for a specific user
-export async function getClaudeClientForUser(
-  userId: string,
-): Promise<ClaudeClient> {
+export async function getClaudeClientForUser(userId: string): Promise<ClaudeClient> {
   const integration = await calendarDb.getIntegration(userId, "CLAUDE");
 
   if (!integration) {

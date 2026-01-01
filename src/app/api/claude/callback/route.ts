@@ -7,9 +7,7 @@ export async function GET(request: NextRequest) {
   try {
     const user = await getUser();
     if (!user) {
-      return NextResponse.redirect(
-        `${process.env.NEXT_PUBLIC_APP_URL}/login?error=unauthorized`,
-      );
+      return NextResponse.redirect(`${process.env.NEXT_PUBLIC_APP_URL}/login?error=unauthorized`);
     }
 
     const searchParams = request.nextUrl.searchParams;
