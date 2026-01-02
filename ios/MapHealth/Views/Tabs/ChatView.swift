@@ -15,6 +15,11 @@ struct ChatView: View {
     @State private var messageTaskId = 0
     @State private var isReauthenticating = false
 
+    private static let openAIModels: [ModelOption] = [
+        ModelOption(id: "gpt-4o", name: "GPT-4o"),
+        ModelOption(id: "gpt-4o-mini", name: "GPT-4o mini")
+    ]
+
     var body: some View {
         NavigationStack {
             GlassChatView(
@@ -26,6 +31,9 @@ struct ChatView: View {
                 isGenerating: healthDataInterpreter.isGenerating
             )
             .toolbar {
+                ToolbarItem(placement: .principal) {
+                    modelSelector
+                }
                 ToolbarItem(placement: .primaryAction) {
                     resetChatButton
                 }
@@ -76,6 +84,38 @@ struct ChatView: View {
         .accessibilityIdentifier("resetChatButton")
     }
 
+    private var modelSelector: some View {
+        Menu {
+            ForEach(Self.openAIModels) { model in
+                Button {
+                    openAIModel = model.id
+                    modelSettingRefreshId = UUID()
+                } label: {
+                    HStack {
+                        Text(model.name)
+                        if openAIModel == model.id {
+                            Spacer()
+                            Image(systemName: "checkmark")
+                        }
+                    }
+                }
+            }
+        } label: {
+            HStack(spacing: 4) {
+                Text(currentModelName)
+                    .font(.headline)
+                Image(systemName: "chevron.down")
+                    .font(.caption.weight(.semibold))
+            }
+            .foregroundStyle(.primary)
+        }
+        .accessibilityIdentifier("modelSelector")
+    }
+
+    private var currentModelName: String {
+        Self.openAIModels.first { $0.id == openAIModel }?.name ?? openAIModel
+    }
+
     @MainActor
     private func startReauthentication() async -> Bool {
         if isReauthenticating {
@@ -121,4 +161,9 @@ struct ChatView: View {
             return false
         }
     }
+}
+
+private struct ModelOption: Identifiable {
+    let id: String
+    let name: String
 }
