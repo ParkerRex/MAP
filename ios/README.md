@@ -136,14 +136,11 @@ The app syncs to these endpoints:
 - `POST /api/health/apple-health/sync` - Upload health data
 - `GET /api/health/apple-health/status` - Check connection status
 
-## Dependencies (Spezi Framework)
+## Dependencies
 
-- [Spezi](https://github.com/StanfordSpezi/Spezi) - Core framework
-- [SpeziHealthKit](https://github.com/StanfordSpezi/SpeziHealthKit) - HealthKit abstraction
-- [SpeziLLM](https://github.com/StanfordSpezi/SpeziLLM) - LLM orchestration (OpenAI, Local, Fog)
-- [SpeziChat](https://github.com/StanfordSpezi/SpeziChat) - Chat UI
-- [SpeziOnboarding](https://github.com/StanfordSpezi/SpeziOnboarding) - Onboarding flows
-- [SpeziStorage](https://github.com/StanfordSpezi/SpeziStorage) - Keychain storage
+- SwiftUI
+- HealthKit
+- BackgroundTasks
 
 ## Documentation
 

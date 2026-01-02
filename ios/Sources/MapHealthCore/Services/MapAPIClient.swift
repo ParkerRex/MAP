@@ -252,13 +252,13 @@ public enum MapAPIError: Error, LocalizedError {
     public var errorDescription: String? {
         switch self {
         case .invalidResponse:
-            return "Invalid response from server"
+            return String(localized: "API_INVALID_RESPONSE")
         case .httpError(let statusCode):
-            return "HTTP error: \(statusCode)"
+            return String(format: String(localized: "API_HTTP_ERROR"), statusCode)
         case .unauthorized:
-            return "Not authorized. Please sign in."
+            return String(localized: "API_UNAUTHORIZED")
         case .networkError(let error):
-            return "Network error: \(error.localizedDescription)"
+            return String(format: String(localized: "API_NETWORK_ERROR"), error.localizedDescription)
         }
     }
 }

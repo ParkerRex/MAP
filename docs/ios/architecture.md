@@ -22,7 +22,7 @@ ios/
 │   ├── MapHealthCore/              # Business logic library
 │   │   ├── Models/
 │   │   │   ├── HealthData.swift         # Health metrics model
-│   │   │   └── LLMSource.swift          # LLM provider enum
+│   │   │   └── ChatMessage.swift        # Chat message model
 │   │   ├── Services/
 │   │   │   ├── MapAPIClient.swift       # Backend sync client
 │   │   │   └── BackgroundSync.swift     # Background task manager
@@ -31,6 +31,7 @@ ios/
 │   │   │   ├── HealthDataFetcher+Process.swift
 │   │   │   ├── HealthDataFetcherError.swift
 │   │   │   ├── HealthDataInterpreter.swift  # LLM context builder
+│   │   │   ├── HealthKitAuthorizationManager.swift
 │   │   │   └── PromptGenerator.swift    # System prompt builder
 │   │   ├── Helpers/
 │   │   │   ├── Date+Extensions.swift
@@ -43,21 +44,16 @@ ios/
 │   │
 │   └── MapHealthApp/               # SwiftUI app
 │       ├── MapHealthApp.swift           # @main entry point
-│       ├── MapHealthAppDelegate.swift   # Spezi configuration
-│       ├── MapHealthStandard.swift      # HealthKit handler
+│       ├── MapHealthAppDelegate.swift   # App delegate hooks
+│       ├── MapHealthStandard.swift      # Placeholder (unused)
 │       ├── MapHealthTestingSetup.swift  # Test configuration
 │       ├── Views/
 │       │   ├── HealthChatView.swift     # Main chat UI
 │       │   └── SettingsView.swift
 │       ├── Onboarding/
 │       │   ├── OnboardingFlow.swift
-│       │   ├── Welcome.swift
-│       │   ├── Disclaimer.swift
-│       │   ├── LLMSourceSelection.swift
 │       │   ├── HealthKitPermissions.swift
-│       │   ├── OpenAI/
-│       │   ├── Local/
-│       │   └── Fog/
+│       │   └── OpenAI/
 │       └── Resources/
 │           └── Localizable.xcstrings
 │
@@ -86,7 +82,7 @@ ios/
                                  │
                                  ▼
                         ┌──────────────────┐     ┌─────────────────┐
-                        │   LLM Session    │────▶│  HealthChatView │
+                        │  OpenAI Client   │────▶│  HealthChatView │
                         └──────────────────┘     └─────────────────┘
 ```
 
@@ -94,11 +90,10 @@ ios/
 
 ### HealthDataFetcher
 
-Spezi `Module` that queries HealthKit for health metrics.
+Queries HealthKit for health metrics.
 
 ```swift
-@Observable
-public class HealthDataFetcher: DefaultInitializable, Module, EnvironmentAccessible {
+public final class HealthDataFetcher {
     public func fetchLastTwoWeeksStepCount() async throws -> [Double]
     public func fetchLastTwoWeeksSleep() async throws -> [Double]
     public func fetchAndProcessHealthData() async -> [HealthData]
@@ -110,14 +105,10 @@ public class HealthDataFetcher: DefaultInitializable, Module, EnvironmentAccessi
 Builds LLM context with health data and manages chat sessions.
 
 ```swift
-@Observable
-public class HealthDataInterpreter: DefaultInitializable, Module, EnvironmentAccessible {
-    @Dependency(LLMRunner.self) private var llmRunner
-    @Dependency(HealthDataFetcher.self) private var healthDataFetcher
-
-    public var llm: (any LLMSession)?
-
-    public func prepareLLM(with schema: any LLMSchema) async throws
+@MainActor
+public final class HealthDataInterpreter: ObservableObject {
+    @Published public var messages: [ChatMessage]
+    public func prepareSession(model: String) async
     public func queryLLM() async throws
     public func resetChat() async
 }
@@ -155,61 +146,26 @@ public class BackgroundSyncManager {
 }
 ```
 
-## Spezi Framework
-
-The app uses [Stanford's Spezi framework](https://github.com/StanfordSpezi/Spezi) for:
-
-- **Module system** - Dependency injection via `@Dependency`
-- **HealthKit abstraction** - Simplified health data access
-- **LLM orchestration** - Multiple LLM provider support
-- **Onboarding flows** - Step-by-step user setup
-
-### Configuration (MapHealthAppDelegate)
-
-```swift
-class MapHealthAppDelegate: SpeziAppDelegate {
-    override var configuration: Configuration {
-        Configuration(standard: MapHealthStandard()) {
-            HealthKit { ... }
-            LLMRunner {
-                LLMOpenAIPlatform(...)
-                LLMFogPlatform(...)
-                LLMLocalPlatform()
-            }
-            HealthDataInterpreter()
-            HealthDataFetcher()
-            KeychainStorage()
-        }
-    }
-}
-```
-
 ## Design Patterns
 
 ### Observable Pattern
 
-All Spezi modules use `@Observable` macro for SwiftUI reactivity:
+Core services use `ObservableObject` for SwiftUI reactivity:
 
 ```swift
-@Observable
-public class HealthDataFetcher { ... }
+public final class HealthDataInterpreter: ObservableObject { ... }
 ```
 
 ### Dependency Injection
 
-Spezi's `@Dependency` macro provides compile-time safe DI:
-
-```swift
-@ObservationIgnored @Dependency(LLMRunner.self) private var llmRunner
-@ObservationIgnored @Dependency(HealthDataFetcher.self) private var healthDataFetcher
-```
+Dependency injection is done via SwiftUI `environmentObject` and explicit initializers.
 
 ### Environment Access
 
-Modules are accessible via SwiftUI environment:
+Core services are shared via SwiftUI `environmentObject`:
 
 ```swift
-@Environment(HealthDataInterpreter.self) private var healthDataInterpreter
+@EnvironmentObject private var healthDataInterpreter: HealthDataInterpreter
 ```
 
 ### Feature Flags
@@ -230,8 +186,6 @@ Centralized storage key management:
 ```swift
 public enum StorageKeys {
     public static let onboardingFlowComplete = "onboardingFlow.complete"
-    public static let llmSource = "llmsource"
     public static let openAIModel = "openAI.model"
-    public static let enableTextToSpeech = "settings.enableTextToSpeech"
 }
 ```

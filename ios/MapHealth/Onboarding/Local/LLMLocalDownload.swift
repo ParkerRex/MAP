@@ -1,23 +1,40 @@
+import Foundation
 import MapHealthCore
-import SpeziLLMLocalDownload
-import SpeziViews
 import SwiftUI
 
 struct LLMLocalDownload: View {
-    @Environment(ManagedNavigationStack.Path.self) private var onboardingNavigationPath
+    let onContinue: () -> Void
 
     var body: some View {
-        LLMLocalDownloadView(
-            model: .llama3_2_3B_4bit,
-            downloadDescription: "LLAMA3_DOWNLOAD_DESCRIPTION"
+        OnboardingScreen(
+            title: "LOCAL_DOWNLOAD_TITLE",
+            subtitle: "LOCAL_DOWNLOAD_SUBTITLE"
         ) {
-            onboardingNavigationPath.nextStep()
+            VStack(spacing: 16) {
+                Image(systemName: "shippingbox")
+                    .font(.system(size: 80))
+                    .foregroundStyle(.accent)
+                    .accessibilityHidden(true)
+
+                Text("LLAMA3_DOWNLOAD_DESCRIPTION")
+                    .multilineTextAlignment(.center)
+                Text("LOCAL_DOWNLOAD_UNSUPPORTED")
+                    .font(.headline)
+                    .foregroundStyle(.secondary)
+            }
+            .padding(20)
+            .mapHealthGlassSurface(cornerRadius: 24, tint: .accentColor.opacity(0.08))
+        } footer: {
+            Button("ONBOARDING_CONTINUE") {
+                onContinue()
+            }
+            .mapHealthGlassButtonStyle(prominent: true)
         }
     }
 }
 
 #if DEBUG
 #Preview {
-    LLMLocalDownload()
+    LLMLocalDownload {}
 }
 #endif

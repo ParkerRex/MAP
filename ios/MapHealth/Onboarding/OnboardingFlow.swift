@@ -1,29 +1,42 @@
 import HealthKit
 import MapHealthCore
-import SpeziLLMOpenAI
-import SpeziViews
 import SwiftUI
 
 /// Displays a multi-step onboarding flow for Map Health.
 ///
 /// Flow:
-/// 1. Welcome - Introduction to the app
-/// 2. Google Sign-In - Authenticate with Google (required)
-/// 3. Disclaimer - Health data warnings (condensed)
-/// 4. LLM Source Selection - Choose AI provider (Claude triggers OAuth inline)
-/// 5. HealthKit Permissions - Required for health data access
+/// 1. Google Sign-In - Authenticate with Google (required)
+/// 2. OpenAI API Key
+/// 3. OpenAI Model Selection
+/// 4. HealthKit Permissions - Required for health data access
 struct OnboardingFlow: View {
     @AppStorage(StorageKeys.onboardingFlowComplete) var completedOnboardingFlow = false
-    @AppStorage(StorageKeys.llmSource) var llmSource = StorageKeys.Defaults.llmSource
+    @State private var path = [OnboardingRoute]()
 
     var body: some View {
-        ManagedNavigationStack(didComplete: $completedOnboardingFlow) {
-            // New user - full onboarding flow
-            GoogleSignInView()
-            LLMSourceSelection()
-
-            if HKHealthStore.isHealthDataAvailable() {
-                HealthKitPermissions()
+        NavigationStack(path: $path) {
+            GoogleSignInView {
+                path.append(.openAIKey)
+            }
+            .navigationDestination(for: OnboardingRoute.self) { route in
+                switch route {
+                case .openAIKey:
+                    OpenAIAPIKey {
+                        path.append(.openAIModel)
+                    }
+                case .openAIModel:
+                    OpenAIModelSelection {
+                        if HKHealthStore.isHealthDataAvailable() {
+                            path.append(.healthKit)
+                        } else {
+                            completedOnboardingFlow = true
+                        }
+                    }
+                case .healthKit:
+                    HealthKitPermissions {
+                        completedOnboardingFlow = true
+                    }
+                }
             }
         }
         .navigationBarTitleDisplayMode(.inline)

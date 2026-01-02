@@ -10,7 +10,7 @@ Documentation for the Map Health iOS app.
 | [CLI Development](./cli-development.md) | Building and testing without Xcode IDE |
 | [Device Deployment](./device-deployment.md) | Deploying to physical iPhone from command line |
 | [HealthKit Integration](./healthkit.md) | Health data fetching and processing |
-| [LLM Integration](./llm.md) | AI chat configuration (OpenAI, Local, Fog) |
+| [LLM Integration](./llm.md) | AI chat configuration (OpenAI) |
 | [Testing](./testing.md) | Unit tests, UI tests, and test strategies |
 
 ## Quick Start
@@ -41,9 +41,8 @@ Map Health is a native iOS app that:
 ### Technology Stack
 
 - **Swift 5.9+** with SwiftUI
-- **Spezi Framework** for modular health app architecture
 - **HealthKit** for Apple Health integration
-- **SpeziLLM** for AI chat (OpenAI, Local Llama, Fog nodes)
+- **OpenAI HTTP API** for AI chat
 
 ### Module Structure
 

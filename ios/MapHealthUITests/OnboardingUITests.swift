@@ -31,60 +31,26 @@ final class OnboardingUITests: XCTestCase {
 
 extension XCUIApplication {
     func conductOnboardingIfNeeded() throws {
-        if self.staticTexts["MapHealth"].waitForExistence(timeout: 10) {
+        if self.staticTexts["Map Health"].waitForExistence(timeout: 10) {
             try navigateOnboardingFlow(assertThatHealthKitConsentIsShown: false)
         }
     }
 
     func navigateOnboardingFlow(assertThatHealthKitConsentIsShown: Bool = true) throws {
-        try navigateOnboardingFlowWelcome()
-        try navigateOnboardingFlowDisclaimer()
-        try navigateOnboardingFlowLLMSourceSelection()
+        try navigateOnboardingFlowGoogleSignIn()
         try navigateOnboardingFlowApiKey()
         try navigateOnboardingFlowModelSelection()
         try navigateOnboardingFlowHealthKitAccess(assertThatHealthKitConsentIsShown: assertThatHealthKitConsentIsShown)
     }
 
-    private func navigateOnboardingFlowWelcome() throws {
-        XCTAssertTrue(staticTexts["MapHealth"].waitForExistence(timeout: 10))
-
-        XCTAssertTrue(buttons["Continue"].waitForExistence(timeout: 10))
-        buttons["Continue"].tap()
-    }
-
-    private func navigateOnboardingFlowDisclaimer() throws {
-        XCTAssertTrue(staticTexts["Disclaimer"].waitForExistence(timeout: 10))
-
-        for _ in 1..<4 {
-            XCTAssertTrue(buttons["Next"].waitForExistence(timeout: 10))
-            buttons["Next"].tap()
-        }
-
-        XCTAssertTrue(buttons["I Agree"].waitForExistence(timeout: 10))
-        buttons["I Agree"].tap()
-    }
-    
-    private func navigateOnboardingFlowLLMSourceSelection() throws {
-        XCTAssertTrue(staticTexts["LLM Source Selection"].waitForExistence(timeout: 5))
-        
-        let picker = pickers["llmSourcePicker"]
-        let optionToSelect = picker.pickerWheels.element(boundBy: 0)
-        optionToSelect.adjust(toPickerWheelValue: "On-device LLM")
-        
-        XCTAssertTrue(buttons["Save Choice"].waitForExistence(timeout: 5))
-        buttons["Save Choice"].tap()
-        
-        XCTAssertTrue(staticTexts["LLM Download"].waitForExistence(timeout: 5))
-        XCTAssertTrue(buttons["Back"].waitForExistence(timeout: 2))
-        buttons["Back"].tap()
-        
-        optionToSelect.adjust(toPickerWheelValue: "Remote OpenAI LLM")
-        XCTAssertTrue(buttons["Save Choice"].waitForExistence(timeout: 5))
-        buttons["Save Choice"].tap()
+    private func navigateOnboardingFlowGoogleSignIn() throws {
+        XCTAssertTrue(staticTexts["Welcome to MapHealth"].waitForExistence(timeout: 10))
+        XCTAssertTrue(buttons["Continue with Google"].waitForExistence(timeout: 10))
+        buttons["Continue with Google"].tap()
     }
 
     private func navigateOnboardingFlowApiKey() throws {
-        try textFields["OpenAI API Key"].enter(value: "sk-123456789")
+        try secureTextFields["OpenAI API Key"].enter(value: "sk-123456789")
         
         XCTAssertTrue(buttons["Next"].waitForExistence(timeout: 2))
         buttons["Next"].tap()

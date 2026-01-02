@@ -7,6 +7,7 @@ public final class KeychainService {
 
     private let service = "com.map.health"
     private let sessionTokenKey = "sessionToken"
+    private let openAIKey = "openAIKey"
 
     private init() {}
 
@@ -33,6 +34,27 @@ public final class KeychainService {
     /// Check if a session token exists
     public var hasSessionToken: Bool {
         getSessionToken() != nil
+    }
+
+    // MARK: - OpenAI API Key
+
+    public func saveOpenAIKey(_ token: String) throws {
+        try save(key: openAIKey, data: Data(token.utf8))
+    }
+
+    public func getOpenAIKey() -> String? {
+        guard let data = try? retrieve(key: openAIKey) else {
+            return nil
+        }
+        return String(data: data, encoding: .utf8)
+    }
+
+    public func deleteOpenAIKey() throws {
+        try delete(key: openAIKey)
+    }
+
+    public var hasOpenAIKey: Bool {
+        getOpenAIKey() != nil
     }
 
     // MARK: - Generic Keychain Operations
@@ -102,11 +124,11 @@ public enum KeychainError: Error, LocalizedError {
     public var errorDescription: String? {
         switch self {
         case .saveFailed(let status):
-            return "Failed to save to Keychain: \(status)"
+            return String(format: String(localized: "KEYCHAIN_SAVE_FAILED"), status)
         case .retrieveFailed(let status):
-            return "Failed to retrieve from Keychain: \(status)"
+            return String(format: String(localized: "KEYCHAIN_RETRIEVE_FAILED"), status)
         case .deleteFailed(let status):
-            return "Failed to delete from Keychain: \(status)"
+            return String(format: String(localized: "KEYCHAIN_DELETE_FAILED"), status)
         }
     }
 }

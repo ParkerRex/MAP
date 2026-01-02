@@ -1,11 +1,9 @@
 import HealthKit
-import Spezi
 
-@Observable
-public class HealthDataFetcher: DefaultInitializable, Module, EnvironmentAccessible {
-    @ObservationIgnored private let healthStore = HKHealthStore()
+public final class HealthDataFetcher {
+    private let healthStore = HKHealthStore()
 
-    public required init() { }
+    public init() { }
 
     // MARK: - Generic Quantity Fetcher
 

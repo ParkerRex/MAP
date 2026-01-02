@@ -4,7 +4,7 @@ How Map Health fetches and processes Apple Health data.
 
 ## Overview
 
-The app uses [SpeziHealthKit](https://github.com/StanfordSpezi/SpeziHealthKit) for HealthKit abstraction, with custom fetching logic in `HealthDataFetcher`.
+The app uses native HealthKit APIs directly, with custom fetching logic in `HealthDataFetcher`.
 
 ## Data Types Collected
 
@@ -52,43 +52,14 @@ The app uses [SpeziHealthKit](https://github.com/StanfordSpezi/SpeziHealthKit) f
 
 ## Permissions Setup
 
-Permissions are configured in `MapHealthAppDelegate`:
-
-```swift
-private var healthKit: HealthKit {
-    HealthKit {
-        RequestReadAccess(
-            quantity: [
-                .stepCount,
-                .distanceWalkingRunning,
-                .activeEnergyBurned,
-                .basalEnergyBurned,
-                .appleExerciseTime,
-                .appleStandTime,
-                .flightsClimbed,
-                .restingHeartRate,
-                .walkingHeartRateAverage,
-                .heartRateVariabilitySDNN,
-                .vo2Max,
-                .oxygenSaturation,
-                .respiratoryRate,
-                .bodyMass,
-                .bodyFatPercentage,
-                .leanBodyMass,
-            ]
-        )
-        RequestReadAccess(category: [.sleepAnalysis, .mindfulSession])
-    }
-}
-```
+Permissions are requested via `HealthKitAuthorizationManager` during onboarding.
 
 ## HealthDataFetcher
 
 The main class for fetching health data:
 
 ```swift
-@Observable
-public class HealthDataFetcher: DefaultInitializable, Module, EnvironmentAccessible {
+public final class HealthDataFetcher {
     private let healthStore = HKHealthStore()
 
     // Generic fetcher for quantity data

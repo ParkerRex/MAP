@@ -1,62 +1,85 @@
 import Foundation
-import Spezi
-import SpeziChat
-import SpeziLLM
-import SpeziLLMLocal
-import SpeziLLMOpenAI
-import SpeziSpeechSynthesizer
 
-@Observable
-public class HealthDataInterpreter: DefaultInitializable, Module, EnvironmentAccessible {
-    @ObservationIgnored @Dependency(LLMRunner.self) private var llmRunner
-    @ObservationIgnored @Dependency(HealthDataFetcher.self) private var healthDataFetcher
+@MainActor
+public final class HealthDataInterpreter: ObservableObject {
+    @Published public var messages: [ChatMessage] = []
+    @Published public private(set) var isGenerating = false
 
-    public var llm: (any LLMSession)?
-    @ObservationIgnored private var systemPrompt = ""
+    private let healthDataFetcher: HealthDataFetcher
+    private let openAIClient: OpenAIClient
+    private var systemPrompt = ""
+    private var model: String = "gpt-4o"
 
-    public required init() { }
-
-    /// Creates an `LLMRunner`, from an `LLMSchema` and injects the system prompt
-    /// into the context, and assigns the resulting `LLMSession` to the `llm` property. For more
-    /// information, please refer to the [`SpeziLLM`](https://swiftpackageindex.com/StanfordSpezi/SpeziLLM/documentation/spezillm) documentation.
-    ///
-    /// - Parameter schema: The LLMSchema to use.
-    @MainActor
-    public func prepareLLM(with schema: any LLMSchema) async throws {
-        let llm = self.llmRunner(with: schema)
-        self.systemPrompt = await generateSystemPrompt()
-
-        llm.context.append(systemMessage: self.systemPrompt)
-        self.llm = llm
+    public init(
+        healthDataFetcher: HealthDataFetcher = HealthDataFetcher(),
+        openAIClient: OpenAIClient = OpenAIClient()
+    ) {
+        self.healthDataFetcher = healthDataFetcher
+        self.openAIClient = openAIClient
     }
 
-    /// Queries the LLM using the current session in the `llm` property and adds the output to the context.
-    @MainActor
+    public func prepareSession(model: String) async {
+        self.model = model
+        self.systemPrompt = await generateSystemPrompt()
+        self.messages = []
+    }
+
+    public func appendUserMessage(_ content: String) {
+        messages.append(ChatMessage(role: .user, content: content))
+    }
+
     public func queryLLM() async throws {
-        guard let llm,
-              llm.context.last?.role == .user || !(llm.context.contains(where: { $0.role == .assistant() }) ) else {
+        guard !isGenerating, messages.last?.role == .user else {
             return
         }
 
-        let stream = try await llm.generate()
-
-        for try await token in stream {
-            llm.context.append(assistantOutput: token)
+        guard let apiKey = KeychainService.shared.getOpenAIKey() else {
+            throw OpenAIClientError.missingAPIKey
         }
+
+        isGenerating = true
+        defer { isGenerating = false }
+
+        if FeatureFlags.mockMode {
+            messages.append(ChatMessage(role: .assistant, content: String(localized: "LLM_MOCK_RESPONSE")))
+            return
+        }
+
+        let openAIMessages = buildOpenAIMessages()
+        let response = try await openAIClient.sendChat(
+            apiKey: apiKey,
+            model: model,
+            messages: openAIMessages
+        )
+        messages.append(ChatMessage(role: .assistant, content: response))
     }
 
-    /// Resets the LLM context and re-injects the system prompt.
-    @MainActor
     public func resetChat() async {
-        self.systemPrompt = await self.generateSystemPrompt()
-        self.llm?.context.reset()
-        self.llm?.context.append(systemMessage: self.systemPrompt)
+        systemPrompt = await generateSystemPrompt()
+        messages = []
     }
 
-    /// Fetches updated health data using the `HealthDataFetcher`
-    /// and passes it to the `PromptGenerator` to create the system prompt.
+    private func buildOpenAIMessages() -> [OpenAIClient.Message] {
+        var result = [OpenAIClient.Message(role: "system", content: systemPrompt)]
+        result.append(contentsOf: messages.map { message in
+            OpenAIClient.Message(role: message.role.rawValue, content: message.content)
+        })
+        return result
+    }
+
     private func generateSystemPrompt() async -> String {
-        let healthData = await self.healthDataFetcher.fetchAndProcessHealthData()
+        let healthData = await healthDataFetcher.fetchAndProcessHealthData()
         return PromptGenerator(with: healthData).buildMainPrompt()
+    }
+}
+
+public enum OpenAIClientError: LocalizedError {
+    case missingAPIKey
+
+    public var errorDescription: String? {
+        switch self {
+        case .missingAPIKey:
+            return String(localized: "OPENAI_MISSING_API_KEY")
+        }
     }
 }

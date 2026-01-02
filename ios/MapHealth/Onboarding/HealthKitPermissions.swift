@@ -1,61 +1,55 @@
 import MapHealthCore
 import OSLog
-import SpeziHealthKit
-import SpeziOnboarding
-import SpeziViews
 import SwiftUI
 
 struct HealthKitPermissions: View {
-    @Environment(HealthKit.self) var healthKitDataSource
-    @Environment(ManagedNavigationStack.Path.self) private var onboardingNavigationPath
+    @EnvironmentObject private var healthKitManager: HealthKitAuthorizationManager
     @State var healthKitProcessing = false
     let logger = Logger(subsystem: "MapHealth", category: "Onboarding")
+    let onContinue: () -> Void
 
     var body: some View {
-        OnboardingView(
-            content: {
-                VStack {
-                    OnboardingTitleView(
-                        title: "HEALTHKIT_PERMISSIONS_TITLE".moduleLocalized,
-                        subtitle: "HEALTHKIT_PERMISSIONS_SUBTITLE".moduleLocalized
-                    )
-                    Spacer()
-                    Image(systemName: "heart.text.square.fill")
-                        .accessibilityHidden(true)
-                        .font(.system(size: 150))
-                        .foregroundColor(.accentColor)
-                    Text("HEALTHKIT_PERMISSIONS_DESCRIPTION")
-                        .multilineTextAlignment(.center)
-                        .padding(.vertical, 16)
-                    Spacer()
-                }
-            }, footer: {
-                OnboardingActionsView(
-                    "HEALTHKIT_PERMISSIONS_BUTTON",
-                    action: {
-                        do {
-                            healthKitProcessing = true
-                            // HealthKit is not available in the preview simulator.
-                            if ProcessInfo.processInfo.environment["XCODE_RUNNING_FOR_PREVIEWS"] == "1" {
-                                try await _Concurrency.Task.sleep(for: .seconds(5))
-                            } else {
-                                try await healthKitDataSource.askForAuthorization()
-                            }
-                        } catch {
-                            logger.error("Could not request HealthKit permissions: \(error.localizedDescription)")
-                        }
-                        onboardingNavigationPath.nextStep()
-                        healthKitProcessing = false
-                    }
-                )
+        OnboardingScreen(
+            title: "HEALTHKIT_PERMISSIONS_TITLE",
+            subtitle: "HEALTHKIT_PERMISSIONS_SUBTITLE"
+        ) {
+            VStack(spacing: 16) {
+                Image(systemName: "heart.text.square.fill")
+                    .accessibilityHidden(true)
+                    .font(.system(size: 150))
+                    .foregroundColor(.accentColor)
+                Text("HEALTHKIT_PERMISSIONS_DESCRIPTION")
+                    .multilineTextAlignment(.center)
             }
-        )
-            .navigationBarBackButtonHidden(healthKitProcessing)
+            .padding(20)
+            .mapHealthGlassSurface(cornerRadius: 24, tint: .accentColor.opacity(0.08))
+        } footer: {
+            Button("HEALTHKIT_PERMISSIONS_BUTTON") {
+                Task {
+                    do {
+                        healthKitProcessing = true
+                        if ProcessInfo.processInfo.environment["XCODE_RUNNING_FOR_PREVIEWS"] == "1" {
+                            try await _Concurrency.Task.sleep(for: .seconds(5))
+                        } else {
+                            try await healthKitManager.requestAuthorization()
+                        }
+                    } catch {
+                        logger.error("Could not request HealthKit permissions: \(error.localizedDescription)")
+                    }
+                    healthKitProcessing = false
+                    onContinue()
+                }
+            }
+            .mapHealthGlassButtonStyle(prominent: true)
+            .disabled(healthKitProcessing)
+        }
+        .navigationBarBackButtonHidden(healthKitProcessing)
     }
 }
 
 #if DEBUG
 #Preview {
-    HealthKitPermissions()
+    HealthKitPermissions {}
+        .environmentObject(HealthKitAuthorizationManager())
 }
 #endif

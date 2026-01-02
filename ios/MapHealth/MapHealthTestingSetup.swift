@@ -1,11 +1,9 @@
 import MapHealthCore
 import OSLog
-@_spi(Internal) import SpeziKeychainStorage
 import SwiftUI
 
 private struct MapHealthAppTestingSetup: ViewModifier {
     @AppStorage(StorageKeys.onboardingFlowComplete) var completedOnboardingFlow = false
-    @Environment(KeychainStorage.self) var keychainStorage
 
     let logger = Logger(subsystem: "MapHealth", category: "Testing")
 
@@ -20,7 +18,8 @@ private struct MapHealthAppTestingSetup: ViewModifier {
                 }
                 if FeatureFlags.resetKeychainStorage {
                     do {
-                        try keychainStorage.deleteAllCredentials(accessGroup: .any)
+                        try KeychainService.shared.deleteOpenAIKey()
+                        try KeychainService.shared.deleteSessionToken()
                     } catch {
                         logger.error("Could not clear secure storage: \(error.localizedDescription)")
                     }

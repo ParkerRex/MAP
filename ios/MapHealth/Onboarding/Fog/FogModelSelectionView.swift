@@ -1,25 +1,35 @@
 import MapHealthCore
-import SpeziLLMFog
-import SpeziViews
 import SwiftUI
 
 struct FogModelSelectionView: View {
-    @Environment(ManagedNavigationStack.Path.self) private var onboardingNavigationPath
-    @AppStorage(StorageKeys.fogModel) private var fogModel = LLMFogParameters.FogModelType.llama3_1_8B
+    @State private var fogModel = Self.models.first ?? "llama3"
+    let onContinue: () -> Void
 
     var body: some View {
-        LLMFogModelOnboardingStep(
-            actionText: "FOG_MODEL_SAVE_ACTION",
-            models: [       // explicitly list available models
-                .llama3_1_8B,
-                .llama3_2,
-                .phi4,
-                .gemma_7B,
-                .deepSeekR1
-            ]
-        ) { model in
-            self.fogModel = model
-            self.onboardingNavigationPath.nextStep()
+        OnboardingScreen(
+            title: "FOG_MODEL_TITLE",
+            subtitle: "FOG_MODEL_SUBTITLE"
+        ) {
+            Picker("FOG_MODEL_PICKER_LABEL", selection: $fogModel) {
+                ForEach(Self.models, id: \.self) { model in
+                    Text(verbatim: model)
+                        .tag(model)
+                }
+            }
+            .pickerStyle(.wheel)
+            .padding(16)
+            .mapHealthGlassSurface(cornerRadius: 20, tint: .accentColor.opacity(0.08))
+        } footer: {
+            Button("FOG_MODEL_SAVE_ACTION") {
+                onContinue()
+            }
+            .mapHealthGlassButtonStyle(prominent: true)
         }
     }
+
+    private static let models: [String] = [
+        "llama3",
+        "phi",
+        "gemma"
+    ]
 }

@@ -24,16 +24,15 @@ final class HealthChatViewUITests: XCTestCase {
         let app = XCUIApplication()
         try app.conductOnboardingIfNeeded()
         
-        XCTAssert(app.buttons["Record Message"].waitForExistence(timeout: 2))
+        XCTAssert(app.textFields["chatInput"].waitForExistence(timeout: 2))
+        try app.textFields["chatInput"].enter(value: "New Message!")
         
-        try app.textFields["Message Input Textfield"].enter(value: "New Message!")
-        
-        XCTAssert(app.buttons["Send Message"].waitForExistence(timeout: 2))
-        app.buttons["Send Message"].tap()
+        XCTAssert(app.buttons["chatSendButton"].waitForExistence(timeout: 2))
+        app.buttons["chatSendButton"].tap()
         
         sleep(3)
         
-        XCTAssert(app.staticTexts["Mock Message from SpeziLLM!"].waitForExistence(timeout: 5))
+        XCTAssert(app.staticTexts["This is a mock response for testing."].waitForExistence(timeout: 5))
     }
     
     func testSettingsView() throws {
@@ -46,21 +45,18 @@ final class HealthChatViewUITests: XCTestCase {
         
         XCTAssert(app.buttons["changeModelButton"].firstMatch.waitForExistence(timeout: 1))
         app.buttons["changeModelButton"].firstMatch.tap()
-        XCTAssert(app.buttons["Save Choice"].firstMatch.waitForExistence(timeout: 1))
-        app.buttons["Save Choice"].firstMatch.tap()
-        XCTAssert(app.textFields["sk-123456789"].waitForExistence(timeout: 1))
+        XCTAssert(app.secureTextFields["OpenAI API Key"].firstMatch.waitForExistence(timeout: 1))
+        try app.secureTextFields["OpenAI API Key"].enter(value: "sk-123456789")
         app.buttons["Next"].firstMatch.tap()
         XCTAssert(app.pickerWheels.firstMatch.waitForExistence(timeout: 1))
         app.pickerWheels.firstMatch.adjust(toPickerWheelValue: "gpt-4o")
         app.buttons["Save OpenAI Model"].firstMatch.tap()
         
-        XCTAssert(app.staticTexts["MapHealth"].waitForExistence(timeout: 2))
+        XCTAssert(app.staticTexts["Map Health"].waitForExistence(timeout: 2))
         settingsButton.tap()
-        
-        XCTAssert(app.switches["Enable Text to Speech"].waitForExistence(timeout: 1))
         app.buttons["resetButton"].firstMatch.tap()
         
-        XCTAssert(app.staticTexts["MapHealth"].waitForExistence(timeout: 2))
+        XCTAssert(app.staticTexts["Map Health"].waitForExistence(timeout: 2))
     }
     
     func testResetChat() throws {

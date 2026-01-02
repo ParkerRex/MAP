@@ -1,42 +1,22 @@
 import MapHealthCore
-import SpeziOnboarding
-import SpeziViews
 import SwiftUI
 
 struct LLMSourceSelection: View {
-    @Environment(ManagedNavigationStack.Path.self) private var onboardingNavigationPath
-    @AppStorage(StorageKeys.llmSource) private var llmSource = StorageKeys.Defaults.llmSource
+    @State private var llmSource: LLMSource = .openai
+    let onContinue: (LLMSource) -> Void
 
     var body: some View {
-        OnboardingView(
-            content: {
-                VStack {
-                    OnboardingTitleView(
-                        title: "LLM_SOURCE_SELECTION_TITLE",
-                        subtitle: "LLM_SOURCE_SELECTION_SUBTITLE"
-                    )
-                    Spacer()
-                    self.sourceSelector
-                    Spacer()
-                }
-            },
-            footer: {
-                OnboardingActionsView(
-                    "LLM_SOURCE_SELECTION_BUTTON"
-                ) {
-                    switch self.llmSource {
-                    case .openai:
-                        self.onboardingNavigationPath.append(customView: OpenAIAPIKey())
-                    case .claude:
-                        self.onboardingNavigationPath.append(customView: ClaudeAuthView())
-                    case .fog:
-                        self.onboardingNavigationPath.append(customView: FogInformationView())
-                    case .local:
-                        self.onboardingNavigationPath.append(customView: LLMLocalDownload())
-                    }
-                }
+        OnboardingScreen(
+            title: "LLM_SOURCE_SELECTION_TITLE",
+            subtitle: "LLM_SOURCE_SELECTION_SUBTITLE"
+        ) {
+            self.sourceSelector
+        } footer: {
+            Button("LLM_SOURCE_SELECTION_BUTTON") {
+                onContinue(llmSource)
             }
-        )
+            .mapHealthGlassButtonStyle(prominent: true)
+        }
     }
 
     private var sourceSelector: some View {
@@ -46,13 +26,16 @@ struct LLMSourceSelection: View {
                     .tag(source)
             }
         }
-        .pickerStyle(.inline)
+        .pickerStyle(.wheel)
+        .frame(maxWidth: .infinity)
+        .padding(16)
+        .mapHealthGlassSurface(cornerRadius: 20, tint: .accentColor.opacity(0.08))
         .accessibilityIdentifier("llmSourcePicker")
     }
 }
 
 #if DEBUG
 #Preview {
-    LLMSourceSelection()
+    LLMSourceSelection { _ in }
 }
 #endif

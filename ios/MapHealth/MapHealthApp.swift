@@ -1,11 +1,12 @@
 import MapHealthCore
-import Spezi
 import SwiftUI
 
 @main
 struct MapHealthApp: App {
     @UIApplicationDelegateAdaptor(MapHealthAppDelegate.self) var appDelegate
     @AppStorage(StorageKeys.onboardingFlowComplete) var completedOnboardingFlow = false
+    @StateObject private var healthDataInterpreter = HealthDataInterpreter()
+    @StateObject private var healthKitManager = HealthKitAuthorizationManager()
 
     var body: some Scene {
         WindowGroup {
@@ -25,7 +26,8 @@ struct MapHealthApp: App {
                 }
             }
             .testingSetup()
-            .spezi(appDelegate)
+            .environmentObject(healthDataInterpreter)
+            .environmentObject(healthKitManager)
         }
     }
 }
