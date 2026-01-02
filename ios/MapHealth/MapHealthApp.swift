@@ -12,7 +12,7 @@ struct MapHealthApp: App {
         WindowGroup {
             Group {
                 if completedOnboardingFlow {
-                    HealthChatView()
+                    MainTabView()
                 } else {
                     EmptyView()
                 }
