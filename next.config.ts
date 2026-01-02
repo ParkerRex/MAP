@@ -3,7 +3,11 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   poweredByHeader: false,
   reactStrictMode: true,
-  allowedDevOrigins: ["https://mapyourlife.org"],
+  allowedDevOrigins: [
+    "https://mapyourlife.org",
+    "https://www.mapyourlife.org",
+    "http://localhost:3000",
+  ],
 
   images: {
     remotePatterns: [

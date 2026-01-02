@@ -35,10 +35,20 @@ export default function CalendarMenu({
     >
       <div className="flex flex-col items-center">
         <UIDatePicker
-          className="w-[190px] justify-center"
+          className="w-full px-2"
           mode="single"
           selected={currentWeekStartDate}
           onSelect={handleDateSelect}
+          classNames={{
+            months: "flex flex-col",
+            month: "space-y-2",
+            table: "w-full border-collapse",
+            head_row: "flex justify-between",
+            head_cell: "text-muted-foreground w-7 font-normal text-[0.7rem] text-center",
+            row: "flex w-full justify-between mt-1",
+            cell: "h-7 w-7 text-center text-xs p-0 relative",
+            day: "h-7 w-7 p-0 font-normal text-xs hover:bg-accent rounded-md aria-selected:opacity-100",
+          }}
         />
         <Separator className="bg-[#EBEBEB] dark:bg-[#242424] my-4" />
 

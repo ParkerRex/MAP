@@ -101,7 +101,7 @@ import {
 import { PiDiscordLogo } from "react-icons/pi";
 export const Icons = {
   LogoSmall: (props: IconProps) => (
-    <svg xmlns="http://www.w3.org/2000/svg" width={29} height={32} fill="none" {...props}>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 29 32" fill="none" {...props}>
       <path
         fill="currentColor"
         fillRule="evenodd"
@@ -119,7 +119,7 @@ export const Icons = {
     </svg>
   ),
   Logo: (props: IconProps) => (
-    <svg xmlns="http://www.w3.org/2000/svg" width={88} height={28} fill="none" {...props}>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 88 28" fill="none" {...props}>
       <path
         fill="currentColor"
         fillRule="evenodd"

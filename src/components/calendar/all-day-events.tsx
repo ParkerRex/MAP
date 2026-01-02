@@ -28,6 +28,14 @@ export default function CalendarAllDayEvents({
 
   const toggleExpand = () => setIsExpanded(!isExpanded);
 
+  // Filter all-day events early to check if section should render
+  const allDayEvents = events.filter((event) => !!event.start?.date);
+
+  // Hide the entire section when there are no all-day events
+  if (allDayEvents.length === 0) {
+    return null;
+  }
+
   const handleEventClick = (event: calendar_v3.Schema$Event) => {
     setSelectedEvent(event);
   };

@@ -33,6 +33,9 @@ export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams;
     const platform = searchParams.get("platform"); // "ios" or undefined (web)
     const sessionToken = searchParams.get("token");
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "";
+    const host = appUrl ? new URL(appUrl).hostname : "";
+    const cookieDomain = host.endsWith("mapyourlife.org") ? ".mapyourlife.org" : undefined;
 
     const user =
       sessionToken && platform === "ios"
@@ -68,6 +71,7 @@ export async function GET(request: NextRequest) {
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
       maxAge: 60 * 10, // 10 minutes
+      ...(cookieDomain ? { domain: cookieDomain } : {}),
     });
 
     response.cookies.set("claude_code_verifier", codeVerifier, {
@@ -75,6 +79,7 @@ export async function GET(request: NextRequest) {
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
       maxAge: 60 * 10, // 10 minutes
+      ...(cookieDomain ? { domain: cookieDomain } : {}),
     });
 
     return response;

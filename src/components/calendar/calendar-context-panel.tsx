@@ -55,15 +55,8 @@ export default function ContextPanel({
   if (!selectedEvent) {
     const nextEvent = getNextEvent();
     if (!nextEvent) {
-      return (
-        <div className={`h-full w-[256px] border-l bg-muted/30 dark:bg-muted/10 ${className}`}>
-          <div className="flex flex-col gap-2 p-4">
-            <div className="flex items-center justify-between">
-              <p className="text-sm text-muted-foreground">No upcoming events</p>
-            </div>
-          </div>
-        </div>
-      );
+      // Hide the panel completely when there are no upcoming events
+      return null;
     }
 
     const { hours, minutes } = getTimeUntilNextEvent(nextEvent);
