@@ -163,7 +163,8 @@ struct SettingsView: View {
             userProfile = try await MapAPIClient.shared.getProfile()
         } catch {
             // Profile fetch failed, show fallback UI
-            Logger.standard.error("Failed to load profile: \(error.localizedDescription)")
+            let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "com.yourcompany.app", category: "Settings")
+            logger.error("Failed to load profile: \(error.localizedDescription)")
         }
         isLoadingProfile = false
     }
