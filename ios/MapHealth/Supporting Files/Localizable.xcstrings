@@ -232,6 +232,36 @@
         }
       }
     },
+    "CLAUDE_MODEL_SAVE_ACTION" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Continue"
+          }
+        }
+      }
+    },
+    "CLAUDE_MODEL_SELECTION_SUBTITLE" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choose between Opus (most capable), Sonnet (balanced), or Haiku (fast & affordable)."
+          }
+        }
+      }
+    },
+    "CLAUDE_MODEL_SELECTION_TITLE" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Select a Claude Model"
+          }
+        }
+      }
+    },
     "ERROR_ALERT_CANCEL" : {
       "localizations" : {
         "en" : {

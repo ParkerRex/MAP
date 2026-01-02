@@ -32,6 +32,14 @@ struct OnboardingFlow: View {
                             completedOnboardingFlow = true
                         }
                     }
+                case .claudeModel:
+                    ClaudeModelSelection {
+                        if HKHealthStore.isHealthDataAvailable() {
+                            path.append(.healthKit)
+                        } else {
+                            completedOnboardingFlow = true
+                        }
+                    }
                 case .healthKit:
                     HealthKitPermissions {
                         completedOnboardingFlow = true
