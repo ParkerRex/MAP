@@ -1,56 +1,90 @@
 import SwiftUI
 
+// MARK: - Onboarding Background
+
 struct OnboardingBackground: View {
     var body: some View {
         ZStack {
+            // Base gradient
             LinearGradient(
                 colors: [
                     Color(.systemBackground),
-                    Color(.systemGray6),
+                    Color(.systemGray6).opacity(0.5),
                     Color(.systemBackground)
                 ],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             )
 
-            Circle()
-                .fill(
-                    RadialGradient(
-                        colors: [Color.accentColor.opacity(0.15), Color.accentColor.opacity(0)],
-                        center: .center,
-                        startRadius: 0,
-                        endRadius: 110
+            // Ambient gradient orbs
+            GeometryReader { geo in
+                // Top-left orb - blue
+                Circle()
+                    .fill(
+                        RadialGradient(
+                            colors: [
+                                Color.blue.opacity(0.15),
+                                Color.blue.opacity(0)
+                            ],
+                            center: .center,
+                            startRadius: 0,
+                            endRadius: geo.size.width * 0.4
+                        )
                     )
-                )
-                .frame(width: 220, height: 220)
-                .offset(x: -140, y: -220)
+                    .frame(width: geo.size.width * 0.8)
+                    .offset(x: -geo.size.width * 0.3, y: -geo.size.height * 0.1)
 
-            Circle()
-                .fill(
-                    RadialGradient(
-                        colors: [Color.accentColor.opacity(0.12), Color.accentColor.opacity(0)],
-                        center: .center,
-                        startRadius: 0,
-                        endRadius: 90
+                // Bottom-right orb - purple
+                Circle()
+                    .fill(
+                        RadialGradient(
+                            colors: [
+                                Color.purple.opacity(0.12),
+                                Color.purple.opacity(0)
+                            ],
+                            center: .center,
+                            startRadius: 0,
+                            endRadius: geo.size.width * 0.35
+                        )
                     )
-                )
-                .frame(width: 180, height: 180)
-                .offset(x: 150, y: 220)
+                    .frame(width: geo.size.width * 0.7)
+                    .offset(x: geo.size.width * 0.5, y: geo.size.height * 0.6)
+
+                // Center orb - green/teal
+                Circle()
+                    .fill(
+                        RadialGradient(
+                            colors: [
+                                Color.green.opacity(0.08),
+                                Color.green.opacity(0)
+                            ],
+                            center: .center,
+                            startRadius: 0,
+                            endRadius: geo.size.width * 0.25
+                        )
+                    )
+                    .frame(width: geo.size.width * 0.5)
+                    .offset(x: geo.size.width * 0.2, y: geo.size.height * 0.3)
+            }
         }
         .ignoresSafeArea()
-        .drawingGroup()
     }
 }
+
+// MARK: - Onboarding Header
 
 struct OnboardingHeader: View {
     let title: LocalizedStringKey
     let subtitle: LocalizedStringKey?
 
     var body: some View {
-        VStack(spacing: 12) {
+        VStack(spacing: 8) {
             Text(title)
-                .font(.system(size: 28, weight: .bold, design: .rounded))
+                .font(.title)
+                .fontWeight(.semibold)
+                .fontDesign(.default)
                 .multilineTextAlignment(.center)
+
             if let subtitle {
                 Text(subtitle)
                     .font(.body)
@@ -58,10 +92,10 @@ struct OnboardingHeader: View {
                     .multilineTextAlignment(.center)
             }
         }
-        .padding(24)
-        .mapHealthGlassSurface(cornerRadius: 24, tint: .accentColor.opacity(0.08))
     }
 }
+
+// MARK: - Onboarding Screen
 
 struct OnboardingScreen<Content: View, Footer: View>: View {
     let title: LocalizedStringKey
@@ -112,5 +146,17 @@ struct OnboardingScreen<Content: View, Footer: View>: View {
                 .padding(.horizontal, 24)
                 .padding(.bottom, 24)
         }
+    }
+}
+
+// MARK: - Glass Effect Container (for iOS 26+)
+
+@available(iOS 26, *)
+struct GlassEffectContainer<Content: View>: View {
+    let spacing: CGFloat
+    @ViewBuilder let content: Content
+
+    var body: some View {
+        content
     }
 }

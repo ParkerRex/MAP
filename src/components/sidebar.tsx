@@ -28,7 +28,7 @@ export function Sidebar() {
 
   // Hide sidebar on auth pages (exact match for "/" since all paths start with it)
   const isAuthPage = authRoutes.some((route) =>
-    route === "/" ? pathname === "/" : pathname.startsWith(route)
+    route === "/" ? pathname === "/" : pathname.startsWith(route),
   );
   if (isAuthPage) return null;
 

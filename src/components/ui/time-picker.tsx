@@ -25,7 +25,9 @@ export function TimePicker({ value, onChange, className }: TimePickerProps) {
   React.useEffect(() => {
     if (open) {
       setTimeout(() => {
-        hourRef.current?.querySelector(`[data-hour="${hour}"]`)?.scrollIntoView({ block: "center" });
+        hourRef.current
+          ?.querySelector(`[data-hour="${hour}"]`)
+          ?.scrollIntoView({ block: "center" });
         minuteRef.current
           ?.querySelector(`[data-minute="${Math.floor(minute / 5) * 5}"]`)
           ?.scrollIntoView({ block: "center" });
@@ -56,7 +58,7 @@ export function TimePicker({ value, onChange, className }: TimePickerProps) {
           className={cn(
             "w-full justify-start text-left font-normal",
             !value && "text-muted-foreground",
-            className
+            className,
           )}
         >
           <Clock className="mr-2 h-4 w-4" />
@@ -77,7 +79,8 @@ export function TimePicker({ value, onChange, className }: TimePickerProps) {
                 onClick={() => handleHourSelect(h)}
                 className={cn(
                   "px-4 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors",
-                  hour === h && "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground"
+                  hour === h &&
+                    "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground",
                 )}
               >
                 {h.toString().padStart(2, "0")}
@@ -96,7 +99,9 @@ export function TimePicker({ value, onChange, className }: TimePickerProps) {
                 onClick={() => handleMinuteSelect(m)}
                 className={cn(
                   "px-4 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors",
-                  minute >= m && minute < m + 5 && "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground"
+                  minute >= m &&
+                    minute < m + 5 &&
+                    "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground",
                 )}
               >
                 {m.toString().padStart(2, "0")}

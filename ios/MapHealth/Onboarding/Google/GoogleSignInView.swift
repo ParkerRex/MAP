@@ -6,6 +6,7 @@ import SwiftUI
 /// Google Sign-In onboarding view that handles OAuth authentication
 struct GoogleSignInView: View {
     @Environment(\.webAuthenticationSession) private var webAuthSession
+    @Environment(\.colorScheme) private var colorScheme
     @State private var isAuthenticating = false
     @State private var showErrorAlert = false
     @State private var errorMessage = ""
@@ -15,94 +16,157 @@ struct GoogleSignInView: View {
         ZStack {
             OnboardingBackground()
 
-            glassContainer
+            VStack(spacing: 0) {
+                Spacer()
+
+                // Main content
+                VStack(spacing: 40) {
+                    // App icon and branding
+                    brandingSection
+
+                    // Welcome text
+                    headerSection
+                }
+
+                Spacer()
+                Spacer()
+
+                // Bottom section with button and legal
+                footerSection
+            }
+            .padding(.horizontal, 32)
+            .padding(.vertical, 24)
         }
-        .alert("ERROR_ALERT_TITLE", isPresented: $showErrorAlert) {
-            Button("ERROR_ALERT_CANCEL", role: .cancel) {}
+        .alert("Sign In Error", isPresented: $showErrorAlert) {
+            Button("OK", role: .cancel) {}
         } message: {
             Text(errorMessage)
         }
     }
 
-    @ViewBuilder
-    private var glassContainer: some View {
-        if #available(iOS 26, *) {
-            GlassEffectContainer(spacing: 20) {
-                signInContent
-            }
-        } else {
-            signInContent
-        }
-    }
+    // MARK: - Branding Section
 
-    private var signInContent: some View {
-        VStack(spacing: 24) {
-            Spacer(minLength: 24)
-
-            appIcon
-            headerSection
-
-            Spacer()
-
-            footerSection
-        }
-        .padding(.horizontal, 24)
-    }
-
-    private var appIcon: some View {
-        ZStack {
-            Circle()
-                .fill(
-                    LinearGradient(
-                        colors: [
-                            Color(red: 0.26, green: 0.52, blue: 0.96),
-                            Color(red: 0.23, green: 0.73, blue: 0.55)
-                        ],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
+    private var brandingSection: some View {
+        VStack(spacing: 20) {
+            // App icon
+            ZStack {
+                RoundedRectangle(cornerRadius: 28, style: .continuous)
+                    .fill(
+                        LinearGradient(
+                            colors: [
+                                Color(red: 0.26, green: 0.52, blue: 0.96),
+                                Color(red: 0.23, green: 0.73, blue: 0.55)
+                            ],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
                     )
-                )
-                .frame(width: 110, height: 110)
+                    .frame(width: 88, height: 88)
+                    .shadow(color: .blue.opacity(0.3), radius: 20, x: 0, y: 10)
 
-            Image(systemName: "heart.text.clipboard")
-                .font(.system(size: 44, weight: .medium))
-                .foregroundStyle(.white)
+                Image(systemName: "heart.text.clipboard")
+                    .font(.system(size: 36, weight: .medium))
+                    .foregroundStyle(.white)
+            }
+
+            Text("MAP")
+                .font(.title2)
+                .fontWeight(.semibold)
+                .fontDesign(.rounded)
         }
-        .accessibilityHidden(true)
-        .mapHealthGlassSurface(cornerRadius: 56, tint: .clear)
     }
+
+    // MARK: - Header Section
 
     private var headerSection: some View {
-        OnboardingHeader(
-            title: "GOOGLE_SIGNIN_TITLE",
-            subtitle: "GOOGLE_SIGNIN_SUBTITLE"
-        )
+        VStack(spacing: 12) {
+            Text("Welcome")
+                .font(.largeTitle)
+                .fontWeight(.bold)
+
+            Text("Sign in to track your health,\nset goals, and stay on course.")
+                .font(.body)
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
+                .lineSpacing(2)
+        }
     }
 
-    private var footerSection: some View {
-        VStack(spacing: 20) {
-            GoogleSignInButton(isLoading: isAuthenticating) {
-                startAuthentication()
-            }
-            .disabled(isAuthenticating)
-            .accessibilityIdentifier("googleSignInButton")
+    // MARK: - Footer Section
 
-            Text("GOOGLE_SIGNIN_PRIVACY_NOTE")
+    private var footerSection: some View {
+        VStack(spacing: 24) {
+            // Google Sign In Button
+            Button(action: startAuthentication) {
+                HStack(spacing: 12) {
+                    if isAuthenticating {
+                        ProgressView()
+                            .progressViewStyle(.circular)
+                            .tint(.primary)
+                    } else {
+                        GoogleLogo()
+                            .frame(width: 18, height: 18)
+
+                        Text("Continue with Google")
+                            .font(.body)
+                            .fontWeight(.medium)
+                    }
+                }
+                .frame(maxWidth: .infinity)
+                .frame(height: 50)
+                .background(buttonBackground)
+                .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                        .stroke(Color.primary.opacity(0.1), lineWidth: 1)
+                )
+            }
+            .buttonStyle(.plain)
+            .disabled(isAuthenticating)
+
+            // Divider with text
+            HStack(spacing: 12) {
+                Rectangle()
+                    .fill(Color.primary.opacity(0.1))
+                    .frame(height: 1)
+
+                Text("Secure sign-in via Google")
+                    .font(.caption)
+                    .foregroundStyle(.tertiary)
+                    .layoutPriority(1)
+
+                Rectangle()
+                    .fill(Color.primary.opacity(0.1))
+                    .frame(height: 1)
+            }
+
+            // Legal text
+            Text("By continuing, you agree to our Terms of Service and Privacy Policy.")
                 .font(.caption)
                 .foregroundStyle(.tertiary)
                 .multilineTextAlignment(.center)
-                .padding(.horizontal, 24)
+                .padding(.horizontal, 16)
         }
-        .padding(.bottom, 24)
+        .padding(.bottom, 16)
     }
+
+    @ViewBuilder
+    private var buttonBackground: some View {
+        if colorScheme == .dark {
+            Color(.systemGray5)
+        } else {
+            Color.white
+                .shadow(color: .black.opacity(0.06), radius: 8, x: 0, y: 2)
+        }
+    }
+
+    // MARK: - Authentication
 
     private func startAuthentication() {
         isAuthenticating = true
 
         Task {
             do {
-                // Open the web-based OAuth flow
-                // Add platform=ios to tell backend to redirect with deep link
                 let authURL = URL(string: "\(AppConfig.webBaseURL)/api/auth/google?platform=ios")!
                 let callbackScheme = "maphealth"
 
@@ -112,30 +176,26 @@ struct GoogleSignInView: View {
                     preferredBrowserSession: .shared
                 )
 
-                // Parse callback URL
-                guard let components = URLComponents(url: callbackURL, resolvingAgainstBaseURL: false) else {
-                    throw GoogleSignInError.invalidCallback(
-                        String(localized: "GOOGLE_SIGNIN_INVALID_CALLBACK_URL")
-                    )
+                guard let components = URLComponents(
+                    url: callbackURL,
+                    resolvingAgainstBaseURL: false
+                ) else {
+                    throw GoogleSignInError.invalidCallback("Invalid callback URL")
                 }
 
-                // Check for success with token
-            if let token = components.queryItems?.first(where: { $0.name == "token" })?.value {
-                // Save token to Keychain
-                try KeychainService.shared.saveSessionToken(token)
-
-                    // Set auth token on API client
+                if let token = components.queryItems?.first(where: { $0.name == "token" })?.value {
+                    try KeychainService.shared.saveSessionToken(token)
                     MapAPIClient.shared.setAuthToken(token)
-
-                // Proceed to next step
-                onAuthenticated()
-            } else if let error = components.queryItems?.first(where: { $0.name == "error" })?.value {
-                throw GoogleSignInError.authFailed(error)
+                    onAuthenticated()
+                } else if let error = components.queryItems?.first(
+                    where: { $0.name == "error" }
+                )?.value {
+                    throw GoogleSignInError.authFailed(error)
                 } else {
-                    throw GoogleSignInError.authFailed(String(localized: "GOOGLE_SIGNIN_UNKNOWN_ERROR"))
+                    throw GoogleSignInError.authFailed("Unknown error occurred")
                 }
             } catch ASWebAuthenticationSessionError.canceledLogin {
-                // User cancelled, just reset state
+                // User cancelled - do nothing
             } catch {
                 errorMessage = error.localizedDescription
                 showErrorAlert = true
@@ -146,115 +206,91 @@ struct GoogleSignInView: View {
     }
 }
 
-// MARK: - Google Sign In Button
+// MARK: - Google Logo
 
-private struct GoogleSignInButton: View {
-    let isLoading: Bool
-    let action: () -> Void
-
+private struct GoogleLogo: View {
     var body: some View {
-        Button(action: action) {
-            HStack(spacing: 12) {
-                if isLoading {
-                    ProgressView()
-                        .progressViewStyle(.circular)
-                        .tint(.primary.opacity(0.6))
-                } else {
-                    GoogleGLogo()
-                        .frame(width: 20, height: 20)
+        Image(systemName: "g.circle.fill")
+            .font(.title2)
+            .foregroundStyle(.primary)
+            .opacity(0)
+            .overlay {
+                Canvas { context, size in
+                    let rect = CGRect(origin: .zero, size: size)
 
-                    Text("GOOGLE_SIGNIN_BUTTON")
-                        .font(.system(size: 16, weight: .medium))
-                        .foregroundStyle(.primary.opacity(0.87))
+                    // Blue section
+                    var bluePath = Path()
+                    bluePath.move(to: CGPoint(x: rect.midX, y: rect.midY))
+                    bluePath.addArc(
+                        center: CGPoint(x: rect.midX, y: rect.midY),
+                        radius: rect.width / 2,
+                        startAngle: .degrees(-45),
+                        endAngle: .degrees(45),
+                        clockwise: false
+                    )
+                    bluePath.closeSubpath()
+                    context.fill(bluePath, with: .color(Color(hex: "4285F4")!))
+
+                    // Green section
+                    var greenPath = Path()
+                    greenPath.move(to: CGPoint(x: rect.midX, y: rect.midY))
+                    greenPath.addArc(
+                        center: CGPoint(x: rect.midX, y: rect.midY),
+                        radius: rect.width / 2,
+                        startAngle: .degrees(45),
+                        endAngle: .degrees(135),
+                        clockwise: false
+                    )
+                    greenPath.closeSubpath()
+                    context.fill(greenPath, with: .color(Color(hex: "34A853")!))
+
+                    // Yellow section
+                    var yellowPath = Path()
+                    yellowPath.move(to: CGPoint(x: rect.midX, y: rect.midY))
+                    yellowPath.addArc(
+                        center: CGPoint(x: rect.midX, y: rect.midY),
+                        radius: rect.width / 2,
+                        startAngle: .degrees(135),
+                        endAngle: .degrees(225),
+                        clockwise: false
+                    )
+                    yellowPath.closeSubpath()
+                    context.fill(yellowPath, with: .color(Color(hex: "FBBC05")!))
+
+                    // Red section
+                    var redPath = Path()
+                    redPath.move(to: CGPoint(x: rect.midX, y: rect.midY))
+                    redPath.addArc(
+                        center: CGPoint(x: rect.midX, y: rect.midY),
+                        radius: rect.width / 2,
+                        startAngle: .degrees(225),
+                        endAngle: .degrees(315),
+                        clockwise: false
+                    )
+                    redPath.closeSubpath()
+                    context.fill(redPath, with: .color(Color(hex: "EA4335")!))
+
+                    // White center circle
+                    let innerRadius = rect.width * 0.35
+                    let innerRect = CGRect(
+                        x: rect.midX - innerRadius,
+                        y: rect.midY - innerRadius,
+                        width: innerRadius * 2,
+                        height: innerRadius * 2
+                    )
+                    context.fill(Path(ellipseIn: innerRect), with: .color(.white))
+
+                    // Blue bar (the G crossbar)
+                    let barHeight = rect.height * 0.18
+                    let barRect = CGRect(
+                        x: rect.midX - rect.width * 0.05,
+                        y: rect.midY - barHeight / 2,
+                        width: rect.width * 0.55,
+                        height: barHeight
+                    )
+                    context.fill(Path(barRect), with: .color(Color(hex: "4285F4")!))
                 }
             }
-            .frame(maxWidth: .infinity)
-            .frame(height: 52)
-        }
-        .mapHealthGlassButtonStyle(prominent: true)
-    }
-}
-
-// MARK: - Google "G" Logo
-
-private struct GoogleGLogo: View {
-    var body: some View {
-        Canvas { context, size in
-            let width = size.width
-            let height = size.height
-            let center = CGPoint(x: width / 2, y: height / 2)
-            let radius = min(width, height) / 2 * 0.9
-            let strokeWidth = radius * 0.4
-
-            // Blue arc (right side)
-            var bluePath = Path()
-            bluePath.addArc(
-                center: center,
-                radius: radius - strokeWidth / 2,
-                startAngle: .degrees(-45),
-                endAngle: .degrees(45),
-                clockwise: false
-            )
-            context.stroke(
-                bluePath,
-                with: .color(Color(red: 0.26, green: 0.52, blue: 0.96)),
-                lineWidth: strokeWidth
-            )
-
-            // Green arc (bottom)
-            var greenPath = Path()
-            greenPath.addArc(
-                center: center,
-                radius: radius - strokeWidth / 2,
-                startAngle: .degrees(45),
-                endAngle: .degrees(135),
-                clockwise: false
-            )
-            context.stroke(
-                greenPath,
-                with: .color(Color(red: 0.20, green: 0.66, blue: 0.33)),
-                lineWidth: strokeWidth
-            )
-
-            // Yellow arc (left-bottom)
-            var yellowPath = Path()
-            yellowPath.addArc(
-                center: center,
-                radius: radius - strokeWidth / 2,
-                startAngle: .degrees(135),
-                endAngle: .degrees(180),
-                clockwise: false
-            )
-            context.stroke(
-                yellowPath,
-                with: .color(Color(red: 0.98, green: 0.74, blue: 0.02)),
-                lineWidth: strokeWidth
-            )
-
-            // Red arc (top-left to top-right)
-            var redPath = Path()
-            redPath.addArc(
-                center: center,
-                radius: radius - strokeWidth / 2,
-                startAngle: .degrees(180),
-                endAngle: .degrees(-45),
-                clockwise: false
-            )
-            context.stroke(
-                redPath,
-                with: .color(Color(red: 0.92, green: 0.26, blue: 0.21)),
-                lineWidth: strokeWidth
-            )
-
-            // Horizontal bar extending right (the "serif" of the G)
-            let barHeight = strokeWidth
-            let barY = center.y - barHeight / 2
-            let barStartX = center.x
-            let barEndX = center.x + radius
-            var barPath = Path()
-            barPath.addRect(CGRect(x: barStartX, y: barY, width: barEndX - barStartX, height: barHeight))
-            context.fill(barPath, with: .color(Color(red: 0.26, green: 0.52, blue: 0.96)))
-        }
     }
 }
 
@@ -267,15 +303,9 @@ enum GoogleSignInError: Error, LocalizedError {
     var errorDescription: String? {
         switch self {
         case .invalidCallback(let message):
-            return String(
-                format: String(localized: "GOOGLE_SIGNIN_INVALID_CALLBACK"),
-                message
-            )
+            return "Invalid callback: \(message)"
         case .authFailed(let message):
-            return String(
-                format: String(localized: "GOOGLE_SIGNIN_AUTH_FAILED"),
-                message
-            )
+            return "Authentication failed: \(message)"
         }
     }
 }
