@@ -1,114 +1,134 @@
 import MapHealthCore
 import OSLog
-import SpeziChat
-import SpeziLLMOpenAI
-import SpeziViews
 import SwiftUI
 
 struct SettingsView: View {
-    @Environment(HealthDataInterpreter.self) private var healthDataInterpreter
+    @EnvironmentObject private var healthDataInterpreter: HealthDataInterpreter
     @Environment(\.dismiss) private var dismiss
 
-    @AppStorage(StorageKeys.enableTextToSpeech) private var enableTextToSpeech = StorageKeys.Defaults.enableTextToSpeech
     @AppStorage(StorageKeys.onboardingFlowComplete) private var onboardingFlowComplete = false
 
-    @State private var path = ManagedNavigationStack.Path()
-    @State private var didComplete = false
     @State private var showSignOutAlert = false
     @State private var userProfile: UserProfile?
     @State private var isLoadingProfile = false
     @Binding var modelSettingRefreshId: UUID
+    @State private var showLLMSettings = false
+    @Namespace private var settingsNamespace
 
     var body: some View {
-        ManagedNavigationStack(didComplete: self.$didComplete, path: self.path) {
-            List {
-                self.accountSection
-                self.changeModelSettings
-                self.chatSettings
-                self.speechSettings
-                self.disclaimer
-            }
-            .navigationTitle("SETTINGS_TITLE")
-            .toolbar {
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("SETTINGS_DONE") {
-                        dismiss()
+        NavigationStack {
+            settingsContainer
+                .scrollContentBackground(.hidden)
+                .navigationTitle("SETTINGS_TITLE")
+                .toolbar {
+                    ToolbarItem(placement: .confirmationAction) {
+                        Button("SETTINGS_DONE") {
+                            dismiss()
+                        }
+                        .mapHealthGlassButtonStyle(prominent: true)
                     }
                 }
-            }
-            .accessibilityIdentifier("settingsList")
-            .task {
-                await loadProfile()
-            }
+                .accessibilityIdentifier("settingsList")
+                .task {
+                    await loadProfile()
+                }
         }
-        .onChange(of: self.didComplete) { _, newValue in
-            if newValue {
-                self.modelSettingRefreshId = UUID()      // fresh refresh main view
-                dismiss()
-            }
-        }
-        .alert("Sign Out", isPresented: $showSignOutAlert) {
-            Button("Cancel", role: .cancel) {}
-            Button("Sign Out", role: .destructive) {
+        .background(OnboardingBackground())
+        .alert("SIGN_OUT_TITLE", isPresented: $showSignOutAlert) {
+            Button("ALERT_CANCEL", role: .cancel) {}
+            Button("SIGN_OUT_BUTTON", role: .destructive) {
                 signOut()
             }
         } message: {
-            Text("Are you sure you want to sign out? Your local data will be preserved.")
+            Text("SIGN_OUT_MESSAGE")
+        }
+        .sheet(isPresented: $showLLMSettings, onDismiss: {
+            self.modelSettingRefreshId = UUID()
+        }, content: {
+            LLMSettingsFlow()
+        })
+    }
+
+    @ViewBuilder
+    private var settingsContainer: some View {
+        if #available(iOS 26, *) {
+            GlassEffectContainer(spacing: 16) {
+                settingsList
+            }
+        } else {
+            settingsList
+        }
+    }
+
+    private var settingsList: some View {
+        List {
+            self.accountSection
+            self.changeModelSettings
+            self.chatSettings
+            self.disclaimer
         }
     }
 
     private var accountSection: some View {
-        Section("Account") {
+        Section("SETTINGS_ACCOUNT_TITLE") {
             if MapAPIClient.shared.isAuthenticated {
-                HStack(spacing: 12) {
-                    // Profile photo or placeholder
-                    if let photoUrl = userProfile?.profilePhotoUrl,
-                       let url = URL(string: photoUrl) {
-                        AsyncImage(url: url) { image in
-                            image
-                                .resizable()
-                                .aspectRatio(contentMode: .fill)
-                        } placeholder: {
+                VStack(spacing: 12) {
+                    HStack(spacing: 12) {
+                        // Profile photo or placeholder
+                        if let photoUrl = userProfile?.profilePhotoUrl,
+                           let url = URL(string: photoUrl) {
+                            AsyncImage(url: url) { image in
+                                image
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fill)
+                            } placeholder: {
+                                profilePlaceholder
+                            }
+                            .frame(width: 48, height: 48)
+                            .clipShape(Circle())
+                        } else {
                             profilePlaceholder
                         }
-                        .frame(width: 48, height: 48)
-                        .clipShape(Circle())
-                    } else {
-                        profilePlaceholder
-                    }
 
-                    VStack(alignment: .leading, spacing: 2) {
-                        if isLoadingProfile {
-                            Text("Loading...")
-                                .font(.subheadline)
-                                .foregroundStyle(.secondary)
-                        } else if let profile = userProfile {
-                            Text(profile.displayName ?? profile.email)
-                                .font(.subheadline)
-                                .fontWeight(.medium)
-                            Text(profile.email)
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                        } else {
-                            Text("Connected with Google")
-                                .font(.subheadline)
-                                .fontWeight(.medium)
-                            Text("Signed in")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
+                        VStack(alignment: .leading, spacing: 2) {
+                            if isLoadingProfile {
+                                Text("GENERIC_LOADING")
+                                    .font(.subheadline)
+                                    .foregroundStyle(.secondary)
+                            } else if let profile = userProfile {
+                                Text(profile.displayName ?? profile.email)
+                                    .font(.subheadline)
+                                    .fontWeight(.medium)
+                                Text(profile.email)
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            } else {
+                                Text("ACCOUNT_CONNECTED_GOOGLE")
+                                    .font(.subheadline)
+                                    .fontWeight(.medium)
+                                Text("ACCOUNT_SIGNED_IN")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
                         }
+
+                        Spacer()
                     }
 
-                    Spacer()
+                    Button("SIGN_OUT_BUTTON", role: .destructive) {
+                        showSignOutAlert = true
+                    }
+                    .mapHealthGlassButtonStyle()
                 }
-                .padding(.vertical, 4)
-
-                Button("Sign Out", role: .destructive) {
-                    showSignOutAlert = true
-                }
+                .padding(12)
+                .mapHealthGlassSurface(cornerRadius: 20, tint: .accentColor.opacity(0.04))
+                .listRowBackground(Color.clear)
             } else {
-                Text("Not signed in")
+                Text("ACCOUNT_NOT_SIGNED_IN")
                     .foregroundStyle(.secondary)
+                    .padding(12)
+                    .mapHealthGlassSurface(cornerRadius: 20, tint: .accentColor.opacity(0.04))
+                    .listRowBackground(Color.clear)
             }
         }
     }
@@ -120,11 +140,13 @@ struct SettingsView: View {
     }
 
     private var changeModelSettings: some View {
-        Section("LLM Settings") {
-            Button("Select Execution Type & Model") {
-                self.path.append(customView: LLMSourceSelection())
+        Section("LLM_SETTINGS_TITLE") {
+            Button("LLM_SETTINGS_SELECT_MODEL") {
+                showLLMSettings = true
             }
+            .mapHealthGlassButtonStyle()
                 .accessibilityIdentifier("changeModelButton")
+            .listRowBackground(Color.clear)
         }
     }
 
@@ -136,22 +158,18 @@ struct SettingsView: View {
                     dismiss()
                 }
             }
-                .buttonStyle(PlainButtonStyle())
-                .accessibilityIdentifier("resetButton")
-        }
-    }
-
-    private var speechSettings: some View {
-        Section("SETTINGS_SPEECH") {
-            Toggle(isOn: $enableTextToSpeech) {
-                Text("SETTINGS_SPEECH_TEXT_TO_SPEECH")
-            }
+            .mapHealthGlassButtonStyle()
+            .accessibilityIdentifier("resetButton")
+            .listRowBackground(Color.clear)
         }
     }
 
     private var disclaimer: some View {
         Section("SETTINGS_DISCLAIMER_TITLE") {
             Text("SETTINGS_DISCLAIMER_TEXT")
+                .padding(12)
+                .mapHealthGlassSurface(cornerRadius: 16, tint: .accentColor.opacity(0.04))
+                .listRowBackground(Color.clear)
         }
     }
 
@@ -183,5 +201,6 @@ struct SettingsView: View {
 #if DEBUG
 #Preview {
     SettingsView(modelSettingRefreshId: .constant(UUID()))
+        .environmentObject(HealthDataInterpreter())
 }
 #endif

@@ -1,21 +1,13 @@
 import AuthenticationServices
+import Foundation
 import MapHealthCore
-import SpeziChat
-import SpeziLLM
-import SpeziLLMFog
-import SpeziLLMLocal
-import SpeziLLMOpenAI
-import SpeziSpeechSynthesizer
 import SwiftUI
 
 struct HealthChatView: View {
     @AppStorage(StorageKeys.onboardingFlowComplete) var completedOnboardingFlow = false
-    @AppStorage(StorageKeys.enableTextToSpeech) private var textToSpeech = StorageKeys.Defaults.enableTextToSpeech
-    @AppStorage(StorageKeys.llmSource) private var llmSource = StorageKeys.Defaults.llmSource
-    @AppStorage(StorageKeys.openAIModel) private var openAIModel = LLMOpenAIParameters.ModelType.gpt4o
-    @AppStorage(StorageKeys.fogModel) private var fogModel = LLMFogParameters.FogModelType.llama3_1_8B
+    @AppStorage(StorageKeys.openAIModel) private var openAIModel = StorageKeys.Defaults.openAIModel
 
-    @Environment(HealthDataInterpreter.self) private var healthDataInterpreter
+    @EnvironmentObject private var healthDataInterpreter: HealthDataInterpreter
     @Environment(\.webAuthenticationSession) private var webAuthSession
     @State private var showSettings = false
     @State private var showErrorAlert = false
@@ -26,66 +18,50 @@ struct HealthChatView: View {
 
     var body: some View {
         NavigationStack {
-            if let llm = self.healthDataInterpreter.llm {
-                let contextBinding = Binding { llm.context.chat } set: { llm.context.chat = $0 }
-
-                ChatView(contextBinding, exportFormat: .text)
-                    .speak(llm.context.chat, muted: !self.textToSpeech)
-                    .speechToolbarButton(muted: !self.$textToSpeech)
-                    .viewStateAlert(state: llm.state)
-                    .navigationTitle("Map Health")
-                    .toolbar {
-                        ToolbarItem(placement: .primaryAction) {
-                            self.settingsButton
-                        }
-                        ToolbarItem(placement: .primaryAction) {
-                            self.resetChatButton
-                        }
-                    }
-                    .onChange(of: llm.context, initial: true) { _, _ in
-                        if !llm.context.isEmpty && llm.state != .generating && llm.context.last?.role != .system {
-                            self.messageTaskId += 1
-                        }
-                    }
-                    .task(id: self.messageTaskId) {
-                        do {
-                            try await healthDataInterpreter.queryLLM()
-                        } catch {
-                            showErrorAlert = true
-                            errorMessage = "Error querying LLM: \(error.localizedDescription)"
-                        }
-                    }
-            } else {
-                self.loadingChatView
+            GlassChatView(
+                chat: Binding(
+                    get: { healthDataInterpreter.messages },
+                    set: { healthDataInterpreter.messages = $0 }
+                ),
+                isInputEnabled: !healthDataInterpreter.isGenerating
+            )
+            .navigationTitle("APP_TITLE")
+            .toolbar {
+                ToolbarItem(placement: .primaryAction) {
+                    self.settingsButton
+                }
+                ToolbarItem(placement: .primaryAction) {
+                    self.resetChatButton
+                }
+            }
+            .onChange(of: healthDataInterpreter.messages, initial: true) { _, newValue in
+                if newValue.last?.role == .user {
+                    self.messageTaskId += 1
+                }
+            }
+            .task(id: self.messageTaskId) {
+                do {
+                    try await healthDataInterpreter.queryLLM()
+                } catch {
+                    showErrorAlert = true
+                    errorMessage = String(
+                        format: String(localized: "CHAT_QUERY_ERROR"),
+                        error.localizedDescription
+                    )
+                }
             }
         }
+        .background(OnboardingBackground())
         .sheet(isPresented: $showSettings) {
             SettingsView(modelSettingRefreshId: $modelSettingRefreshId)
         }
-        .alert("Error", isPresented: $showErrorAlert) {
-            Button("OK", role: .cancel) {}
+        .alert("ERROR_ALERT_TITLE", isPresented: $showErrorAlert) {
+            Button("ERROR_ALERT_CANCEL", role: .cancel) {}
         } message: {
             Text(self.errorMessage)
         }
         .task(id: self.modelSettingRefreshId) {
-            do {
-                if FeatureFlags.mockMode {
-                    try await healthDataInterpreter.prepareLLM(with: LLMMockSchema())
-                } else if FeatureFlags.localLLM || llmSource == .local {
-                    try await healthDataInterpreter.prepareLLM(with: LLMLocalSchema(model: .llama3_2_3B_4bit))
-                } else if llmSource == .fog {
-                    try await healthDataInterpreter.prepareLLM(
-                        with: LLMFogSchema(parameters: .init(modelType: self.fogModel))
-                    )
-                } else {
-                    try await healthDataInterpreter.prepareLLM(
-                        with: LLMOpenAISchema(parameters: .init(modelType: openAIModel))
-                    )
-                }
-            } catch {
-                self.showErrorAlert = true
-                self.errorMessage = "Error initializing LLM: \(error.localizedDescription)"
-            }
+            await healthDataInterpreter.prepareSession(model: openAIModel)
         }
         .task {
             MapAPIClient.shared.onAuthenticationRequired = {
@@ -99,8 +75,9 @@ struct HealthChatView: View {
             showSettings = true
         } label: {
             Image(systemName: "gearshape")
-                .accessibilityLabel(Text("Settings"))
+                .accessibilityLabel(Text("SETTINGS_TITLE"))
         }
+        .mapHealthGlassButtonStyle()
         .accessibilityIdentifier("settingsButton")
     }
 
@@ -111,16 +88,10 @@ struct HealthChatView: View {
             }
         } label: {
             Image(systemName: "arrow.counterclockwise")
-                .accessibilityLabel(Text("Reset Chat"))
+                .accessibilityLabel(Text("SETTINGS_CHAT_RESET"))
         }
+        .mapHealthGlassButtonStyle()
         .accessibilityIdentifier("resetChatButton")
-    }
-
-    private var loadingChatView: some View {
-        VStack {
-            Text("Loading...")
-            ProgressView()
-        }
     }
 
     @MainActor
@@ -143,7 +114,9 @@ struct HealthChatView: View {
             )
 
             guard let components = URLComponents(url: callbackURL, resolvingAgainstBaseURL: false) else {
-                throw GoogleSignInError.invalidCallback("Invalid callback URL")
+                throw GoogleSignInError.invalidCallback(
+                    String(localized: "GOOGLE_SIGNIN_INVALID_CALLBACK_URL")
+                )
             }
 
             if let token = components.queryItems?.first(where: { $0.name == "token" })?.value {
@@ -153,13 +126,16 @@ struct HealthChatView: View {
             } else if let error = components.queryItems?.first(where: { $0.name == "error" })?.value {
                 throw GoogleSignInError.authFailed(error)
             } else {
-                throw GoogleSignInError.authFailed("Unknown error")
+                throw GoogleSignInError.authFailed(String(localized: "GOOGLE_SIGNIN_UNKNOWN_ERROR"))
             }
         } catch ASWebAuthenticationSessionError.canceledLogin {
             return false
         } catch {
             self.showErrorAlert = true
-            self.errorMessage = "Sign-in required: \(error.localizedDescription)"
+            self.errorMessage = String(
+                format: String(localized: "SIGN_IN_REQUIRED_ERROR"),
+                error.localizedDescription
+            )
             return false
         }
     }

@@ -1,97 +1,100 @@
 import AuthenticationServices
+import Foundation
 import MapHealthCore
-import SpeziOnboarding
-import SpeziViews
 import SwiftUI
 
 /// Google Sign-In onboarding view that handles OAuth authentication
 struct GoogleSignInView: View {
-    @Environment(ManagedNavigationStack.Path.self) private var onboardingNavigationPath
     @Environment(\.webAuthenticationSession) private var webAuthSession
     @State private var isAuthenticating = false
     @State private var showErrorAlert = false
     @State private var errorMessage = ""
+    @Namespace private var glassNamespace
+    let onAuthenticated: () -> Void
 
     var body: some View {
         ZStack {
-            // Subtle gradient background
-            LinearGradient(
-                colors: [
-                    Color(.systemBackground),
-                    Color(.systemGray6)
-                ],
-                startPoint: .top,
-                endPoint: .bottom
-            )
-            .ignoresSafeArea()
+            OnboardingBackground()
 
-            VStack(spacing: 0) {
-                Spacer()
-
-                // Hero section
-                VStack(spacing: 40) {
-                    // App icon with Google colors accent
-                    ZStack {
-                        Circle()
-                            .fill(
-                                LinearGradient(
-                                    colors: [
-                                        Color(red: 0.26, green: 0.52, blue: 0.96),  // Google blue
-                                        Color(red: 0.23, green: 0.73, blue: 0.55)   // Google green
-                                    ],
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                )
-                            )
-                            .frame(width: 100, height: 100)
-                            .shadow(color: .black.opacity(0.1), radius: 20, y: 10)
-
-                        Image(systemName: "heart.text.clipboard")
-                            .font(.system(size: 44, weight: .medium))
-                            .foregroundStyle(.white)
-                    }
-                    .accessibilityHidden(true)
-
-                    VStack(spacing: 16) {
-                        Text("GOOGLE_SIGNIN_TITLE")
-                            .font(.system(size: 28, weight: .bold, design: .rounded))
-                            .multilineTextAlignment(.center)
-
-                        Text("GOOGLE_SIGNIN_SUBTITLE")
-                            .font(.body)
-                            .foregroundStyle(.secondary)
-                            .multilineTextAlignment(.center)
-                            .lineSpacing(4)
-                            .padding(.horizontal, 32)
-                    }
-                }
-
-                Spacer()
-                Spacer()
-
-                // Footer
-                VStack(spacing: 24) {
-                    GoogleSignInButton(isLoading: isAuthenticating) {
-                        startAuthentication()
-                    }
-                    .disabled(isAuthenticating)
-                    .accessibilityIdentifier("googleSignInButton")
-
-                    Text("GOOGLE_SIGNIN_PRIVACY_NOTE")
-                        .font(.caption)
-                        .foregroundStyle(.tertiary)
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal, 40)
-                }
-                .padding(.horizontal, 24)
-                .padding(.bottom, 50)
-            }
+            glassContainer
         }
-        .alert("Error", isPresented: $showErrorAlert) {
-            Button("OK", role: .cancel) {}
+        .alert("ERROR_ALERT_TITLE", isPresented: $showErrorAlert) {
+            Button("ERROR_ALERT_CANCEL", role: .cancel) {}
         } message: {
             Text(errorMessage)
         }
+    }
+
+    @ViewBuilder
+    private var glassContainer: some View {
+        if #available(iOS 26, *) {
+            GlassEffectContainer(spacing: 20) {
+                signInContent
+            }
+        } else {
+            signInContent
+        }
+    }
+
+    private var signInContent: some View {
+        VStack(spacing: 24) {
+            Spacer(minLength: 24)
+
+            appIcon
+            headerSection
+
+            Spacer()
+
+            footerSection
+        }
+        .padding(.horizontal, 24)
+    }
+
+    private var appIcon: some View {
+        ZStack {
+            Circle()
+                .fill(
+                    LinearGradient(
+                        colors: [
+                            Color(red: 0.26, green: 0.52, blue: 0.96),
+                            Color(red: 0.23, green: 0.73, blue: 0.55)
+                        ],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
+                .frame(width: 110, height: 110)
+
+            Image(systemName: "heart.text.clipboard")
+                .font(.system(size: 44, weight: .medium))
+                .foregroundStyle(.white)
+        }
+        .accessibilityHidden(true)
+        .mapHealthGlassSurface(cornerRadius: 56, tint: .clear)
+    }
+
+    private var headerSection: some View {
+        OnboardingHeader(
+            title: "GOOGLE_SIGNIN_TITLE",
+            subtitle: "GOOGLE_SIGNIN_SUBTITLE"
+        )
+    }
+
+    private var footerSection: some View {
+        VStack(spacing: 20) {
+            GoogleSignInButton(isLoading: isAuthenticating) {
+                startAuthentication()
+            }
+            .disabled(isAuthenticating)
+            .accessibilityIdentifier("googleSignInButton")
+
+            Text("GOOGLE_SIGNIN_PRIVACY_NOTE")
+                .font(.caption)
+                .foregroundStyle(.tertiary)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 24)
+        }
+        .padding(.bottom, 24)
     }
 
     private func startAuthentication() {
@@ -112,23 +115,25 @@ struct GoogleSignInView: View {
 
                 // Parse callback URL
                 guard let components = URLComponents(url: callbackURL, resolvingAgainstBaseURL: false) else {
-                    throw GoogleSignInError.invalidCallback("Invalid callback URL")
+                    throw GoogleSignInError.invalidCallback(
+                        String(localized: "GOOGLE_SIGNIN_INVALID_CALLBACK_URL")
+                    )
                 }
 
                 // Check for success with token
-                if let token = components.queryItems?.first(where: { $0.name == "token" })?.value {
-                    // Save token to Keychain
-                    try KeychainService.shared.saveSessionToken(token)
+            if let token = components.queryItems?.first(where: { $0.name == "token" })?.value {
+                // Save token to Keychain
+                try KeychainService.shared.saveSessionToken(token)
 
                     // Set auth token on API client
                     MapAPIClient.shared.setAuthToken(token)
 
-                    // Proceed to next step
-                    onboardingNavigationPath.nextStep()
-                } else if let error = components.queryItems?.first(where: { $0.name == "error" })?.value {
-                    throw GoogleSignInError.authFailed(error)
+                // Proceed to next step
+                onAuthenticated()
+            } else if let error = components.queryItems?.first(where: { $0.name == "error" })?.value {
+                throw GoogleSignInError.authFailed(error)
                 } else {
-                    throw GoogleSignInError.authFailed("Unknown error")
+                    throw GoogleSignInError.authFailed(String(localized: "GOOGLE_SIGNIN_UNKNOWN_ERROR"))
                 }
             } catch ASWebAuthenticationSessionError.canceledLogin {
                 // User cancelled, just reset state
@@ -166,17 +171,8 @@ private struct GoogleSignInButton: View {
             }
             .frame(maxWidth: .infinity)
             .frame(height: 52)
-            .background(
-                RoundedRectangle(cornerRadius: 26, style: .continuous)
-                    .fill(Color(.systemBackground))
-                    .shadow(color: .black.opacity(0.08), radius: 8, y: 2)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 26, style: .continuous)
-                            .stroke(Color(.separator), lineWidth: 1)
-                    )
-            )
         }
-        .buttonStyle(.plain)
+        .mapHealthGlassButtonStyle(prominent: true)
     }
 }
 
@@ -272,15 +268,21 @@ enum GoogleSignInError: Error, LocalizedError {
     var errorDescription: String? {
         switch self {
         case .invalidCallback(let message):
-            return "Invalid callback: \(message)"
+            return String(
+                format: String(localized: "GOOGLE_SIGNIN_INVALID_CALLBACK"),
+                message
+            )
         case .authFailed(let message):
-            return "Authentication failed: \(message)"
+            return String(
+                format: String(localized: "GOOGLE_SIGNIN_AUTH_FAILED"),
+                message
+            )
         }
     }
 }
 
 #if DEBUG
 #Preview {
-    GoogleSignInView()
+    GoogleSignInView {}
 }
 #endif
