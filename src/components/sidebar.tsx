@@ -26,8 +26,10 @@ const authRoutes = ["/", "/login", "/signup", "/auth/error"];
 export function Sidebar() {
   const pathname = usePathname();
 
-  // Hide sidebar on auth pages
-  const isAuthPage = authRoutes.some((route) => pathname.startsWith(route));
+  // Hide sidebar on auth pages (exact match for "/" since all paths start with it)
+  const isAuthPage = authRoutes.some((route) =>
+    route === "/" ? pathname === "/" : pathname.startsWith(route)
+  );
   if (isAuthPage) return null;
 
   return (

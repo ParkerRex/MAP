@@ -13,7 +13,11 @@
       "Bash(git add:*)",
       "Bash(git commit:*)",
       "Bash(bun run dev)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(bun run lint:*)",
+      "Bash(grep:*)",
+      "Bash(bunx shadcn@latest add:*)",
+      "Bash(bunx shadcn@latest init:*)"
     ]
   }
 }

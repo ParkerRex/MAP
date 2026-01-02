@@ -39,11 +39,7 @@ export default function HomePage() {
             <Link href="/" className="flex items-center">
               <Icons.Logo className="h-6 w-auto text-neutral-900" />
             </Link>
-            <Button
-              asChild
-              variant="ghost"
-              className="text-neutral-600 hover:text-neutral-900"
-            >
+            <Button asChild variant="ghost" className="text-neutral-600 hover:text-neutral-900">
               <Link href="/login">Sign in</Link>
             </Button>
           </div>
@@ -64,8 +60,8 @@ export default function HomePage() {
 
             {/* Subheadline */}
             <p className="mt-6 text-lg leading-relaxed text-neutral-500">
-              Set goals, track progress, and understand your health with
-              AI-powered insights from your calendar, WHOOP, and Apple Health.
+              Set goals, track progress, and understand your health with AI-powered insights from
+              your calendar, WHOOP, and Apple Health.
             </p>
 
             {/* CTA */}

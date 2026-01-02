@@ -16,7 +16,15 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { TimePicker } from "@/components/ui/time-picker";
 import { useToast } from "@/components/ui/use-toast";
 import { useCreateEvent } from "@/hooks/use-calendar";
 
@@ -134,18 +142,21 @@ export function CreateEventDialog({ calendars, currentWeekStartDate }: CreateEve
             </div>
             <div className="grid gap-2">
               <Label htmlFor="calendar">Calendar</Label>
-              <select
-                id="calendar"
+              <Select
                 value={selectedCalendarId || primaryCalendar?.id || ""}
-                onChange={(e) => setSelectedCalendarId(e.target.value)}
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                onValueChange={setSelectedCalendarId}
               >
-                {calendars.map((cal) => (
-                  <option key={cal.id} value={cal.id || ""}>
-                    {cal.summary} {cal.primary && "(Primary)"}
-                  </option>
-                ))}
-              </select>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a calendar" />
+                </SelectTrigger>
+                <SelectContent>
+                  {calendars.map((cal) => (
+                    <SelectItem key={cal.id} value={cal.id || ""}>
+                      {cal.summary} {cal.primary && "(Primary)"}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div className="grid gap-2">
               <Label htmlFor="date">Date</Label>
@@ -153,22 +164,12 @@ export function CreateEventDialog({ calendars, currentWeekStartDate }: CreateEve
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="grid gap-2">
-                <Label htmlFor="startTime">Start Time</Label>
-                <Input
-                  id="startTime"
-                  type="time"
-                  value={startTime}
-                  onChange={(e) => setStartTime(e.target.value)}
-                />
+                <Label>Start Time</Label>
+                <TimePicker value={startTime} onChange={setStartTime} />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="endTime">End Time</Label>
-                <Input
-                  id="endTime"
-                  type="time"
-                  value={endTime}
-                  onChange={(e) => setEndTime(e.target.value)}
-                />
+                <Label>End Time</Label>
+                <TimePicker value={endTime} onChange={setEndTime} />
               </div>
             </div>
           </div>

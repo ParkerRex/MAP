@@ -3,7 +3,7 @@
 import { startOfWeek } from "date-fns";
 import { AlertTriangle, Calendar, RefreshCw } from "lucide-react";
 import { useSearchParams } from "next/navigation";
-import { Suspense, useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import ContextPanel from "@/components/calendar/calendar-context-panel";
 import CalendarGrid from "@/components/calendar/calendar-grid";
 import CalendarMenu from "@/components/calendar/calendar-menu";
@@ -134,6 +134,7 @@ function CalendarDashboard({ needsReconnect, onReconnect }: CalendarDashboardPro
   );
   const [selectedEvent, setSelectedEvent] = useState<ExtendedEvent | null>(null);
   const [visibleCalendars, setVisibleCalendars] = useState<Set<string>>(new Set());
+  const hasInitializedCalendars = useRef(false);
   const { checkForReconnect } = useCalendarReconnect();
 
   // Server state - TanStack Query
@@ -147,13 +148,13 @@ function CalendarDashboard({ needsReconnect, onReconnect }: CalendarDashboardPro
     }
   }, [calendarsError, checkForReconnect]);
 
-  // Initialize visible calendars when loaded
+  // Initialize visible calendars when loaded (only once)
   useEffect(() => {
-    if (calendars.length > 0 && visibleCalendars.size === 0) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- One-time initialization from server data
+    if (calendars.length > 0 && !hasInitializedCalendars.current) {
+      hasInitializedCalendars.current = true;
       setVisibleCalendars(new Set(calendars.map((c) => c.id).filter(Boolean) as string[]));
     }
-  }, [calendars, visibleCalendars.size]);
+  }, [calendars]);
 
   // Time range for events query
   const timeMin = useMemo(() => currentWeekStartDate.toISOString(), [currentWeekStartDate]);

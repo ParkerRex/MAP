@@ -1,12 +1,12 @@
 "use client";
 
-import React, { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import React, { useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { useClaudeConnect, useClaudeDisconnect, useClaudeStatus } from "@/hooks/use-claude";
-import { useOpenAIConnect, useOpenAIDisconnect, useOpenAIStatus } from "@/hooks/use-openai";
 import { useAuth } from "@/hooks/use-auth";
 import { useGoogleStatus } from "@/hooks/use-calendar";
+import { useClaudeConnect, useClaudeDisconnect, useClaudeStatus } from "@/hooks/use-claude";
+import { useOpenAIConnect, useOpenAIDisconnect, useOpenAIStatus } from "@/hooks/use-openai";
 
 export default function SettingsPage() {
   const router = useRouter();
@@ -42,10 +42,10 @@ export default function SettingsPage() {
         .join("")
         .slice(0, 2)
         .toUpperCase()
-    : user.email?.[0]?.toUpperCase() ?? "U";
+    : (user.email?.[0]?.toUpperCase() ?? "U");
 
   return (
-    <div className="mx-auto w-full max-w-3xl space-y-6">
+    <div className="mx-auto w-full max-w-3xl space-y-6 py-8 px-4">
       <div className="rounded-xl border bg-card p-6 shadow-sm">
         <h1 className="text-2xl font-semibold">Settings</h1>
         <p className="text-sm text-muted-foreground">Manage your account and connections.</p>
@@ -53,9 +53,7 @@ export default function SettingsPage() {
 
       <div className="rounded-xl border bg-card p-6 shadow-sm">
         <h2 className="text-lg font-semibold">Connected account</h2>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Your MAP profile is linked to Google.
-        </p>
+        <p className="mt-1 text-sm text-muted-foreground">Your MAP profile is linked to Google.</p>
 
         <div className="mt-4 flex items-center gap-4 rounded-lg border border-border/60 bg-muted/40 p-4">
           {user.profilePhotoUrl ? (
@@ -164,12 +162,7 @@ export default function SettingsPage() {
         <p className="mt-1 text-sm text-muted-foreground">
           You can sign back in with Google at any time.
         </p>
-        <Button
-          onClick={logout}
-          disabled={isLoggingOut}
-          className="mt-4"
-          variant="destructive"
-        >
+        <Button onClick={logout} disabled={isLoggingOut} className="mt-4" variant="destructive">
           {isLoggingOut ? "Signing out..." : "Sign out"}
         </Button>
       </div>

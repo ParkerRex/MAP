@@ -91,6 +91,8 @@ export async function GET(request: NextRequest) {
     return response;
   } catch (error) {
     console.error("Claude callback error:", error);
-    return NextResponse.redirect(`${process.env.NEXT_PUBLIC_APP_URL}/settings?error=callback_failed`);
+    return NextResponse.redirect(
+      `${process.env.NEXT_PUBLIC_APP_URL}/settings?error=callback_failed`,
+    );
   }
 }

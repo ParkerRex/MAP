@@ -1,8 +1,8 @@
 "use client";
 
-import type React from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import type React from "react";
 import { RiLogoutBoxRLine, RiSettings4Line } from "react-icons/ri";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "./ui/button";
@@ -29,6 +29,16 @@ export const Header: React.FC<HeaderProps> = ({ className }) => {
     return null;
   }
 
+  // Get page title from pathname
+  const getPageTitle = () => {
+    if (pathname.startsWith("/calendar")) return "Calendar";
+    if (pathname.startsWith("/tasks")) return "Tasks";
+    if (pathname.startsWith("/notes")) return "Notes";
+    if (pathname.startsWith("/health")) return "Health";
+    if (pathname.startsWith("/settings")) return "Settings";
+    return "Dashboard";
+  };
+
   const handleLogout = async () => {
     await logout();
     router.push("/login");
@@ -41,7 +51,7 @@ export const Header: React.FC<HeaderProps> = ({ className }) => {
         .join("")
         .slice(0, 2)
         .toUpperCase()
-    : user?.email?.[0]?.toUpperCase() ?? "U";
+    : (user?.email?.[0]?.toUpperCase() ?? "U");
 
   return (
     <header
@@ -52,7 +62,7 @@ export const Header: React.FC<HeaderProps> = ({ className }) => {
           <Icons.LogoSmall className="h-5 w-5" />
           <span className="text-lg font-semibold text-gray-800 dark:text-white">MAP</span>
         </Link>
-        <span className="hidden text-sm text-muted-foreground md:inline">Dashboard</span>
+        <span className="hidden text-sm text-muted-foreground md:inline">{getPageTitle()}</span>
       </div>
 
       <div className="flex items-center gap-3">

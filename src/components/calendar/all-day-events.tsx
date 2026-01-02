@@ -45,11 +45,6 @@ export default function CalendarAllDayEvents({
     return calendar?.backgroundColor || "#DDFFE3";
   };
 
-  const isAllDayEvent = (event: calendar_v3.Schema$Event) => {
-    return !!event.start?.date;
-  };
-
-  const allDayEvents = events.filter(isAllDayEvent);
   const visibleEvents = isExpanded ? allDayEvents : allDayEvents.slice(0, 2);
   const hiddenEventsCount = allDayEvents.length - visibleEvents.length;
 
