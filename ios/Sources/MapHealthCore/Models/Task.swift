@@ -157,12 +157,15 @@ public struct CreateTaskRequest: Codable {
     }
 }
 
-public struct UpdateTaskRequest: Codable {
+public struct UpdateTaskRequest: Encodable {
     public var title: String?
     public var body: String?
     public var dueAt: String?
     public var completed: Bool?
     public var tags: [String]?
+
+    // Track if we should explicitly send null for dueAt
+    private var shouldClearDueDate: Bool = false
 
     public init(
         title: String? = nil,
@@ -174,12 +177,29 @@ public struct UpdateTaskRequest: Codable {
     ) {
         self.title = title
         self.body = body
-        if clearDueDate {
-            self.dueAt = nil
-        } else {
-            self.dueAt = dueAt?.iso8601String
-        }
+        self.shouldClearDueDate = clearDueDate
+        self.dueAt = dueAt?.iso8601String
         self.completed = completed
         self.tags = tags
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case title, body, dueAt, completed, tags
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+
+        try container.encodeIfPresent(title, forKey: .title)
+        try container.encodeIfPresent(body, forKey: .body)
+        try container.encodeIfPresent(completed, forKey: .completed)
+        try container.encodeIfPresent(tags, forKey: .tags)
+
+        // Explicitly encode null if clearing the due date
+        if shouldClearDueDate {
+            try container.encodeNil(forKey: .dueAt)
+        } else if let dueAt = dueAt {
+            try container.encode(dueAt, forKey: .dueAt)
+        }
     }
 }

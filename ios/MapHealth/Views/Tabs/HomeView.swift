@@ -1,3 +1,5 @@
+// swiftlint:disable file_length type_body_length
+import CoreLocation
 import HealthKit
 import MapHealthCore
 import SwiftUI
@@ -16,6 +18,10 @@ struct HomeView: View {
     @State private var restingHeartRate: Double?
     @State private var healthNeedsPermission = false
 
+    // Weather state
+    @State private var weather: WeatherData?
+    @StateObject private var locationManager = LocationManager()
+
     @State private var isLoading = true
     @State private var eventsError: String?
     @State private var tasksError: String?
@@ -25,7 +31,7 @@ struct HomeView: View {
     var body: some View {
         NavigationStack {
             homeContent
-                .navigationTitle("Today")
+                .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
                     ToolbarItem(placement: .primaryAction) {
                         settingsButton
@@ -40,6 +46,13 @@ struct HomeView: View {
         }
         .task {
             await loadAllData()
+        }
+        .onChange(of: locationManager.location) { _, newLocation in
+            if let location = newLocation {
+                Task {
+                    await loadWeather(location: location)
+                }
+            }
         }
     }
 
@@ -70,14 +83,22 @@ struct HomeView: View {
     }
 
     private var todayHeader: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text(Date(), format: .dateTime.weekday(.wide))
+        HStack(alignment: .center) {
+            Text(Date(), format: .dateTime.month(.wide).year())
+                .font(.system(size: 24, weight: .bold, design: .rounded))
+
+            if let weather = weather {
+                HStack(spacing: 4) {
+                    Image(systemName: weather.icon)
+                        .foregroundStyle(.secondary)
+                    Text("\(weather.temperature)°")
+                        .foregroundStyle(.secondary)
+                }
                 .font(.subheadline)
-                .foregroundStyle(.secondary)
-            Text(Date(), format: .dateTime.month().day())
-                .font(.system(size: 32, weight: .bold, design: .rounded))
+            }
+
+            Spacer()
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     // MARK: - Calendar Widget
@@ -379,5 +400,43 @@ struct HomeView: View {
             // If we can't fetch, assume we need permission
             healthNeedsPermission = true
         }
+    }
+
+    private func loadWeather(location: CLLocation) async {
+        do {
+            weather = try await WeatherService.shared.getCurrentWeather(
+                latitude: location.coordinate.latitude,
+                longitude: location.coordinate.longitude
+            )
+        } catch {
+            // Silently fail - weather is optional
+        }
+    }
+}
+
+// MARK: - Location Manager
+
+private class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
+    @Published var location: CLLocation?
+
+    private let manager = CLLocationManager()
+
+    override init() {
+        super.init()
+        manager.delegate = self
+        manager.desiredAccuracy = kCLLocationAccuracyKilometer
+        manager.requestWhenInUseAuthorization()
+        manager.startUpdatingLocation()
+    }
+
+    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        if let location = locations.first {
+            self.location = location
+            manager.stopUpdatingLocation()
+        }
+    }
+
+    func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
+        // Silently fail
     }
 }

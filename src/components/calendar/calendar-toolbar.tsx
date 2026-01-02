@@ -1,11 +1,12 @@
 "use client";
 import { TooltipTrigger } from "@radix-ui/react-tooltip";
-import { addWeeks, format, getWeek, startOfWeek, subWeeks } from "date-fns";
+import { addWeeks, format, startOfWeek, subWeeks } from "date-fns";
 import type { calendar_v3 } from "googleapis";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import * as React from "react";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent } from "@/components/ui/tooltip";
+import { WeatherWidget } from "@/components/weather-widget";
 import { CreateEventDialog } from "./create-event-dialog";
 
 interface CalendarToolbarProps {
@@ -35,22 +36,15 @@ const CalendarToolbar: React.FC<CalendarToolbarProps> = ({
     setCurrentWeekStartDate(startOfWeek(new Date(), { weekStartsOn: 1 }));
   };
 
-  const currentMonth = format(currentWeekStartDate, "MMMM");
-  const currentDay = format(currentWeekStartDate, "d");
-  const currentYear = format(currentWeekStartDate, "yyyy");
-  const currentWeek = `Week ${getWeek(currentWeekStartDate)}`;
+  const dateDisplay = format(currentWeekStartDate, "MMMM yyyy");
 
   return (
     <div
       className={`flex flex-wrap items-center justify-between gap-2 border-b border-border p-3 sm:p-4 ${className}`}
     >
-      <div className="flex items-baseline gap-1 sm:gap-2">
-        <span className="text-xl font-semibold tracking-tight sm:text-3xl">{currentMonth}</span>
-        <span className="text-xl font-semibold tracking-tight sm:text-3xl">{currentDay}</span>
-        <span className="hidden text-lg tracking-tight sm:inline sm:text-2xl">{currentYear}</span>
-        <span className="hidden font-mono text-xs text-muted-foreground sm:inline">
-          {currentWeek}
-        </span>
+      <div className="flex items-center gap-3">
+        <span className="text-lg font-semibold tracking-tight sm:text-xl">{dateDisplay}</span>
+        <WeatherWidget />
       </div>
       <div className="flex items-center gap-1">
         {calendars.length > 0 && (

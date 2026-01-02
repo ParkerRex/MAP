@@ -73,6 +73,19 @@ public class TasksService: ObservableObject {
         return updated
     }
 
+    /// Schedule or reschedule a task (pass nil to clear the due date)
+    @discardableResult
+    public func scheduleTask(_ task: MapTask, dueAt: Date?) async throws -> MapTask {
+        let request = UpdateTaskRequest(dueAt: dueAt, clearDueDate: dueAt == nil)
+        let updated = try await apiClient.updateTask(id: task.id, request)
+
+        if let index = tasks.firstIndex(where: { $0.id == task.id }) {
+            tasks[index] = updated
+        }
+
+        return updated
+    }
+
     /// Toggle task completion
     @discardableResult
     public func toggleTask(_ task: MapTask) async throws -> MapTask {
