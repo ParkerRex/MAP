@@ -187,9 +187,7 @@ struct EventFormSheet: View {
             .disabled(isSaving)
             .overlay {
                 if isSaving {
-                    ProgressView()
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                        .background(.ultraThinMaterial)
+                    LoadingOverlay(message: editingEvent == nil ? "Creating event..." : "Saving...")
                 }
             }
         }

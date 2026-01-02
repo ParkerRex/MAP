@@ -100,9 +100,11 @@ struct GoogleSignInView: View {
             Button(action: startAuthentication) {
                 HStack(spacing: 12) {
                     if isAuthenticating {
-                        ProgressView()
-                            .progressViewStyle(.circular)
-                            .tint(.primary)
+                        TypingIndicator()
+                        Text("Signing in...")
+                            .font(.body)
+                            .fontWeight(.medium)
+                            .foregroundStyle(.secondary)
                     } else {
                         GoogleLogo()
                             .frame(width: 18, height: 18)
@@ -120,6 +122,7 @@ struct GoogleSignInView: View {
                     RoundedRectangle(cornerRadius: 12, style: .continuous)
                         .stroke(Color.primary.opacity(0.1), lineWidth: 1)
                 )
+                .animation(.easeInOut(duration: 0.2), value: isAuthenticating)
             }
             .buttonStyle(.plain)
             .disabled(isAuthenticating)

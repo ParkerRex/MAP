@@ -52,8 +52,7 @@ struct RecoveryCard: View {
                     .foregroundStyle(.secondary)
             }
             if isLoading {
-                ProgressView()
-                    .frame(maxWidth: .infinity, alignment: .leading)
+                SkeletonText(width: 60, height: 24)
             } else {
                 Text(WhoopFormatter.formatRecoveryScore(recovery?.recoveryScore))
                     .font(.title2)
@@ -64,6 +63,7 @@ struct RecoveryCard: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(16)
         .mapHealthGlassSurface(cornerRadius: 16, tint: recoveryColor.opacity(0.1))
+        .animation(.easeInOut(duration: 0.25), value: isLoading)
     }
 }
 
@@ -91,8 +91,7 @@ struct StrainCard: View {
                     .foregroundStyle(.secondary)
             }
             if isLoading {
-                ProgressView()
-                    .frame(maxWidth: .infinity, alignment: .leading)
+                SkeletonText(width: 50, height: 24)
             } else {
                 Text(WhoopFormatter.formatStrain(cycle?.strainValue))
                     .font(.title2)
@@ -103,6 +102,7 @@ struct StrainCard: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(16)
         .mapHealthGlassSurface(cornerRadius: 16, tint: strainColor.opacity(0.1))
+        .animation(.easeInOut(duration: 0.25), value: isLoading)
     }
 }
 
