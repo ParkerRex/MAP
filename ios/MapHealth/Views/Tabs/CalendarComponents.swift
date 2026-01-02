@@ -194,6 +194,18 @@ struct CalendarErrorView: View {
     }
 }
 
+struct CalendarSectionHeader: View {
+    let title: String
+
+    var body: some View {
+        Text(title)
+            .font(.caption.weight(.semibold))
+            .foregroundStyle(.secondary)
+            .textCase(.uppercase)
+            .frame(maxWidth: .infinity, alignment: .leading)
+    }
+}
+
 // MARK: - Google Calendar Colors
 
 func googleCalendarColor(for colorId: String?) -> Color {

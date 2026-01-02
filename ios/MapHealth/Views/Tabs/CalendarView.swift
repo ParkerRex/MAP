@@ -19,7 +19,14 @@ struct CalendarView: View {
                     ToolbarItem(placement: .topBarLeading) {
                         calendarPickerButton
                     }
-                    ToolbarItem(placement: .topBarTrailing) {
+                    ToolbarItemGroup(placement: .topBarTrailing) {
+                        Button("Today") {
+                            withAnimation {
+                                selectedDate = Date()
+                            }
+                        }
+                        .disabled(Calendar.current.isDateInToday(selectedDate))
+
                         Button {
                             showingCreateEvent = true
                         } label: {

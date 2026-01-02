@@ -20,6 +20,15 @@ struct HealthView: View {
     @State private var needsPermission = false
     @State private var permissionDenied = false
     @State private var errorMessage: String?
+    @State private var lastUpdated: Date?
+    @State private var stepsTrend: MetricTrend?
+    @State private var caloriesTrend: MetricTrend?
+    @State private var exerciseTrend: MetricTrend?
+    @State private var standTrend: MetricTrend?
+    @State private var restingHrTrend: MetricTrend?
+    @State private var hrvTrend: MetricTrend?
+    @State private var sleepTrend: MetricTrend?
+    @State private var sleepAverage7d: Double?
 
     // WHOOP State
     @State private var whoopConnected = false
@@ -58,11 +67,17 @@ struct HealthView: View {
             }
             .contentMargins(.horizontal, 20, for: .scrollContent)
             .contentMargins(.vertical, 16, for: .scrollContent)
+            .refreshable {
+                await loadAllData()
+            }
         } else {
             ScrollView {
                 healthBody
                     .padding(.horizontal, 20)
                     .padding(.vertical, 16)
+            }
+            .refreshable {
+                await loadAllData()
             }
         }
     }
@@ -74,6 +89,10 @@ struct HealthView: View {
             } else if let error = errorMessage {
                 errorView(error)
             } else {
+                headerSection
+                dataSourcesSection
+                highlightsSection
+
                 // WHOOP Recovery & Strain (if connected)
                 if whoopConnected {
                     WhoopRecoverySection(
@@ -182,14 +201,16 @@ struct HealthView: View {
                     value: formatNumber(steps),
                     icon: "figure.walk",
                     color: .green,
-                    isLoading: isLoading
+                    isLoading: isLoading,
+                    trend: stepsTrend
                 )
                 metricCard(
                     title: "Calories",
                     value: formatNumber(activeCalories, suffix: " kcal"),
                     icon: "flame.fill",
                     color: .orange,
-                    isLoading: isLoading
+                    isLoading: isLoading,
+                    trend: caloriesTrend
                 )
             }
         }
@@ -211,12 +232,33 @@ struct HealthView: View {
                 }
 
                 if isLoading {
-                    ProgressView()
-                        .frame(maxWidth: .infinity, alignment: .leading)
+                    VStack(alignment: .leading, spacing: 12) {
+                        SkeletonText(width: 120, height: 24)
+                        SkeletonRectangle(cornerRadius: 4)
+                            .frame(height: 8)
+                        HStack(spacing: 16) {
+                            ForEach(0..<3, id: \.self) { _ in
+                                HStack(spacing: 4) {
+                                    SkeletonCircle(size: 8)
+                                    SkeletonText(width: 50, height: 12)
+                                }
+                            }
+                        }
+                    }
                 } else {
                     Text(formatSleepDuration(sleepHours))
                         .font(.title2)
                         .fontWeight(.semibold)
+
+                    if let sleepAverage7d {
+                        Text("7d avg \(formatHoursMinutes(sleepAverage7d))")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+
+                    if let trend = sleepTrend {
+                        trendChip(trend)
+                    }
 
                     if let stages = sleepStages, stages.totalAsleep > 0 {
                         sleepStagesBar(stages)
@@ -281,14 +323,16 @@ struct HealthView: View {
                     value: formatNumber(exerciseMinutes, suffix: " min"),
                     icon: "figure.run",
                     color: .cyan,
-                    isLoading: isLoading
+                    isLoading: isLoading,
+                    trend: exerciseTrend
                 )
                 metricCard(
                     title: "Stand",
                     value: formatNumber(standMinutes.map { $0 / 60 }, suffix: " hr"),
                     icon: "figure.stand",
                     color: .blue,
-                    isLoading: isLoading
+                    isLoading: isLoading,
+                    trend: standTrend
                 )
             }
         }
@@ -306,14 +350,16 @@ struct HealthView: View {
                     value: formatNumber(restingHR, suffix: " bpm"),
                     icon: "heart.fill",
                     color: .red,
-                    isLoading: isLoading
+                    isLoading: isLoading,
+                    trend: restingHrTrend
                 )
                 metricCard(
                     title: "HRV",
                     value: formatNumber(hrv, suffix: " ms"),
                     icon: "waveform.path.ecg",
                     color: .pink,
-                    isLoading: isLoading
+                    isLoading: isLoading,
+                    trend: hrvTrend
                 )
             }
         }
@@ -324,7 +370,8 @@ struct HealthView: View {
         value: String,
         icon: String,
         color: Color,
-        isLoading: Bool
+        isLoading: Bool,
+        trend: MetricTrend? = nil
     ) -> some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
@@ -335,17 +382,20 @@ struct HealthView: View {
                     .foregroundStyle(.secondary)
             }
             if isLoading {
-                ProgressView()
-                    .frame(maxWidth: .infinity, alignment: .leading)
+                SkeletonText(width: 80, height: 22)
             } else {
                 Text(value)
                     .font(.title3)
                     .fontWeight(.semibold)
+                if let trend {
+                    trendChip(trend)
+                }
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(16)
-        .mapHealthGlassSurface(cornerRadius: 16, tint: .accentColor.opacity(0.04))
+        .mapHealthGlassSurface(cornerRadius: 16, tint: color.opacity(0.04))
+        .animation(.easeInOut(duration: 0.25), value: isLoading)
     }
 
     private var refreshButton: some View {
@@ -401,6 +451,7 @@ private extension HealthView {
         async let healthKitTask: () = loadHealthData()
         async let whoopTask: () = loadWhoopData()
         _ = await (healthKitTask, whoopTask)
+        lastUpdated = Date()
     }
 
     func loadHealthData() async {
@@ -438,6 +489,14 @@ private extension HealthView {
             restingHR = restingHRArr.last.flatMap { $0 > 0 ? $0 : nil }
             hrv = hrvArr.last.flatMap { $0 > 0 ? $0 : nil }
             sleepHours = sleepArr.last.flatMap { $0 > 0 ? $0 : nil }
+            stepsTrend = makeTrend(current: steps, history: stepsArr)
+            caloriesTrend = makeTrend(current: activeCalories, history: caloriesArr)
+            exerciseTrend = makeTrend(current: exerciseMinutes, history: exerciseArr)
+            standTrend = makeTrend(current: standMinutes, history: standArr)
+            restingHrTrend = makeTrend(current: restingHR, history: restingHRArr, higherIsBetter: false)
+            hrvTrend = makeTrend(current: hrv, history: hrvArr)
+            sleepTrend = makeTrend(current: sleepHours, history: sleepArr)
+            sleepAverage7d = averageRecent(sleepArr, count: 7)
 
             if let lastStages = sleepStagesArr.last, !lastStages.isEmpty {
                 sleepStages = SleepStages(
@@ -516,5 +575,260 @@ private extension HealthView {
             return "\(wholeHours)h \(minutes)m"
         }
         return "\(minutes)m"
+    }
+}
+
+// MARK: - Summary UI
+
+private extension HealthView {
+    var headerSection: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Health Summary")
+                .font(.title2)
+                .fontWeight(.semibold)
+
+            HStack(spacing: 8) {
+                Text(Date(), format: .dateTime.weekday(.wide).month(.abbreviated).day())
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                if let lastUpdated {
+                    Text("• Updated")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                    Text(lastUpdated, style: .relative)
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                }
+            }
+        }
+    }
+
+    var dataSourcesSection: some View {
+        HStack(spacing: 8) {
+            statusChip(
+                title: "Apple Health",
+                status: healthKitStatus.title,
+                color: healthKitStatus.color,
+                icon: "heart.text.square"
+            )
+            statusChip(
+                title: "WHOOP",
+                status: whoopStatus.title,
+                color: whoopStatus.color,
+                icon: "bolt.heart"
+            )
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    var highlightsSection: some View {
+        let highlights = makeHighlights()
+        return Group {
+            if !highlights.isEmpty {
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("Highlights")
+                        .font(.headline)
+                        .foregroundStyle(.secondary)
+
+                    VStack(spacing: 10) {
+                        ForEach(highlights) { highlight in
+                            highlightRow(highlight)
+                        }
+                    }
+                    .padding(16)
+                    .mapHealthGlassSurface(cornerRadius: 18, tint: .accentColor.opacity(0.06))
+                }
+            }
+        }
+    }
+
+    var healthKitStatus: StatusChip {
+        if permissionDenied {
+            return StatusChip(title: "Denied", color: .orange)
+        }
+        if needsPermission {
+            return StatusChip(title: "Needs Access", color: .orange)
+        }
+        if isLoading {
+            return StatusChip(title: "Loading", color: .secondary)
+        }
+        return StatusChip(title: "Connected", color: .green)
+    }
+
+    var whoopStatus: StatusChip {
+        if !apiClient.isAuthenticated {
+            return StatusChip(title: "Not Linked", color: .secondary)
+        }
+        if isLoadingWhoop {
+            return StatusChip(title: "Syncing", color: .secondary)
+        }
+        if whoopConnected {
+            return StatusChip(title: "Connected", color: .green)
+        }
+        return StatusChip(title: "Not Connected", color: .orange)
+    }
+
+    func statusChip(title: String, status: String, color: Color, icon: String) -> some View {
+        HStack(spacing: 6) {
+            Image(systemName: icon)
+                .foregroundStyle(color)
+            Text(title)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+            Text(status)
+                .font(.caption)
+                .fontWeight(.semibold)
+                .foregroundStyle(color)
+        }
+        .padding(.horizontal, 10)
+        .padding(.vertical, 6)
+        .mapHealthGlassSurface(cornerRadius: 12, tint: color.opacity(0.08))
+    }
+}
+
+// MARK: - Trends
+
+private extension HealthView {
+    struct StatusChip {
+        let title: String
+        let color: Color
+    }
+
+    struct MetricTrend {
+        let label: String
+        let isPositive: Bool
+        let delta: Double
+    }
+
+    struct Highlight: Identifiable {
+        let id = UUID()
+        let title: String
+        let detail: String
+        let icon: String
+        let color: Color
+    }
+
+    func makeTrend(current: Double?, history: [Double], higherIsBetter: Bool = true) -> MetricTrend? {
+        guard let current, current > 0 else { return nil }
+        let valid = history.filter { $0 > 0 }
+        guard valid.count >= 4 else { return nil }
+        let previous = Array(valid.dropLast()).suffix(7)
+        guard !previous.isEmpty else { return nil }
+        let avg = previous.reduce(0, +) / Double(previous.count)
+        guard avg > 0 else { return nil }
+        let delta = (current - avg) / avg
+        let magnitude = Swift.abs(delta)
+        if magnitude < 0.02 {
+            return MetricTrend(label: "On 7d avg", isPositive: true, delta: 0)
+        }
+        let percent = Int((magnitude * 100).rounded())
+        let label = "\(percent)% \(delta >= 0 ? "above" : "below") 7d avg"
+        let isPositive = higherIsBetter ? delta >= 0 : delta <= 0
+        return MetricTrend(label: label, isPositive: isPositive, delta: delta)
+    }
+
+    func trendChip(_ trend: MetricTrend) -> some View {
+        HStack(spacing: 4) {
+            Image(systemName: trend.isPositive ? "arrow.up.right" : "arrow.down.right")
+            Text(trend.label)
+        }
+        .font(.caption2)
+        .fontWeight(.semibold)
+        .padding(.horizontal, 8)
+        .padding(.vertical, 4)
+        .foregroundStyle(trend.isPositive ? .green : .orange)
+        .mapHealthGlassSurface(
+            cornerRadius: 10,
+            tint: (trend.isPositive ? Color.green : Color.orange).opacity(0.12)
+        )
+        .accessibilityLabel(trend.label)
+    }
+
+    func averageRecent(_ history: [Double], count: Int) -> Double? {
+        let valid = history.filter { $0 > 0 }
+        guard !valid.isEmpty else { return nil }
+        let slice = valid.suffix(count)
+        guard !slice.isEmpty else { return nil }
+        let total = slice.reduce(0, +)
+        return total / Double(slice.count)
+    }
+
+    func makeHighlights() -> [Highlight] {
+        struct HighlightCandidate {
+            let name: String
+            let trend: MetricTrend
+            let icon: String
+            let color: Color
+        }
+
+        struct HighlightEntry {
+            let name: String
+            let trend: MetricTrend?
+            let icon: String
+            let color: Color
+        }
+
+        let entries: [HighlightEntry] = [
+            HighlightEntry(name: "Steps", trend: stepsTrend, icon: "figure.walk", color: .green),
+            HighlightEntry(name: "Calories", trend: caloriesTrend, icon: "flame.fill", color: .orange),
+            HighlightEntry(name: "Exercise", trend: exerciseTrend, icon: "figure.run", color: .cyan),
+            HighlightEntry(name: "Stand", trend: standTrend, icon: "figure.stand", color: .blue),
+            HighlightEntry(name: "Resting HR", trend: restingHrTrend, icon: "heart.fill", color: .red),
+            HighlightEntry(name: "HRV", trend: hrvTrend, icon: "waveform.path.ecg", color: .pink),
+            HighlightEntry(name: "Sleep", trend: sleepTrend, icon: "moon.fill", color: .indigo)
+        ]
+
+        let trends = entries.compactMap { entry -> HighlightCandidate? in
+            guard let trend = entry.trend else { return nil }
+            return HighlightCandidate(name: entry.name, trend: trend, icon: entry.icon, color: entry.color)
+        }
+
+        guard !trends.isEmpty else { return [] }
+
+        let best = trends.max { $0.trend.delta < $1.trend.delta }
+        let worst = trends.min { $0.trend.delta < $1.trend.delta }
+
+        var highlights: [Highlight] = []
+        if let best, best.trend.delta > 0.02 {
+            highlights.append(
+                Highlight(
+                    title: "Up today",
+                    detail: "\(best.name) • \(best.trend.label)",
+                    icon: best.icon,
+                    color: best.color
+                )
+            )
+        }
+        if let worst, worst.trend.delta < -0.02 {
+            highlights.append(
+                Highlight(
+                    title: "Needs attention",
+                    detail: "\(worst.name) • \(worst.trend.label)",
+                    icon: worst.icon,
+                    color: .orange
+                )
+            )
+        }
+
+        return highlights
+    }
+
+    func highlightRow(_ highlight: Highlight) -> some View {
+        HStack(spacing: 12) {
+            Image(systemName: highlight.icon)
+                .font(.subheadline)
+                .foregroundStyle(highlight.color)
+            VStack(alignment: .leading, spacing: 4) {
+                Text(highlight.title)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                Text(highlight.detail)
+                    .font(.subheadline)
+                    .fontWeight(.semibold)
+            }
+            Spacer()
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .accessibilityElement(children: .combine)
     }
 }

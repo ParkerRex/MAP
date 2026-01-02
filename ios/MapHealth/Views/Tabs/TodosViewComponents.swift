@@ -67,16 +67,19 @@ struct CompletedTasksSection<Row: View>: View {
 
 struct TasksLoadingView: View {
     var body: some View {
-        VStack(spacing: 16) {
-            ProgressView()
-                .scaleEffect(1.2)
-            Text("Loading tasks...")
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
+        VStack(spacing: 12) {
+            // Section header skeleton
+            HStack(spacing: 6) {
+                SkeletonCircle(size: 16)
+                SkeletonText(width: 80, height: 14)
+                Spacer()
+            }
+            .padding(.horizontal, 4)
+
+            // Task row skeletons
+            SkeletonTasksList(count: 4)
         }
-        .frame(maxWidth: .infinity)
-        .padding(40)
-        .mapHealthGlassSurface(cornerRadius: 20, tint: .accentColor.opacity(0.04))
+        .transition(.opacity.combined(with: .scale(scale: 0.98)))
     }
 }
 
@@ -105,6 +108,8 @@ struct TasksErrorView: View {
 }
 
 struct TasksEmptyView: View {
+    let onAdd: () -> Void
+
     var body: some View {
         VStack(spacing: 16) {
             Image(systemName: "checkmark.circle")
@@ -113,12 +118,39 @@ struct TasksEmptyView: View {
             Text("All caught up!")
                 .font(.title3)
                 .fontWeight(.semibold)
-            Text("Tap the + button to add a task")
+            Text("Tap Add a Task or the + button to get started")
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
+            Button("Add a Task", action: onAdd)
+                .mapHealthGlassButtonStyle(prominent: true)
         }
         .frame(maxWidth: .infinity)
         .padding(40)
         .mapHealthGlassSurface(cornerRadius: 20, tint: .green.opacity(0.06))
+    }
+}
+
+struct TasksNoResultsView: View {
+    let title: String
+    let message: String
+    let onClear: () -> Void
+
+    var body: some View {
+        VStack(spacing: 12) {
+            Image(systemName: "magnifyingglass")
+                .font(.system(size: 40))
+                .foregroundStyle(.secondary)
+            Text(title)
+                .font(.headline)
+            Text(message)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
+            Button("Clear Filters", action: onClear)
+                .mapHealthGlassButtonStyle(prominent: false)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(32)
+        .mapHealthGlassSurface(cornerRadius: 20, tint: .secondary.opacity(0.06))
     }
 }

@@ -42,35 +42,81 @@ struct DayCalendarView: View {
                 Spacer()
 
                 if calendarService.isLoading {
-                    ProgressView()
-                        .scaleEffect(0.8)
+                    TypingIndicator()
                 }
             }
 
             if let error = calendarService.error {
                 CalendarErrorView(message: error.localizedDescription)
-            } else if eventsForDay.isEmpty && !calendarService.isLoading {
+            } else if calendarService.isLoading && eventsForDay.isEmpty {
+                SkeletonCalendarList(count: 3)
+            } else if eventsForDay.isEmpty {
                 CalendarEmptyStateView(onCreateEvent: onCreateEvent)
             } else {
-                VStack(spacing: 8) {
-                    ForEach(eventsForDay) { event in
-                        CalendarEventRow(
-                            event: event,
-                            calendarService: calendarService,
-                            onTap: { onEventTap(event) },
-                            onDelete: { onEventDelete(event) }
-                        )
+                VStack(spacing: 12) {
+                    if !allDayEvents.isEmpty {
+                        CalendarSectionHeader(title: "All-day")
+                            .padding(.leading, 4)
+                        VStack(spacing: 8) {
+                            ForEach(allDayEvents) { event in
+                                CalendarEventRow(
+                                    event: event,
+                                    calendarService: calendarService,
+                                    onTap: { onEventTap(event) },
+                                    onDelete: { onEventDelete(event) }
+                                )
+                            }
+                        }
+                    }
+
+                    if !timedEvents.isEmpty {
+                        CalendarSectionHeader(title: "Scheduled")
+                            .padding(.leading, 4)
+                        VStack(spacing: 8) {
+                            ForEach(timedEvents) { event in
+                                CalendarEventRow(
+                                    event: event,
+                                    calendarService: calendarService,
+                                    onTap: { onEventTap(event) },
+                                    onDelete: { onEventDelete(event) }
+                                )
+                            }
+                        }
                     }
                 }
             }
         }
+        .animation(.easeInOut(duration: 0.25), value: calendarService.isLoading)
     }
 
     private var eventsForDay: [CalendarEvent] {
         let calendar = Calendar.current
-        return calendarService.events.filter { event in
+        let events = calendarService.events.filter { event in
             guard let startDate = event.startDate else { return false }
             return calendar.isDate(startDate, inSameDayAs: selectedDate)
+        }
+        return sortEvents(events)
+    }
+
+    private var allDayEvents: [CalendarEvent] {
+        eventsForDay.filter { $0.isAllDay }
+    }
+
+    private var timedEvents: [CalendarEvent] {
+        eventsForDay.filter { !$0.isAllDay }
+    }
+
+    private func sortEvents(_ events: [CalendarEvent]) -> [CalendarEvent] {
+        events.sorted { lhs, rhs in
+            if lhs.isAllDay != rhs.isAllDay {
+                return lhs.isAllDay && !rhs.isAllDay
+            }
+            let lhsDate = lhs.startDate ?? .distantPast
+            let rhsDate = rhs.startDate ?? .distantPast
+            if lhsDate != rhsDate {
+                return lhsDate < rhsDate
+            }
+            return (lhs.summary ?? "") < (rhs.summary ?? "")
         }
     }
 }
@@ -93,12 +139,15 @@ struct WeekCalendarView: View {
 
             if let error = calendarService.error {
                 CalendarErrorView(message: error.localizedDescription)
-            } else if calendarService.events.isEmpty && !calendarService.isLoading {
+            } else if calendarService.isLoading && calendarService.events.isEmpty {
+                SkeletonCalendarList(count: 4)
+            } else if calendarService.events.isEmpty {
                 CalendarEmptyStateView(onCreateEvent: onCreateEvent)
             } else {
                 weekEventsGrid
             }
         }
+        .animation(.easeInOut(duration: 0.25), value: calendarService.isLoading)
     }
 
     private var weekNavigationHeader: some View {
@@ -114,12 +163,11 @@ struct WeekCalendarView: View {
 
             Spacer()
 
-            VStack(spacing: 2) {
+            VStack(spacing: 4) {
                 Text(weekRangeText)
                     .font(.headline)
                 if calendarService.isLoading {
-                    ProgressView()
-                        .scaleEffect(0.6)
+                    TypingIndicator()
                 }
             }
 
@@ -167,6 +215,38 @@ struct WeekCalendarView: View {
                                 Circle().stroke(Color.accentColor, lineWidth: 2)
                             }
                         }
+
+                    let count = eventsForDate(date).count
+                    if count > 0 {
+                        let dotColor = isToday(date) ? Color.white.opacity(0.9) : Color.accentColor
+                        HStack(spacing: 2) {
+                            if count <= 3 {
+                                ForEach(0..<count, id: \.self) { _ in
+                                    Circle()
+                                        .fill(dotColor)
+                                        .frame(width: 4, height: 4)
+                                }
+                            } else {
+                                ForEach(0..<2, id: \.self) { _ in
+                                    Circle()
+                                        .fill(dotColor)
+                                        .frame(width: 4, height: 4)
+                                }
+                                Text("+")
+                                    .font(.caption2.weight(.semibold))
+                                    .foregroundStyle(dotColor)
+                                    .padding(.horizontal, 2)
+                                    .padding(.vertical, 1)
+                                    .background(
+                                        Capsule()
+                                            .stroke(dotColor.opacity(0.7), lineWidth: 1)
+                                    )
+                            }
+                        }
+                        .frame(height: 6)
+                    } else {
+                        Color.clear.frame(height: 6)
+                    }
                 }
                 .frame(maxWidth: .infinity)
                 .onTapGesture {
@@ -211,14 +291,29 @@ struct WeekCalendarView: View {
     }
 
     private func eventsForDate(_ date: Date) -> [CalendarEvent] {
-        calendarService.events.filter { event in
+        let events = calendarService.events.filter { event in
             guard let startDate = event.startDate else { return false }
             return calendar.isDate(startDate, inSameDayAs: date)
         }
+        return sortEvents(events)
     }
 
     private func isToday(_ date: Date) -> Bool { calendar.isDateInToday(date) }
     private func isSelected(_ date: Date) -> Bool { calendar.isDate(date, inSameDayAs: selectedDate) }
+
+    private func sortEvents(_ events: [CalendarEvent]) -> [CalendarEvent] {
+        events.sorted { lhs, rhs in
+            if lhs.isAllDay != rhs.isAllDay {
+                return lhs.isAllDay && !rhs.isAllDay
+            }
+            let lhsDate = lhs.startDate ?? .distantPast
+            let rhsDate = rhs.startDate ?? .distantPast
+            if lhsDate != rhsDate {
+                return lhsDate < rhsDate
+            }
+            return (lhs.summary ?? "") < (rhs.summary ?? "")
+        }
+    }
 }
 
 // MARK: - Month Calendar View
@@ -259,12 +354,11 @@ struct MonthCalendarView: View {
 
             Spacer()
 
-            VStack(spacing: 2) {
+            VStack(spacing: 4) {
                 Text(selectedDate.formatted(.dateTime.month(.wide).year()))
                     .font(.headline)
                 if calendarService.isLoading {
-                    ProgressView()
-                        .scaleEffect(0.6)
+                    TypingIndicator()
                 }
             }
 
@@ -326,21 +420,45 @@ struct MonthCalendarView: View {
             }
 
             let dayEvents = eventsForDate(selectedDate)
-            if dayEvents.isEmpty && !calendarService.isLoading {
+            if calendarService.isLoading && dayEvents.isEmpty {
+                SkeletonCalendarList(count: 2)
+            } else if dayEvents.isEmpty {
                 CalendarEmptyStateView(onCreateEvent: onCreateEvent)
             } else {
-                VStack(spacing: 8) {
-                    ForEach(dayEvents) { event in
-                        CalendarEventRow(
-                            event: event,
-                            calendarService: calendarService,
-                            onTap: { onEventTap(event) },
-                            onDelete: { onEventDelete(event) }
-                        )
+                VStack(spacing: 12) {
+                    if !allDayEvents(for: selectedDate).isEmpty {
+                        CalendarSectionHeader(title: "All-day")
+                            .padding(.leading, 4)
+                        VStack(spacing: 8) {
+                            ForEach(allDayEvents(for: selectedDate)) { event in
+                                CalendarEventRow(
+                                    event: event,
+                                    calendarService: calendarService,
+                                    onTap: { onEventTap(event) },
+                                    onDelete: { onEventDelete(event) }
+                                )
+                            }
+                        }
+                    }
+
+                    if !timedEvents(for: selectedDate).isEmpty {
+                        CalendarSectionHeader(title: "Scheduled")
+                            .padding(.leading, 4)
+                        VStack(spacing: 8) {
+                            ForEach(timedEvents(for: selectedDate)) { event in
+                                CalendarEventRow(
+                                    event: event,
+                                    calendarService: calendarService,
+                                    onTap: { onEventTap(event) },
+                                    onDelete: { onEventDelete(event) }
+                                )
+                            }
+                        }
                     }
                 }
             }
         }
+        .animation(.easeInOut(duration: 0.25), value: calendarService.isLoading)
     }
 
     private var monthDays: [Date?] {
@@ -369,9 +487,32 @@ struct MonthCalendarView: View {
     }
 
     private func eventsForDate(_ date: Date) -> [CalendarEvent] {
-        calendarService.events.filter { event in
+        let events = calendarService.events.filter { event in
             guard let startDate = event.startDate else { return false }
             return calendar.isDate(startDate, inSameDayAs: date)
+        }
+        return sortEvents(events)
+    }
+
+    private func allDayEvents(for date: Date) -> [CalendarEvent] {
+        eventsForDate(date).filter { $0.isAllDay }
+    }
+
+    private func timedEvents(for date: Date) -> [CalendarEvent] {
+        eventsForDate(date).filter { !$0.isAllDay }
+    }
+
+    private func sortEvents(_ events: [CalendarEvent]) -> [CalendarEvent] {
+        events.sorted { lhs, rhs in
+            if lhs.isAllDay != rhs.isAllDay {
+                return lhs.isAllDay && !rhs.isAllDay
+            }
+            let lhsDate = lhs.startDate ?? .distantPast
+            let rhsDate = rhs.startDate ?? .distantPast
+            if lhsDate != rhsDate {
+                return lhsDate < rhsDate
+            }
+            return (lhs.summary ?? "") < (rhs.summary ?? "")
         }
     }
 }

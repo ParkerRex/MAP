@@ -8,6 +8,8 @@ struct TodosView: View {
     @State private var quickAddText = ""
     @State private var isQuickAddFocused = false
     @State private var quickAddDate: Date?
+    @State private var filter: TaskListFilter = .all
+    @State private var searchText = ""
     @FocusState private var quickAddFieldFocused: Bool
 
     var body: some View {
@@ -16,6 +18,7 @@ struct TodosView: View {
                 scrollContent
                     .navigationTitle("Tasks")
                     .toolbar { toolbarContent }
+                    .searchable(text: $searchText, prompt: "Search tasks")
                     .refreshable { await tasksService.refresh() }
                     .task { await loadTasksIfNeeded() }
                     .sheet(isPresented: $showingAddSheet) {
@@ -56,11 +59,7 @@ struct TodosView: View {
 extension TodosView {
     private var floatingAddButton: some View {
         Button {
-            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-                isQuickAddFocused = true
-                quickAddFieldFocused = true
-            }
-            HapticFeedback.light()
+            focusQuickAdd()
         } label: {
             Image(systemName: "plus")
                 .font(.title2.weight(.semibold))
@@ -149,6 +148,8 @@ extension TodosView {
 extension TodosView {
     private var todosBody: some View {
         LazyVStack(spacing: 16) {
+            filterBar
+
             if tasksService.isLoading && tasksService.tasks.isEmpty {
                 TasksLoadingView()
             } else if let error = tasksService.error {
@@ -156,8 +157,17 @@ extension TodosView {
                     Task { await tasksService.fetchTasks() }
                 }
             } else if tasksService.tasks.isEmpty {
-                TasksEmptyView()
+                TasksEmptyView(onAdd: focusQuickAdd)
+            } else if !hasVisibleTasks {
+                TasksNoResultsView(
+                    title: searchQuery.isEmpty ? "No tasks to show" : "No matching tasks",
+                    message: searchQuery.isEmpty ? filter.emptyStateMessage : "Try a different keyword or filter.",
+                    onClear: clearSearchAndFilter
+                )
             } else {
+                if !isQuickAddFocused {
+                    quickAddPromptCard
+                }
                 taskSections
             }
         }
@@ -166,30 +176,29 @@ extension TodosView {
 
     @ViewBuilder
     private var taskSections: some View {
-        if !tasksService.overdueTasks.isEmpty {
+        let overdueTasks = filteredOverdueTasks
+        if !overdueTasks.isEmpty {
             TaskSectionView(
                 title: "Overdue",
                 icon: "exclamationmark.circle.fill",
                 color: .red,
-                tasks: tasksService.overdueTasks,
+                tasks: overdueTasks,
                 rowBuilder: todoRow
             )
         }
 
-        if !tasksService.todaysTasks.isEmpty {
+        let todaysTasks = filteredTodaysTasks
+        if !todaysTasks.isEmpty {
             TaskSectionView(
                 title: "Today",
                 icon: "sun.max.fill",
                 color: .orange,
-                tasks: tasksService.todaysTasks,
+                tasks: todaysTasks,
                 rowBuilder: todoRow
             )
         }
 
-        let upcoming = tasksService.upcomingTasks.filter { task in
-            guard let dueAt = task.dueAt else { return false }
-            return !Calendar.current.isDateInToday(dueAt) && dueAt >= Date()
-        }
+        let upcoming = filteredUpcomingTasks
         if !upcoming.isEmpty {
             TaskSectionView(
                 title: "Upcoming",
@@ -200,7 +209,7 @@ extension TodosView {
             )
         }
 
-        let noDueDate = tasksService.pendingTasks.filter { $0.dueAt == nil }
+        let noDueDate = filteredAnytimeTasks
         if !noDueDate.isEmpty {
             TaskSectionView(
                 title: "Anytime",
@@ -211,12 +220,121 @@ extension TodosView {
             )
         }
 
-        if !tasksService.completedTasks.isEmpty {
+        let completedTasks = filteredCompletedTasks
+        if !completedTasks.isEmpty {
             CompletedTasksSection(
-                tasks: tasksService.completedTasks,
+                tasks: completedTasks,
                 rowBuilder: todoRow
             )
         }
+    }
+
+    private var filteredUpcomingTasks: [MapTask] {
+        guard filter != .completed else { return [] }
+        return tasksService.upcomingTasks
+            .filter { task in
+                guard let dueAt = task.dueAt else { return false }
+                return !Calendar.current.isDateInToday(dueAt) && dueAt >= Date()
+            }
+            .filter(matchesSearch)
+    }
+
+    private var filteredAnytimeTasks: [MapTask] {
+        guard filter != .completed else { return [] }
+        return tasksService.pendingTasks
+            .filter { $0.dueAt == nil }
+            .filter(matchesSearch)
+    }
+
+    private var filteredOverdueTasks: [MapTask] {
+        guard filter != .completed else { return [] }
+        return tasksService.overdueTasks.filter(matchesSearch)
+    }
+
+    private var filteredTodaysTasks: [MapTask] {
+        guard filter != .completed else { return [] }
+        return tasksService.todaysTasks.filter(matchesSearch)
+    }
+
+    private var filteredCompletedTasks: [MapTask] {
+        guard filter != .active else { return [] }
+        return tasksService.completedTasks.filter(matchesSearch)
+    }
+
+    private var hasVisibleTasks: Bool {
+        !filteredOverdueTasks.isEmpty ||
+        !filteredTodaysTasks.isEmpty ||
+        !filteredUpcomingTasks.isEmpty ||
+        !filteredAnytimeTasks.isEmpty ||
+        !filteredCompletedTasks.isEmpty
+    }
+
+    private var filterBar: some View {
+        Picker("Filter", selection: $filter) {
+            ForEach(TaskListFilter.allCases, id: \.self) { option in
+                Text(option.title).tag(option)
+            }
+        }
+        .pickerStyle(.segmented)
+    }
+
+    private var quickAddPromptCard: some View {
+        Button(action: focusQuickAdd) {
+            HStack(spacing: 12) {
+                ZStack {
+                    Circle()
+                        .fill(Color.accentColor.opacity(0.15))
+                        .frame(width: 36, height: 36)
+                    Image(systemName: "plus")
+                        .font(.headline.weight(.semibold))
+                        .foregroundStyle(.accent)
+                }
+
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Quick add")
+                        .font(.subheadline.weight(.semibold))
+                    Text("Capture a task fast with optional due date")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+
+                Spacer()
+
+                Image(systemName: "chevron.up")
+                    .font(.footnote.weight(.semibold))
+                    .foregroundStyle(.secondary)
+            }
+            .padding(.horizontal, 14)
+            .padding(.vertical, 12)
+        }
+        .buttonStyle(.plain)
+        .mapHealthGlassSurface(cornerRadius: 14, tint: .accentColor.opacity(0.05))
+    }
+
+    private var searchQuery: String {
+        searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    private func matchesSearch(_ task: MapTask) -> Bool {
+        let query = searchQuery
+        guard !query.isEmpty else { return true }
+
+        if task.title.localizedCaseInsensitiveContains(query) { return true }
+        if let body = task.body, body.localizedCaseInsensitiveContains(query) { return true }
+        return task.tags.contains { $0.title.localizedCaseInsensitiveContains(query) }
+    }
+
+    private func focusQuickAdd() {
+        withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+            isQuickAddFocused = true
+            quickAddFieldFocused = true
+        }
+        HapticFeedback.light()
+    }
+
+    private func clearSearchAndFilter() {
+        searchText = ""
+        filter = .all
     }
 
     private func todoRow(_ task: MapTask) -> some View {
@@ -236,5 +354,30 @@ extension TodosView {
                 Task { try? await tasksService.scheduleTask(task, dueAt: date) }
             }
         )
+    }
+}
+
+private enum TaskListFilter: String, CaseIterable {
+    case all
+    case active
+    case completed
+
+    var title: String {
+        switch self {
+        case .all: return "All"
+        case .active: return "Active"
+        case .completed: return "Completed"
+        }
+    }
+
+    var emptyStateMessage: String {
+        switch self {
+        case .all:
+            return "Try showing active tasks or completed tasks."
+        case .active:
+            return "You are all caught up on active tasks."
+        case .completed:
+            return "No completed tasks yet."
+        }
     }
 }
