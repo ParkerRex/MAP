@@ -22,7 +22,8 @@ struct ChatView: View {
                     get: { healthDataInterpreter.messages },
                     set: { healthDataInterpreter.messages = $0 }
                 ),
-                isInputEnabled: !healthDataInterpreter.isGenerating
+                isInputEnabled: !healthDataInterpreter.isGenerating,
+                isGenerating: healthDataInterpreter.isGenerating
             )
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {

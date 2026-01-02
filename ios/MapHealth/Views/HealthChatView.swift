@@ -23,7 +23,8 @@ struct HealthChatView: View {
                     get: { healthDataInterpreter.messages },
                     set: { healthDataInterpreter.messages = $0 }
                 ),
-                isInputEnabled: !healthDataInterpreter.isGenerating
+                isInputEnabled: !healthDataInterpreter.isGenerating,
+                isGenerating: healthDataInterpreter.isGenerating
             )
             .navigationTitle("APP_TITLE")
             .toolbar {

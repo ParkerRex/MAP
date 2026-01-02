@@ -68,6 +68,61 @@ public class MapAPIClient {
         )
     }
 
+    // MARK: - Tasks
+
+    /// Get all tasks for the current user
+    public func getTasks() async throws -> [MapTask] {
+        return try await request(
+            endpoint: "/api/tasks",
+            method: "GET",
+            responseType: TasksResponse.self
+        ).tasks
+    }
+
+    /// Create a new task
+    public func createTask(_ request: CreateTaskRequest) async throws -> MapTask {
+        return try await self.request(
+            endpoint: "/api/tasks",
+            method: "POST",
+            body: request,
+            responseType: TaskResponse.self
+        ).task
+    }
+
+    /// Update an existing task
+    public func updateTask(id: String, _ request: UpdateTaskRequest) async throws -> MapTask {
+        return try await self.request(
+            endpoint: "/api/tasks/\(id)",
+            method: "PUT",
+            body: request,
+            responseType: TaskResponse.self
+        ).task
+    }
+
+    /// Toggle task completion status
+    public func toggleTask(id: String, completed: Bool) async throws -> MapTask {
+        let request = UpdateTaskRequest(completed: completed)
+        return try await updateTask(id: id, request)
+    }
+
+    /// Delete a task
+    public func deleteTask(id: String) async throws {
+        _ = try await request(
+            endpoint: "/api/tasks/\(id)",
+            method: "DELETE",
+            responseType: SuccessResponse.self
+        )
+    }
+
+    /// Get all tags for the current user
+    public func getTags() async throws -> [TaskTag] {
+        return try await request(
+            endpoint: "/api/tags",
+            method: "GET",
+            responseType: TagsResponse.self
+        ).tags
+    }
+
     // MARK: - Health Data Sync
 
     /// Sync health data to Map backend
@@ -92,6 +147,39 @@ public class MapAPIClient {
             endpoint: "/api/health/apple-health/status",
             method: "GET",
             responseType: HealthConnectionStatus.self
+        )
+    }
+
+    // MARK: - Calendar
+
+    /// Get user's calendars
+    public func getCalendars(refresh: Bool = false) async throws -> [CalendarInfo] {
+        let endpoint = refresh ? "/api/calendar/calendars?refresh=true" : "/api/calendar/calendars"
+        return try await request(
+            endpoint: endpoint,
+            method: "GET",
+            responseType: CalendarsResponse.self
+        ).calendars
+    }
+
+    /// Get events for a date range
+    public func getEvents(
+        calendarId: String = "primary",
+        timeMin: Date,
+        timeMax: Date,
+        timeZone: String? = nil
+    ) async throws -> EventsResponse {
+        var endpoint = "/api/calendar/events?calendarId=\(calendarId)"
+        endpoint += "&timeMin=\(timeMin.iso8601String)"
+        endpoint += "&timeMax=\(timeMax.iso8601String)"
+        if let tz = timeZone {
+            endpoint += "&timeZone=\(tz)"
+        }
+
+        return try await request(
+            endpoint: endpoint,
+            method: "GET",
+            responseType: EventsResponse.self
         )
     }
 
@@ -185,6 +273,10 @@ public class MapAPIClient {
 private struct Empty: Encodable {}
 
 private struct EmptyResponse: Codable {}
+
+private struct SuccessResponse: Codable {
+    let success: Bool
+}
 
 // MARK: - Response Types
 

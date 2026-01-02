@@ -22,7 +22,7 @@ public final class HealthDataFetcher {
         let query = HKStatisticsCollectionQueryDescriptor(
             predicate: quantityLastTwoWeeks,
             options: options,
-            anchorDate: Date.startOfDay(),
+            anchorDate: Date.startOfToday(),
             intervalComponents: DateComponents(day: 1)
         )
 
@@ -31,7 +31,7 @@ public final class HealthDataFetcher {
 
         quantityCounts.enumerateStatistics(
             from: Date().twoWeeksAgoStartOfDay(),
-            to: Date.startOfDay()
+            to: Date.startOfToday()
         ) { statistics, _ in
             if let quantity = statistics.sumQuantity() {
                 dailyData.append(quantity.doubleValue(for: unit))
@@ -145,9 +145,9 @@ public final class HealthDataFetcher {
         var dailySleepData: [Double] = []
 
         for day in -14..<0 {
-            guard let startOfSleepDay = Calendar.current.date(byAdding: DateComponents(day: day - 1), to: Date.startOfDay()),
+            guard let startOfSleepDay = Calendar.current.date(byAdding: DateComponents(day: day - 1), to: Date.startOfToday()),
                   let startOfSleep = Calendar.current.date(bySettingHour: 15, minute: 0, second: 0, of: startOfSleepDay),
-                  let endOfSleepDay = Calendar.current.date(byAdding: DateComponents(day: day), to: Date.startOfDay()),
+                  let endOfSleepDay = Calendar.current.date(byAdding: DateComponents(day: day), to: Date.startOfToday()),
                   let endOfSleep = Calendar.current.date(bySettingHour: 15, minute: 0, second: 0, of: endOfSleepDay) else {
                 dailySleepData.append(0)
                 continue
@@ -180,9 +180,9 @@ public final class HealthDataFetcher {
         var dailySleepStages: [[String: Double]] = []
 
         for day in -14..<0 {
-            guard let startOfSleepDay = Calendar.current.date(byAdding: DateComponents(day: day - 1), to: Date.startOfDay()),
+            guard let startOfSleepDay = Calendar.current.date(byAdding: DateComponents(day: day - 1), to: Date.startOfToday()),
                   let startOfSleep = Calendar.current.date(bySettingHour: 15, minute: 0, second: 0, of: startOfSleepDay),
-                  let endOfSleepDay = Calendar.current.date(byAdding: DateComponents(day: day), to: Date.startOfDay()),
+                  let endOfSleepDay = Calendar.current.date(byAdding: DateComponents(day: day), to: Date.startOfToday()),
                   let endOfSleep = Calendar.current.date(bySettingHour: 15, minute: 0, second: 0, of: endOfSleepDay) else {
                 dailySleepStages.append([:])
                 continue

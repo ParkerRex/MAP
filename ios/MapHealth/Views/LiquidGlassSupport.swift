@@ -46,4 +46,3 @@ extension View {
             .mapHealthGlassSurface(cornerRadius: 20, tint: tint)
     }
 }
-
