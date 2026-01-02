@@ -2,10 +2,12 @@ import HealthKit
 import MapHealthCore
 import SwiftUI
 
+// swiftlint:disable:next type_body_length
 struct HealthView: View {
     @EnvironmentObject private var healthKitManager: HealthKitAuthorizationManager
     @Environment(\.openURL) private var openURL
 
+    // HealthKit State
     @State private var steps: Double?
     @State private var activeCalories: Double?
     @State private var exerciseMinutes: Double?
@@ -19,8 +21,17 @@ struct HealthView: View {
     @State private var permissionDenied = false
     @State private var errorMessage: String?
 
+    // WHOOP State
+    @State private var whoopConnected = false
+    @State private var whoopRecovery: WhoopRecovery?
+    @State private var whoopCycle: WhoopCycle?
+    @State private var whoopSleep: WhoopSleep?
+    @State private var whoopWorkouts: [WhoopWorkout] = []
+    @State private var isLoadingWhoop = false
+
     private let healthStore = HKHealthStore()
     private let healthDataFetcher = HealthDataFetcher()
+    private let apiClient = MapAPIClient.shared
 
     var body: some View {
         NavigationStack {
@@ -63,10 +74,36 @@ struct HealthView: View {
             } else if let error = errorMessage {
                 errorView(error)
             } else {
+                // WHOOP Recovery & Strain (if connected)
+                if whoopConnected {
+                    WhoopRecoverySection(
+                        recovery: whoopRecovery,
+                        cycle: whoopCycle,
+                        isLoading: isLoadingWhoop
+                    )
+                }
+
                 todaySection
                 sleepSection
+
+                // WHOOP Sleep Quality (if connected)
+                if whoopConnected, whoopSleep != nil {
+                    WhoopSleepQualitySection(sleep: whoopSleep)
+                }
+
                 activitySection
+
+                // WHOOP Workouts (if connected)
+                if whoopConnected, !whoopWorkouts.isEmpty {
+                    WhoopWorkoutsSection(workouts: whoopWorkouts)
+                }
+
                 heartSection
+
+                // WHOOP Vitals (if connected)
+                if whoopConnected {
+                    WhoopVitalsSection(recovery: whoopRecovery)
+                }
             }
         }
     }
@@ -314,15 +351,14 @@ struct HealthView: View {
     private var refreshButton: some View {
         Button {
             Task {
-                await loadHealthData()
+                await loadAllData()
             }
         } label: {
             Image(systemName: "arrow.clockwise")
         }
         .mapHealthGlassButtonStyle()
-        .disabled(isLoading)
+        .disabled(isLoading || isLoadingWhoop)
     }
-
 }
 
 // MARK: - Data Loading
@@ -343,9 +379,9 @@ private extension HealthView {
             needsPermission = true
             isLoading = false
         case .sharingDenied, .sharingAuthorized:
-            await loadHealthData()
+            await loadAllData()
         @unknown default:
-            await loadHealthData()
+            await loadAllData()
         }
     }
 
@@ -354,10 +390,17 @@ private extension HealthView {
             try await healthKitManager.requestAuthorization()
             needsPermission = false
             permissionDenied = false
-            await loadHealthData()
+            await loadAllData()
         } catch {
             permissionDenied = true
         }
+    }
+
+    func loadAllData() async {
+        // Load HealthKit and WHOOP data in parallel
+        async let healthKitTask: () = loadHealthData()
+        async let whoopTask: () = loadWhoopData()
+        _ = await (healthKitTask, whoopTask)
     }
 
     func loadHealthData() async {
@@ -410,6 +453,41 @@ private extension HealthView {
         }
 
         isLoading = false
+    }
+
+    func loadWhoopData() async {
+        guard apiClient.isAuthenticated else { return }
+
+        isLoadingWhoop = true
+
+        do {
+            // Check WHOOP connection status
+            let profileResponse = try await apiClient.getWhoopProfile()
+            whoopConnected = profileResponse.connected
+
+            guard whoopConnected else {
+                isLoadingWhoop = false
+                return
+            }
+
+            // Fetch WHOOP data in parallel
+            async let recoveryTask = apiClient.getWhoopRecovery()
+            async let sleepTask = apiClient.getWhoopSleep()
+            async let workoutsTask = apiClient.getWhoopWorkouts(limit: 5)
+
+            let (recoveryResponse, sleepResponse, workoutsResponse) =
+                try await (recoveryTask, sleepTask, workoutsTask)
+
+            whoopRecovery = recoveryResponse.latest
+            whoopCycle = recoveryResponse.latestCycle
+            whoopSleep = sleepResponse.latest
+            whoopWorkouts = workoutsResponse.workouts
+        } catch {
+            // Silently fail - WHOOP data is optional
+            whoopConnected = false
+        }
+
+        isLoadingWhoop = false
     }
 }
 

@@ -5,15 +5,19 @@ import Foundation
 public class MapAPIClient {
     public static let shared = MapAPIClient()
 
-    private let baseURL: URL
+    private let baseURLString: String
     private let session: URLSession
     private var authToken: String?
 
     /// Callback for when re-authentication is needed (401 response)
     public var onAuthenticationRequired: (() async -> Bool)?
 
-    public init(baseURL: URL = URL(string: "https://app.map.ai")!) {
-        self.baseURL = baseURL
+    public init(baseURL: String? = nil) {
+        #if DEBUG
+        self.baseURLString = baseURL ?? "https://mapyourlife.org"
+        #else
+        self.baseURLString = baseURL ?? "https://app.map.ai"
+        #endif
         self.session = URLSession.shared
 
         // Load token from Keychain on init
@@ -167,19 +171,263 @@ public class MapAPIClient {
         calendarId: String = "primary",
         timeMin: Date,
         timeMax: Date,
-        timeZone: String? = nil
+        timeZone: String? = nil,
+        query: String? = nil,
+        maxResults: Int? = nil
     ) async throws -> EventsResponse {
-        var endpoint = "/api/calendar/events?calendarId=\(calendarId)"
+        var endpoint = "/api/calendar/events?calendarId=\(calendarId.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? calendarId)"
         endpoint += "&timeMin=\(timeMin.iso8601String)"
         endpoint += "&timeMax=\(timeMax.iso8601String)"
         if let tz = timeZone {
             endpoint += "&timeZone=\(tz)"
+        }
+        if let q = query, !q.isEmpty {
+            endpoint += "&q=\(q.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? q)"
+        }
+        if let max = maxResults {
+            endpoint += "&maxResults=\(max)"
         }
 
         return try await request(
             endpoint: endpoint,
             method: "GET",
             responseType: EventsResponse.self
+        )
+    }
+
+    /// Get events from multiple calendars
+    public func getMultiCalendarEvents(
+        calendarIds: [String],
+        timeMin: Date,
+        timeMax: Date,
+        timeZone: String? = nil
+    ) async throws -> [CalendarEvent] {
+        var allEvents: [CalendarEvent] = []
+
+        // Fetch events from all calendars concurrently
+        try await withThrowingTaskGroup(of: EventsResponse.self) { group in
+            for calendarId in calendarIds {
+                group.addTask {
+                    try await self.getEvents(
+                        calendarId: calendarId,
+                        timeMin: timeMin,
+                        timeMax: timeMax,
+                        timeZone: timeZone
+                    )
+                }
+            }
+
+            for try await response in group {
+                allEvents.append(contentsOf: response.events)
+            }
+        }
+
+        // Sort by start time
+        return allEvents.sorted { event1, event2 in
+            guard let date1 = event1.startDate, let date2 = event2.startDate else {
+                return false
+            }
+            return date1 < date2
+        }
+    }
+
+    /// Get a single event by ID
+    public func getEvent(eventId: String, calendarId: String = "primary") async throws -> CalendarEvent {
+        let encodedEventId = eventId.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? eventId
+        let encodedCalendarId = calendarId.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? calendarId
+        let endpoint = "/api/calendar/events/\(encodedEventId)?calendarId=\(encodedCalendarId)"
+
+        return try await request(
+            endpoint: endpoint,
+            method: "GET",
+            responseType: EventResponse.self
+        ).event
+    }
+
+    /// Create a new calendar event
+    public func createEvent(
+        _ eventRequest: CreateEventRequest,
+        calendarId: String = "primary",
+        sendUpdates: String? = nil,
+        addConference: Bool = false
+    ) async throws -> CalendarEvent {
+        let encodedCalendarId = calendarId.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? calendarId
+        var endpoint = "/api/calendar/events?calendarId=\(encodedCalendarId)"
+
+        if let updates = sendUpdates {
+            endpoint += "&sendUpdates=\(updates)"
+        }
+        if addConference {
+            endpoint += "&conferenceDataVersion=1"
+        }
+
+        return try await request(
+            endpoint: endpoint,
+            method: "POST",
+            body: eventRequest,
+            responseType: EventResponse.self
+        ).event
+    }
+
+    /// Update an existing calendar event
+    public func updateEvent(
+        eventId: String,
+        _ eventRequest: UpdateEventRequest,
+        calendarId: String = "primary",
+        sendUpdates: String? = nil
+    ) async throws -> CalendarEvent {
+        let encodedEventId = eventId.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? eventId
+        let encodedCalendarId = calendarId.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? calendarId
+        var endpoint = "/api/calendar/events/\(encodedEventId)?calendarId=\(encodedCalendarId)"
+
+        if let updates = sendUpdates {
+            endpoint += "&sendUpdates=\(updates)"
+        }
+
+        return try await request(
+            endpoint: endpoint,
+            method: "PUT",
+            body: eventRequest,
+            responseType: EventResponse.self
+        ).event
+    }
+
+    /// Delete a calendar event
+    public func deleteEvent(
+        eventId: String,
+        calendarId: String = "primary",
+        sendUpdates: String? = nil
+    ) async throws {
+        let encodedEventId = eventId.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? eventId
+        let encodedCalendarId = calendarId.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? calendarId
+        var endpoint = "/api/calendar/events/\(encodedEventId)?calendarId=\(encodedCalendarId)"
+
+        if let updates = sendUpdates {
+            endpoint += "&sendUpdates=\(updates)"
+        }
+
+        _ = try await request(
+            endpoint: endpoint,
+            method: "DELETE",
+            responseType: DeleteEventResponse.self
+        )
+    }
+
+    /// Get calendar color palette
+    public func getColors() async throws -> CalendarColors {
+        return try await request(
+            endpoint: "/api/calendar/colors",
+            method: "GET",
+            responseType: ColorsResponse.self
+        ).colors
+    }
+
+    /// Sync calendars with Google
+    public func syncCalendars(forceFullSync: Bool = false) async throws -> SyncCalendarsResponse {
+        let endpoint = forceFullSync ? "/api/calendar/sync?forceFullSync=true" : "/api/calendar/sync"
+        return try await request(
+            endpoint: endpoint,
+            method: "POST",
+            responseType: SyncCalendarsResponse.self
+        )
+    }
+
+    // MARK: - WHOOP Integration
+
+    /// Get WHOOP profile and connection status
+    public func getWhoopProfile() async throws -> WhoopProfileResponse {
+        return try await request(
+            endpoint: "/api/whoop/profile",
+            method: "GET",
+            responseType: WhoopProfileResponse.self
+        )
+    }
+
+    /// Get latest WHOOP recovery data
+    public func getWhoopRecovery() async throws -> WhoopRecoveryResponse {
+        return try await request(
+            endpoint: "/api/whoop/recovery",
+            method: "GET",
+            responseType: WhoopRecoveryResponse.self
+        )
+    }
+
+    /// Get latest WHOOP sleep data
+    public func getWhoopSleep() async throws -> WhoopSleepResponse {
+        return try await request(
+            endpoint: "/api/whoop/sleep",
+            method: "GET",
+            responseType: WhoopSleepResponse.self
+        )
+    }
+
+    /// Get WHOOP cycles with optional date range
+    public func getWhoopCycles(startDate: String? = nil, endDate: String? = nil, limit: Int? = nil) async throws -> WhoopCyclesResponse {
+        var endpoint = "/api/whoop/cycles"
+        var params: [String] = []
+
+        if let start = startDate {
+            params.append("startDate=\(start)")
+        }
+        if let end = endDate {
+            params.append("endDate=\(end)")
+        }
+        if let limit = limit {
+            params.append("limit=\(limit)")
+        }
+
+        if !params.isEmpty {
+            endpoint += "?" + params.joined(separator: "&")
+        }
+
+        return try await request(
+            endpoint: endpoint,
+            method: "GET",
+            responseType: WhoopCyclesResponse.self
+        )
+    }
+
+    /// Get WHOOP workouts with optional date range
+    public func getWhoopWorkouts(startDate: String? = nil, endDate: String? = nil, limit: Int? = nil) async throws -> WhoopWorkoutsResponse {
+        var endpoint = "/api/whoop/workouts"
+        var params: [String] = []
+
+        if let start = startDate {
+            params.append("startDate=\(start)")
+        }
+        if let end = endDate {
+            params.append("endDate=\(end)")
+        }
+        if let limit = limit {
+            params.append("limit=\(limit)")
+        }
+
+        if !params.isEmpty {
+            endpoint += "?" + params.joined(separator: "&")
+        }
+
+        return try await request(
+            endpoint: endpoint,
+            method: "GET",
+            responseType: WhoopWorkoutsResponse.self
+        )
+    }
+
+    /// Sync WHOOP data (triggers 30-day sync)
+    public func syncWhoop() async throws -> WhoopSyncResponse {
+        return try await request(
+            endpoint: "/api/whoop/sync",
+            method: "POST",
+            responseType: WhoopSyncResponse.self
+        )
+    }
+
+    /// Disconnect WHOOP integration
+    public func disconnectWhoop() async throws {
+        _ = try await request(
+            endpoint: "/api/whoop/disconnect",
+            method: "POST",
+            responseType: SuccessResponse.self
         )
     }
 
@@ -192,7 +440,9 @@ public class MapAPIClient {
         responseType: T.Type,
         retryOnUnauthorized: Bool = true
     ) async throws -> T {
-        let url = baseURL.appendingPathComponent(endpoint)
+        guard let url = URL(string: baseURLString + endpoint) else {
+            throw MapAPIError.invalidResponse
+        }
 
         var request = URLRequest(url: url)
         request.httpMethod = method
@@ -274,8 +524,12 @@ private struct Empty: Encodable {}
 
 private struct EmptyResponse: Codable {}
 
-private struct SuccessResponse: Codable {
-    let success: Bool
+public struct SuccessResponse: Codable {
+    public let success: Bool
+
+    public init(success: Bool) {
+        self.success = success
+    }
 }
 
 // MARK: - Response Types

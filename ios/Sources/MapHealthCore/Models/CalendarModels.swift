@@ -226,3 +226,214 @@ public struct EventsResponse: Codable {
         self.nextPageToken = nextPageToken
     }
 }
+
+public struct EventResponse: Codable {
+    public var event: CalendarEvent
+
+    public init(event: CalendarEvent) {
+        self.event = event
+    }
+}
+
+public struct DeleteEventResponse: Codable {
+    public var success: Bool
+
+    public init(success: Bool) {
+        self.success = success
+    }
+}
+
+// MARK: - Colors
+
+public struct CalendarColors: Codable {
+    public var calendar: [String: ColorPair]?
+    public var event: [String: ColorPair]?
+
+    public init(calendar: [String: ColorPair]? = nil, event: [String: ColorPair]? = nil) {
+        self.calendar = calendar
+        self.event = event
+    }
+}
+
+public struct ColorPair: Codable {
+    public var background: String
+    public var foreground: String
+
+    public init(background: String, foreground: String) {
+        self.background = background
+        self.foreground = foreground
+    }
+}
+
+public struct ColorsResponse: Codable {
+    public var colors: CalendarColors
+
+    public init(colors: CalendarColors) {
+        self.colors = colors
+    }
+}
+
+// MARK: - Sync
+
+public struct SyncCalendarsResponse: Codable {
+    public var success: Bool
+    public var calendarsSynced: Int?
+    public var eventsSynced: Int?
+    public var eventsDeleted: Int?
+    public var errors: [String]?
+    public var error: String?
+
+    public init(success: Bool) {
+        self.success = success
+    }
+}
+
+// MARK: - Event Requests
+
+public struct CreateEventRequest: Codable {
+    public var summary: String?
+    public var description: String?
+    public var location: String?
+    public var start: EventDateTime
+    public var end: EventDateTime
+    public var colorId: String?
+    public var attendees: [EventAttendeeRequest]?
+    public var reminders: EventReminders?
+    public var visibility: String?
+    public var transparency: String?
+    public var conferenceData: ConferenceDataRequest?
+
+    public init(
+        summary: String? = nil,
+        description: String? = nil,
+        location: String? = nil,
+        start: EventDateTime,
+        end: EventDateTime,
+        colorId: String? = nil,
+        attendees: [EventAttendeeRequest]? = nil,
+        reminders: EventReminders? = nil,
+        visibility: String? = nil,
+        transparency: String? = nil,
+        conferenceData: ConferenceDataRequest? = nil
+    ) {
+        self.summary = summary
+        self.description = description
+        self.location = location
+        self.start = start
+        self.end = end
+        self.colorId = colorId
+        self.attendees = attendees
+        self.reminders = reminders
+        self.visibility = visibility
+        self.transparency = transparency
+        self.conferenceData = conferenceData
+    }
+}
+
+public struct UpdateEventRequest: Codable {
+    public var summary: String?
+    public var description: String?
+    public var location: String?
+    public var start: EventDateTime?
+    public var end: EventDateTime?
+    public var colorId: String?
+    public var attendees: [EventAttendeeRequest]?
+    public var reminders: EventReminders?
+    public var visibility: String?
+    public var transparency: String?
+    public var status: String?
+
+    public init(
+        summary: String? = nil,
+        description: String? = nil,
+        location: String? = nil,
+        start: EventDateTime? = nil,
+        end: EventDateTime? = nil,
+        colorId: String? = nil,
+        attendees: [EventAttendeeRequest]? = nil,
+        reminders: EventReminders? = nil,
+        visibility: String? = nil,
+        transparency: String? = nil,
+        status: String? = nil
+    ) {
+        self.summary = summary
+        self.description = description
+        self.location = location
+        self.start = start
+        self.end = end
+        self.colorId = colorId
+        self.attendees = attendees
+        self.reminders = reminders
+        self.visibility = visibility
+        self.transparency = transparency
+        self.status = status
+    }
+}
+
+public struct EventAttendeeRequest: Codable {
+    public var email: String
+    public var displayName: String?
+    public var optional: Bool?
+    public var responseStatus: String?
+    public var comment: String?
+
+    public init(
+        email: String,
+        displayName: String? = nil,
+        optional: Bool? = nil,
+        responseStatus: String? = nil,
+        comment: String? = nil
+    ) {
+        self.email = email
+        self.displayName = displayName
+        self.optional = optional
+        self.responseStatus = responseStatus
+        self.comment = comment
+    }
+}
+
+public struct EventReminders: Codable {
+    public var useDefault: Bool?
+    public var overrides: [ReminderOverride]?
+
+    public init(useDefault: Bool? = nil, overrides: [ReminderOverride]? = nil) {
+        self.useDefault = useDefault
+        self.overrides = overrides
+    }
+}
+
+public struct ReminderOverride: Codable {
+    public var method: String // "email" or "popup"
+    public var minutes: Int
+
+    public init(method: String, minutes: Int) {
+        self.method = method
+        self.minutes = minutes
+    }
+}
+
+public struct ConferenceDataRequest: Codable {
+    public var createRequest: ConferenceCreateRequest?
+
+    public init(createRequest: ConferenceCreateRequest? = nil) {
+        self.createRequest = createRequest
+    }
+}
+
+public struct ConferenceCreateRequest: Codable {
+    public var requestId: String
+    public var conferenceSolutionKey: ConferenceSolutionKey?
+
+    public init(requestId: String, conferenceSolutionKey: ConferenceSolutionKey? = nil) {
+        self.requestId = requestId
+        self.conferenceSolutionKey = conferenceSolutionKey
+    }
+}
+
+public struct ConferenceSolutionKey: Codable {
+    public var type: String // "hangoutsMeet" or "addOn"
+
+    public init(type: String = "hangoutsMeet") {
+        self.type = type
+    }
+}
