@@ -13,7 +13,6 @@ struct SettingsView: View {
     @State private var isLoadingProfile = false
     @Binding var modelSettingRefreshId: UUID
     @State private var showLLMSettings = false
-    @Namespace private var settingsNamespace
 
     var body: some View {
         NavigationStack {
@@ -61,20 +60,27 @@ struct SettingsView: View {
     }
 
     private var settingsList: some View {
-        List {
-            self.accountSection
-            self.changeModelSettings
-            self.chatSettings
-            self.disclaimer
+        ScrollView {
+            LazyVStack(spacing: 24) {
+                self.accountSection
+                self.changeModelSettings
+                self.chatSettings
+                self.disclaimer
+            }
+            .padding(.horizontal, 20)
+            .padding(.vertical, 16)
         }
     }
 
     private var accountSection: some View {
-        Section("SETTINGS_ACCOUNT_TITLE") {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("SETTINGS_ACCOUNT_TITLE")
+                .font(.headline)
+                .foregroundStyle(.secondary)
+
             if MapAPIClient.shared.isAuthenticated {
                 VStack(spacing: 12) {
                     HStack(spacing: 12) {
-                        // Profile photo or placeholder
                         if let photoUrl = userProfile?.profilePhotoUrl,
                            let url = URL(string: photoUrl) {
                             AsyncImage(url: url) { image in
@@ -122,13 +128,12 @@ struct SettingsView: View {
                 }
                 .padding(12)
                 .mapHealthGlassSurface(cornerRadius: 20, tint: .accentColor.opacity(0.04))
-                .listRowBackground(Color.clear)
             } else {
                 Text("ACCOUNT_NOT_SIGNED_IN")
                     .foregroundStyle(.secondary)
                     .padding(12)
+                    .frame(maxWidth: .infinity, alignment: .leading)
                     .mapHealthGlassSurface(cornerRadius: 20, tint: .accentColor.opacity(0.04))
-                    .listRowBackground(Color.clear)
             }
         }
     }
@@ -140,18 +145,25 @@ struct SettingsView: View {
     }
 
     private var changeModelSettings: some View {
-        Section("LLM_SETTINGS_TITLE") {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("LLM_SETTINGS_TITLE")
+                .font(.headline)
+                .foregroundStyle(.secondary)
+
             Button("LLM_SETTINGS_SELECT_MODEL") {
                 showLLMSettings = true
             }
             .mapHealthGlassButtonStyle()
-                .accessibilityIdentifier("changeModelButton")
-            .listRowBackground(Color.clear)
+            .accessibilityIdentifier("changeModelButton")
         }
     }
 
     private var chatSettings: some View {
-        Section("SETTINGS_CHAT") {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("SETTINGS_CHAT")
+                .font(.headline)
+                .foregroundStyle(.secondary)
+
             Button("SETTINGS_CHAT_RESET") {
                 Task {
                     await healthDataInterpreter.resetChat()
@@ -160,16 +172,21 @@ struct SettingsView: View {
             }
             .mapHealthGlassButtonStyle()
             .accessibilityIdentifier("resetButton")
-            .listRowBackground(Color.clear)
         }
     }
 
     private var disclaimer: some View {
-        Section("SETTINGS_DISCLAIMER_TITLE") {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("SETTINGS_DISCLAIMER_TITLE")
+                .font(.headline)
+                .foregroundStyle(.secondary)
+
             Text("SETTINGS_DISCLAIMER_TEXT")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
                 .padding(12)
+                .frame(maxWidth: .infinity, alignment: .leading)
                 .mapHealthGlassSurface(cornerRadius: 16, tint: .accentColor.opacity(0.04))
-                .listRowBackground(Color.clear)
         }
     }
 

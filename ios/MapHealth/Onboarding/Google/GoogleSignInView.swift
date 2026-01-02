@@ -9,7 +9,6 @@ struct GoogleSignInView: View {
     @State private var isAuthenticating = false
     @State private var showErrorAlert = false
     @State private var errorMessage = ""
-    @Namespace private var glassNamespace
     let onAuthenticated: () -> Void
 
     var body: some View {

@@ -36,8 +36,8 @@ struct GlassChatView: View {
                         }
                     }
                     .padding(.vertical, 8)
+                    .padding(.horizontal, 4)
                 }
-                .mapHealthGlassSurface(cornerRadius: 24, tint: .accentColor.opacity(0.04))
                 .onAppear {
                     scrollToBottom(proxy)
                 }
@@ -47,6 +47,7 @@ struct GlassChatView: View {
                     }
                 }
             }
+            .mapHealthGlassSurface(cornerRadius: 24, tint: .accentColor.opacity(0.04))
 
             composer
         }
