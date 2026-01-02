@@ -16,6 +16,7 @@ export const integrationProviderEnum = pgEnum("integration_provider", [
   "GOOGLE",
   "WHOOP",
   "CLAUDE",
+  "OPENAI",
 ]);
 export const goalCategoryEnum = pgEnum("goal_categories", [
   "health",

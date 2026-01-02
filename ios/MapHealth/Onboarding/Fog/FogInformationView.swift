@@ -15,14 +15,16 @@ struct FogInformationView: View {
                 .init(
                     iconSymbol: "network.badge.shield.half.filled",
                     title: "Private by Design".moduleLocalized,
-                    description: "All LLM inference happens directly within your network - nothing is sent to remote servers."
-                        .moduleLocalized
+                    description: "All LLM inference happens directly within your network - nothing is sent to remote"
+                        .moduleLocalized +
+                        " servers.".moduleLocalized
                 ),
                 .init(
                     iconSymbol: "server.rack",
                     title: "Local Fog Nodes".moduleLocalized,
-                    description: "Computation is performed on so-called fog nodes, running directly inside your own network."
-                        .moduleLocalized
+                    description: "Computation is performed on so-called fog nodes, running directly inside your own"
+                        .moduleLocalized +
+                        " network.".moduleLocalized
                 ),
                 .init(
                     iconSymbol: "exclamationmark.circle.fill",

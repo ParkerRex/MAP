@@ -3,20 +3,16 @@ import { calendarDb } from "@/db/calendar";
 import { handleApiError, unauthorized } from "@/lib/api/errors";
 import { getUser } from "@/lib/auth";
 
-export async function GET() {
+export async function POST() {
   try {
     const user = await getUser();
     if (!user) {
       throw unauthorized();
     }
 
-    const integration = await calendarDb.getIntegration(user.id, "CLAUDE");
+    await calendarDb.deleteIntegration(user.id, "OPENAI");
 
-    return NextResponse.json({
-      connected: !!integration,
-      expiresAt: integration?.expiresAt?.toISOString(),
-      authType: integration?.refreshToken ? "oauth" : integration ? "api" : undefined,
-    });
+    return NextResponse.json({ success: true });
   } catch (error) {
     return handleApiError(error);
   }

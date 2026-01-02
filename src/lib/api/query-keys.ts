@@ -50,6 +50,10 @@ export const queryKeys = {
     status: ["claude", "status"] as const,
     all: ["claude"] as const,
   },
+  openai: {
+    status: ["openai", "status"] as const,
+    all: ["openai"] as const,
+  },
   auth: {
     me: ["auth", "me"] as const,
   },

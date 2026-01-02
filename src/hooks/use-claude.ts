@@ -18,9 +18,8 @@ export function useClaudeDisconnect() {
 }
 
 export function useClaudeConnect() {
-  return {
-    connect: () => {
-      window.location.href = "/api/claude/auth";
-    },
-  };
+  return useSimpleMutation({
+    mutationFn: (apiKey: string) => api.claude.setKey(apiKey),
+    invalidateKeys: [queryKeys.claude.all],
+  });
 }

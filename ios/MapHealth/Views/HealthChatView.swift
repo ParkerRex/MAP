@@ -139,7 +139,7 @@ struct HealthChatView: View {
             let callbackURL = try await webAuthSession.authenticate(
                 using: authURL,
                 callbackURLScheme: callbackScheme,
-                prefersEphemeralWebBrowserSession: false
+                preferredBrowserSession: .shared
             )
 
             guard let components = URLComponents(url: callbackURL, resolvingAgainstBaseURL: false) else {

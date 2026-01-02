@@ -165,7 +165,7 @@ export const calendarDb = {
   },
 
   // Integrations
-  async getIntegration(userId: string, provider: "GOOGLE" | "WHOOP" | "CLAUDE") {
+  async getIntegration(userId: string, provider: "GOOGLE" | "WHOOP" | "CLAUDE" | "OPENAI") {
     const result = await db
       .select()
       .from(integrations)
@@ -176,7 +176,7 @@ export const calendarDb = {
 
   async updateIntegration(
     userId: string,
-    provider: "GOOGLE" | "WHOOP" | "CLAUDE",
+    provider: "GOOGLE" | "WHOOP" | "CLAUDE" | "OPENAI",
     data: { accessToken?: string; refreshToken?: string; expiresAt?: Date },
   ) {
     const result = await db
@@ -189,7 +189,7 @@ export const calendarDb = {
 
   async upsertIntegration(data: {
     userId: string;
-    provider: "GOOGLE" | "WHOOP" | "CLAUDE";
+    provider: "GOOGLE" | "WHOOP" | "CLAUDE" | "OPENAI";
     accessToken: string;
     refreshToken?: string;
     expiresAt?: Date;
@@ -215,7 +215,7 @@ export const calendarDb = {
     return result[0];
   },
 
-  async hasIntegration(userId: string, provider: "GOOGLE" | "WHOOP" | "CLAUDE") {
+  async hasIntegration(userId: string, provider: "GOOGLE" | "WHOOP" | "CLAUDE" | "OPENAI") {
     const result = await db
       .select({ id: integrations.id })
       .from(integrations)
@@ -224,7 +224,7 @@ export const calendarDb = {
     return result.length > 0;
   },
 
-  async deleteIntegration(userId: string, provider: "GOOGLE" | "WHOOP" | "CLAUDE") {
+  async deleteIntegration(userId: string, provider: "GOOGLE" | "WHOOP" | "CLAUDE" | "OPENAI") {
     const result = await db
       .delete(integrations)
       .where(and(eq(integrations.userId, userId), eq(integrations.provider, provider)))

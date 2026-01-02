@@ -159,6 +159,12 @@ export async function refreshClaudeToken(refreshToken: string): Promise<ClaudeTo
 }
 
 // Create authenticated Claude client
+type ClaudeAuth = { type: "oauth"; token: string } | { type: "api"; token: string };
+
+function isApiKey(token: string) {
+  return token.startsWith("sk-ant-") || token.startsWith("sk-");
+}
+
 async function createClaudeClient(
   userId: string,
   integration: {
@@ -166,8 +172,12 @@ async function createClaudeClient(
     refreshToken: string | null;
     expiresAt: Date | null;
   },
-): Promise<{ accessToken: string }> {
+): Promise<ClaudeAuth> {
   let { accessToken } = integration;
+
+  if (isApiKey(accessToken) && !integration.refreshToken) {
+    return { type: "api", token: accessToken };
+  }
 
   // Check if token needs refresh (within 5 minutes of expiry)
   if (integration.expiresAt && integration.refreshToken) {
@@ -188,21 +198,23 @@ async function createClaudeClient(
     }
   }
 
-  return { accessToken };
+  return { type: "oauth", token: accessToken };
 }
 
 // Make authenticated API request
 async function claudeFetch<T>(
-  accessToken: string,
+  auth: ClaudeAuth,
   endpoint: string,
   options?: RequestInit,
 ): Promise<T> {
   const response = await fetch(`${CLAUDE_API_BASE}${endpoint}`, {
     ...options,
     headers: {
-      Authorization: `Bearer ${accessToken}`,
+      ...(auth.type === "oauth"
+        ? { Authorization: `Bearer ${auth.token}` }
+        : { "x-api-key": auth.token }),
       "anthropic-version": "2023-06-01",
-      "anthropic-beta": "oauth-2025-04-20",
+      ...(auth.type === "oauth" ? { "anthropic-beta": "oauth-2025-04-20" } : {}),
       "Content-Type": "application/json",
       ...options?.headers,
     },
@@ -218,10 +230,10 @@ async function claudeFetch<T>(
 
 // Claude API Client class
 export class ClaudeClient {
-  private accessToken: string;
+  private auth: ClaudeAuth;
 
-  constructor(accessToken: string) {
-    this.accessToken = accessToken;
+  constructor(auth: ClaudeAuth) {
+    this.auth = auth;
   }
 
   // Create a message (non-streaming)
@@ -231,7 +243,7 @@ export class ClaudeClient {
     system?: string;
     max_tokens?: number;
   }): Promise<ClaudeMessageResponse> {
-    return claudeFetch<ClaudeMessageResponse>(this.accessToken, "/v1/messages", {
+    return claudeFetch<ClaudeMessageResponse>(this.auth, "/v1/messages", {
       method: "POST",
       body: JSON.stringify({
         model: params.model ?? "claude-sonnet-4-20250514",
@@ -252,9 +264,11 @@ export class ClaudeClient {
     const response = await fetch(`${CLAUDE_API_BASE}/v1/messages`, {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${this.accessToken}`,
+        ...(this.auth.type === "oauth"
+          ? { Authorization: `Bearer ${this.auth.token}` }
+          : { "x-api-key": this.auth.token }),
         "anthropic-version": "2023-06-01",
-        "anthropic-beta": "oauth-2025-04-20",
+        ...(this.auth.type === "oauth" ? { "anthropic-beta": "oauth-2025-04-20" } : {}),
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
@@ -317,9 +331,9 @@ export async function getClaudeClient(): Promise<ClaudeClient> {
     throw new Error("No Claude integration found");
   }
 
-  const { accessToken } = await createClaudeClient(user.id, integration);
+  const auth = await createClaudeClient(user.id, integration);
 
-  return new ClaudeClient(accessToken);
+  return new ClaudeClient(auth);
 }
 
 // Get Claude client for a specific user
@@ -330,7 +344,7 @@ export async function getClaudeClientForUser(userId: string): Promise<ClaudeClie
     throw new Error("No Claude integration found");
   }
 
-  const { accessToken } = await createClaudeClient(userId, integration);
+  const auth = await createClaudeClient(userId, integration);
 
-  return new ClaudeClient(accessToken);
+  return new ClaudeClient(auth);
 }

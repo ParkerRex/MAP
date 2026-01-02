@@ -53,6 +53,21 @@ public class MapAPIClient {
         ).user
     }
 
+    // MARK: - Claude API Key
+
+    public func setClaudeApiKey(_ apiKey: String) async throws {
+        struct ClaudeKeyPayload: Codable {
+            let apiKey: String
+        }
+
+        _ = try await request(
+            endpoint: "/api/claude/key",
+            method: "POST",
+            body: ClaudeKeyPayload(apiKey: apiKey),
+            responseType: EmptyResponse.self
+        )
+    }
+
     // MARK: - Health Data Sync
 
     /// Sync health data to Map backend
@@ -168,6 +183,8 @@ public class MapAPIClient {
 // MARK: - Empty type for requests without body
 
 private struct Empty: Encodable {}
+
+private struct EmptyResponse: Codable {}
 
 // MARK: - Response Types
 

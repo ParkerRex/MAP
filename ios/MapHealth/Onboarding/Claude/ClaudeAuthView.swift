@@ -1,4 +1,3 @@
-import AuthenticationServices
 import MapHealthCore
 import SpeziOnboarding
 import SpeziViews
@@ -6,10 +5,10 @@ import SwiftUI
 
 struct ClaudeAuthView: View {
     @Environment(ManagedNavigationStack.Path.self) private var onboardingNavigationPath
-    @Environment(\.webAuthenticationSession) private var webAuthSession
-    @State private var isAuthenticating = false
+    @State private var isSaving = false
     @State private var showErrorAlert = false
     @State private var errorMessage = ""
+    @State private var apiKey = ""
 
     var body: some View {
         OnboardingView(
@@ -32,18 +31,23 @@ struct ClaudeAuthView: View {
             },
             footer: {
                 VStack(spacing: 16) {
+                    SecureField("Enter Anthropic API key (sk-ant-...)", text: $apiKey)
+                        .textInputAutocapitalization(.never)
+                        .autocorrectionDisabled(true)
+                        .textFieldStyle(.roundedBorder)
+
                     Button {
-                        startAuthentication()
+                        saveApiKey()
                     } label: {
-                        if isAuthenticating {
+                        if isSaving {
                             ProgressView()
                                 .progressViewStyle(.circular)
                         } else {
-                            Text("CLAUDE_AUTH_BUTTON")
+                            Text("Save API Key")
                         }
                     }
                     .buttonStyle(.borderedProminent)
-                    .disabled(isAuthenticating)
+                    .disabled(isSaving || apiKey.isEmpty)
                     .accessibilityIdentifier("claudeAuthButton")
                 }
             }
@@ -55,42 +59,20 @@ struct ClaudeAuthView: View {
         }
     }
 
-    private func startAuthentication() {
-        isAuthenticating = true
-
+    private func saveApiKey() {
+        isSaving = true
         Task {
             do {
-                // Open the web-based OAuth flow
-                // The web backend handles the OAuth with Anthropic
-                let authURL = URL(string: "\(AppConfig.webBaseURL)/api/claude/auth")!
-                let callbackScheme = "maphealth"
-
-                let callbackURL = try await webAuthSession.authenticate(
-                    using: authURL,
-                    callbackURLScheme: callbackScheme
-                )
-
-                // Check if authentication was successful
-                guard let components = URLComponents(url: callbackURL, resolvingAgainstBaseURL: false) else {
-                    throw ClaudeAuthError.authFailed("Invalid callback URL")
-                }
-
-                if components.queryItems?.contains(where: { $0.name == "success" }) == true {
-                    // Successfully authenticated, proceed to next step
+                try await MapAPIClient.shared.setClaudeApiKey(apiKey)
+                await MainActor.run {
                     onboardingNavigationPath.nextStep()
-                } else if let error = components.queryItems?.first(where: { $0.name == "error" })?.value {
-                    throw ClaudeAuthError.authFailed(error)
-                } else {
-                    throw ClaudeAuthError.authFailed("Unknown error")
                 }
-            } catch ASWebAuthenticationSessionError.canceledLogin {
-                // User cancelled, just reset state
             } catch {
                 errorMessage = error.localizedDescription
                 showErrorAlert = true
             }
 
-            isAuthenticating = false
+            isSaving = false
         }
     }
 }

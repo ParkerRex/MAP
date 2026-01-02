@@ -10,12 +10,10 @@ export async function GET() {
       throw unauthorized();
     }
 
-    const integration = await calendarDb.getIntegration(user.id, "CLAUDE");
+    const integration = await calendarDb.getIntegration(user.id, "OPENAI");
 
     return NextResponse.json({
       connected: !!integration,
-      expiresAt: integration?.expiresAt?.toISOString(),
-      authType: integration?.refreshToken ? "oauth" : integration ? "api" : undefined,
     });
   } catch (error) {
     return handleApiError(error);

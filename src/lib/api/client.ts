@@ -427,6 +427,11 @@ class ApiClient {
 
   claude = {
     status: () => this.request<{ connected: boolean; expiresAt?: string }>("/claude/status"),
+    setKey: (apiKey: string) =>
+      this.request<{ success: boolean }>("/claude/key", {
+        method: "POST",
+        body: JSON.stringify({ apiKey }),
+      }),
     disconnect: () =>
       this.request<{ success: boolean }>("/claude/disconnect", {
         method: "POST",
@@ -435,6 +440,19 @@ class ApiClient {
       this.request<ClaudeChatResponse>("/claude/chat", {
         method: "POST",
         body: JSON.stringify(params),
+      }),
+  };
+
+  openai = {
+    status: () => this.request<{ connected: boolean }>("/openai/status"),
+    setKey: (apiKey: string) =>
+      this.request<{ success: boolean }>("/openai/key", {
+        method: "POST",
+        body: JSON.stringify({ apiKey }),
+      }),
+    disconnect: () =>
+      this.request<{ success: boolean }>("/openai/disconnect", {
+        method: "POST",
       }),
   };
 }
