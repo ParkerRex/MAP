@@ -19,10 +19,7 @@ struct OnboardingFlow: View {
     var body: some View {
         ManagedNavigationStack(didComplete: $completedOnboardingFlow) {
             // New user - full onboarding flow
-            Welcome()
             GoogleSignInView()
-            Disclaimer()
-
             LLMSourceSelection()
 
             if HKHealthStore.isHealthDataAvailable() {
