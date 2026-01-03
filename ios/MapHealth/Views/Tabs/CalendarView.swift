@@ -10,69 +10,90 @@ struct CalendarView: View {
     @State private var selectedEvent: CalendarEvent?
     @State private var eventToDelete: CalendarEvent?
     @State private var showingDeleteConfirmation = false
+    @GestureState private var dayDragOffset: CGFloat = 0
+
+    private let feedbackGenerator = UIImpactFeedbackGenerator(style: .medium)
+    private let calendar = Calendar.current
 
     var body: some View {
         NavigationStack {
-            calendarContent
-                .navigationTitle("Calendar")
-                .toolbar {
-                    ToolbarItem(placement: .topBarLeading) {
-                        calendarPickerButton
-                    }
-                    ToolbarItemGroup(placement: .topBarTrailing) {
-                        Button("Today") {
-                            withAnimation {
-                                selectedDate = Date()
-                            }
-                        }
-                        .disabled(Calendar.current.isDateInToday(selectedDate))
+            VStack(spacing: 0) {
+                // Week strip header
+                CalendarWeekStrip(
+                    selectedDate: $selectedDate,
+                    events: calendarService.events,
+                    onDateDoubleTap: { _ in showingCreateEvent = true }
+                )
+                .padding(.horizontal, 20)
+                .padding(.top, 8)
+                .padding(.bottom, 12)
 
-                        Button {
-                            showingCreateEvent = true
-                        } label: {
-                            Image(systemName: "plus")
+                // View mode picker (compact)
+                viewModePicker
+                    .padding(.horizontal, 20)
+                    .padding(.bottom, 8)
+
+                Divider()
+                    .padding(.horizontal, 20)
+
+                // Main content with swipe gestures
+                mainContent
+            }
+            .navigationTitle("Calendar")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    calendarPickerButton
+                }
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        feedbackGenerator.impactOccurred()
+                        showingCreateEvent = true
+                    } label: {
+                        Image(systemName: "plus")
+                            .font(.body.weight(.semibold))
+                    }
+                }
+            }
+            .refreshable {
+                await loadData()
+            }
+            .sheet(isPresented: $showingCalendarPicker) {
+                CalendarPickerSheet(calendarService: calendarService)
+            }
+            .sheet(isPresented: $showingCreateEvent) {
+                EventFormSheet(
+                    calendarService: calendarService,
+                    selectedDate: selectedDate
+                )
+            }
+            .sheet(item: $selectedEvent) { event in
+                EventDetailSheet(
+                    event: event,
+                    calendarService: calendarService,
+                    onDelete: {
+                        selectedEvent = nil
+                        Task { await loadEvents() }
+                    },
+                    onUpdate: {
+                        Task { await loadEvents() }
+                    }
+                )
+            }
+            .alert("Delete Event", isPresented: $showingDeleteConfirmation) {
+                Button("Cancel", role: .cancel) {
+                    eventToDelete = nil
+                }
+                Button("Delete", role: .destructive) {
+                    if let event = eventToDelete {
+                        Task {
+                            await deleteEvent(event)
                         }
                     }
                 }
-                .refreshable {
-                    await loadData()
-                }
-                .sheet(isPresented: $showingCalendarPicker) {
-                    CalendarPickerSheet(calendarService: calendarService)
-                }
-                .sheet(isPresented: $showingCreateEvent) {
-                    EventFormSheet(
-                        calendarService: calendarService,
-                        selectedDate: selectedDate
-                    )
-                }
-                .sheet(item: $selectedEvent) { event in
-                    EventDetailSheet(
-                        event: event,
-                        calendarService: calendarService,
-                        onDelete: {
-                            selectedEvent = nil
-                            Task { await loadEvents() }
-                        },
-                        onUpdate: {
-                            Task { await loadEvents() }
-                        }
-                    )
-                }
-                .alert("Delete Event", isPresented: $showingDeleteConfirmation) {
-                    Button("Cancel", role: .cancel) {
-                        eventToDelete = nil
-                    }
-                    Button("Delete", role: .destructive) {
-                        if let event = eventToDelete {
-                            Task {
-                                await deleteEvent(event)
-                            }
-                        }
-                    }
-                } message: {
-                    Text("Are you sure you want to delete \"\(eventToDelete?.summary ?? "this event")\"?")
-                }
+            } message: {
+                Text("Are you sure you want to delete \"\(eventToDelete?.summary ?? "this event")\"?")
+            }
         }
         .task {
             await loadData()
@@ -89,72 +110,158 @@ struct CalendarView: View {
         }
     }
 
+    // MARK: - View Mode Picker
+
+    private var viewModePicker: some View {
+        HStack(spacing: 0) {
+            ForEach(CalendarViewMode.allCases, id: \.self) { mode in
+                Button {
+                    withAnimation(.snappy(duration: 0.2)) {
+                        viewMode = mode
+                    }
+                    UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                } label: {
+                    Text(mode.rawValue)
+                        .font(.subheadline.weight(viewMode == mode ? .semibold : .regular))
+                        .foregroundStyle(viewMode == mode ? .primary : .secondary)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 8)
+                        .background {
+                            if viewMode == mode {
+                                Capsule()
+                                    .fill(Color.accentColor.opacity(0.12))
+                                    .matchedGeometryEffect(id: "viewMode", in: viewModeNamespace)
+                            }
+                        }
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .padding(4)
+        .background(Color.secondary.opacity(0.08))
+        .clipShape(Capsule())
+    }
+
+    @Namespace private var viewModeNamespace
+
+    // MARK: - Main Content
+
     @ViewBuilder
-    private var calendarContent: some View {
-        if #available(iOS 26, *) {
-            ScrollView {
-                calendarBody
-            }
-            .contentMargins(.horizontal, 20, for: .scrollContent)
-            .contentMargins(.vertical, 16, for: .scrollContent)
-        } else {
-            ScrollView {
-                calendarBody
-                    .padding(.horizontal, 20)
-                    .padding(.vertical, 16)
-            }
+    private var mainContent: some View {
+        switch viewMode {
+        case .day:
+            dayView
+                .gesture(daySwipeGesture)
+                .offset(x: dayDragOffset)
+        case .week:
+            weekView
+        case .month:
+            monthView
         }
     }
 
-    private var calendarBody: some View {
-        VStack(spacing: 16) {
-            Picker("View Mode", selection: $viewMode) {
-                ForEach(CalendarViewMode.allCases, id: \.self) { mode in
-                    Text(mode.rawValue).tag(mode)
+    // MARK: - Day View
+
+    private var dayView: some View {
+        ScrollView {
+            VStack(spacing: 0) {
+                if let error = calendarService.error {
+                    CalendarErrorView(message: error.localizedDescription)
+                        .padding(20)
+                } else if calendarService.isLoading && eventsForSelectedDay.isEmpty {
+                    SkeletonCalendarList(count: 3)
+                        .padding(20)
+                } else if eventsForSelectedDay.isEmpty {
+                    CalendarTimelineEmptyState(
+                        selectedDate: selectedDate,
+                        onCreateEvent: { showingCreateEvent = true }
+                    )
+                } else {
+                    CalendarTimelineView(
+                        events: eventsForSelectedDay,
+                        calendarService: calendarService,
+                        selectedDate: selectedDate,
+                        onEventTap: { selectedEvent = $0 },
+                        onEventDelete: { event in
+                            eventToDelete = event
+                            showingDeleteConfirmation = true
+                        },
+                        onCreateEvent: { showingCreateEvent = true }
+                    )
+                    .padding(20)
                 }
             }
-            .pickerStyle(.segmented)
+        }
+        .animation(.easeInOut(duration: 0.2), value: calendarService.isLoading)
+    }
 
-            switch viewMode {
-            case .day:
-                DayCalendarView(
-                    selectedDate: $selectedDate,
-                    calendarService: calendarService,
-                    onEventTap: { selectedEvent = $0 },
-                    onEventDelete: { event in
-                        eventToDelete = event
-                        showingDeleteConfirmation = true
-                    },
-                    onCreateEvent: { showingCreateEvent = true }
-                )
-            case .week:
-                WeekCalendarView(
-                    selectedDate: $selectedDate,
-                    calendarService: calendarService,
-                    onEventTap: { selectedEvent = $0 },
-                    onEventDelete: { event in
-                        eventToDelete = event
-                        showingDeleteConfirmation = true
-                    },
-                    onCreateEvent: { showingCreateEvent = true }
-                )
-            case .month:
-                MonthCalendarView(
-                    selectedDate: $selectedDate,
-                    calendarService: calendarService,
-                    onEventTap: { selectedEvent = $0 },
-                    onEventDelete: { event in
-                        eventToDelete = event
-                        showingDeleteConfirmation = true
-                    },
-                    onCreateEvent: { showingCreateEvent = true }
-                )
+    // MARK: - Day Swipe Gesture
+
+    private var daySwipeGesture: some Gesture {
+        DragGesture(minimumDistance: 30)
+            .updating($dayDragOffset) { value, state, _ in
+                state = value.translation.width * 0.2
+            }
+            .onEnded { value in
+                let threshold: CGFloat = 60
+                if value.translation.width > threshold {
+                    navigateDay(by: -1)
+                } else if value.translation.width < -threshold {
+                    navigateDay(by: 1)
+                }
+            }
+    }
+
+    private func navigateDay(by offset: Int) {
+        feedbackGenerator.impactOccurred()
+        withAnimation(.snappy(duration: 0.25)) {
+            if let newDate = calendar.date(byAdding: .day, value: offset, to: selectedDate) {
+                selectedDate = newDate
             }
         }
     }
+
+    // MARK: - Week View
+
+    private var weekView: some View {
+        ScrollView {
+            WeekCalendarContent(
+                selectedDate: $selectedDate,
+                calendarService: calendarService,
+                onEventTap: { selectedEvent = $0 },
+                onEventDelete: { event in
+                    eventToDelete = event
+                    showingDeleteConfirmation = true
+                },
+                onCreateEvent: { showingCreateEvent = true }
+            )
+            .padding(20)
+        }
+    }
+
+    // MARK: - Month View
+
+    private var monthView: some View {
+        ScrollView {
+            MonthCalendarContent(
+                selectedDate: $selectedDate,
+                calendarService: calendarService,
+                onEventTap: { selectedEvent = $0 },
+                onEventDelete: { event in
+                    eventToDelete = event
+                    showingDeleteConfirmation = true
+                },
+                onCreateEvent: { showingCreateEvent = true }
+            )
+            .padding(20)
+        }
+    }
+
+    // MARK: - Calendar Picker Button
 
     private var calendarPickerButton: some View {
         Button {
+            feedbackGenerator.impactOccurred()
             showingCalendarPicker = true
         } label: {
             HStack(spacing: 6) {
@@ -166,7 +273,7 @@ struct CalendarView: View {
                 Text(calendarPickerTitle)
                     .lineLimit(1)
                 Image(systemName: "chevron.down")
-                    .font(.caption)
+                    .font(.caption2.weight(.semibold))
             }
         }
     }
@@ -186,6 +293,15 @@ struct CalendarView: View {
         }
     }
 
+    // MARK: - Data Loading
+
+    private var eventsForSelectedDay: [CalendarEvent] {
+        calendarService.events.filter { event in
+            guard let startDate = event.startDate else { return false }
+            return calendar.isDate(startDate, inSameDayAs: selectedDate)
+        }
+    }
+
     private func loadData() async {
         await calendarService.fetchCalendars()
         await calendarService.fetchColors()
@@ -198,11 +314,14 @@ struct CalendarView: View {
     }
 
     private func dateRangeForViewMode() -> (start: Date, end: Date) {
-        let calendar = Calendar.current
-
         switch viewMode {
         case .day:
-            return (selectedDate.startOfDay, selectedDate.endOfDay)
+            // Load a week's worth for the week strip
+            let weekStart = calendar.date(
+                from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: selectedDate)
+            )!
+            let weekEnd = calendar.date(byAdding: .day, value: 7, to: weekStart)!
+            return (weekStart.startOfDay, weekEnd.endOfDay)
 
         case .week:
             let weekStart = calendar.date(

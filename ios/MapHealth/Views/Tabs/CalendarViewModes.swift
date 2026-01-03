@@ -9,279 +9,100 @@ enum CalendarViewMode: String, CaseIterable {
     case month = "Month"
 }
 
-// MARK: - Day Calendar View
+// MARK: - Week Calendar Content
 
-struct DayCalendarView: View {
+struct WeekCalendarContent: View {
     @Binding var selectedDate: Date
     @ObservedObject var calendarService: CalendarService
     let onEventTap: (CalendarEvent) -> Void
     let onEventDelete: (CalendarEvent) -> Void
     let onCreateEvent: () -> Void
 
-    var body: some View {
-        VStack(spacing: 20) {
-            DatePicker(
-                "Select Date",
-                selection: $selectedDate,
-                displayedComponents: .date
-            )
-            .datePickerStyle(.graphical)
-            .mapHealthGlassSurface(cornerRadius: 20, tint: .accentColor.opacity(0.04))
-
-            eventsSection
-        }
-    }
-
-    private var eventsSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                Text(selectedDate.formatted(.dateTime.weekday(.wide).month(.wide).day()))
-                    .font(.headline)
-                    .foregroundStyle(.secondary)
-
-                Spacer()
-
-                if calendarService.isLoading {
-                    TypingIndicator()
-                }
-            }
-
-            if let error = calendarService.error {
-                CalendarErrorView(message: error.localizedDescription)
-            } else if calendarService.isLoading && eventsForDay.isEmpty {
-                SkeletonCalendarList(count: 3)
-            } else if eventsForDay.isEmpty {
-                CalendarEmptyStateView(onCreateEvent: onCreateEvent)
-            } else {
-                VStack(spacing: 12) {
-                    if !allDayEvents.isEmpty {
-                        CalendarSectionHeader(title: "All-day")
-                            .padding(.leading, 4)
-                        VStack(spacing: 8) {
-                            ForEach(allDayEvents) { event in
-                                CalendarEventRow(
-                                    event: event,
-                                    calendarService: calendarService,
-                                    onTap: { onEventTap(event) },
-                                    onDelete: { onEventDelete(event) }
-                                )
-                            }
-                        }
-                    }
-
-                    if !timedEvents.isEmpty {
-                        CalendarSectionHeader(title: "Scheduled")
-                            .padding(.leading, 4)
-                        VStack(spacing: 8) {
-                            ForEach(timedEvents) { event in
-                                CalendarEventRow(
-                                    event: event,
-                                    calendarService: calendarService,
-                                    onTap: { onEventTap(event) },
-                                    onDelete: { onEventDelete(event) }
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        .animation(.easeInOut(duration: 0.25), value: calendarService.isLoading)
-    }
-
-    private var eventsForDay: [CalendarEvent] {
-        let calendar = Calendar.current
-        let events = calendarService.events.filter { event in
-            guard let startDate = event.startDate else { return false }
-            return calendar.isDate(startDate, inSameDayAs: selectedDate)
-        }
-        return sortEvents(events)
-    }
-
-    private var allDayEvents: [CalendarEvent] {
-        eventsForDay.filter { $0.isAllDay }
-    }
-
-    private var timedEvents: [CalendarEvent] {
-        eventsForDay.filter { !$0.isAllDay }
-    }
-
-    private func sortEvents(_ events: [CalendarEvent]) -> [CalendarEvent] {
-        events.sorted { lhs, rhs in
-            if lhs.isAllDay != rhs.isAllDay {
-                return lhs.isAllDay && !rhs.isAllDay
-            }
-            let lhsDate = lhs.startDate ?? .distantPast
-            let rhsDate = rhs.startDate ?? .distantPast
-            if lhsDate != rhsDate {
-                return lhsDate < rhsDate
-            }
-            return (lhs.summary ?? "") < (rhs.summary ?? "")
-        }
-    }
-}
-
-// MARK: - Week Calendar View
-
-struct WeekCalendarView: View {
-    @Binding var selectedDate: Date
-    @ObservedObject var calendarService: CalendarService
-    let onEventTap: (CalendarEvent) -> Void
-    let onEventDelete: (CalendarEvent) -> Void
-    let onCreateEvent: () -> Void
-
+    @GestureState private var dragOffset: CGFloat = 0
     private let calendar = Calendar.current
+    private let feedbackGenerator = UIImpactFeedbackGenerator(style: .medium)
 
     var body: some View {
         VStack(spacing: 16) {
-            weekNavigationHeader
-            weekDayHeaders
-
             if let error = calendarService.error {
                 CalendarErrorView(message: error.localizedDescription)
             } else if calendarService.isLoading && calendarService.events.isEmpty {
-                SkeletonCalendarList(count: 4)
+                SkeletonCalendarList(count: 5)
             } else if calendarService.events.isEmpty {
-                CalendarEmptyStateView(onCreateEvent: onCreateEvent)
+                CalendarTimelineEmptyState(
+                    selectedDate: selectedDate,
+                    onCreateEvent: onCreateEvent
+                )
             } else {
-                weekEventsGrid
+                weekEventsContent
             }
         }
-        .animation(.easeInOut(duration: 0.25), value: calendarService.isLoading)
+        .gesture(weekSwipeGesture)
+        .offset(x: dragOffset)
+        .animation(.easeInOut(duration: 0.2), value: calendarService.isLoading)
     }
 
-    private var weekNavigationHeader: some View {
-        HStack {
-            Button {
-                withAnimation {
-                    selectedDate = calendar.date(byAdding: .weekOfYear, value: -1, to: selectedDate) ?? selectedDate
-                }
-            } label: {
-                Image(systemName: "chevron.left")
-                    .font(.title3.weight(.semibold))
-            }
+    // MARK: - Week Events Content
 
-            Spacer()
-
-            VStack(spacing: 4) {
-                Text(weekRangeText)
-                    .font(.headline)
-                if calendarService.isLoading {
-                    TypingIndicator()
-                }
-            }
-
-            Spacer()
-
-            Button {
-                withAnimation {
-                    selectedDate = calendar.date(byAdding: .weekOfYear, value: 1, to: selectedDate) ?? selectedDate
-                }
-            } label: {
-                Image(systemName: "chevron.right")
-                    .font(.title3.weight(.semibold))
-            }
-        }
-        .padding(.horizontal, 8)
-    }
-
-    private var weekRangeText: String {
-        let weekStart = calendar.date(
-            from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: selectedDate)
-        )!
-        let weekEnd = calendar.date(byAdding: .day, value: 6, to: weekStart)!
-
-        let formatter = DateFormatter()
-        formatter.dateFormat = "MMM d"
-        return "\(formatter.string(from: weekStart)) - \(formatter.string(from: weekEnd))"
-    }
-
-    private var weekDayHeaders: some View {
-        HStack(spacing: 4) {
-            ForEach(weekDays, id: \.self) { date in
-                VStack(spacing: 4) {
-                    Text(date.formatted(.dateTime.weekday(.narrow)))
-                        .font(.caption2.weight(.medium))
-                        .foregroundStyle(.secondary)
-
-                    Text(date.formatted(.dateTime.day()))
-                        .font(.subheadline.weight(isToday(date) ? .bold : .regular))
-                        .foregroundStyle(isToday(date) ? .white : .primary)
-                        .frame(width: 28, height: 28)
-                        .background {
-                            if isToday(date) {
-                                Circle().fill(Color.accentColor)
-                            } else if isSelected(date) {
-                                Circle().stroke(Color.accentColor, lineWidth: 2)
-                            }
-                        }
-
-                    let count = eventsForDate(date).count
-                    if count > 0 {
-                        let dotColor = isToday(date) ? Color.white.opacity(0.9) : Color.accentColor
-                        HStack(spacing: 2) {
-                            if count <= 3 {
-                                ForEach(0..<count, id: \.self) { _ in
-                                    Circle()
-                                        .fill(dotColor)
-                                        .frame(width: 4, height: 4)
-                                }
-                            } else {
-                                ForEach(0..<2, id: \.self) { _ in
-                                    Circle()
-                                        .fill(dotColor)
-                                        .frame(width: 4, height: 4)
-                                }
-                                Text("+")
-                                    .font(.caption2.weight(.semibold))
-                                    .foregroundStyle(dotColor)
-                                    .padding(.horizontal, 2)
-                                    .padding(.vertical, 1)
-                                    .background(
-                                        Capsule()
-                                            .stroke(dotColor.opacity(0.7), lineWidth: 1)
-                                    )
-                            }
-                        }
-                        .frame(height: 6)
-                    } else {
-                        Color.clear.frame(height: 6)
-                    }
-                }
-                .frame(maxWidth: .infinity)
-                .onTapGesture {
-                    withAnimation { selectedDate = date }
-                }
-            }
-        }
-        .padding(.vertical, 8)
-        .mapHealthGlassSurface(cornerRadius: 12, tint: .accentColor.opacity(0.04))
-    }
-
-    private var weekEventsGrid: some View {
-        VStack(alignment: .leading, spacing: 12) {
+    private var weekEventsContent: some View {
+        VStack(alignment: .leading, spacing: 20) {
             ForEach(weekDays, id: \.self) { date in
                 let dayEvents = eventsForDate(date)
                 if !dayEvents.isEmpty {
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text(date.formatted(.dateTime.weekday(.abbreviated).month(.abbreviated).day()))
-                            .font(.caption.weight(.semibold))
-                            .foregroundStyle(.secondary)
-                            .padding(.leading, 4)
-
-                        ForEach(dayEvents) { event in
-                            CompactEventRow(
-                                event: event,
-                                calendarService: calendarService,
-                                onTap: { onEventTap(event) },
-                                onDelete: { onEventDelete(event) }
-                            )
+                    WeekDaySection(
+                        date: date,
+                        events: dayEvents,
+                        calendarService: calendarService,
+                        isToday: calendar.isDateInToday(date),
+                        isSelected: calendar.isDate(date, inSameDayAs: selectedDate),
+                        onEventTap: onEventTap,
+                        onEventDelete: onEventDelete,
+                        onSelectDate: {
+                            UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                            withAnimation(.snappy(duration: 0.2)) {
+                                selectedDate = date
+                            }
                         }
-                    }
+                    )
                 }
+            }
+
+            if weekDays.allSatisfy({ eventsForDate($0).isEmpty }) {
+                CalendarTimelineEmptyState(
+                    selectedDate: selectedDate,
+                    onCreateEvent: onCreateEvent
+                )
             }
         }
     }
+
+    // MARK: - Swipe Gesture
+
+    private var weekSwipeGesture: some Gesture {
+        DragGesture(minimumDistance: 40)
+            .updating($dragOffset) { value, state, _ in
+                state = value.translation.width * 0.15
+            }
+            .onEnded { value in
+                let threshold: CGFloat = 60
+                if value.translation.width > threshold {
+                    navigateWeek(by: -1)
+                } else if value.translation.width < -threshold {
+                    navigateWeek(by: 1)
+                }
+            }
+    }
+
+    private func navigateWeek(by offset: Int) {
+        feedbackGenerator.impactOccurred()
+        withAnimation(.snappy(duration: 0.3)) {
+            if let newDate = calendar.date(byAdding: .weekOfYear, value: offset, to: selectedDate) {
+                selectedDate = newDate
+            }
+        }
+    }
+
+    // MARK: - Helpers
 
     private var weekDays: [Date] {
         let weekStart = calendar.date(
@@ -291,103 +112,200 @@ struct WeekCalendarView: View {
     }
 
     private func eventsForDate(_ date: Date) -> [CalendarEvent] {
-        let events = calendarService.events.filter { event in
+        calendarService.events.filter { event in
             guard let startDate = event.startDate else { return false }
             return calendar.isDate(startDate, inSameDayAs: date)
-        }
-        return sortEvents(events)
-    }
-
-    private func isToday(_ date: Date) -> Bool { calendar.isDateInToday(date) }
-    private func isSelected(_ date: Date) -> Bool { calendar.isDate(date, inSameDayAs: selectedDate) }
-
-    private func sortEvents(_ events: [CalendarEvent]) -> [CalendarEvent] {
-        events.sorted { lhs, rhs in
-            if lhs.isAllDay != rhs.isAllDay {
-                return lhs.isAllDay && !rhs.isAllDay
-            }
-            let lhsDate = lhs.startDate ?? .distantPast
-            let rhsDate = rhs.startDate ?? .distantPast
-            if lhsDate != rhsDate {
-                return lhsDate < rhsDate
-            }
-            return (lhs.summary ?? "") < (rhs.summary ?? "")
+        }.sorted { lhs, rhs in
+            if lhs.isAllDay != rhs.isAllDay { return lhs.isAllDay }
+            return (lhs.startDate ?? .distantPast) < (rhs.startDate ?? .distantPast)
         }
     }
 }
 
-// MARK: - Month Calendar View
+// MARK: - Week Day Section
 
-struct MonthCalendarView: View {
+struct WeekDaySection: View {
+    let date: Date
+    let events: [CalendarEvent]
+    let calendarService: CalendarService
+    let isToday: Bool
+    let isSelected: Bool
+    let onEventTap: (CalendarEvent) -> Void
+    let onEventDelete: (CalendarEvent) -> Void
+    let onSelectDate: () -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            // Day header
+            Button(action: onSelectDate) {
+                HStack(spacing: 10) {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(date.formatted(.dateTime.weekday(.wide)))
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(isToday ? Color.accentColor : Color.primary)
+
+                        Text(date.formatted(.dateTime.month(.abbreviated).day()))
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+
+                    if isToday {
+                        Text("TODAY")
+                            .font(.caption2.weight(.bold))
+                            .foregroundStyle(.white)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 3)
+                            .background(Color.accentColor)
+                            .clipShape(Capsule())
+                    }
+
+                    Spacer()
+
+                    Text("\(events.count)")
+                        .font(.caption.weight(.medium))
+                        .foregroundStyle(.secondary)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                        .background(Color.secondary.opacity(0.1))
+                        .clipShape(Capsule())
+                }
+            }
+            .buttonStyle(.plain)
+
+            // Events
+            VStack(spacing: 6) {
+                ForEach(events) { event in
+                    CompactEventCard(
+                        event: event,
+                        calendarService: calendarService,
+                        onTap: { onEventTap(event) },
+                        onDelete: { onEventDelete(event) }
+                    )
+                }
+            }
+        }
+        .padding(14)
+        .mapHealthGlassSurface(
+            cornerRadius: 16,
+            tint: isSelected ? .accentColor.opacity(0.06) : .accentColor.opacity(0.02)
+        )
+    }
+}
+
+// MARK: - Compact Event Card
+
+struct CompactEventCard: View {
+    let event: CalendarEvent
+    let calendarService: CalendarService
+    let onTap: () -> Void
+    let onDelete: () -> Void
+
+    private let feedbackGenerator = UIImpactFeedbackGenerator(style: .light)
+
+    var body: some View {
+        Button {
+            feedbackGenerator.impactOccurred()
+            onTap()
+        } label: {
+            HStack(spacing: 10) {
+                Circle()
+                    .fill(eventColor)
+                    .frame(width: 8, height: 8)
+
+                Text(event.summary ?? "Untitled")
+                    .font(.subheadline)
+                    .foregroundStyle(.primary)
+                    .lineLimit(1)
+
+                Spacer()
+
+                if event.hangoutLink != nil || event.conferenceData != nil {
+                    Image(systemName: "video.fill")
+                        .font(.caption2)
+                        .foregroundStyle(eventColor)
+                }
+
+                Text(event.timeString)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 10)
+            .background(eventColor.opacity(0.08))
+            .clipShape(RoundedRectangle(cornerRadius: 10))
+        }
+        .buttonStyle(.plain)
+        .contextMenu {
+            Button { onTap() } label: {
+                Label("View Details", systemImage: "info.circle")
+            }
+
+            if let link = event.hangoutLink ??
+                event.conferenceData?.entryPoints?.first(where: { $0.entryPointType == "video" })?.uri,
+               let url = URL(string: link) {
+                Link(destination: url) {
+                    Label("Join Video Call", systemImage: "video")
+                }
+            }
+
+            Divider()
+
+            Button(role: .destructive) { onDelete() } label: {
+                Label("Delete", systemImage: "trash")
+            }
+        }
+    }
+
+    private var eventColor: Color {
+        if let colors = calendarService.colorForEvent(event) {
+            return Color(hex: colors.background) ?? .accentColor
+        }
+        return googleCalendarColor(for: event.colorId)
+    }
+}
+
+// MARK: - Month Calendar Content
+
+struct MonthCalendarContent: View {
     @Binding var selectedDate: Date
     @ObservedObject var calendarService: CalendarService
     let onEventTap: (CalendarEvent) -> Void
     let onEventDelete: (CalendarEvent) -> Void
     let onCreateEvent: () -> Void
 
+    @GestureState private var dragOffset: CGFloat = 0
     private let calendar = Calendar.current
-    private let columns = Array(repeating: GridItem(.flexible(), spacing: 4), count: 7)
+    private let columns = Array(repeating: GridItem(.flexible(), spacing: 2), count: 7)
+    private let feedbackGenerator = UIImpactFeedbackGenerator(style: .medium)
 
     var body: some View {
         VStack(spacing: 16) {
-            monthNavigationHeader
-            monthCalendarGrid
+            monthGrid
 
-            if let error = calendarService.error {
-                CalendarErrorView(message: error.localizedDescription)
-            } else {
-                selectedDayEvents
-            }
+            Divider()
+
+            selectedDayEvents
         }
+        .gesture(monthSwipeGesture)
+        .offset(x: dragOffset)
     }
 
-    private var monthNavigationHeader: some View {
-        HStack {
-            Button {
-                withAnimation {
-                    selectedDate = calendar.date(byAdding: .month, value: -1, to: selectedDate) ?? selectedDate
-                }
-            } label: {
-                Image(systemName: "chevron.left")
-                    .font(.title3.weight(.semibold))
-            }
+    // MARK: - Month Grid
 
-            Spacer()
-
-            VStack(spacing: 4) {
-                Text(selectedDate.formatted(.dateTime.month(.wide).year()))
-                    .font(.headline)
-                if calendarService.isLoading {
-                    TypingIndicator()
-                }
-            }
-
-            Spacer()
-
-            Button {
-                withAnimation {
-                    selectedDate = calendar.date(byAdding: .month, value: 1, to: selectedDate) ?? selectedDate
-                }
-            } label: {
-                Image(systemName: "chevron.right")
-                    .font(.title3.weight(.semibold))
-            }
-        }
-        .padding(.horizontal, 8)
-    }
-
-    private var monthCalendarGrid: some View {
+    private var monthGrid: some View {
         VStack(spacing: 8) {
-            HStack(spacing: 4) {
+            // Weekday headers
+            HStack(spacing: 2) {
                 ForEach(calendar.shortWeekdaySymbols, id: \.self) { symbol in
-                    Text(symbol.prefix(1))
-                        .font(.caption2.weight(.medium))
+                    Text(symbol.prefix(2).uppercased())
+                        .font(.caption2.weight(.semibold))
                         .foregroundStyle(.secondary)
                         .frame(maxWidth: .infinity)
                 }
             }
 
-            LazyVGrid(columns: columns, spacing: 4) {
+            // Calendar grid
+            LazyVGrid(columns: columns, spacing: 2) {
                 ForEach(monthDays, id: \.self) { date in
                     if let date = date {
                         MonthDayCell(
@@ -395,71 +313,124 @@ struct MonthCalendarView: View {
                             isToday: calendar.isDateInToday(date),
                             isSelected: calendar.isDate(date, inSameDayAs: selectedDate),
                             isCurrentMonth: calendar.isDate(date, equalTo: selectedDate, toGranularity: .month),
-                            eventCount: eventsForDate(date).count
+                            eventCount: eventsForDate(date).count,
+                            eventColors: eventColors(for: date)
                         )
                         .onTapGesture {
-                            withAnimation { selectedDate = date }
+                            UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                            withAnimation(.snappy(duration: 0.2)) {
+                                selectedDate = date
+                            }
                         }
                     } else {
-                        Color.clear.frame(height: 40)
+                        Color.clear.frame(height: 48)
                     }
                 }
             }
         }
-        .padding(12)
-        .mapHealthGlassSurface(cornerRadius: 16, tint: .accentColor.opacity(0.04))
+        .padding(14)
+        .mapHealthGlassSurface(cornerRadius: 16, tint: .accentColor.opacity(0.03))
     }
+
+    // MARK: - Selected Day Events
 
     private var selectedDayEvents: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
                 Text(selectedDate.formatted(.dateTime.weekday(.wide).month(.abbreviated).day()))
                     .font(.headline)
-                    .foregroundStyle(.secondary)
+
+                if calendar.isDateInToday(selectedDate) {
+                    Text("TODAY")
+                        .font(.caption2.weight(.bold))
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 3)
+                        .background(Color.accentColor)
+                        .clipShape(Capsule())
+                }
+
                 Spacer()
+
+                if calendarService.isLoading {
+                    TypingIndicator()
+                }
             }
 
             let dayEvents = eventsForDate(selectedDate)
-            if calendarService.isLoading && dayEvents.isEmpty {
+
+            if let error = calendarService.error {
+                CalendarErrorView(message: error.localizedDescription)
+            } else if calendarService.isLoading && dayEvents.isEmpty {
                 SkeletonCalendarList(count: 2)
             } else if dayEvents.isEmpty {
-                CalendarEmptyStateView(onCreateEvent: onCreateEvent)
+                emptyDayState
             } else {
-                VStack(spacing: 12) {
-                    if !allDayEvents(for: selectedDate).isEmpty {
-                        CalendarSectionHeader(title: "All-day")
-                            .padding(.leading, 4)
-                        VStack(spacing: 8) {
-                            ForEach(allDayEvents(for: selectedDate)) { event in
-                                CalendarEventRow(
-                                    event: event,
-                                    calendarService: calendarService,
-                                    onTap: { onEventTap(event) },
-                                    onDelete: { onEventDelete(event) }
-                                )
-                            }
-                        }
-                    }
-
-                    if !timedEvents(for: selectedDate).isEmpty {
-                        CalendarSectionHeader(title: "Scheduled")
-                            .padding(.leading, 4)
-                        VStack(spacing: 8) {
-                            ForEach(timedEvents(for: selectedDate)) { event in
-                                CalendarEventRow(
-                                    event: event,
-                                    calendarService: calendarService,
-                                    onTap: { onEventTap(event) },
-                                    onDelete: { onEventDelete(event) }
-                                )
-                            }
-                        }
+                VStack(spacing: 8) {
+                    ForEach(dayEvents) { event in
+                        CalendarEventRow(
+                            event: event,
+                            calendarService: calendarService,
+                            onTap: { onEventTap(event) },
+                            onDelete: { onEventDelete(event) }
+                        )
                     }
                 }
             }
         }
-        .animation(.easeInOut(duration: 0.25), value: calendarService.isLoading)
+        .animation(.easeInOut(duration: 0.2), value: calendarService.isLoading)
     }
+
+    private var emptyDayState: some View {
+        VStack(spacing: 12) {
+            Image(systemName: "calendar.badge.plus")
+                .font(.title2)
+                .foregroundStyle(.tertiary)
+
+            Text("No events")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+
+            Button {
+                UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+                onCreateEvent()
+            } label: {
+                Text("Add Event")
+                    .font(.subheadline.weight(.medium))
+            }
+            .mapHealthGlassButtonStyle()
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 24)
+    }
+
+    // MARK: - Swipe Gesture
+
+    private var monthSwipeGesture: some Gesture {
+        DragGesture(minimumDistance: 50)
+            .updating($dragOffset) { value, state, _ in
+                state = value.translation.width * 0.1
+            }
+            .onEnded { value in
+                let threshold: CGFloat = 60
+                if value.translation.width > threshold {
+                    navigateMonth(by: -1)
+                } else if value.translation.width < -threshold {
+                    navigateMonth(by: 1)
+                }
+            }
+    }
+
+    private func navigateMonth(by offset: Int) {
+        feedbackGenerator.impactOccurred()
+        withAnimation(.snappy(duration: 0.3)) {
+            if let newDate = calendar.date(byAdding: .month, value: offset, to: selectedDate) {
+                selectedDate = newDate
+            }
+        }
+    }
+
+    // MARK: - Helpers
 
     private var monthDays: [Date?] {
         let monthStart = calendar.date(from: calendar.dateComponents([.year, .month], from: selectedDate))!
@@ -487,33 +458,23 @@ struct MonthCalendarView: View {
     }
 
     private func eventsForDate(_ date: Date) -> [CalendarEvent] {
-        let events = calendarService.events.filter { event in
+        calendarService.events.filter { event in
             guard let startDate = event.startDate else { return false }
             return calendar.isDate(startDate, inSameDayAs: date)
+        }.sorted { lhs, rhs in
+            if lhs.isAllDay != rhs.isAllDay { return lhs.isAllDay }
+            return (lhs.startDate ?? .distantPast) < (rhs.startDate ?? .distantPast)
         }
-        return sortEvents(events)
     }
 
-    private func allDayEvents(for date: Date) -> [CalendarEvent] {
-        eventsForDate(date).filter { $0.isAllDay }
-    }
-
-    private func timedEvents(for date: Date) -> [CalendarEvent] {
-        eventsForDate(date).filter { !$0.isAllDay }
-    }
-
-    private func sortEvents(_ events: [CalendarEvent]) -> [CalendarEvent] {
-        events.sorted { lhs, rhs in
-            if lhs.isAllDay != rhs.isAllDay {
-                return lhs.isAllDay && !rhs.isAllDay
+    private func eventColors(for date: Date) -> [Color] {
+        let dayEvents = eventsForDate(date)
+        return Array(Set(dayEvents.compactMap { event -> Color? in
+            if let colors = calendarService.colorForEvent(event) {
+                return Color(hex: colors.background)
             }
-            let lhsDate = lhs.startDate ?? .distantPast
-            let rhsDate = rhs.startDate ?? .distantPast
-            if lhsDate != rhsDate {
-                return lhsDate < rhsDate
-            }
-            return (lhs.summary ?? "") < (rhs.summary ?? "")
-        }
+            return googleCalendarColor(for: event.colorId)
+        })).prefix(3).map { $0 }
     }
 }
 
@@ -525,39 +486,68 @@ struct MonthDayCell: View {
     let isSelected: Bool
     let isCurrentMonth: Bool
     let eventCount: Int
+    let eventColors: [Color]
 
     var body: some View {
-        VStack(spacing: 2) {
-            Text(date.formatted(.dateTime.day()))
-                .font(.subheadline.weight(isToday ? .bold : .regular))
-                .foregroundStyle(textColor)
+        VStack(spacing: 4) {
+            ZStack {
+                if isSelected {
+                    Circle()
+                        .fill(isToday ? Color.accentColor : Color.accentColor.opacity(0.15))
+                        .frame(width: 32, height: 32)
+                } else if isToday {
+                    Circle()
+                        .strokeBorder(Color.accentColor, lineWidth: 2)
+                        .frame(width: 32, height: 32)
+                }
 
+                Text(date.formatted(.dateTime.day()))
+                    .font(.subheadline.weight(isToday || isSelected ? .semibold : .regular))
+                    .foregroundStyle(textColor)
+            }
+            .frame(width: 32, height: 32)
+
+            // Event indicators with colors
             if eventCount > 0 {
                 HStack(spacing: 2) {
-                    ForEach(0..<min(eventCount, 3), id: \.self) { _ in
-                        Circle()
-                            .fill(Color.accentColor)
-                            .frame(width: 4, height: 4)
+                    if eventColors.isEmpty {
+                        ForEach(0..<min(eventCount, 3), id: \.self) { _ in
+                            Circle()
+                                .fill(Color.accentColor)
+                                .frame(width: 4, height: 4)
+                        }
+                    } else {
+                        ForEach(0..<min(eventColors.count, 3), id: \.self) { index in
+                            Circle()
+                                .fill(eventColors[index])
+                                .frame(width: 4, height: 4)
+                        }
+                    }
+                    if eventCount > 3 {
+                        Text("+")
+                            .font(.system(size: 8, weight: .bold))
+                            .foregroundStyle(.secondary)
                     }
                 }
+                .frame(height: 4)
+            } else {
+                Color.clear.frame(height: 4)
             }
         }
         .frame(maxWidth: .infinity)
-        .frame(height: 40)
-        .background {
-            if isToday {
-                Circle().fill(Color.accentColor).frame(width: 32, height: 32)
-            } else if isSelected {
-                Circle().stroke(Color.accentColor, lineWidth: 2).frame(width: 32, height: 32)
-            }
-        }
+        .frame(height: 48)
+        .contentShape(Rectangle())
     }
 
     private var textColor: Color {
-        if isToday {
+        if isSelected && isToday {
             return .white
+        } else if isSelected {
+            return .accentColor
+        } else if isToday {
+            return .accentColor
         } else if !isCurrentMonth {
-            return .secondary.opacity(0.5)
+            return .secondary.opacity(0.4)
         } else {
             return .primary
         }

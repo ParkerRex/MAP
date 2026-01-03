@@ -3,31 +3,24 @@ import SwiftUI
 
 struct TodosView: View {
     @StateObject private var tasksService = TasksService.shared
-    @State private var showingAddSheet = false
+    @State private var newTaskText = ""
     @State private var selectedTask: MapTask?
-    @State private var quickAddText = ""
-    @State private var isQuickAddFocused = false
-    @State private var quickAddDate: Date?
-    @State private var filter: TaskListFilter = .all
     @State private var searchText = ""
-    @FocusState private var quickAddFieldFocused: Bool
+    @FocusState private var isAddingTask: Bool
 
     var body: some View {
         NavigationStack {
-            ZStack(alignment: .bottomTrailing) {
-                scrollContent
-                    .navigationTitle("Tasks")
-                    .toolbar { toolbarContent }
-                    .searchable(text: $searchText, prompt: "Search tasks")
-                    .refreshable { await tasksService.refresh() }
-                    .task { await loadTasksIfNeeded() }
-                    .sheet(isPresented: $showingAddSheet) {
-                        AddTaskSheet(tasksService: tasksService)
-                    }
-                    .sheet(item: $selectedTask) { task in
-                        EditTaskSheet(task: task, tasksService: tasksService)
-                    }
-                floatingAddButton
+            List {
+                addTaskSection
+                taskSections
+            }
+            .listStyle(.plain)
+            .scrollContentBackground(.hidden)
+            .searchable(text: $searchText, prompt: "Search tasks")
+            .refreshable { await tasksService.refresh() }
+            .task { await loadTasksIfNeeded() }
+            .sheet(item: $selectedTask) { task in
+                TaskDetailSheet(task: task, tasksService: tasksService)
             }
         }
     }
@@ -37,347 +30,240 @@ struct TodosView: View {
             await tasksService.fetchTasks()
         }
     }
+}
 
-    @ToolbarContentBuilder
-    private var toolbarContent: some ToolbarContent {
-        ToolbarItem(placement: .primaryAction) {
-            Menu {
-                Button {
-                    showingAddSheet = true
-                } label: {
-                    Label("New Task with Details", systemImage: "square.and.pencil")
+// MARK: - Add Task Section
+
+extension TodosView {
+    private var addTaskSection: some View {
+        Section {
+            HStack(spacing: 12) {
+                Circle()
+                    .strokeBorder(Color.secondary.opacity(0.3), lineWidth: 2)
+                    .frame(width: 22, height: 22)
+
+                TextField("Add a task...", text: $newTaskText)
+                    .focused($isAddingTask)
+                    .submitLabel(.done)
+                    .onSubmit(createTask)
+
+                if !newTaskText.isEmpty {
+                    Button {
+                        createTask()
+                    } label: {
+                        Image(systemName: "arrow.up.circle.fill")
+                            .font(.title2)
+                            .foregroundStyle(.accent)
+                    }
+                    .transition(.scale.combined(with: .opacity))
                 }
-            } label: {
-                Image(systemName: "ellipsis.circle")
             }
-        }
-    }
-}
-
-// MARK: - Floating Add Button
-
-extension TodosView {
-    private var floatingAddButton: some View {
-        Button {
-            focusQuickAdd()
-        } label: {
-            Image(systemName: "plus")
-                .font(.title2.weight(.semibold))
-                .foregroundStyle(.white)
-                .frame(width: 56, height: 56)
-                .background(
-                    Circle()
-                        .fill(.accent)
-                        .shadow(color: .accent.opacity(0.3), radius: 8, x: 0, y: 4)
-                )
-        }
-        .padding(.trailing, 20)
-        .padding(.bottom, 20)
-        .opacity(isQuickAddFocused ? 0 : 1)
-        .scaleEffect(isQuickAddFocused ? 0.5 : 1)
-        .animation(.spring(response: 0.3, dampingFraction: 0.7), value: isQuickAddFocused)
-    }
-}
-
-// MARK: - Scroll Content
-
-extension TodosView {
-    @ViewBuilder
-    private var scrollContent: some View {
-        if #available(iOS 26, *) {
-            ScrollView { todosBody }
-                .contentMargins(.horizontal, 20, for: .scrollContent)
-                .contentMargins(.vertical, 16, for: .scrollContent)
-                .safeAreaInset(edge: .bottom) { quickAddInset }
-        } else {
-            ScrollView {
-                todosBody
-                    .padding(.horizontal, 20)
-                    .padding(.vertical, 16)
-            }
-            .safeAreaInset(edge: .bottom) { quickAddInset }
+            .listRowInsets(EdgeInsets(top: 12, leading: 16, bottom: 12, trailing: 16))
+            .animation(.easeOut(duration: 0.15), value: newTaskText.isEmpty)
         }
     }
 
-    @ViewBuilder
-    private var quickAddInset: some View {
-        if isQuickAddFocused {
-            QuickAddBar(
-                text: $quickAddText,
-                date: $quickAddDate,
-                onSubmit: createQuickTask,
-                onCancel: dismissQuickAdd,
-                focused: $quickAddFieldFocused
-            )
-        }
-    }
-
-    private func createQuickTask() {
-        let trimmed = quickAddText.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmed.isEmpty else { return }
+    private func createTask() {
+        let text = newTaskText.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !text.isEmpty else { return }
 
         HapticFeedback.success()
+        let taskText = text
+        newTaskText = ""
 
         Task {
-            do {
-                try await tasksService.createTask(title: trimmed, dueAt: quickAddDate)
-                await MainActor.run {
-                    withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-                        quickAddText = ""
-                        quickAddDate = nil
-                    }
-                }
-            } catch {
-                HapticFeedback.error()
-            }
-        }
-    }
-
-    private func dismissQuickAdd() {
-        withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-            isQuickAddFocused = false
-            quickAddFieldFocused = false
-            quickAddText = ""
-            quickAddDate = nil
+            try? await tasksService.createTask(title: taskText, dueAt: nil)
         }
     }
 }
 
-// MARK: - Todos Body
+// MARK: - Task Sections
 
 extension TodosView {
-    private var todosBody: some View {
-        LazyVStack(spacing: 16) {
-            filterBar
-
-            if tasksService.isLoading && tasksService.tasks.isEmpty {
+    @ViewBuilder
+    private var taskSections: some View {
+        if tasksService.isLoading && tasksService.tasks.isEmpty {
+            Section {
                 TasksLoadingView()
-            } else if let error = tasksService.error {
+            }
+        } else if let error = tasksService.error {
+            Section {
                 TasksErrorView(error: error) {
                     Task { await tasksService.fetchTasks() }
                 }
-            } else if tasksService.tasks.isEmpty {
-                TasksEmptyView(onAdd: focusQuickAdd)
-            } else if !hasVisibleTasks {
-                TasksNoResultsView(
-                    title: searchQuery.isEmpty ? "No tasks to show" : "No matching tasks",
-                    message: searchQuery.isEmpty ? filter.emptyStateMessage : "Try a different keyword or filter.",
-                    onClear: clearSearchAndFilter
-                )
-            } else {
-                if !isQuickAddFocused {
-                    quickAddPromptCard
-                }
-                taskSections
             }
+        } else if tasksService.tasks.isEmpty {
+            Section {
+                emptyState
+            }
+        } else if filteredTasks.isEmpty && !searchText.isEmpty {
+            Section {
+                noResultsState
+            }
+        } else {
+            activeSections
         }
-        .padding(.bottom, 80)
+    }
+
+    private var filteredTasks: [MapTask] {
+        let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !query.isEmpty else { return tasksService.tasks }
+        return tasksService.tasks.filter { task in
+            task.title.localizedCaseInsensitiveContains(query) ||
+            (task.body?.localizedCaseInsensitiveContains(query) ?? false) ||
+            task.tags.contains { $0.title.localizedCaseInsensitiveContains(query) }
+        }
     }
 
     @ViewBuilder
-    private var taskSections: some View {
-        let overdueTasks = filteredOverdueTasks
-        if !overdueTasks.isEmpty {
-            TaskSectionView(
-                title: "Overdue",
-                icon: "exclamationmark.circle.fill",
-                color: .red,
-                tasks: overdueTasks,
-                rowBuilder: todoRow
-            )
+    private var activeSections: some View {
+        let pending = filteredTasks.filter { !$0.isCompleted }
+        let completed = filteredTasks.filter { $0.isCompleted }
+
+        // Overdue
+        let overdue = pending.filter { task in
+            guard let due = task.dueAt else { return false }
+            return due < Calendar.current.startOfDay(for: Date())
+        }.sorted { ($0.dueAt ?? .distantFuture) < ($1.dueAt ?? .distantFuture) }
+
+        if !overdue.isEmpty {
+            taskSection(title: "Overdue", tasks: overdue, tint: .red)
         }
 
-        let todaysTasks = filteredTodaysTasks
-        if !todaysTasks.isEmpty {
-            TaskSectionView(
-                title: "Today",
-                icon: "sun.max.fill",
-                color: .orange,
-                tasks: todaysTasks,
-                rowBuilder: todoRow
-            )
+        // Today
+        let today = pending.filter { task in
+            guard let due = task.dueAt else { return false }
+            return Calendar.current.isDateInToday(due)
         }
 
-        let upcoming = filteredUpcomingTasks
+        if !today.isEmpty {
+            taskSection(title: "Today", tasks: today, tint: .orange)
+        }
+
+        // Upcoming
+        let upcoming = pending.filter { task in
+            guard let due = task.dueAt else { return false }
+            let startOfToday = Calendar.current.startOfDay(for: Date())
+            return due >= startOfToday && !Calendar.current.isDateInToday(due)
+        }.sorted { ($0.dueAt ?? .distantFuture) < ($1.dueAt ?? .distantFuture) }
+
         if !upcoming.isEmpty {
-            TaskSectionView(
-                title: "Upcoming",
-                icon: "calendar",
-                color: .blue,
-                tasks: upcoming,
-                rowBuilder: todoRow
-            )
+            taskSection(title: "Upcoming", tasks: upcoming, tint: .blue)
         }
 
-        let noDueDate = filteredAnytimeTasks
+        // No due date
+        let noDueDate = pending.filter { $0.dueAt == nil }
+            .sorted { $0.createdAt > $1.createdAt }
+
         if !noDueDate.isEmpty {
-            TaskSectionView(
-                title: "Anytime",
-                icon: "tray.fill",
-                color: .secondary,
-                tasks: noDueDate,
-                rowBuilder: todoRow
-            )
+            taskSection(title: "No Date", tasks: noDueDate, tint: .secondary)
         }
 
-        let completedTasks = filteredCompletedTasks
-        if !completedTasks.isEmpty {
-            CompletedTasksSection(
-                tasks: completedTasks,
-                rowBuilder: todoRow
-            )
+        // Completed
+        if !completed.isEmpty {
+            completedSection(tasks: completed)
         }
     }
 
-    private var filteredUpcomingTasks: [MapTask] {
-        guard filter != .completed else { return [] }
-        return tasksService.upcomingTasks
-            .filter { task in
-                guard let dueAt = task.dueAt else { return false }
-                return !Calendar.current.isDateInToday(dueAt) && dueAt >= Date()
+    private func taskSection(title: String, tasks: [MapTask], tint: Color) -> some View {
+        Section {
+            ForEach(tasks) { task in
+                TaskRow(
+                    task: task,
+                    onToggle: { toggleTask(task) },
+                    onTap: { selectedTask = task },
+                    onDelete: { deleteTask(task) }
+                )
             }
-            .filter(matchesSearch)
-    }
-
-    private var filteredAnytimeTasks: [MapTask] {
-        guard filter != .completed else { return [] }
-        return tasksService.pendingTasks
-            .filter { $0.dueAt == nil }
-            .filter(matchesSearch)
-    }
-
-    private var filteredOverdueTasks: [MapTask] {
-        guard filter != .completed else { return [] }
-        return tasksService.overdueTasks.filter(matchesSearch)
-    }
-
-    private var filteredTodaysTasks: [MapTask] {
-        guard filter != .completed else { return [] }
-        return tasksService.todaysTasks.filter(matchesSearch)
-    }
-
-    private var filteredCompletedTasks: [MapTask] {
-        guard filter != .active else { return [] }
-        return tasksService.completedTasks.filter(matchesSearch)
-    }
-
-    private var hasVisibleTasks: Bool {
-        !filteredOverdueTasks.isEmpty ||
-        !filteredTodaysTasks.isEmpty ||
-        !filteredUpcomingTasks.isEmpty ||
-        !filteredAnytimeTasks.isEmpty ||
-        !filteredCompletedTasks.isEmpty
-    }
-
-    private var filterBar: some View {
-        Picker("Filter", selection: $filter) {
-            ForEach(TaskListFilter.allCases, id: \.self) { option in
-                Text(option.title).tag(option)
-            }
+        } header: {
+            Text(title)
+                .font(.footnote.weight(.semibold))
+                .foregroundStyle(tint)
+                .textCase(.uppercase)
         }
-        .pickerStyle(.segmented)
     }
 
-    private var quickAddPromptCard: some View {
-        Button(action: focusQuickAdd) {
-            HStack(spacing: 12) {
-                ZStack {
-                    Circle()
-                        .fill(Color.accentColor.opacity(0.15))
-                        .frame(width: 36, height: 36)
-                    Image(systemName: "plus")
-                        .font(.headline.weight(.semibold))
-                        .foregroundStyle(.accent)
-                }
+    private func completedSection(tasks: [MapTask]) -> some View {
+        let sortedTasks = tasks.prefix(15).sorted {
+            ($0.completedAt ?? .distantPast) > ($1.completedAt ?? .distantPast)
+        }
 
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("Quick add")
-                        .font(.subheadline.weight(.semibold))
-                    Text("Capture a task fast with optional due date")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
-
-                Spacer()
-
-                Image(systemName: "chevron.up")
-                    .font(.footnote.weight(.semibold))
+        return Section {
+            ForEach(sortedTasks) { task in
+                TaskRow(
+                    task: task,
+                    onToggle: { toggleTask(task) },
+                    onTap: { selectedTask = task },
+                    onDelete: { deleteTask(task) }
+                )
+            }
+            if tasks.count > 15 {
+                Text("\(tasks.count - 15) more completed")
+                    .font(.caption)
                     .foregroundStyle(.secondary)
+                    .frame(maxWidth: .infinity)
             }
-            .padding(.horizontal, 14)
-            .padding(.vertical, 12)
-        }
-        .buttonStyle(.plain)
-        .mapHealthGlassSurface(cornerRadius: 14, tint: .accentColor.opacity(0.05))
-    }
-
-    private var searchQuery: String {
-        searchText.trimmingCharacters(in: .whitespacesAndNewlines)
-    }
-
-    private func matchesSearch(_ task: MapTask) -> Bool {
-        let query = searchQuery
-        guard !query.isEmpty else { return true }
-
-        if task.title.localizedCaseInsensitiveContains(query) { return true }
-        if let body = task.body, body.localizedCaseInsensitiveContains(query) { return true }
-        return task.tags.contains { $0.title.localizedCaseInsensitiveContains(query) }
-    }
-
-    private func focusQuickAdd() {
-        withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-            isQuickAddFocused = true
-            quickAddFieldFocused = true
-        }
-        HapticFeedback.light()
-    }
-
-    private func clearSearchAndFilter() {
-        searchText = ""
-        filter = .all
-    }
-
-    private func todoRow(_ task: MapTask) -> some View {
-        TaskRowView(
-            task: task,
-            onToggle: {
-                HapticFeedback.success()
-                Task { try? await tasksService.toggleTask(task) }
-            },
-            onEdit: { selectedTask = task },
-            onDelete: {
-                HapticFeedback.warning()
-                Task { try? await tasksService.deleteTask(task) }
-            },
-            onSchedule: { date in
-                HapticFeedback.light()
-                Task { try? await tasksService.scheduleTask(task, dueAt: date) }
+        } header: {
+            HStack(spacing: 6) {
+                Image(systemName: "checkmark.circle.fill")
+                    .foregroundStyle(.green)
+                Text("Completed")
+                Text("·")
+                Text("\(tasks.count)")
             }
-        )
+            .font(.footnote.weight(.medium))
+            .foregroundStyle(.secondary)
+            .textCase(.uppercase)
+        }
+    }
+
+    private var emptyState: some View {
+        VStack(spacing: 12) {
+            Image(systemName: "checkmark.circle")
+                .font(.system(size: 48, weight: .light))
+                .foregroundStyle(.green.opacity(0.8))
+
+            Text("No tasks yet")
+                .font(.headline)
+
+            Text("Type above to add your first task")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 60)
+        .listRowBackground(Color.clear)
+    }
+
+    private var noResultsState: some View {
+        VStack(spacing: 12) {
+            Image(systemName: "magnifyingglass")
+                .font(.system(size: 40, weight: .light))
+                .foregroundStyle(.secondary)
+
+            Text("No matching tasks")
+                .font(.headline)
+
+            Text("Try a different search term")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 60)
+        .listRowBackground(Color.clear)
     }
 }
 
-private enum TaskListFilter: String, CaseIterable {
-    case all
-    case active
-    case completed
+// MARK: - Actions
 
-    var title: String {
-        switch self {
-        case .all: return "All"
-        case .active: return "Active"
-        case .completed: return "Completed"
-        }
+extension TodosView {
+    private func toggleTask(_ task: MapTask) {
+        HapticFeedback.success()
+        Task { try? await tasksService.toggleTask(task) }
     }
 
-    var emptyStateMessage: String {
-        switch self {
-        case .all:
-            return "Try showing active tasks or completed tasks."
-        case .active:
-            return "You are all caught up on active tasks."
-        case .completed:
-            return "No completed tasks yet."
-        }
+    private func deleteTask(_ task: MapTask) {
+        HapticFeedback.warning()
+        Task { try? await tasksService.deleteTask(task) }
     }
 }
