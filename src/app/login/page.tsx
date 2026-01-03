@@ -49,11 +49,11 @@ export default function LoginPage() {
       </div>
 
       {/* Right side - Login form */}
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col bg-zinc-950 text-white">
         {/* Mobile header */}
         <header className="lg:hidden p-6">
           <Link href="https://mapthemap.com">
-            <Icons.Logo className="h-7 w-auto" />
+            <Icons.Logo className="h-7 w-auto text-white" />
           </Link>
         </header>
 
@@ -61,18 +61,14 @@ export default function LoginPage() {
         <div className="flex-1 flex items-center justify-center p-6">
           <div className="w-full max-w-sm space-y-8">
             <div className="space-y-2">
-              <h1 className="text-2xl font-semibold tracking-tight">
-                Welcome back
-              </h1>
-              <p className="text-muted-foreground">
-                Sign in to continue to MAP
-              </p>
+              <h1 className="text-2xl font-semibold tracking-tight text-white">Welcome back</h1>
+              <p className="text-zinc-400">Sign in to continue to MAP</p>
             </div>
 
             <Button
               onClick={handleGoogleSignIn}
               variant="outline"
-              className="w-full h-11 text-sm font-medium gap-3 border-border/60 hover:bg-accent hover:border-border transition-colors"
+              className="w-full h-11 text-sm font-medium gap-3 border-zinc-700 bg-zinc-900 text-white hover:bg-zinc-800 hover:border-zinc-600 transition-colors"
             >
               <svg className="w-4 h-4" viewBox="0 0 24 24">
                 <path
@@ -97,27 +93,27 @@ export default function LoginPage() {
 
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-border/40" />
+                <div className="w-full border-t border-zinc-800" />
               </div>
               <div className="relative flex justify-center text-xs">
-                <span className="px-2 bg-background text-muted-foreground/60">
+                <span className="px-2 bg-zinc-950 text-zinc-500">
                   Secure authentication via Google
                 </span>
               </div>
             </div>
 
-            <p className="text-xs text-muted-foreground/60 text-center leading-relaxed">
+            <p className="text-xs text-zinc-500 text-center leading-relaxed">
               By continuing, you agree to our{" "}
               <a
                 href="https://mapthemap.com/terms"
-                className="text-muted-foreground hover:text-foreground underline underline-offset-2 transition-colors"
+                className="text-zinc-400 hover:text-white underline underline-offset-2 transition-colors"
               >
                 Terms of Service
               </a>{" "}
               and{" "}
               <a
                 href="https://mapthemap.com/policy"
-                className="text-muted-foreground hover:text-foreground underline underline-offset-2 transition-colors"
+                className="text-zinc-400 hover:text-white underline underline-offset-2 transition-colors"
               >
                 Privacy Policy
               </a>
@@ -127,7 +123,7 @@ export default function LoginPage() {
 
         {/* Mobile footer */}
         <footer className="lg:hidden p-6 text-center">
-          <p className="text-xs text-muted-foreground/60">
+          <p className="text-xs text-zinc-500">
             © {new Date().getFullYear()} MAP. All rights reserved.
           </p>
         </footer>
