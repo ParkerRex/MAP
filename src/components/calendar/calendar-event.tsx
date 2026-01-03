@@ -1,5 +1,5 @@
 "use client";
-import { format } from "date-fns";
+import { format, isPast } from "date-fns";
 import type { calendar_v3 } from "googleapis";
 import type React from "react";
 import { useMemo, useState } from "react";
@@ -33,6 +33,18 @@ interface CalendarEventProps {
 const MINUTES_IN_HOUR = 60;
 const HOUR_HEIGHT = 64;
 
+// Convert hex to RGB for better color manipulation
+function hexToRgb(hex: string): { r: number; g: number; b: number } | null {
+  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  return result
+    ? {
+        r: Number.parseInt(result[1], 16),
+        g: Number.parseInt(result[2], 16),
+        b: Number.parseInt(result[3], 16),
+      }
+    : null;
+}
+
 const CalendarEventComponent: React.FC<CalendarEventProps> = ({
   events,
   dayIndex: _dayIndex,
@@ -65,7 +77,7 @@ const CalendarEventComponent: React.FC<CalendarEventProps> = ({
 
   const getCalendarColor = (calendarId: string | null | undefined) => {
     const calendar = calendars.find((cal) => cal.id === calendarId);
-    return calendar?.backgroundColor || "#DDFFE3";
+    return calendar?.backgroundColor || "#3b82f6";
   };
 
   const formatEventTime = (dateTimeStr: string | null | undefined) => {
@@ -188,17 +200,29 @@ const CalendarEventComponent: React.FC<CalendarEventProps> = ({
         {eventsWithLayout.sortedEvents.map((event) => {
           const calendarColor = getCalendarColor(event.organizer?.email);
           const style = calculateEventStyle(event);
+          const eventEnd = new Date(event.end?.dateTime || event.end?.date || "");
+          const isEventPast = isPast(eventEnd);
+          const rgb = hexToRgb(calendarColor);
+          const bgColor = rgb ? `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.15)` : `${calendarColor}26`;
+          const hoverBgColor = rgb
+            ? `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.25)`
+            : `${calendarColor}40`;
 
           return (
             <ContextMenu key={event.id}>
               <ContextMenuTrigger>
                 <div
-                  className="absolute select-none p-1 rounded-lg border-l-4 overflow-hidden cursor-pointer"
-                  style={{
-                    ...style,
-                    backgroundColor: `${calendarColor}33`,
-                    borderLeftColor: calendarColor,
-                  }}
+                  className={`group absolute select-none rounded-md border-l-[3px] overflow-hidden cursor-pointer transition-all duration-150 hover:shadow-md hover:z-10 ${
+                    isEventPast ? "opacity-50" : ""
+                  }`}
+                  style={
+                    {
+                      ...style,
+                      backgroundColor: bgColor,
+                      borderLeftColor: calendarColor,
+                      "--hover-bg": hoverBgColor,
+                    } as React.CSSProperties
+                  }
                   onClick={() => handleEventClick(event)}
                   onKeyDown={(e) => {
                     if (e.key === "Enter" || e.key === " ") {
@@ -206,21 +230,31 @@ const CalendarEventComponent: React.FC<CalendarEventProps> = ({
                       handleEventClick(event);
                     }
                   }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = hoverBgColor;
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = bgColor;
+                  }}
                   tabIndex={0}
                   role="button"
                   aria-label={`Event: ${event.summary}`}
                 >
-                  <div className="flex flex-col h-full w-full overflow-hidden">
-                    <p className="text-[11px] font-semibold line-clamp-1">{event.summary}</p>
-                    <p className="text-[10px] line-clamp-1 font-mono tracking-tight">
-                      {formatEventTime(event.start?.dateTime)} -{" "}
-                      {formatEventTime(event.end?.dateTime)}
+                  <div className="flex flex-col h-full w-full overflow-hidden px-1.5 py-1">
+                    <p className="text-[11px] font-semibold leading-tight line-clamp-2 text-foreground/90">
+                      {event.summary}
+                    </p>
+                    <p className="text-[10px] line-clamp-1 text-muted-foreground mt-0.5">
+                      {formatEventTime(event.start?.dateTime)}
                     </p>
                   </div>
                 </div>
               </ContextMenuTrigger>
               <ContextMenuContent>
-                <ContextMenuItem onSelect={() => setEventToDelete(event)}>
+                <ContextMenuItem
+                  onSelect={() => setEventToDelete(event)}
+                  className="text-destructive focus:text-destructive"
+                >
                   Delete Event
                 </ContextMenuItem>
               </ContextMenuContent>

@@ -1,13 +1,15 @@
+"use client";
+
 import { format } from "date-fns";
-import { Eye, Pencil } from "lucide-react";
+import { Eye, FileText, Pencil } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import Markdown from "react-markdown";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/components/ui/cn";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Textarea } from "@/components/ui/textarea";
 import { useUpdateNote } from "@/hooks/use-notes";
-
 import type { Note } from "@/types/notes";
 
 interface NoteDisplayProps {
@@ -88,70 +90,92 @@ export default function NoteDisplay({ note }: NoteDisplayProps) {
     setSaveStatus("idle");
   }, []);
 
-  return (
-    <div className="flex flex-col h-full">
-      <div className="p-4 space-y-4 shrink-0">
-        {note ? (
-          <>
-            <div className="flex items-center gap-2">
-              <Input
-                ref={titleInputRef}
-                className="text-2xl font-bold w-full"
-                placeholder="Note Title"
-                value={title}
-                onChange={handleTitleChange}
-              />
-              <span className="text-xs text-muted-foreground whitespace-nowrap">
-                {saveStatus === "saving" && "Saving..."}
-                {saveStatus === "saved" && "Saved"}
-              </span>
-            </div>
-            <span className="text-sm text-muted-foreground">
-              {format(note.updatedAt ?? note.createdAt, "MMM d, yyyy 'at' h:mm a")}
-            </span>
-          </>
-        ) : (
-          <p className="text-center text-muted-foreground">Select a note to view its content</p>
-        )}
+  // Empty state
+  if (!note) {
+    return (
+      <div className="flex-1 flex flex-col items-center justify-center text-muted-foreground">
+        <FileText className="h-12 w-12 mb-4 opacity-30" />
+        <p className="text-lg font-medium">No note selected</p>
+        <p className="text-sm mt-1">Select a note to view its content</p>
       </div>
-      {note && (
-        <div className="grow overflow-hidden flex flex-col">
-          <div className="flex items-center gap-2 px-4 pb-2 border-b">
-            <Button
-              variant={isPreview ? "ghost" : "secondary"}
-              size="sm"
-              onClick={() => setIsPreview(false)}
-            >
-              <Pencil className="h-4 w-4 mr-1" />
-              Edit
-            </Button>
-            <Button
-              variant={isPreview ? "secondary" : "ghost"}
-              size="sm"
-              onClick={() => setIsPreview(true)}
-            >
-              <Eye className="h-4 w-4 mr-1" />
-              Preview
-            </Button>
+    );
+  }
+
+  return (
+    <div className="flex-1 flex flex-col min-w-0">
+      {/* Header */}
+      <div className="shrink-0 border-b bg-background/50 p-4 md:p-6">
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex-1 min-w-0">
+            <Input
+              ref={titleInputRef}
+              className="text-xl md:text-2xl font-semibold border-none shadow-none p-0 h-auto focus-visible:ring-0 bg-transparent"
+              placeholder="Note Title"
+              value={title}
+              onChange={handleTitleChange}
+            />
+            <p className="text-sm text-muted-foreground mt-1">
+              {format(note.updatedAt ?? note.createdAt, "MMMM d, yyyy 'at' h:mm a")}
+            </p>
           </div>
-          <div className="flex-1 overflow-hidden p-4">
-            {isPreview ? (
-              <ScrollArea className="h-full">
-                <div className="prose prose-sm dark:prose-invert max-w-none">
-                  <Markdown>{content || "*No content yet*"}</Markdown>
-                </div>
-              </ScrollArea>
-            ) : (
-              <Textarea
-                className="w-full h-full resize-none"
-                placeholder="Start typing your note... (Markdown supported)"
-                value={content}
-                onChange={handleContentChange}
-              />
+          <div className="flex items-center gap-2">
+            {saveStatus !== "idle" && (
+              <span
+                className={cn(
+                  "text-xs transition-opacity",
+                  saveStatus === "saving" ? "text-muted-foreground" : "text-green-600",
+                )}
+              >
+                {saveStatus === "saving" ? "Saving..." : "Saved"}
+              </span>
             )}
           </div>
         </div>
-      )}
+      </div>
+
+      {/* Mode toggle */}
+      <div className="shrink-0 border-b px-4 md:px-6 py-2 flex items-center gap-1 bg-muted/30">
+        <Button
+          variant={isPreview ? "ghost" : "secondary"}
+          size="sm"
+          onClick={() => setIsPreview(false)}
+          className="h-7 text-xs"
+        >
+          <Pencil className="h-3 w-3 mr-1.5" />
+          Edit
+        </Button>
+        <Button
+          variant={isPreview ? "secondary" : "ghost"}
+          size="sm"
+          onClick={() => setIsPreview(true)}
+          className="h-7 text-xs"
+        >
+          <Eye className="h-3 w-3 mr-1.5" />
+          Preview
+        </Button>
+      </div>
+
+      {/* Content */}
+      <div className="flex-1 overflow-hidden">
+        {isPreview ? (
+          <ScrollArea className="h-full">
+            <div className="p-4 md:p-6">
+              <article className="prose prose-sm dark:prose-invert max-w-none prose-headings:font-semibold prose-p:leading-relaxed prose-pre:bg-muted prose-pre:border">
+                <Markdown>{content || "*Start writing to see a preview...*"}</Markdown>
+              </article>
+            </div>
+          </ScrollArea>
+        ) : (
+          <div className="h-full p-4 md:p-6">
+            <Textarea
+              className="w-full h-full resize-none border-none shadow-none focus-visible:ring-0 bg-transparent p-0 text-sm leading-relaxed"
+              placeholder="Start typing your note... (Markdown supported)"
+              value={content}
+              onChange={handleContentChange}
+            />
+          </div>
+        )}
+      </div>
     </div>
   );
 }

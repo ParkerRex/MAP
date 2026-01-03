@@ -1,10 +1,25 @@
 "use client";
-import { format } from "date-fns";
+import { format, formatDistanceToNow } from "date-fns";
 import type { calendar_v3 } from "googleapis";
-import { MoveRight } from "lucide-react";
+import { Calendar, Clock, MapPin, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
 import type { ExtendedEvent } from "@/types/calendar";
 
 const formatTime = (date: Date) => format(date, "h:mm a");
+const formatDate = (date: Date) => format(date, "EEE, MMM d");
+
+// Convert hex to RGB for better color manipulation
+function hexToRgb(hex: string): { r: number; g: number; b: number } | null {
+  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  return result
+    ? {
+        r: Number.parseInt(result[1], 16),
+        g: Number.parseInt(result[2], 16),
+        b: Number.parseInt(result[3], 16),
+      }
+    : null;
+}
 
 interface ContextPanelProps {
   className?: string;
@@ -12,6 +27,7 @@ interface ContextPanelProps {
   events: calendar_v3.Schema$Event[];
   visibleCalendars: Set<string>;
   calendars: calendar_v3.Schema$CalendarListEntry[];
+  onClearSelection?: () => void;
 }
 
 export default function ContextPanel({
@@ -20,6 +36,7 @@ export default function ContextPanel({
   events,
   visibleCalendars,
   calendars,
+  onClearSelection,
 }: ContextPanelProps) {
   const getNextEvent = (): calendar_v3.Schema$Event | undefined => {
     const now = new Date();
@@ -38,71 +55,139 @@ export default function ContextPanel({
     return upcomingEvents[0];
   };
 
-  const getTimeUntilNextEvent = (event: calendar_v3.Schema$Event) => {
-    const now = new Date();
-    const eventStart = new Date(event.start?.dateTime || event.start?.date || "");
-    const diff = eventStart.getTime() - now.getTime();
-    const hours = Math.floor(diff / (1000 * 60 * 60));
-    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-    return { hours, minutes };
+  const getCalendarColor = (calendarId: string | null | undefined) => {
+    const calendar = calendars.find((cal) => cal.id === calendarId);
+    return calendar?.backgroundColor || "#3b82f6";
   };
 
-  const _getCalendarColor = (calendarId: string | null | undefined) => {
+  const getCalendarName = (calendarId: string | null | undefined) => {
     const calendar = calendars.find((cal) => cal.id === calendarId);
-    return calendar?.backgroundColor || "#DDFFE3";
+    return calendar?.summary || "Calendar";
   };
 
   if (!selectedEvent) {
     const nextEvent = getNextEvent();
     if (!nextEvent) {
-      // Hide the panel completely when there are no upcoming events
       return null;
     }
 
-    const { hours, minutes } = getTimeUntilNextEvent(nextEvent);
-    const { summary, description: _description } = nextEvent;
     const startDate = new Date(nextEvent.start?.dateTime || nextEvent.start?.date || "");
     const endDate = new Date(nextEvent.end?.dateTime || nextEvent.end?.date || "");
+    const timeUntil = formatDistanceToNow(startDate, { addSuffix: false });
+    const calendarColor = getCalendarColor(nextEvent.organizer?.email);
+    const rgb = hexToRgb(calendarColor);
+    const bgColor = rgb ? `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.1)` : `${calendarColor}1a`;
 
     return (
-      <div className={`h-full w-[256px] border-l bg-muted/30 dark:bg-muted/10 ${className}`}>
-        <div className="flex flex-col gap-4 p-4">
-          <div className="flex items-center justify-between">
-            <p className="text-xs text-muted-foreground">
-              Upcoming in {hours}h {minutes}min
+      <aside className={`h-full w-[280px] border-l border-border/50 bg-background ${className}`}>
+        <div className="flex flex-col h-full">
+          <div className="p-4 border-b border-border/50">
+            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+              Up Next
             </p>
-            <MoveRight className="size-4 text-muted-foreground" />
+            <p className="text-sm text-primary font-medium mt-0.5">in {timeUntil}</p>
           </div>
-          <div className="rounded-lg bg-muted p-4">
-            <h2 className="line-clamp-1 text-sm font-semibold">{summary}</h2>
-            <p className="text-xs text-muted-foreground">
-              {formatTime(startDate)} - {formatTime(endDate)}
-            </p>
+
+          <div className="p-4 flex-1">
+            <div
+              className="rounded-lg p-4 border-l-[3px]"
+              style={{
+                backgroundColor: bgColor,
+                borderLeftColor: calendarColor,
+              }}
+            >
+              <h2 className="font-semibold text-foreground line-clamp-2">{nextEvent.summary}</h2>
+
+              <div className="mt-3 space-y-2">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Clock className="h-3.5 w-3.5" />
+                  <span>
+                    {formatTime(startDate)} - {formatTime(endDate)}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Calendar className="h-3.5 w-3.5" />
+                  <span>{formatDate(startDate)}</span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
+      </aside>
     );
   }
 
-  const { summary, description } = selectedEvent;
+  const { summary, description, location } = selectedEvent;
   const startDate = new Date(selectedEvent.start?.dateTime || selectedEvent.start?.date || "");
   const endDate = new Date(selectedEvent.end?.dateTime || selectedEvent.end?.date || "");
+  const calendarColor = getCalendarColor(selectedEvent.organizer?.email);
+  const calendarName = getCalendarName(selectedEvent.organizer?.email);
+  const rgb = hexToRgb(calendarColor);
+  const bgColor = rgb ? `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.1)` : `${calendarColor}1a`;
 
   return (
-    <div className={`h-full w-[256px] border-l bg-muted/30 dark:bg-muted/10 ${className}`}>
-      <div className="flex flex-col gap-4 p-4">
-        <div className="flex items-center justify-between">
-          <p className="text-xs text-muted-foreground">Event Details</p>
-          <MoveRight className="size-4 text-muted-foreground" />
-        </div>
-        <div className="rounded-lg bg-muted p-4">
-          <h2 className="line-clamp-1 text-sm font-semibold">{summary}</h2>
-          <p className="text-xs text-muted-foreground">
-            {formatTime(startDate)} - {formatTime(endDate)}
+    <aside className={`h-full w-[280px] border-l border-border/50 bg-background ${className}`}>
+      <div className="flex flex-col h-full">
+        <div className="flex items-center justify-between p-4 border-b border-border/50">
+          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+            Event Details
           </p>
-          {description && <p className="mt-2 text-xs">{description}</p>}
+          {onClearSelection && (
+            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={onClearSelection}>
+              <X className="h-3.5 w-3.5" />
+            </Button>
+          )}
+        </div>
+
+        <div className="p-4 flex-1 overflow-auto">
+          <div
+            className="rounded-lg p-4 border-l-[3px]"
+            style={{
+              backgroundColor: bgColor,
+              borderLeftColor: calendarColor,
+            }}
+          >
+            <h2 className="font-semibold text-foreground">{summary}</h2>
+
+            <div className="mt-3 space-y-2">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Clock className="h-3.5 w-3.5 shrink-0" />
+                <span>
+                  {formatTime(startDate)} - {formatTime(endDate)}
+                </span>
+              </div>
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Calendar className="h-3.5 w-3.5 shrink-0" />
+                <span>{formatDate(startDate)}</span>
+              </div>
+              {location && (
+                <div className="flex items-start gap-2 text-sm text-muted-foreground">
+                  <MapPin className="h-3.5 w-3.5 shrink-0 mt-0.5" />
+                  <span className="line-clamp-2">{location}</span>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {description && (
+            <>
+              <Separator className="my-4" />
+              <div>
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">
+                  Description
+                </p>
+                <p className="text-sm text-foreground/80 whitespace-pre-wrap">{description}</p>
+              </div>
+            </>
+          )}
+
+          <Separator className="my-4" />
+          <div className="flex items-center gap-2">
+            <div className="h-3 w-3 rounded-sm" style={{ backgroundColor: calendarColor }} />
+            <span className="text-xs text-muted-foreground">{calendarName}</span>
+          </div>
         </div>
       </div>
-    </div>
+    </aside>
   );
 }

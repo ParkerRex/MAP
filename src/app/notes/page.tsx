@@ -1,22 +1,27 @@
 "use client";
 
-import FolderBar from "@/components/notes/folder-bar";
+import { ErrorBoundary } from "@/components/error-boundary";
+import { NotesContent } from "@/components/notes/notes-content";
+import { NotesSkeleton } from "@/components/skeletons/notes-skeleton";
 import { useFolders, useNotes } from "@/hooks/use-notes";
 
-export default function NotePage() {
-  const { data: notesData, isLoading: notesLoading } = useNotes();
-  const { data: foldersData, isLoading: foldersLoading } = useFolders();
+function NotesLoader() {
+  const { isLoading: notesLoading } = useNotes();
+  const { isLoading: foldersLoading } = useFolders();
 
   if (notesLoading || foldersLoading) {
-    return <div className="flex items-center justify-center h-screen">Loading...</div>;
+    return <NotesSkeleton />;
   }
 
-  const notes = notesData?.notes ?? [];
-  const folders = foldersData?.folders ?? [];
+  return <NotesContent />;
+}
 
+export default function NotesPage() {
   return (
-    <div className="hidden flex-col md:flex w-full h-screen">
-      <FolderBar folders={folders} notes={notes} />
+    <div className="flex flex-col h-full">
+      <ErrorBoundary>
+        <NotesLoader />
+      </ErrorBoundary>
     </div>
   );
 }

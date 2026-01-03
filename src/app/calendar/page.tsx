@@ -230,6 +230,7 @@ function CalendarDashboard({ needsReconnect, onReconnect }: CalendarDashboardPro
           events={events}
           visibleCalendars={visibleCalendars}
           calendars={calendars}
+          onClearSelection={() => setSelectedEvent(null)}
         />
       </div>
     </div>
