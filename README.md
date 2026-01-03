@@ -58,6 +58,28 @@ bun run dev
 
 Dashboard runs on http://localhost:3000 (or next available port if 3000 is taken)
 
+#### Public URL (Cloudflare Tunnel)
+
+Use Cloudflare Tunnel when you need a public URL (OAuth callbacks, mobile device testing).
+
+```bash
+# Install cloudflared (macOS)
+brew install cloudflared
+
+# Start tunnel to local dev server (quick, ephemeral URL)
+cloudflared tunnel --url http://localhost:3000
+
+# Start named tunnel (stable URL)
+cloudflared tunnel run map-ai
+```
+
+- For the ephemeral URL: copy the `https://*.trycloudflare.com` URL and set it in
+  `.env.local` as `NEXT_PUBLIC_APP_URL=https://<your-tunnel-url>`.
+- For a named tunnel: set `NEXT_PUBLIC_APP_URL` to the hostname you configured
+  in Cloudflare (e.g. `https://map-ai.yourdomain.com`).
+- Restart `bun run dev` after changing `NEXT_PUBLIC_APP_URL`.
+- Update Google/WHOOP OAuth redirect URIs to match the tunnel URL.
+
 ### iOS App
 
 ```bash
