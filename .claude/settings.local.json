@@ -46,7 +46,8 @@
       "mcp__XcodeBuildMCP__boot_sim",
       "mcp__XcodeBuildMCP__install_app_sim",
       "mcp__XcodeBuildMCP__launch_app_sim",
-      "mcp__XcodeBuildMCP__tap"
+      "mcp__XcodeBuildMCP__tap",
+      "Bash(cat:*)"
     ]
   }
 }

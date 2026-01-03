@@ -1,25 +1,19 @@
 "use client";
-import { differenceInDays, format } from "date-fns";
-import { AnimatePresence, motion, Reorder } from "framer-motion";
-import { Calendar, Check, Flag, Loader2, Tag } from "lucide-react";
+
+import { differenceInDays, format, isPast, isToday, isTomorrow } from "date-fns";
+import { Calendar, Check, Loader2, MoreHorizontal, Tag, Trash2 } from "lucide-react";
 import type { FC } from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Calendar as DatePicker } from "@/components/ui/calendar";
 import { Checkbox } from "@/components/ui/checkbox";
-import {
-  ContextMenu,
-  ContextMenuContent,
-  ContextMenuItem,
-  ContextMenuSeparator,
-  ContextMenuTrigger,
-} from "@/components/ui/context-menu";
+import { cn } from "@/components/ui/cn";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
-  DropdownMenuLabel,
+  DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
@@ -29,14 +23,8 @@ import type { TaskWithTags } from "@/types";
 
 interface TaskItemProps {
   task: TaskWithTags;
-  highlightedTaskId: string | null;
-  selectedTask: TaskWithTags | null;
-  searchQuery: string;
-  handleTaskClick: (task: TaskWithTags) => void;
-  handleTaskDoubleClick: (task: TaskWithTags) => void;
   toggleTaskCompletion: (task: TaskWithTags) => void;
   handleDelete: (taskId: string) => void;
-  setSelectedTask: (task: TaskWithTags | null) => void;
   updateTaskDueDate: (taskId: string, dueDate: string) => Promise<void>;
   updateTask: (taskId: string, data: { title?: string; body?: string }) => Promise<void>;
   getAllTags: () => Promise<{ id: string; title: string }[]>;
@@ -49,14 +37,8 @@ interface TaskItemProps {
 
 const TaskItem: FC<TaskItemProps> = ({
   task,
-  highlightedTaskId,
-  selectedTask,
-  searchQuery: _searchQuery,
-  handleTaskClick,
-  handleTaskDoubleClick,
   toggleTaskCompletion,
   handleDelete,
-  setSelectedTask,
   updateTaskDueDate,
   updateTask,
   getAllTags,
@@ -66,89 +48,86 @@ const TaskItem: FC<TaskItemProps> = ({
   isSelected,
   onToggleSelect,
 }) => {
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const [localDueDate, setLocalDueDate] = useState(task.dueAt);
+  const [isEditing, setIsEditing] = useState(false);
+  const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
   const [title, setTitle] = useState(task.title);
-  const [body, setBody] = useState(task.body || "");
-  const [tags, setTags] = useState<string[]>(task.tags?.map((tag) => tag.title) ?? []);
-  const [newTag, setNewTag] = useState("");
+  const [tags, setTags] = useState<string[]>(task.tags?.map((t) => t.title) ?? []);
   const [availableTags, setAvailableTags] = useState<string[]>([]);
+  const [newTag, setNewTag] = useState("");
   const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved">("idle");
+  const inputRef = useRef<HTMLInputElement>(null);
   const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Sync local state when task prop changes
+  const isCompleted = !!task.completedAt;
+
   useEffect(() => {
     setTitle(task.title);
-    setBody(task.body || "");
-  }, [task.title, task.body]);
+    setTags(task.tags?.map((t) => t.title) ?? []);
+  }, [task.title, task.tags]);
 
   useEffect(() => {
-    const fetchTags = async () => {
-      const tags = await getAllTags();
-      setAvailableTags(tags.map((tag) => tag.title));
-    };
-    fetchTags();
+    getAllTags().then((t) => setAvailableTags(t.map((tag) => tag.title)));
   }, [getAllTags]);
 
-  // Debounced save function
+  useEffect(() => {
+    if (isEditing && inputRef.current) {
+      inputRef.current.focus();
+      inputRef.current.select();
+    }
+  }, [isEditing]);
+
   const debouncedSave = useCallback(
-    (data: { title?: string; body?: string }) => {
+    (newTitle: string) => {
       if (!task.id) return;
-
-      // Clear existing timer
-      if (debounceTimerRef.current) {
-        clearTimeout(debounceTimerRef.current);
-      }
-
+      if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
       setSaveStatus("saving");
-
       debounceTimerRef.current = setTimeout(async () => {
         try {
-          await updateTask(task.id, data);
+          await updateTask(task.id, { title: newTitle });
           setSaveStatus("saved");
-          // Reset to idle after showing "saved" briefly
-          setTimeout(() => setSaveStatus("idle"), 1500);
+          setTimeout(() => setSaveStatus("idle"), 1000);
         } catch {
           setSaveStatus("idle");
         }
-      }, 500);
+      }, 400);
     },
     [task.id, updateTask],
   );
 
-  // Cleanup timer on unmount
   useEffect(() => {
     return () => {
-      if (debounceTimerRef.current) {
-        clearTimeout(debounceTimerRef.current);
-      }
+      if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
     };
   }, []);
 
   const handleTitleChange = (newTitle: string) => {
     setTitle(newTitle);
-    debouncedSave({ title: newTitle });
-  };
-
-  const handleBodyChange = (newBody: string) => {
-    setBody(newBody);
-    debouncedSave({ body: newBody });
+    debouncedSave(newTitle);
   };
 
   const handleDateChange = async (date: Date) => {
     if (task.id) {
       const formattedDate = format(date, "yyyy-MM-dd'T'HH:mm:ss.SSSxxx");
       await updateTaskDueDate(task.id, formattedDate);
-      setLocalDueDate(date);
-      setIsPopoverOpen(false);
+      setIsDatePickerOpen(false);
     }
   };
 
-  const addTag = async () => {
+  const handleTagToggle = async (tagTitle: string) => {
+    const updatedTags = tags.includes(tagTitle)
+      ? tags.filter((t) => t !== tagTitle)
+      : [...tags, tagTitle];
+    setTags(updatedTags);
+    if (task.id) {
+      await updateTaskTags(task.id, updatedTags);
+    }
+  };
+
+  const handleCreateTag = async () => {
     if (newTag && !tags.includes(newTag)) {
       if (!availableTags.includes(newTag)) {
-        const createdTag = await createTag(newTag);
-        setAvailableTags([...availableTags, createdTag.title]);
+        const created = await createTag(newTag);
+        setAvailableTags([...availableTags, created.title]);
       }
       const updatedTags = [...tags, newTag];
       setTags(updatedTags);
@@ -159,210 +138,207 @@ const TaskItem: FC<TaskItemProps> = ({
     }
   };
 
-  const _removeTag = async (tagToRemove: string) => {
-    const updatedTags = tags.filter((tag) => tag !== tagToRemove);
-    setTags(updatedTags);
-    if (task.id) {
-      await updateTaskTags(task.id, updatedTags);
+  const getDueDateInfo = (dueDate: Date | null | undefined) => {
+    if (!dueDate || isNaN(dueDate.getTime())) return null;
+
+    if (isToday(dueDate)) {
+      return { text: "Today", className: "text-orange-600 dark:text-orange-400" };
     }
+    if (isTomorrow(dueDate)) {
+      return { text: "Tomorrow", className: "text-yellow-600 dark:text-yellow-400" };
+    }
+    if (isPast(dueDate)) {
+      const days = Math.abs(differenceInDays(dueDate, new Date()));
+      return { text: `${days}d overdue`, className: "text-red-600 dark:text-red-400" };
+    }
+    const days = differenceInDays(dueDate, new Date());
+    if (days <= 7) {
+      return { text: `${days}d`, className: "text-muted-foreground" };
+    }
+    return { text: format(dueDate, "MMM d"), className: "text-muted-foreground" };
   };
 
-  const handleTagSelect = (tag: string) => {
-    setTags((prev) => (prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]));
-  };
+  const dueDateInfo = getDueDateInfo(task.dueAt);
 
-  const getCountdownText = (dueDate: Date | null | undefined) => {
-    if (!dueDate) return null;
-    if (isNaN(dueDate.getTime())) return null;
-
-    const now = new Date();
-    const diff = differenceInDays(dueDate, now);
-
-    if (diff === 0) {
-      return <span className="text-red-500">today</span>;
-    }
-    if (diff === 1) {
-      return <span className="text-red-500">1 day left</span>;
-    }
-    return <span className="text-gray-500">{diff} days left</span>;
-  };
-
-  const getCountdownClass = (dueDate: Date | null | undefined) => {
-    if (!dueDate) return "";
-    if (isNaN(dueDate.getTime())) return "";
-
-    const now = new Date();
-    const diff = differenceInDays(dueDate, now);
-
-    if (diff <= 1) {
-      return "text-red-500";
-    }
-    return "text-gray-500";
-  };
   return (
-    <Reorder.Item key={task.id} value={task}>
-      <ContextMenu>
-        <ContextMenuTrigger>
-          <motion.div
-            className={`relative flex flex-col gap-2 p-1 rounded-sm select-none transition-colors border bg-card text-card-foreground border-slate-100 dark:border-none dark:bg-[#2E2E2E] dark:shadow-md dark:shadow-gray-950 ${
-              highlightedTaskId === task.id ? "bg-gray-100" : ""
-            } ${isSelected ? "ring-2 ring-primary bg-primary/5" : ""}`}
-            onClick={() => (isSelectMode ? onToggleSelect() : handleTaskClick(task))}
-            onDoubleClick={() => !isSelectMode && handleTaskDoubleClick(task)}
-            layout
-            initial={{ borderRadius: "0.375rem" }}
-            animate={{ borderRadius: "0.375rem" }}
+    <div
+      className={cn(
+        "group flex items-center gap-3 px-3 py-2.5 rounded-lg border bg-card transition-all",
+        "hover:shadow-sm hover:border-border/80",
+        isSelected && "ring-2 ring-primary bg-primary/5",
+        isCompleted && "opacity-60",
+      )}
+      onClick={() => isSelectMode && onToggleSelect()}
+    >
+      {/* Checkbox */}
+      <Checkbox
+        checked={isSelectMode ? isSelected : isCompleted}
+        onCheckedChange={() => (isSelectMode ? onToggleSelect() : toggleTaskCompletion(task))}
+        onClick={(e) => e.stopPropagation()}
+        className={cn(
+          "h-5 w-5 rounded-full border-2",
+          isCompleted && !isSelectMode && "bg-primary border-primary",
+        )}
+      />
+
+      {/* Title */}
+      <div className="flex-1 min-w-0">
+        {isEditing ? (
+          <div className="flex items-center gap-2">
+            <Input
+              ref={inputRef}
+              value={title}
+              onChange={(e) => handleTitleChange(e.target.value)}
+              onBlur={() => setIsEditing(false)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === "Escape") {
+                  setIsEditing(false);
+                }
+              }}
+              className="h-7 text-sm border-none bg-transparent p-0 focus-visible:ring-0"
+            />
+            {saveStatus !== "idle" && (
+              <span className="text-xs text-muted-foreground">
+                {saveStatus === "saving" && <Loader2 className="w-3 h-3 animate-spin" />}
+                {saveStatus === "saved" && <Check className="w-3 h-3 text-green-500" />}
+              </span>
+            )}
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={(e) => {
+              if (!isSelectMode) {
+                e.stopPropagation();
+                setIsEditing(true);
+              }
+            }}
+            className={cn(
+              "text-sm font-medium text-left truncate block w-full",
+              isCompleted && "line-through text-muted-foreground",
+            )}
           >
-            <div className="flex items-center gap-2">
-              {isSelectMode ? (
-                <Checkbox
-                  checked={isSelected}
-                  onCheckedChange={onToggleSelect}
-                  onClick={(e) => e.stopPropagation()}
-                />
-              ) : (
-                <Checkbox
-                  checked={!!task.completedAt}
-                  onCheckedChange={() => toggleTaskCompletion(task)}
-                />
-              )}
-              <Input
-                type="text"
-                value={title}
-                onChange={(e) => handleTitleChange(e.target.value)}
-                className="text-sm bg-none text-black dark:text-white border-none rounded-md placeholder-gray-400 dark:placeholder-white"
+            {task.title}
+          </button>
+        )}
+      </div>
+
+      {/* Tags */}
+      {task.tags && task.tags.length > 0 && (
+        <div className="hidden sm:flex gap-1">
+          {task.tags.slice(0, 2).map((tag) => (
+            <Badge key={tag.id} variant="outline" className="text-xs px-1.5 py-0">
+              {tag.title}
+            </Badge>
+          ))}
+          {task.tags.length > 2 && (
+            <Badge variant="outline" className="text-xs px-1.5 py-0">
+              +{task.tags.length - 2}
+            </Badge>
+          )}
+        </div>
+      )}
+
+      {/* Due date */}
+      {dueDateInfo && (
+        <span className={cn("text-xs font-medium whitespace-nowrap", dueDateInfo.className)}>
+          {dueDateInfo.text}
+        </span>
+      )}
+
+      {/* Actions - visible on hover */}
+      {!isSelectMode && (
+        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+          {/* Date picker */}
+          <Popover open={isDatePickerOpen} onOpenChange={setIsDatePickerOpen}>
+            <PopoverTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-7 w-7"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <Calendar className="h-4 w-4 text-muted-foreground" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="end">
+              <DatePicker
+                mode="single"
+                selected={task.dueAt ?? undefined}
+                onSelect={(date) => date && handleDateChange(date)}
               />
-              {saveStatus !== "idle" && (
-                <span className="flex items-center text-xs text-muted-foreground">
-                  {saveStatus === "saving" && <Loader2 className="w-3 h-3 animate-spin" />}
-                  {saveStatus === "saved" && <Check className="w-3 h-3 text-green-500" />}
-                </span>
-              )}
-              <AnimatePresence>
-                {selectedTask?.id !== task.id && task.tags && task.tags.length > 0 && (
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.15 }}
-                    className="flex"
-                  >
-                    {task.tags.map((tag) => (
-                      <Badge
-                        key={tag.id}
-                        variant="outline"
-                        className="flex items-center text-gray-500 bg-opacity-50 dark:text-white"
-                      >
-                        {tag.title}
-                      </Badge>
-                    ))}
-                  </motion.div>
-                )}
-              </AnimatePresence>
-              <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
-                <PopoverTrigger asChild>
-                  <Calendar className="w-5 h-5 text-muted-foreground cursor-pointer hover:text-primary" />
-                </PopoverTrigger>
-                <PopoverContent>
-                  <DatePicker selected={localDueDate ?? new Date()} onDayClick={handleDateChange} />
-                </PopoverContent>
-              </Popover>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Tag className="w-5 h-5 text-muted-foreground cursor-pointer hover:text-primary" />
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56">
-                  <DropdownMenuLabel>Available Tags</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  {availableTags.map((tag) => (
-                    <DropdownMenuCheckboxItem
-                      key={tag}
-                      checked={tags.includes(tag)}
-                      onCheckedChange={() => handleTagSelect(tag)}
-                    >
-                      {tag}
-                    </DropdownMenuCheckboxItem>
-                  ))}
-                  <DropdownMenuSeparator />
-                  <div className="px-4 py-2">
-                    <Input
-                      placeholder="New tag"
-                      value={newTag}
-                      onChange={(e) => setNewTag(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") {
-                          addTag();
-                        }
-                      }}
-                      className="bg-gray-800 text-white border border-gray-600 rounded-md placeholder-gray-400 dark:placeholder-white"
-                    />
-                    <Button onClick={addTag} className="mt-2">
-                      Add Tag
-                    </Button>
-                  </div>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-            <AnimatePresence>
-              {selectedTask?.id === task.id && (
-                <motion.div
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: "auto", opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
-                  transition={{ duration: 0.3 }}
-                  className="overflow-hidden"
+            </PopoverContent>
+          </Popover>
+
+          {/* Tag dropdown */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-7 w-7"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <Tag className="h-4 w-4 text-muted-foreground" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48">
+              {availableTags.map((tag) => (
+                <DropdownMenuCheckboxItem
+                  key={tag}
+                  checked={tags.includes(tag)}
+                  onCheckedChange={() => handleTagToggle(tag)}
                 >
-                  <div className="flex flex-col flex-1 gap-2 p-2">
-                    <Input
-                      type="text"
-                      value={body}
-                      placeholder="Add a note..."
-                      onChange={(e) => handleBodyChange(e.target.value)}
-                      className="text-sm text-gray-400 border-none rounded-md placeholder-gray-400 dark:placeholder-white"
-                    />
-                    {task.tags && task.tags.length > 0 && (
-                      <div className="flex">
-                        {task.tags.map((tag) => (
-                          <Badge
-                            key={tag.id}
-                            variant="secondary"
-                            className="flex items-center text-green-900 bg-green-600 bg-opacity-50 dark:text-white dark:bg-green-900"
-                          >
-                            {tag.title}
-                          </Badge>
-                        ))}
-                      </div>
-                    )}
-                    {localDueDate && (
-                      <div
-                        className={`flex gap-2 items-center text-gray-300 ${getCountdownClass(
-                          localDueDate,
-                        )}`}
-                      >
-                        <Flag className="size-4" />
-                        <div className="text-xs font-medium">
-                          Deadline: {getCountdownText(localDueDate)}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </motion.div>
-        </ContextMenuTrigger>
-        <ContextMenuContent>
-          <ContextMenuItem onSelect={() => setSelectedTask(task)}>View Task</ContextMenuItem>
-          <ContextMenuItem onSelect={() => task.id && handleDelete(task.id)}>
-            Delete Task
-          </ContextMenuItem>
-          <ContextMenuSeparator />
-          <ContextMenuItem onSelect={() => toggleTaskCompletion(task)}>
-            {task.completedAt ? "Mark Incomplete" : "Mark Complete"}
-          </ContextMenuItem>
-        </ContextMenuContent>
-      </ContextMenu>
-    </Reorder.Item>
+                  {tag}
+                </DropdownMenuCheckboxItem>
+              ))}
+              {availableTags.length > 0 && <DropdownMenuSeparator />}
+              <div className="p-2">
+                <Input
+                  placeholder="New tag..."
+                  value={newTag}
+                  onChange={(e) => setNewTag(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      handleCreateTag();
+                    }
+                  }}
+                  className="h-8 text-sm"
+                />
+              </div>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          {/* More menu */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-7 w-7"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <MoreHorizontal className="h-4 w-4 text-muted-foreground" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => toggleTaskCompletion(task)}>
+                {isCompleted ? "Mark incomplete" : "Mark complete"}
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                className="text-destructive focus:text-destructive"
+                onClick={() => task.id && handleDelete(task.id)}
+              >
+                <Trash2 className="h-4 w-4 mr-2" />
+                Delete
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      )}
+    </div>
   );
 };
 
