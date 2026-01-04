@@ -46,15 +46,12 @@ struct HomeView: View {
         .sheet(isPresented: $showSettings) {
             SettingsView(modelSettingRefreshId: $modelSettingRefreshId)
         }
-        .task {
+        .task(id: modelSettingRefreshId) {
             await loadAllData()
         }
-        .onChange(of: locationManager.location) { _, newLocation in
-            if let location = newLocation {
-                Task {
-                    await loadWeather(location: location)
-                }
-            }
+        .task(id: locationManager.location) {
+            guard let location = locationManager.location else { return }
+            await loadWeather(location: location)
         }
     }
 
@@ -76,7 +73,7 @@ struct HomeView: View {
     }
 
     private var homeScrollContent: some View {
-        LazyVStack(spacing: 16) {
+        VStack(spacing: 16) {
             headerSection
             scheduleWidget
             tasksWidget
@@ -571,6 +568,7 @@ struct HomeView: View {
 
     // MARK: - Data Loading
 
+    @MainActor
     private func loadAllData() async {
         async let eventsTask: () = loadTodayEvents()
         async let tasksTask: () = loadTodayTasks()
@@ -609,6 +607,7 @@ struct HomeView: View {
         HapticFeedback.success()
     }
 
+    @MainActor
     private func loadTodayEvents() async {
         eventsError = nil
         do {
@@ -622,6 +621,7 @@ struct HomeView: View {
         }
     }
 
+    @MainActor
     private func loadTodayTasks() async {
         tasksError = nil
         do {
@@ -636,6 +636,7 @@ struct HomeView: View {
         }
     }
 
+    @MainActor
     private func loadHealthData() async {
         do {
             let stepsData = try await healthDataFetcher.fetchLastTwoWeeksStepCount()
@@ -659,6 +660,7 @@ struct HomeView: View {
         }
     }
 
+    @MainActor
     private func loadWeather(location: CLLocation) async {
         do {
             weather = try await WeatherService.shared.getCurrentWeather(
@@ -676,8 +678,6 @@ struct HomeView: View {
 private struct HomeWidgetButton<Content: View>: View {
     let action: () -> Void
     @ViewBuilder let content: () -> Content
-
-    @State private var isPressed = false
 
     var body: some View {
         Button(action: action) {
