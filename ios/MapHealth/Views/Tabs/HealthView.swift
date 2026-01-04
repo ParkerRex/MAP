@@ -246,7 +246,7 @@ struct HealthView: View {
             )
             CompactMetricCard(
                 title: "Stand",
-                value: formatNumber(snapshot?.today.standMinutes.map { $0 / 60 }, suffix: " hr"),
+                value: formatNumber(snapshot?.today.standMinutes.map { $0 / 60 }, suffix: " hr", decimals: 1),
                 icon: "figure.stand",
                 color: .blue,
                 trend: snapshot?.standTrend.map(mapTrend),
@@ -369,10 +369,13 @@ struct HealthView: View {
 
     // MARK: - Formatting
 
-    private func formatNumber(_ value: Double?, suffix: String = "") -> String {
+    private func formatNumber(_ value: Double?, suffix: String = "", decimals: Int = 0) -> String {
         guard let value, value > 0 else { return "--" }
         if value >= 1000 {
             return String(format: "%.1fk%@", value / 1000, suffix)
+        }
+        if decimals > 0 {
+            return String(format: "%.\(decimals)f%@", value, suffix)
         }
         return String(format: "%.0f%@", value, suffix)
     }
