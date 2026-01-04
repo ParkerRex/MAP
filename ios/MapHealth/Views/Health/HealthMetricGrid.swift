@@ -35,8 +35,9 @@ struct QuickStatsRow: View {
                     isLoading: isLoading
                 )
 
-                Divider()
-                    .frame(height: 40)
+            Divider()
+                .frame(height: 40)
+                .foregroundStyle(.quaternary)
 
                 QuickStat(
                     value: formatCompact(calories),
@@ -46,8 +47,9 @@ struct QuickStatsRow: View {
                     isLoading: isLoading
                 )
 
-                Divider()
-                    .frame(height: 40)
+            Divider()
+                .frame(height: 40)
+                .foregroundStyle(.quaternary)
 
                 QuickStat(
                     value: exerciseMinutes.map { "\(Int($0))m" } ?? "--",
@@ -144,6 +146,7 @@ struct CompactMetricCard: View {
     let color: Color
     let trend: HealthMetricTrend?
     let isLoading: Bool
+    let showsSurface: Bool
 
     init(
         title: String,
@@ -152,7 +155,8 @@ struct CompactMetricCard: View {
         icon: String,
         color: Color,
         trend: HealthMetricTrend? = nil,
-        isLoading: Bool = false
+        isLoading: Bool = false,
+        showsSurface: Bool = true
     ) {
         self.title = title
         self.value = value
@@ -161,10 +165,11 @@ struct CompactMetricCard: View {
         self.color = color
         self.trend = trend
         self.isLoading = isLoading
+        self.showsSurface = showsSurface
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
+        let content = VStack(alignment: .leading, spacing: 10) {
             HStack(spacing: 6) {
                 Image(systemName: icon)
                     .font(.caption)
@@ -194,7 +199,13 @@ struct CompactMetricCard: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(14)
-        .mapHealthGlassSurface(cornerRadius: 14, tint: color.opacity(0.04))
+
+        if showsSurface {
+            content
+                .mapHealthGlassSurface(cornerRadius: 14, tint: color.opacity(0.04))
+        } else {
+            content
+        }
     }
 }
 

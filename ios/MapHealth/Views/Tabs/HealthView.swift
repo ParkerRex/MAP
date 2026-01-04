@@ -201,7 +201,8 @@ struct HealthView: View {
                 icon: "figure.walk",
                 color: .green,
                 trend: snapshot?.stepsTrend.map(mapTrend),
-                isLoading: healthService.isLoading
+                isLoading: healthService.isLoading,
+                showsSurface: false
             )
             CompactMetricCard(
                 title: "Calories",
@@ -209,7 +210,8 @@ struct HealthView: View {
                 icon: "flame.fill",
                 color: .orange,
                 trend: snapshot?.caloriesTrend.map(mapTrend),
-                isLoading: healthService.isLoading
+                isLoading: healthService.isLoading,
+                showsSurface: false
             )
             CompactMetricCard(
                 title: "Exercise",
@@ -217,7 +219,8 @@ struct HealthView: View {
                 icon: "figure.run",
                 color: .cyan,
                 trend: snapshot?.exerciseTrend.map(mapTrend),
-                isLoading: healthService.isLoading
+                isLoading: healthService.isLoading,
+                showsSurface: false
             )
             CompactMetricCard(
                 title: "Stand",
@@ -225,9 +228,12 @@ struct HealthView: View {
                 icon: "figure.stand",
                 color: .blue,
                 trend: snapshot?.standTrend.map(mapTrend),
-                isLoading: healthService.isLoading
+                isLoading: healthService.isLoading,
+                showsSurface: false
             )
         }
+        .padding(12)
+        .mapHealthGlassSurface(cornerRadius: 20, tint: .primary.opacity(0.02))
     }
 
     // MARK: - Data Sources Row
