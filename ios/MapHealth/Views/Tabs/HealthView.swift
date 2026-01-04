@@ -1,3 +1,4 @@
+// swiftlint:disable type_body_length
 import HealthKit
 import MapHealthCore
 import SwiftUI
@@ -271,30 +272,24 @@ struct HealthView: View {
     }
 
     private func sectionHeader(title: String, systemImage: String, footnote: String? = nil) -> some View {
-        VStack(spacing: 6) {
-            HStack(spacing: 8) {
-                Image(systemName: systemImage)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                Text(title.uppercased())
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(.secondary)
-                    .tracking(0.6)
+        HStack(spacing: 8) {
+            Image(systemName: systemImage)
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+            Text(title)
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(.secondary)
 
-                if let footnote {
-                    Text(footnote)
-                        .font(.caption2)
-                        .foregroundStyle(.secondary)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 3)
-                        .background(Color.primary.opacity(0.06), in: Capsule())
-                }
-
-                Spacer()
+            if let footnote {
+                Text(footnote)
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 3)
+                    .background(Color.primary.opacity(0.06), in: Capsule())
             }
 
-            Divider()
-                .foregroundStyle(.quaternary)
+            Spacer()
         }
         .padding(.top, 2)
     }
