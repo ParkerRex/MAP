@@ -11,6 +11,7 @@ struct TaskDetailSheet: View {
     @State private var title: String
     @State private var notes: String
     @State private var dueDate: Date?
+    @State private var selectedTagId: String?
     @State private var isSaving = false
     @State private var showingDeleteConfirmation = false
     @FocusState private var focusedField: Field?
@@ -25,12 +26,14 @@ struct TaskDetailSheet: View {
         _title = State(initialValue: task.title)
         _notes = State(initialValue: task.body ?? "")
         _dueDate = State(initialValue: task.dueAt)
+        _selectedTagId = State(initialValue: task.tags.first?.id)
     }
 
     private var hasChanges: Bool {
         title.trimmed != task.title ||
         notes.trimmed != (task.body ?? "") ||
-        dueDate != task.dueAt
+        dueDate != task.dueAt ||
+        selectedTagId != task.tags.first?.id
     }
 
     var body: some View {
@@ -61,6 +64,15 @@ struct TaskDetailSheet: View {
                             .foregroundStyle(.secondary)
 
                         quickDatePicker
+                    }
+
+                    // Project
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("Project")
+                            .font(.subheadline.weight(.medium))
+                            .foregroundStyle(.secondary)
+
+                        projectPicker
                     }
 
                     // Actions
@@ -102,6 +114,11 @@ struct TaskDetailSheet: View {
                 Button("Cancel", role: .cancel) {}
             } message: {
                 Text("This action cannot be undone.")
+            }
+        }
+        .task {
+            if tasksService.tags.isEmpty {
+                await tasksService.fetchTags()
             }
         }
         .presentationDetents([.medium])
@@ -159,6 +176,31 @@ struct TaskDetailSheet: View {
         .scrollClipDisabled()
     }
 
+    private var projectPicker: some View {
+        let tags = tasksService.tags.sorted { $0.title.localizedCaseInsensitiveCompare($1.title) == .orderedAscending }
+
+        return ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 8) {
+                ProjectSelectionChip(
+                    title: "No Project",
+                    isSelected: selectedTagId == nil
+                ) {
+                    selectedTagId = nil
+                }
+
+                ForEach(tags) { tag in
+                    ProjectSelectionChip(
+                        title: tag.title,
+                        isSelected: selectedTagId == tag.id
+                    ) {
+                        selectedTagId = tag.id
+                    }
+                }
+            }
+        }
+        .scrollClipDisabled()
+    }
+
     private var completeButton: some View {
         Button {
             HapticFeedback.success()
@@ -206,7 +248,8 @@ struct TaskDetailSheet: View {
                     task,
                     title: title.trimmed,
                     body: notes.trimmed.isEmpty ? nil : notes.trimmed,
-                    dueAt: dueDate
+                    dueAt: dueDate,
+                    tags: selectedTagId.map { [$0] } ?? []
                 )
                 await MainActor.run { dismiss() }
             } catch {
@@ -251,6 +294,27 @@ private struct DateChip: View {
             .clipShape(Capsule())
         }
         .animation(.easeOut(duration: 0.15), value: isSelected)
+    }
+}
+
+// MARK: - Project Chip
+
+private struct ProjectSelectionChip: View {
+    let title: String
+    let isSelected: Bool
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            Text(title)
+                .font(.subheadline.weight(.semibold))
+                .padding(.horizontal, 12)
+                .padding(.vertical, 8)
+                .background(isSelected ? Color.accentColor : Color(.tertiarySystemGroupedBackground))
+                .foregroundStyle(isSelected ? .white : .primary)
+                .clipShape(Capsule())
+        }
+        .buttonStyle(.plain)
     }
 }
 

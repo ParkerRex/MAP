@@ -18,13 +18,13 @@ struct HealthView: View {
     private let apiClient = MapAPIClient.shared
 
     private let gridColumns = [
-        GridItem(.flexible(), spacing: 12),
-        GridItem(.flexible(), spacing: 12)
+        GridItem(.adaptive(minimum: 160), spacing: 12)
     ]
 
     var body: some View {
         NavigationStack {
             healthContent
+                .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
                     ToolbarItem(placement: .primaryAction) {
                         if !healthService.needsPermission {
@@ -68,15 +68,21 @@ struct HealthView: View {
     }
 
     private var healthBody: some View {
-        LazyVStack(spacing: 16) {
+        LazyVStack(spacing: 20) {
+            headerSection
+
             if healthService.needsPermission {
                 permissionView
             } else if let error = healthService.error {
                 errorView(error.localizedDescription)
             } else {
-                compactHeader
+                if apiClient.isAuthenticated {
+                    sectionHeader(
+                        title: "WHOOP",
+                        systemImage: "bolt.heart.fill",
+                        footnote: whoopConnected ? "Connected" : "Not connected"
+                    )
 
-                if whoopConnected {
                     HealthHeroCard(
                         recovery: whoopRecovery,
                         cycle: whoopCycle,
@@ -84,6 +90,8 @@ struct HealthView: View {
                         isLoading: isLoadingWhoop
                     )
                 }
+
+                sectionHeader(title: "Highlights", systemImage: "sparkles")
 
                 QuickStatsRow(
                     steps: snapshot?.today.steps,
@@ -101,7 +109,7 @@ struct HealthView: View {
                 )
 
                 if whoopConnected, whoopSleep != nil {
-                    WhoopSleepQualitySection(sleep: whoopSleep)
+                    WhoopSleepQualitySection(sleep: whoopSleep, showsHeader: false)
                 }
 
                 HeartSectionCard(
@@ -112,13 +120,15 @@ struct HealthView: View {
                     isLoading: healthService.isLoading || isLoadingWhoop
                 )
 
+                sectionHeader(title: "Activity", systemImage: "figure.walk")
+
                 activityGrid
 
                 if whoopConnected, !whoopWorkouts.isEmpty {
-                    WhoopWorkoutsSection(workouts: whoopWorkouts)
-                }
+                    sectionHeader(title: "Workouts", systemImage: "figure.run")
 
-                dataSourcesFooter
+                    WhoopWorkoutsSection(workouts: whoopWorkouts, showsHeader: false)
+                }
             }
         }
     }
@@ -173,22 +183,37 @@ struct HealthView: View {
         .mapHealthGlassSurface(cornerRadius: 20, tint: .orange.opacity(0.1))
     }
 
-    // MARK: - Compact Header
+    // MARK: - Header Section
 
-    private var compactHeader: some View {
-        HStack {
-            VStack(alignment: .leading, spacing: 2) {
+    private var headerSection: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Health")
+                .font(.system(size: 28, weight: .bold, design: .rounded))
+
+            HStack(spacing: 12) {
                 Text(Date(), format: .dateTime.weekday(.wide).month(.abbreviated).day())
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
+
                 if let timestamp = snapshot?.timestamp {
-                    Text("Updated \(timestamp, style: .relative) ago")
-                        .font(.caption2)
-                        .foregroundStyle(.tertiary)
+                    updatedBadge(timestamp)
                 }
+
+                Spacer()
             }
-            Spacer()
+
+            dataSourcesRow
         }
+        .padding(.bottom, 4)
+    }
+
+    private func updatedBadge(_ timestamp: Date) -> some View {
+        Text("Updated \(timestamp, style: .relative) ago")
+            .font(.caption2)
+            .foregroundStyle(.secondary)
+            .padding(.horizontal, 10)
+            .padding(.vertical, 4)
+            .background(.ultraThinMaterial, in: Capsule())
     }
 
     // MARK: - Activity Grid
@@ -230,17 +255,15 @@ struct HealthView: View {
         }
     }
 
-    // MARK: - Data Sources Footer
+    // MARK: - Data Sources Row
 
-    private var dataSourcesFooter: some View {
+    private var dataSourcesRow: some View {
         HStack(spacing: 12) {
             dataSourceBadge(icon: "heart.text.square", label: "Apple Health", connected: !healthService.needsPermission, color: .red)
             if apiClient.isAuthenticated {
                 dataSourceBadge(icon: "bolt.heart", label: "WHOOP", connected: whoopConnected, color: .green)
             }
         }
-        .frame(maxWidth: .infinity)
-        .padding(.top, 8)
     }
 
     private func dataSourceBadge(icon: String, label: String, connected: Bool, color: Color) -> some View {
@@ -250,6 +273,29 @@ struct HealthView: View {
             Circle().fill(connected ? Color.green : Color.orange).frame(width: 6, height: 6)
         }
         .foregroundStyle(.secondary)
+    }
+
+    private func sectionHeader(title: String, systemImage: String, footnote: String? = nil) -> some View {
+        HStack(spacing: 8) {
+            Image(systemName: systemImage)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+            Text(title)
+                .font(.headline)
+                .foregroundStyle(.primary)
+
+            if let footnote {
+                Text(footnote)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(Color.primary.opacity(0.06), in: Capsule())
+            }
+
+            Spacer()
+        }
+        .padding(.top, 4)
     }
 
     private var refreshButton: some View {

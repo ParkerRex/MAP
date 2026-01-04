@@ -62,8 +62,14 @@ public class TasksService: ObservableObject {
 
     /// Update an existing task
     @discardableResult
-    public func updateTask(_ task: MapTask, title: String? = nil, body: String? = nil, dueAt: Date? = nil) async throws -> MapTask {
-        let request = UpdateTaskRequest(title: title, body: body, dueAt: dueAt)
+    public func updateTask(
+        _ task: MapTask,
+        title: String? = nil,
+        body: String? = nil,
+        dueAt: Date? = nil,
+        tags: [String]? = nil
+    ) async throws -> MapTask {
+        let request = UpdateTaskRequest(title: title, body: body, dueAt: dueAt, tags: tags)
         let updated = try await apiClient.updateTask(id: task.id, request)
 
         if let index = tasks.firstIndex(where: { $0.id == task.id }) {
