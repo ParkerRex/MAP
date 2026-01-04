@@ -5,7 +5,9 @@ struct GitHubContributionCard: View {
     let username: String
 
     private var normalizedUsername: String {
-        username.trimmingCharacters(in: .whitespacesAndNewlines).replacingOccurrences(of: "^@", with: "", options: .regularExpression)
+        username
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .replacingOccurrences(of: "^@", with: "", options: .regularExpression)
     }
 
     var body: some View {

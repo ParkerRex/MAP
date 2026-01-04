@@ -375,50 +375,69 @@ extension TodosView {
 
 extension TodosView {
     private var addTaskBar: some View {
+        let quickAddPreview = parseQuickAdd(newTaskText)
         VStack(spacing: 0) {
             Divider()
-            HStack(spacing: 12) {
-                Menu {
-                    Button("No Project") {
-                        HapticFeedback.selection()
-                        selectedNewTaskProjectId = nil
-                    }
-                    let tags = tasksService.tags.sorted {
-                        $0.title.localizedCaseInsensitiveCompare($1.title) == .orderedAscending
-                    }
-                    ForEach(tags) { tag in
-                        Button(tag.title) {
+            VStack(spacing: 6) {
+                HStack(spacing: 12) {
+                    Menu {
+                        Button("No Project") {
                             HapticFeedback.selection()
-                            selectedNewTaskProjectId = tag.id
+                            selectedNewTaskProjectId = nil
                         }
+                        let tags = tasksService.tags.sorted {
+                            $0.title.localizedCaseInsensitiveCompare($1.title) == .orderedAscending
+                        }
+                        ForEach(tags) { tag in
+                            Button(tag.title) {
+                                HapticFeedback.selection()
+                                selectedNewTaskProjectId = tag.id
+                            }
+                        }
+                    } label: {
+                        Image(systemName: "plus.circle.fill")
+                            .font(.title3)
+                            .foregroundStyle(newTaskText.isEmpty ? Color.secondary : Color.accentColor)
                     }
-                } label: {
-                    Image(systemName: "plus.circle.fill")
-                        .font(.title3)
-                        .foregroundStyle(newTaskText.isEmpty ? Color.secondary : Color.accentColor)
+
+                    TextField("Add a task...", text: $newTaskText)
+                        .focused($isAddingTask)
+                        .submitLabel(.done)
+                        .onSubmit(createTask)
+
+                    if !newTaskText.isEmpty {
+                        Button {
+                            HapticFeedback.light()
+                            createTask()
+                        } label: {
+                            Image(systemName: "arrow.up.circle.fill")
+                                .font(.title2)
+                                .foregroundStyle(.accent)
+                        }
+                        .transition(.scale.combined(with: .opacity))
+                    }
                 }
 
-                TextField("Add a task...", text: $newTaskText)
-                    .focused($isAddingTask)
-                    .submitLabel(.done)
-                    .onSubmit(createTask)
-
-                if !newTaskText.isEmpty {
-                    Button {
-                        HapticFeedback.light()
-                        createTask()
-                    } label: {
-                        Image(systemName: "arrow.up.circle.fill")
-                            .font(.title2)
-                            .foregroundStyle(.accent)
+                if let summary = quickAddSummary(from: quickAddPreview) {
+                    HStack(spacing: 8) {
+                        ForEach(summary, id: \.self) { token in
+                            Text(token)
+                                .font(.caption.weight(.semibold))
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 4)
+                                .background(Color(.secondarySystemGroupedBackground))
+                                .clipShape(Capsule())
+                        }
+                        Spacer(minLength: 0)
                     }
-                    .transition(.scale.combined(with: .opacity))
+                    .transition(.opacity.combined(with: .move(edge: .bottom)))
                 }
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 10)
             .background(.thinMaterial)
             .animation(.easeOut(duration: 0.15), value: newTaskText.isEmpty)
+            .animation(.snappy(duration: 0.2), value: quickAddPreview.title)
         }
     }
 
@@ -517,12 +536,6 @@ extension TodosView {
 // MARK: - Task Sections
 
 extension TodosView {
-    private struct QuickAddResult {
-        let title: String
-        let dueAt: Date?
-        let tagId: String?
-        let projectName: String?
-    }
     @ViewBuilder
     private var taskSections: some View {
         if tasksService.isLoading && tasksService.tasks.isEmpty {
@@ -595,56 +608,49 @@ extension TodosView {
     private var activeSections: some View {
         if focusMode {
             focusSections
-            return
-        }
-
-        if selectedFilter == .completed {
+        } else if selectedFilter == .completed {
             completedSection(tasks: tasksForFilter)
-            return
-        }
-
-        if selectedFilter != .all {
+        } else if selectedFilter != .all {
             taskSection(title: selectedFilter.rawValue, tasks: tasksForFilter, tint: selectedFilter.tint)
-            return
-        }
+        } else {
+            let pending = tasksForFilter.filter { !$0.isCompleted }
+            let completed = tasksForFilter.filter { $0.isCompleted }
 
-        let pending = tasksForFilter.filter { !$0.isCompleted }
-        let completed = tasksForFilter.filter { $0.isCompleted }
+            // Overdue
+            let overdue = pending.filter { isOverdue($0.dueAt) }
+                .sorted { ($0.dueAt ?? .distantFuture) < ($1.dueAt ?? .distantFuture) }
 
-        // Overdue
-        let overdue = pending.filter { isOverdue($0.dueAt) }
-            .sorted { ($0.dueAt ?? .distantFuture) < ($1.dueAt ?? .distantFuture) }
+            if !overdue.isEmpty {
+                taskSection(title: "Overdue", tasks: overdue, tint: .red)
+            }
 
-        if !overdue.isEmpty {
-            taskSection(title: "Overdue", tasks: overdue, tint: .red)
-        }
+            // Today
+            let today = pending.filter { isToday($0.dueAt) }
 
-        // Today
-        let today = pending.filter { isToday($0.dueAt) }
+            if !today.isEmpty {
+                taskSection(title: "Today", tasks: today, tint: .orange)
+            }
 
-        if !today.isEmpty {
-            taskSection(title: "Today", tasks: today, tint: .orange)
-        }
+            // Upcoming
+            let upcoming = pending.filter { isUpcoming($0.dueAt) }
+                .sorted { ($0.dueAt ?? .distantFuture) < ($1.dueAt ?? .distantFuture) }
 
-        // Upcoming
-        let upcoming = pending.filter { isUpcoming($0.dueAt) }
-            .sorted { ($0.dueAt ?? .distantFuture) < ($1.dueAt ?? .distantFuture) }
+            if !upcoming.isEmpty {
+                taskSection(title: "Upcoming", tasks: upcoming, tint: .blue)
+            }
 
-        if !upcoming.isEmpty {
-            taskSection(title: "Upcoming", tasks: upcoming, tint: .blue)
-        }
+            // No due date
+            let noDueDate = pending.filter { $0.dueAt == nil }
+                .sorted { $0.createdAt > $1.createdAt }
 
-        // No due date
-        let noDueDate = pending.filter { $0.dueAt == nil }
-            .sorted { $0.createdAt > $1.createdAt }
+            if !noDueDate.isEmpty {
+                taskSection(title: "No Date", tasks: noDueDate, tint: .secondary)
+            }
 
-        if !noDueDate.isEmpty {
-            taskSection(title: "No Date", tasks: noDueDate, tint: .secondary)
-        }
-
-        // Completed
-        if !completed.isEmpty {
-            completedSection(tasks: completed)
+            // Completed
+            if !completed.isEmpty {
+                completedSection(tasks: completed)
+            }
         }
     }
 
@@ -1094,6 +1100,7 @@ extension TodosView {
         var working = input
         let lower = working.lowercased()
         var dueAt: Date?
+        var timeComponents: DateComponents?
 
         if lower.contains("tomorrow") {
             dueAt = Calendar.current.date(
@@ -1108,11 +1115,32 @@ extension TodosView {
         } else if lower.contains("next week") {
             dueAt = DateHelpers.nextMonday()
             working = working.replacingOccurrences(of: "next week", with: "", options: .caseInsensitive)
+        } else if let relative = parseRelativeDate(in: lower) {
+            dueAt = relative
+            if let token = relativeToken(in: lower) {
+                working = working.replacingOccurrences(of: token, with: "", options: .caseInsensitive)
+            }
         } else if let weekday = parseWeekday(in: lower) {
             dueAt = weekday
             if let token = weekdayToken(in: lower) {
                 working = working.replacingOccurrences(of: token, with: "", options: .caseInsensitive)
             }
+        }
+
+        if let time = parseTime(in: lower) {
+            timeComponents = time
+            if let token = timeToken(in: lower) {
+                working = working.replacingOccurrences(of: token, with: "", options: .caseInsensitive)
+            }
+        }
+
+        if let base = dueAt, let timeComponents {
+            dueAt = Calendar.current.date(
+                bySettingHour: timeComponents.hour ?? 0,
+                minute: timeComponents.minute ?? 0,
+                second: 0,
+                of: base
+            )
         }
 
         let (tagId, cleaned, projectName) = parseProjectToken(in: working)
@@ -1174,6 +1202,92 @@ extension TodosView {
             if lower.contains(token) { return token }
         }
         return nil
+    }
+
+    private func parseRelativeDate(in lower: String) -> Date? {
+        if let match = lower.range(of: "in\\s+\\d+\\s+days", options: .regularExpression) {
+            let token = String(lower[match])
+            let number = token.components(separatedBy: CharacterSet.decimalDigits.inverted).joined()
+            if let days = Int(number) {
+                return Calendar.current.date(byAdding: .day, value: days, to: Calendar.current.startOfDay(for: Date()))
+            }
+        }
+        if let match = lower.range(of: "in\\s+\\d+\\s+weeks", options: .regularExpression) {
+            let token = String(lower[match])
+            let number = token.components(separatedBy: CharacterSet.decimalDigits.inverted).joined()
+            if let weeks = Int(number) {
+                return Calendar.current.date(byAdding: .day, value: weeks * 7, to: Calendar.current.startOfDay(for: Date()))
+            }
+        }
+        return nil
+    }
+
+    private func relativeToken(in lower: String) -> String? {
+        if let match = lower.range(of: "in\\s+\\d+\\s+days", options: .regularExpression) {
+            return String(lower[match])
+        }
+        if let match = lower.range(of: "in\\s+\\d+\\s+weeks", options: .regularExpression) {
+            return String(lower[match])
+        }
+        return nil
+    }
+
+    private func parseTime(in lower: String) -> DateComponents? {
+        if let match = lower.range(of: "\\b\\d{1,2}(?::\\d{2})?\\s?(am|pm)\\b", options: .regularExpression) {
+            let token = String(lower[match]).replacingOccurrences(of: " ", with: "")
+            let parts = token.split(separator: ":")
+            let hourPart = parts.first ?? "0"
+            let minutePart = parts.count > 1 ? parts[1].prefix(2) : "0"
+            let isPM = token.contains("pm")
+            let hourInt = max(0, min(12, Int(hourPart) ?? 0))
+            let minuteInt = max(0, min(59, Int(minutePart) ?? 0))
+            var hour = hourInt % 12
+            if isPM { hour += 12 }
+            return DateComponents(hour: hour, minute: minuteInt)
+        }
+        return nil
+    }
+
+    private func timeToken(in lower: String) -> String? {
+        if let match = lower.range(of: "\\b\\d{1,2}(?::\\d{2})?\\s?(am|pm)\\b", options: .regularExpression) {
+            return String(lower[match])
+        }
+        return nil
+    }
+
+    private func quickAddSummary(from result: QuickAddResult) -> [String]? {
+        guard !result.title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            return nil
+        }
+
+        var tokens: [String] = []
+        if let dueAt = result.dueAt {
+            tokens.append("Due \(formatQuickAddDate(dueAt))")
+        }
+        if let tagId = result.tagId,
+           let tag = tasksService.tags.first(where: { $0.id == tagId }) {
+            tokens.append(tag.title)
+        } else if let projectName = result.projectName {
+            tokens.append(projectName)
+        }
+
+        return tokens.isEmpty ? nil : tokens
+    }
+
+    private func formatQuickAddDate(_ date: Date) -> String {
+        let calendar = Calendar.current
+        if calendar.isDateInToday(date) { return "Today" }
+        if calendar.isDateInTomorrow(date) { return "Tomorrow" }
+        let formatter = DateFormatter()
+        if calendar.isDate(date, equalTo: Date(), toGranularity: .weekOfYear) {
+            formatter.dateFormat = "EEE"
+        } else {
+            formatter.dateFormat = "MMM d"
+        }
+        let timeFormatter = DateFormatter()
+        timeFormatter.dateFormat = "h:mm a"
+        let hasTime = calendar.component(.hour, from: date) != 0 || calendar.component(.minute, from: date) != 0
+        return hasTime ? "\(formatter.string(from: date)) \(timeFormatter.string(from: date))" : formatter.string(from: date)
     }
 }
 

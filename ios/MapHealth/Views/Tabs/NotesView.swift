@@ -225,7 +225,7 @@ extension NotesView {
             let ids = pinnedIdsStorage.split(separator: ",").map { String($0) }
             return Set(ids)
         }
-        set {
+        nonmutating set {
             pinnedIdsStorage = newValue.joined(separator: ",")
         }
     }

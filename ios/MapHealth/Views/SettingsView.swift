@@ -2,6 +2,7 @@ import MapHealthCore
 import OSLog
 import SwiftUI
 
+// swiftlint:disable:next type_body_length
 struct SettingsView: View {
     @EnvironmentObject private var healthDataInterpreter: HealthDataInterpreter
     @Environment(\.dismiss) private var dismiss

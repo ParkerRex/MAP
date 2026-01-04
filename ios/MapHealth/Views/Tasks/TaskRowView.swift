@@ -36,6 +36,9 @@ struct TaskRow<ProjectMenu: View, ExtraMenu: View>: View {
             checkbox
             content
             Spacer(minLength: 0)
+            Image(systemName: "chevron.right")
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(.secondary.opacity(0.4))
         }
         .contentShape(Rectangle())
         .onTapGesture(perform: onTap)

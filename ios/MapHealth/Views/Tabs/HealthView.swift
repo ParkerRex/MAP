@@ -1,8 +1,8 @@
-// swiftlint:disable type_body_length
 import HealthKit
 import MapHealthCore
 import SwiftUI
 
+// swiftlint:disable:next type_body_length
 struct HealthView: View {
     @EnvironmentObject private var healthKitManager: HealthKitAuthorizationManager
     @StateObject private var healthService = HealthDataService.shared

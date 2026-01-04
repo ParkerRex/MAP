@@ -49,6 +49,28 @@ struct ProjectsListView: View {
         .onAppear {
             normalizeOrders(with: tasksService.tags)
         }
+        .alert("Rename Project", isPresented: Binding(
+            get: { renamingTag != nil },
+            set: { if !$0 { renamingTag = nil } }
+        )) {
+            TextField("Name", text: $renameTitle)
+            Button("Save") { renameProject() }
+            Button("Cancel", role: .cancel) {}
+        }
+        .alert("Delete Project?", isPresented: Binding(
+            get: { deletingTag != nil },
+            set: { if !$0 { deletingTag = nil } }
+        )) {
+            Button("Delete", role: .destructive) { deleteProject() }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("Tasks in this project will not be deleted.")
+        }
+        .task {
+            if tasksService.tags.isEmpty {
+                await tasksService.fetchTags()
+            }
+        }
     }
 
     private func projectRow(for tag: TaskTag) -> some View {
@@ -93,12 +115,12 @@ struct ProjectsListView: View {
 
     private var favoriteOrder: [String] {
         get { decodeIds(from: favoritesData) }
-        set { favoritesData = encodeIds(newValue) }
+        nonmutating set { favoritesData = encodeIds(newValue) }
     }
 
     private var projectOrder: [String] {
         get { decodeIds(from: orderData) }
-        set { orderData = encodeIds(newValue) }
+        nonmutating set { orderData = encodeIds(newValue) }
     }
 
     private var filteredTags: [TaskTag] {
@@ -188,51 +210,6 @@ struct ProjectsListView: View {
             return "[]"
         }
         return string
-    }
-                    ProjectRow(
-                        title: tag.title,
-                        count: taskCount(for: tag),
-                        tint: ProjectStyling.tint(for: tag.id)
-                    )
-                    .swipeActions(edge: .leading, allowsFullSwipe: false) {
-                        Button("Rename") {
-                            renameTitle = tag.title
-                            renamingTag = tag
-                        }
-                        .tint(.blue)
-                    }
-                    .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-                        Button(role: .destructive) {
-                            deletingTag = tag
-                        } label: {
-                            Label("Delete", systemImage: "trash")
-                        }
-                    }
-                }
-            }
-        }
-        .alert("Rename Project", isPresented: Binding(
-            get: { renamingTag != nil },
-            set: { if !$0 { renamingTag = nil } }
-        )) {
-            TextField("Name", text: $renameTitle)
-            Button("Save") { renameProject() }
-            Button("Cancel", role: .cancel) {}
-        }
-        .alert("Delete Project?", isPresented: Binding(
-            get: { deletingTag != nil },
-            set: { if !$0 { deletingTag = nil } }
-        )) {
-            Button("Delete", role: .destructive) { deleteProject() }
-            Button("Cancel", role: .cancel) {}
-        } message: {
-            Text("Tasks in this project will not be deleted.")
-        }
-        .task {
-            if tasksService.tags.isEmpty {
-                await tasksService.fetchTags()
-            }
-        }
     }
 
     private var tags: [TaskTag] {

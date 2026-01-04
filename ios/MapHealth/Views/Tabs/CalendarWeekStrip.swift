@@ -7,6 +7,7 @@ struct CalendarWeekStrip: View {
     @Binding var selectedDate: Date
     let events: [CalendarEvent]
     let onDateDoubleTap: (Date) -> Void
+    let showsHeader: Bool = true
 
     @State private var weekOffset: Int = 0
     @GestureState private var dragOffset: CGFloat = 0
@@ -16,7 +17,9 @@ struct CalendarWeekStrip: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            weekHeader
+            if showsHeader {
+                weekHeader
+            }
             weekDaysRow
         }
         .gesture(weekSwipeGesture)
