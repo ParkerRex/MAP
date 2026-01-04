@@ -124,6 +124,13 @@ extension NotesView {
                     .listRowInsets(EdgeInsets(top: 12, leading: 16, bottom: 12, trailing: 16))
                     .listRowSeparator(.hidden)
                     .listRowBackground(Color(.secondarySystemGroupedBackground))
+                    .swipeActions(edge: .trailing) {
+                        Button(role: .destructive) {
+                            deleteNote(note)
+                        } label: {
+                            Label("Delete", systemImage: "trash")
+                        }
+                    }
                 }
             } header: {
                 listHeader
@@ -162,6 +169,12 @@ extension NotesView {
 
     private func folderName(for note: MapNote) -> String? {
         notesService.folders.first(where: { $0.id == note.folderId })?.name
+    }
+
+    private func deleteNote(_ note: MapNote) {
+        Task {
+            try? await notesService.deleteNote(note)
+        }
     }
 
     private var emptyState: some View {
