@@ -80,6 +80,7 @@ struct EventFormSheet: View {
     @ObservedObject var calendarService: CalendarService
     let selectedDate: Date
     let initialStartDate: Date?
+    let initialIsAllDay: Bool
     let editingEvent: CalendarEvent?
 
     @Environment(\.dismiss) private var dismiss
@@ -98,11 +99,13 @@ struct EventFormSheet: View {
         calendarService: CalendarService,
         selectedDate: Date,
         initialStartDate: Date? = nil,
+        initialIsAllDay: Bool = false,
         editingEvent: CalendarEvent? = nil
     ) {
         self.calendarService = calendarService
         self.selectedDate = selectedDate
         self.initialStartDate = initialStartDate
+        self.initialIsAllDay = initialIsAllDay
         self.editingEvent = editingEvent
 
         if let event = editingEvent {
@@ -114,10 +117,18 @@ struct EventFormSheet: View {
             let fallbackEnd = Calendar.current.date(byAdding: .hour, value: 1, to: selectedDate)!
             _endDate = State(initialValue: event.endDate ?? fallbackEnd)
         } else if let initialStartDate {
-            let start = initialStartDate
-            let end = Calendar.current.date(byAdding: .hour, value: 1, to: start) ?? start
-            _startDate = State(initialValue: start)
-            _endDate = State(initialValue: end)
+            let start = Calendar.current.startOfDay(for: initialStartDate)
+            if initialIsAllDay {
+                let end = Calendar.current.date(byAdding: .day, value: 1, to: start) ?? start
+                _startDate = State(initialValue: start)
+                _endDate = State(initialValue: end)
+                _isAllDay = State(initialValue: true)
+            } else {
+                let end = Calendar.current.date(byAdding: .hour, value: 1, to: initialStartDate) ?? initialStartDate
+                _startDate = State(initialValue: initialStartDate)
+                _endDate = State(initialValue: end)
+                _isAllDay = State(initialValue: false)
+            }
         } else {
             let calendar = Calendar.current
             let now = Date()
@@ -132,6 +143,7 @@ struct EventFormSheet: View {
 
             _startDate = State(initialValue: start)
             _endDate = State(initialValue: end)
+            _isAllDay = State(initialValue: initialIsAllDay)
         }
     }
 

@@ -1,9 +1,9 @@
-// swiftlint:disable type_body_length
 import MapHealthCore
 import SwiftUI
 
 // MARK: - Timeline View
 
+// swiftlint:disable:next type_body_length
 struct CalendarTimelineView: View {
     let events: [CalendarEvent]
     let calendarService: CalendarService
@@ -12,6 +12,7 @@ struct CalendarTimelineView: View {
     let onEventDelete: (CalendarEvent) -> Void
     let onCreateEvent: () -> Void
     let onCreateEventAt: (Date) -> Void
+    let onCreateAllDay: () -> Void
 
     @State private var currentTimeOffset: CGFloat = 0
     @State private var scrollRequest: Int = 0
@@ -58,13 +59,17 @@ struct CalendarTimelineView: View {
 
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 8) {
-                    ForEach(allDayEvents) { event in
-                        AllDayEventChip(
-                            event: event,
-                            calendarService: calendarService,
-                            onTap: { onEventTap(event) },
-                            onDelete: { onEventDelete(event) }
-                        )
+                    if allDayEvents.isEmpty {
+                        AllDayAddChip(onTap: onCreateAllDay)
+                    } else {
+                        ForEach(allDayEvents) { event in
+                            AllDayEventChip(
+                                event: event,
+                                calendarService: calendarService,
+                                onTap: { onEventTap(event) },
+                                onDelete: { onEventDelete(event) }
+                            )
+                        }
                     }
                 }
                 .padding(.horizontal, 4)
@@ -239,7 +244,7 @@ struct CalendarTimelineView: View {
         let isToday = calendar.isDateInToday(selectedDate)
         let currentHour = calendar.component(.hour, from: Date())
 
-        VStack(spacing: 0) {
+        return VStack(spacing: 0) {
             ForEach(0..<24, id: \.self) { hour in
                 ZStack(alignment: .top) {
                     Rectangle()
@@ -688,6 +693,22 @@ private struct AllDayEventChip: View {
     }
 }
 
+private struct AllDayAddChip: View {
+    let onTap: () -> Void
+
+    var body: some View {
+        Button(action: onTap) {
+            Label("Add all-day", systemImage: "plus")
+                .font(.subheadline.weight(.medium))
+                .foregroundStyle(.secondary)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 8)
+                .background(.ultraThinMaterial, in: Capsule())
+        }
+        .mapHealthPressable()
+    }
+}
+
 // MARK: - Empty State
 
 struct CalendarTimelineEmptyState: View {
@@ -759,7 +780,8 @@ struct CalendarTimelineEmptyState: View {
         onEventTap: { _ in },
         onEventDelete: { _ in },
         onCreateEvent: {},
-        onCreateEventAt: { _ in }
+        onCreateEventAt: { _ in },
+        onCreateAllDay: {}
     )
     .padding()
 }

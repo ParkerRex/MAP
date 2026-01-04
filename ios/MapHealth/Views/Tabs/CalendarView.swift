@@ -1,8 +1,8 @@
-// swiftlint:disable type_body_length
 import CoreLocation
 import MapHealthCore
 import SwiftUI
 
+// swiftlint:disable:next type_body_length
 struct CalendarView: View {
     @StateObject private var calendarService = CalendarService.shared
     @State private var selectedDate = Date()
@@ -10,6 +10,7 @@ struct CalendarView: View {
     @State private var showingCalendarPicker = false
     @State private var showingCreateEvent = false
     @State private var createEventStartDate: Date?
+    @State private var createEventIsAllDay = false
     @State private var selectedEvent: CalendarEvent?
     @State private var eventToDelete: CalendarEvent?
     @State private var showingDeleteConfirmation = false
@@ -18,6 +19,7 @@ struct CalendarView: View {
     @State private var hasLoadedInitialData = false
     @State private var weather: WeatherData?
     @StateObject private var locationManager = LocationManager()
+    @State private var showWeekStrip = true
 
     private let feedbackGenerator = UIImpactFeedbackGenerator(style: .medium)
     private let lightFeedbackGenerator = UIImpactFeedbackGenerator(style: .light)
@@ -29,17 +31,21 @@ struct CalendarView: View {
                 calendarHUD
 
                 // Week strip
-                CalendarWeekStrip(
-                    selectedDate: $selectedDate,
-                    events: calendarService.events,
-                    onDateDoubleTap: { date in
-                        createEventStartDate = date
-                        showingCreateEvent = true
-                    },
-                    showsHeader: false
-                )
-                .padding(.horizontal, 20)
-                .padding(.bottom, 12)
+                if showWeekStrip {
+                    CalendarWeekStrip(
+                        selectedDate: $selectedDate,
+                        events: calendarService.events,
+                        onDateDoubleTap: { date in
+                            createEventStartDate = date
+                            createEventIsAllDay = false
+                            showingCreateEvent = true
+                        },
+                        showsHeader: false
+                    )
+                    .padding(.horizontal, 20)
+                    .padding(.bottom, 12)
+                    .transition(.move(edge: .top).combined(with: .opacity))
+                }
 
                 Divider()
                     .padding(.horizontal, 20)
@@ -59,7 +65,8 @@ struct CalendarView: View {
                 EventFormSheet(
                     calendarService: calendarService,
                     selectedDate: selectedDate,
-                    initialStartDate: createEventStartDate
+                    initialStartDate: createEventStartDate,
+                    initialIsAllDay: createEventIsAllDay
                 )
             }
             .sheet(isPresented: $showingDatePicker) {
@@ -158,6 +165,7 @@ struct CalendarView: View {
         HStack(spacing: 12) {
             calendarPickerButton
             Spacer()
+            weekStripToggle
             jumpToDateButton
             addEventButton
         }
@@ -228,6 +236,7 @@ struct CalendarView: View {
                     selectedDate: selectedDate,
                     onCreateEvent: {
                         createEventStartDate = nil
+                        createEventIsAllDay = false
                         showingCreateEvent = true
                     }
                 )
@@ -243,11 +252,18 @@ struct CalendarView: View {
                     },
                     onCreateEvent: {
                         createEventStartDate = nil
+                        createEventIsAllDay = false
                         showingCreateEvent = true
                     },
                     onCreateEventAt: { date in
                         createEventStartDate = date
+                        createEventIsAllDay = false
                         selectedDate = date
+                        showingCreateEvent = true
+                    },
+                    onCreateAllDay: {
+                        createEventStartDate = calendar.startOfDay(for: selectedDate)
+                        createEventIsAllDay = true
                         showingCreateEvent = true
                     }
                 )
@@ -351,6 +367,7 @@ struct CalendarView: View {
         Button {
             feedbackGenerator.impactOccurred()
             createEventStartDate = nil
+            createEventIsAllDay = false
             showingCreateEvent = true
         } label: {
             Label("New", systemImage: "plus")
@@ -361,6 +378,24 @@ struct CalendarView: View {
                 .mapHealthGlassSurface(cornerRadius: 14, tint: .accentColor.opacity(0.12))
         }
         .mapHealthPressable()
+    }
+
+    private var weekStripToggle: some View {
+        Button {
+            lightFeedbackGenerator.impactOccurred()
+            withAnimation(.snappy(duration: 0.25)) {
+                showWeekStrip.toggle()
+            }
+        } label: {
+            Image(systemName: showWeekStrip ? "chevron.up" : "chevron.down")
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(.primary)
+                .padding(.horizontal, 10)
+                .padding(.vertical, 8)
+                .mapHealthGlassSurface(cornerRadius: 12, tint: .primary.opacity(0.03))
+        }
+        .mapHealthPressable()
+        .accessibilityLabel(showWeekStrip ? "Hide week strip" : "Show week strip")
     }
 
     private var todayChip: some View {
