@@ -7,6 +7,9 @@ struct NotesView: View {
     @State private var selectedFolderId: String?
     @State private var showingNewNote = false
     @State private var sortOrder: SortOrder = .lastEdited
+    @State private var showingNewFolder = false
+    @State private var newFolderName = ""
+    @AppStorage("notes.pinnedIds") private var pinnedIdsStorage = ""
 
     var body: some View {
         NavigationStack {
@@ -47,6 +50,12 @@ struct NotesView: View {
                 } else {
                     Text("No folders available")
                 }
+            }
+            .alert("New Folder", isPresented: $showingNewFolder) {
+                TextField("Folder name", text: $newFolderName)
+                Button("Create") { createFolder() }
+                    .disabled(newFolderName.trimmed.isEmpty)
+                Button("Cancel", role: .cancel) { newFolderName = "" }
             }
             .safeAreaInset(edge: .bottom) {
                 bottomBar
@@ -114,25 +123,17 @@ extension NotesView {
                 emptyState
             }
         } else {
+            if !pinnedNotes.isEmpty {
+                Section("Pinned") {
+                    ForEach(pinnedNotes) { note in
+                        noteRow(note)
+                    }
+                }
+            }
+
             Section {
-                ForEach(filteredNotes) { note in
-                    NavigationLink(value: note) {
-                        NoteRow(
-                            note: note,
-                            folderName: folderName(for: note),
-                            showFolder: selectedFolderId == nil
-                        )
-                    }
-                    .listRowInsets(EdgeInsets(top: 12, leading: 16, bottom: 12, trailing: 16))
-                    .listRowSeparator(.hidden)
-                    .listRowBackground(Color(.secondarySystemGroupedBackground))
-                    .swipeActions(edge: .trailing) {
-                        Button(role: .destructive) {
-                            deleteNote(note)
-                        } label: {
-                            Label("Delete", systemImage: "trash")
-                        }
-                    }
+                ForEach(unpinnedNotes) { note in
+                    noteRow(note)
                 }
             } header: {
                 listHeader
@@ -156,6 +157,14 @@ extension NotesView {
         }
     }
 
+    private var pinnedNotes: [MapNote] {
+        filteredNotes.filter { pinnedIds.contains($0.id) }
+    }
+
+    private var unpinnedNotes: [MapNote] {
+        filteredNotes.filter { !pinnedIds.contains($0.id) }
+    }
+
     private var sortedNotes: [MapNote] {
         switch sortOrder {
         case .lastEdited:
@@ -176,6 +185,54 @@ extension NotesView {
     private func deleteNote(_ note: MapNote) {
         Task {
             try? await notesService.deleteNote(note)
+        }
+    }
+
+    private func togglePin(_ note: MapNote) {
+        var ids = pinnedIds
+        if ids.contains(note.id) {
+            ids.remove(note.id)
+        } else {
+            ids.insert(note.id)
+        }
+        pinnedIds = ids
+    }
+
+    private var pinnedIds: Set<String> {
+        get {
+            let ids = pinnedIdsStorage.split(separator: ",").map { String($0) }
+            return Set(ids)
+        }
+        set {
+            pinnedIdsStorage = newValue.joined(separator: ",")
+        }
+    }
+
+    private func noteRow(_ note: MapNote) -> some View {
+        NavigationLink(value: note) {
+            NoteRow(
+                note: note,
+                folderName: folderName(for: note),
+                showFolder: selectedFolderId == nil
+            )
+        }
+        .listRowInsets(EdgeInsets(top: 12, leading: 16, bottom: 12, trailing: 16))
+        .listRowSeparator(.hidden)
+        .listRowBackground(Color(.secondarySystemGroupedBackground))
+        .swipeActions(edge: .trailing) {
+            Button(role: .destructive) {
+                deleteNote(note)
+            } label: {
+                Label("Delete", systemImage: "trash")
+            }
+        }
+        .swipeActions(edge: .leading) {
+            Button {
+                togglePin(note)
+            } label: {
+                Label(pinnedIds.contains(note.id) ? "Unpin" : "Pin", systemImage: "pin")
+            }
+            .tint(.yellow)
         }
     }
 
@@ -251,6 +308,13 @@ extension NotesView {
                     }
                 }
             }
+
+            Divider()
+
+            Button("New Folder") {
+                newFolderName = ""
+                showingNewFolder = true
+            }
         } label: {
             HStack(spacing: 6) {
                 Image(systemName: "folder")
@@ -273,6 +337,23 @@ extension NotesView {
             return "\(folder.name) (\(count))"
         }
         return folder.name
+    }
+
+    private func createFolder() {
+        let trimmed = newFolderName.trimmed
+        guard !trimmed.isEmpty else { return }
+
+        Task {
+            do {
+                let folder = try await notesService.createFolder(name: trimmed)
+                await MainActor.run {
+                    selectedFolderId = folder.id
+                    newFolderName = ""
+                }
+            } catch {
+                await MainActor.run { newFolderName = "" }
+            }
+        }
     }
 }
 

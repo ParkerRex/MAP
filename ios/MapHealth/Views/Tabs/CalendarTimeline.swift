@@ -10,6 +10,7 @@ struct CalendarTimelineView: View {
     let onEventTap: (CalendarEvent) -> Void
     let onEventDelete: (CalendarEvent) -> Void
     let onCreateEvent: () -> Void
+    let onCreateEventAt: (Date) -> Void
 
     @State private var currentTimeOffset: CGFloat = 0
     @State private var scrollRequest: Int = 0
@@ -78,6 +79,7 @@ struct CalendarTimelineView: View {
 
                 ScrollView(.vertical, showsIndicators: false) {
                     ZStack(alignment: .topLeading) {
+                        timelineTapLayer
                         hourStripes
                         hourGrid
 
@@ -126,6 +128,19 @@ struct CalendarTimelineView: View {
             .buttonStyle(.plain)
         }
         .padding(.horizontal, 4)
+    }
+
+    private var timelineTapLayer: some View {
+        Color.clear
+            .contentShape(Rectangle())
+            .gesture(
+                DragGesture(minimumDistance: 0)
+                    .onEnded { value in
+                        let distance = hypot(value.translation.width, value.translation.height)
+                        guard distance < 6 else { return }
+                        onCreateEventAt(dateForTimelineOffset(value.location.y))
+                    }
+            )
     }
 
     private var timelineFocusLabel: String {
@@ -302,6 +317,20 @@ struct CalendarTimelineView: View {
                 proxy.scrollTo("timeline", anchor: UnitPoint(x: 0, y: offset / (hourHeight * 24)))
             }
         }
+    }
+
+    private func dateForTimelineOffset(_ offset: CGFloat) -> Date {
+        let clamped = min(max(0, offset), hourHeight * 24)
+        let minutes = (clamped / hourHeight) * 60
+        let roundedMinutes = (minutes / 15).rounded() * 15
+        let hour = Int(roundedMinutes) / 60
+        let minute = Int(roundedMinutes) % 60
+
+        var components = calendar.dateComponents([.year, .month, .day], from: selectedDate)
+        components.hour = hour
+        components.minute = minute
+
+        return calendar.date(from: components) ?? selectedDate
     }
 
     private var timedEventLayout: [TimelineLayoutEvent] {
@@ -632,7 +661,8 @@ struct CalendarTimelineEmptyState: View {
         selectedDate: Date(),
         onEventTap: { _ in },
         onEventDelete: { _ in },
-        onCreateEvent: {}
+        onCreateEvent: {},
+        onCreateEventAt: { _ in }
     )
     .padding()
 }

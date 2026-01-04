@@ -8,6 +8,7 @@ struct CalendarView: View {
     @State private var viewMode: CalendarViewMode = .day
     @State private var showingCalendarPicker = false
     @State private var showingCreateEvent = false
+    @State private var createEventStartDate: Date?
     @State private var selectedEvent: CalendarEvent?
     @State private var eventToDelete: CalendarEvent?
     @State private var showingDeleteConfirmation = false
@@ -29,7 +30,10 @@ struct CalendarView: View {
                 CalendarWeekStrip(
                     selectedDate: $selectedDate,
                     events: calendarService.events,
-                    onDateDoubleTap: { _ in showingCreateEvent = true },
+                    onDateDoubleTap: { date in
+                        createEventStartDate = date
+                        showingCreateEvent = true
+                    },
                     showsHeader: false
                 )
                 .padding(.horizontal, 20)
@@ -52,7 +56,8 @@ struct CalendarView: View {
             .sheet(isPresented: $showingCreateEvent) {
                 EventFormSheet(
                     calendarService: calendarService,
-                    selectedDate: selectedDate
+                    selectedDate: selectedDate,
+                    initialStartDate: createEventStartDate
                 )
             }
             .sheet(isPresented: $showingDatePicker) {
@@ -219,7 +224,10 @@ struct CalendarView: View {
             } else if eventsForSelectedDay.isEmpty {
                 CalendarTimelineEmptyState(
                     selectedDate: selectedDate,
-                    onCreateEvent: { showingCreateEvent = true }
+                    onCreateEvent: {
+                        createEventStartDate = nil
+                        showingCreateEvent = true
+                    }
                 )
             } else {
                 CalendarTimelineView(
@@ -231,7 +239,15 @@ struct CalendarView: View {
                         eventToDelete = event
                         showingDeleteConfirmation = true
                     },
-                    onCreateEvent: { showingCreateEvent = true }
+                    onCreateEvent: {
+                        createEventStartDate = nil
+                        showingCreateEvent = true
+                    },
+                    onCreateEventAt: { date in
+                        createEventStartDate = date
+                        selectedDate = date
+                        showingCreateEvent = true
+                    }
                 )
                 .padding(20)
             }
@@ -332,6 +348,7 @@ struct CalendarView: View {
     private var addEventButton: some View {
         Button {
             feedbackGenerator.impactOccurred()
+            createEventStartDate = nil
             showingCreateEvent = true
         } label: {
             Label("New", systemImage: "plus")

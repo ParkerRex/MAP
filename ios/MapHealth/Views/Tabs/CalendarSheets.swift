@@ -79,6 +79,7 @@ private struct CalendarPickerRow: View {
 struct EventFormSheet: View {
     @ObservedObject var calendarService: CalendarService
     let selectedDate: Date
+    let initialStartDate: Date?
     let editingEvent: CalendarEvent?
 
     @Environment(\.dismiss) private var dismiss
@@ -93,9 +94,15 @@ struct EventFormSheet: View {
     @State private var isSaving = false
     @State private var errorMessage: String?
 
-    init(calendarService: CalendarService, selectedDate: Date, editingEvent: CalendarEvent? = nil) {
+    init(
+        calendarService: CalendarService,
+        selectedDate: Date,
+        initialStartDate: Date? = nil,
+        editingEvent: CalendarEvent? = nil
+    ) {
         self.calendarService = calendarService
         self.selectedDate = selectedDate
+        self.initialStartDate = initialStartDate
         self.editingEvent = editingEvent
 
         if let event = editingEvent {
@@ -106,6 +113,11 @@ struct EventFormSheet: View {
             _startDate = State(initialValue: event.startDate ?? selectedDate)
             let fallbackEnd = Calendar.current.date(byAdding: .hour, value: 1, to: selectedDate)!
             _endDate = State(initialValue: event.endDate ?? fallbackEnd)
+        } else if let initialStartDate {
+            let start = initialStartDate
+            let end = Calendar.current.date(byAdding: .hour, value: 1, to: start) ?? start
+            _startDate = State(initialValue: start)
+            _endDate = State(initialValue: end)
         } else {
             let calendar = Calendar.current
             let now = Date()
