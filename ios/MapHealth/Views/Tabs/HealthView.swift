@@ -68,7 +68,7 @@ struct HealthView: View {
     }
 
     private var healthBody: some View {
-        LazyVStack(spacing: 20) {
+        LazyVStack(spacing: 24) {
             headerSection
 
             if healthService.needsPermission {
@@ -77,57 +77,57 @@ struct HealthView: View {
                 errorView(error.localizedDescription)
             } else {
                 if apiClient.isAuthenticated {
-                    sectionHeader(
+                    section(
                         title: "WHOOP",
                         systemImage: "bolt.heart.fill",
                         footnote: whoopConnected ? "Connected" : "Not connected"
+                    ) {
+                        HealthHeroCard(
+                            recovery: whoopRecovery,
+                            cycle: whoopCycle,
+                            whoopConnected: whoopConnected,
+                            isLoading: isLoadingWhoop
+                        )
+                    }
+                }
+
+                section(title: "Highlights", systemImage: "sparkles") {
+                    QuickStatsRow(
+                        steps: snapshot?.today.steps,
+                        calories: snapshot?.today.activeEnergy,
+                        exerciseMinutes: snapshot?.today.exerciseMinutes,
+                        isLoading: healthService.isLoading
                     )
 
-                    HealthHeroCard(
-                        recovery: whoopRecovery,
-                        cycle: whoopCycle,
-                        whoopConnected: whoopConnected,
-                        isLoading: isLoadingWhoop
+                    SleepCompactCard(
+                        sleepHours: snapshot?.today.sleepHours,
+                        sleepStages: snapshot?.today.sleepStages,
+                        average7d: snapshot?.sleepAverage7d,
+                        trend: snapshot?.sleepTrend.map(mapTrend),
+                        isLoading: healthService.isLoading
+                    )
+
+                    if whoopConnected, whoopSleep != nil {
+                        WhoopSleepQualitySection(sleep: whoopSleep, showsHeader: false)
+                    }
+
+                    HeartSectionCard(
+                        restingHR: whoopConnected ? whoopRecovery?.restingHR : snapshot?.today.restingHeartRate,
+                        hrv: whoopConnected ? whoopRecovery?.hrv : snapshot?.today.hrvSDNN,
+                        restingHRTrend: snapshot?.restingHRTrend.map(mapTrend),
+                        hrvTrend: snapshot?.hrvTrend.map(mapTrend),
+                        isLoading: healthService.isLoading || isLoadingWhoop
                     )
                 }
 
-                sectionHeader(title: "Highlights", systemImage: "sparkles")
-
-                QuickStatsRow(
-                    steps: snapshot?.today.steps,
-                    calories: snapshot?.today.activeEnergy,
-                    exerciseMinutes: snapshot?.today.exerciseMinutes,
-                    isLoading: healthService.isLoading
-                )
-
-                SleepCompactCard(
-                    sleepHours: snapshot?.today.sleepHours,
-                    sleepStages: snapshot?.today.sleepStages,
-                    average7d: snapshot?.sleepAverage7d,
-                    trend: snapshot?.sleepTrend.map(mapTrend),
-                    isLoading: healthService.isLoading
-                )
-
-                if whoopConnected, whoopSleep != nil {
-                    WhoopSleepQualitySection(sleep: whoopSleep, showsHeader: false)
+                section(title: "Activity", systemImage: "figure.walk") {
+                    activityGrid
                 }
-
-                HeartSectionCard(
-                    restingHR: whoopConnected ? whoopRecovery?.restingHR : snapshot?.today.restingHeartRate,
-                    hrv: whoopConnected ? whoopRecovery?.hrv : snapshot?.today.hrvSDNN,
-                    restingHRTrend: snapshot?.restingHRTrend.map(mapTrend),
-                    hrvTrend: snapshot?.hrvTrend.map(mapTrend),
-                    isLoading: healthService.isLoading || isLoadingWhoop
-                )
-
-                sectionHeader(title: "Activity", systemImage: "figure.walk")
-
-                activityGrid
 
                 if whoopConnected, !whoopWorkouts.isEmpty {
-                    sectionHeader(title: "Workouts", systemImage: "figure.run")
-
-                    WhoopWorkoutsSection(workouts: whoopWorkouts, showsHeader: false)
+                    section(title: "Workouts", systemImage: "figure.run") {
+                        WhoopWorkoutsSection(workouts: whoopWorkouts, showsHeader: false)
+                    }
                 }
             }
         }
@@ -301,6 +301,18 @@ struct HealthView: View {
             Spacer()
         }
         .padding(.top, 4)
+    }
+
+    private func section<Content: View>(
+        title: String,
+        systemImage: String,
+        footnote: String? = nil,
+        @ViewBuilder content: () -> Content
+    ) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
+            sectionHeader(title: title, systemImage: systemImage, footnote: footnote)
+            content()
+        }
     }
 
     private var refreshButton: some View {

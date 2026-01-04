@@ -131,9 +131,7 @@ struct WhoopSleepQualitySection: View {
 
             LazyVGrid(
                 columns: [
-                    GridItem(.flexible()),
-                    GridItem(.flexible()),
-                    GridItem(.flexible())
+                    GridItem(.adaptive(minimum: 90), spacing: 10)
                 ],
                 spacing: 12
             ) {

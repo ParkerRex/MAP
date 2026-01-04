@@ -10,36 +10,65 @@ struct QuickStatsRow: View {
     let isLoading: Bool
 
     var body: some View {
-        HStack(spacing: 0) {
-            QuickStat(
-                value: formatCompact(steps),
-                label: "Steps",
-                icon: "figure.walk",
-                color: .green,
-                isLoading: isLoading
-            )
+        ViewThatFits(in: .horizontal) {
+            HStack(spacing: 0) {
+                QuickStat(
+                    value: formatCompact(steps),
+                    label: "Steps",
+                    icon: "figure.walk",
+                    color: .green,
+                    isLoading: isLoading
+                )
 
-            Divider()
-                .frame(height: 40)
+                Divider()
+                    .frame(height: 40)
 
-            QuickStat(
-                value: formatCompact(calories),
-                label: "Calories",
-                icon: "flame.fill",
-                color: .orange,
-                isLoading: isLoading
-            )
+                QuickStat(
+                    value: formatCompact(calories),
+                    label: "Calories",
+                    icon: "flame.fill",
+                    color: .orange,
+                    isLoading: isLoading
+                )
 
-            Divider()
-                .frame(height: 40)
+                Divider()
+                    .frame(height: 40)
 
-            QuickStat(
-                value: exerciseMinutes.map { "\(Int($0))m" } ?? "--",
-                label: "Exercise",
-                icon: "figure.run",
-                color: .cyan,
-                isLoading: isLoading
-            )
+                QuickStat(
+                    value: exerciseMinutes.map { "\(Int($0))m" } ?? "--",
+                    label: "Exercise",
+                    icon: "figure.run",
+                    color: .cyan,
+                    isLoading: isLoading
+                )
+            }
+
+            LazyVGrid(
+                columns: [GridItem(.flexible()), GridItem(.flexible())],
+                spacing: 12
+            ) {
+                QuickStat(
+                    value: formatCompact(steps),
+                    label: "Steps",
+                    icon: "figure.walk",
+                    color: .green,
+                    isLoading: isLoading
+                )
+                QuickStat(
+                    value: formatCompact(calories),
+                    label: "Calories",
+                    icon: "flame.fill",
+                    color: .orange,
+                    isLoading: isLoading
+                )
+                QuickStat(
+                    value: exerciseMinutes.map { "\(Int($0))m" } ?? "--",
+                    label: "Exercise",
+                    icon: "figure.run",
+                    color: .cyan,
+                    isLoading: isLoading
+                )
+            }
         }
         .padding(.vertical, 16)
         .frame(maxWidth: .infinity)
