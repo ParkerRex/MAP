@@ -321,13 +321,19 @@ struct HealthView: View {
                 showsSurface: false
             )
 
+            Divider()
+                .foregroundStyle(.quaternary)
+
             recoveryRow
 
             if whoopConnected, whoopSleep != nil {
+                Divider()
+                    .foregroundStyle(.quaternary)
+
                 WhoopSleepQualitySection(sleep: whoopSleep, showsHeader: false, showsSurface: false)
             }
         }
-        .padding(16)
+        .padding(14)
         .mapHealthGlassSurface(cornerRadius: 20, tint: .primary.opacity(0.02))
     }
 

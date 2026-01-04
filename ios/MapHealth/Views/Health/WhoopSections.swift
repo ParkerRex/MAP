@@ -61,7 +61,7 @@ struct RecoveryCard: View {
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(16)
+        .padding(14)
         .mapHealthGlassSurface(cornerRadius: 16, tint: recoveryColor.opacity(0.1))
         .animation(.easeInOut(duration: 0.25), value: isLoading)
     }

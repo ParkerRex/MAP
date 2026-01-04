@@ -87,7 +87,7 @@ struct QuickStatsRow: View {
                 )
             }
         }
-        .padding(.vertical, 16)
+        .padding(.vertical, 14)
         .frame(maxWidth: .infinity)
 
         if showsSurface {
@@ -327,7 +327,7 @@ struct SleepCompactCard: View {
                 }
             }
         }
-        .padding(16)
+        .padding(14)
         .frame(maxWidth: .infinity, alignment: .leading)
 
         if showsSurface {
@@ -509,7 +509,7 @@ struct HeartSectionCard: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
         }
-        .padding(16)
+        .padding(14)
         .frame(maxWidth: .infinity, alignment: .leading)
 
         if showsSurface {

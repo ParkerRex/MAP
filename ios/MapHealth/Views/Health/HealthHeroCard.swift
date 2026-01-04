@@ -61,7 +61,7 @@ struct RecoveryArcView: View {
                         SkeletonText(width: 50, height: 36)
                     } else {
                         Text(scoreLabel)
-                            .font(.system(size: 42, weight: .bold, design: .rounded))
+                            .font(.system(size: 38, weight: .bold, design: .rounded))
                             .foregroundStyle(scoreColor)
                         Text("%")
                             .font(.caption)
@@ -69,7 +69,7 @@ struct RecoveryArcView: View {
                     }
                 }
             }
-            .frame(width: 120, height: 120)
+            .frame(width: 110, height: 110)
 
             if !isLoading {
                 Text(statusText)
@@ -133,12 +133,12 @@ struct StrainGaugeView: View {
                         SkeletonText(width: 30, height: 24)
                     } else {
                         Text(strainLabel)
-                            .font(.system(size: 24, weight: .bold, design: .rounded))
+                            .font(.system(size: 22, weight: .bold, design: .rounded))
                             .foregroundStyle(strainColor)
                     }
                 }
             }
-            .frame(width: 70, height: 70)
+            .frame(width: 64, height: 64)
 
             Text("Strain")
                 .font(.caption2)
@@ -156,7 +156,7 @@ struct HealthHeroCard: View {
     let isLoading: Bool
 
     var body: some View {
-        HStack(spacing: 24) {
+        HStack(spacing: 16) {
             // Main recovery score
             VStack(alignment: .leading, spacing: 8) {
                 HStack(spacing: 6) {
@@ -178,7 +178,7 @@ struct HealthHeroCard: View {
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
-                    .frame(width: 120, height: 120)
+                    .frame(width: 100, height: 100)
                 }
             }
 
@@ -203,7 +203,7 @@ struct HealthHeroCard: View {
                 }
             }
         }
-        .padding(20)
+        .padding(16)
         .frame(maxWidth: .infinity)
         .mapHealthGlassSurface(cornerRadius: 24, tint: .green.opacity(0.05))
     }
