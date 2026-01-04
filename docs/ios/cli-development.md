@@ -1,235 +1,114 @@
 # CLI Development
 
-Build and test the iOS app without opening Xcode IDE.
+You can build/test without the Xcode UI. You still need Xcode Command Line Tools.
 
-## Prerequisites
-
-- **Xcode Command Line Tools** - Required (contains `xcodebuild`, SDKs, simulators)
-- **Xcode IDE** - Not required for build/test, only for code signing setup
+## Prereqs (do this once)
 
 ```bash
-# Install command line tools
 xcode-select --install
-
-# Verify installation
 xcodebuild -version
 ```
 
-## Package Commands
+If you need code signing, open Xcode once and set your Team in Signing & Capabilities.
 
-### Describe Package
+## Find schemes (do not guess)
 
 ```bash
 cd ios
-swift package describe
+xcodebuild -list -project MapHealth.xcodeproj
 ```
 
-### Resolve Dependencies
+Use the scheme names that actually show up on your machine.
 
-```bash
-xcodebuild -resolvePackageDependencies
-```
+## Build
 
-### Show Dependency Tree
-
-```bash
-swift package show-dependencies
-```
-
-### Update Dependencies
-
-```bash
-swift package update
-```
-
-## Build Commands
-
-### List Available Schemes
-
-```bash
-xcodebuild -list
-```
-
-### Build for Simulator
+### Simulator
 
 ```bash
 xcodebuild build \
-  -scheme MapHealth \
+  -project MapHealth.xcodeproj \
+  -scheme <APP_SCHEME> \
   -sdk iphonesimulator \
   -destination "platform=iOS Simulator,name=iPhone 15"
 ```
 
-### Build for Device (Unsigned)
+### Device (unsigned)
 
 ```bash
 xcodebuild build \
-  -scheme MapHealth \
+  -project MapHealth.xcodeproj \
+  -scheme <APP_SCHEME> \
   -sdk iphoneos \
   CODE_SIGNING_ALLOWED=NO
 ```
 
-### Build for Device (Signed)
+### Device (signed)
 
 ```bash
 xcodebuild build \
-  -scheme MapHealth \
+  -project MapHealth.xcodeproj \
+  -scheme <APP_SCHEME> \
   -sdk iphoneos \
   -destination "generic/platform=iOS" \
   -allowProvisioningUpdates \
   DEVELOPMENT_TEAM="YOUR_TEAM_ID"
 ```
 
-### Clean Build
+## Tests
+
+### Swift package unit tests (MapHealthCore)
 
 ```bash
-xcodebuild clean -scheme MapHealth
+swift test
 ```
 
-## Test Commands
-
-### Run Unit Tests
+### Xcode tests
 
 ```bash
 xcodebuild test \
-  -scheme MapHealthCore \
+  -project MapHealth.xcodeproj \
+  -scheme <APP_SCHEME> \
   -sdk iphonesimulator \
-  -destination "platform=iOS Simulator,name=iPhone 15,OS=17.0" \
+  -destination "platform=iOS Simulator,name=iPhone 15" \
   CODE_SIGNING_ALLOWED=NO
 ```
 
-### Run with Pretty Output
+### Pretty output
 
 ```bash
-# Install xcbeautify
 brew install xcbeautify
-
-# Run tests with formatted output
 xcodebuild test \
-  -scheme MapHealthCore \
+  -project MapHealth.xcodeproj \
+  -scheme <APP_SCHEME> \
   -sdk iphonesimulator \
   -destination "platform=iOS Simulator,name=iPhone 15" \
   CODE_SIGNING_ALLOWED=NO \
   | xcbeautify
 ```
 
-### Parallel Testing
+## Simulator install/launch
+
+Bundle ID in the project is `com.parkerrex.maphealth` (change if you rename it).
 
 ```bash
-xcodebuild test \
-  -scheme MapHealthCore \
-  -sdk iphonesimulator \
-  -destination "platform=iOS Simulator,name=iPhone 15" \
-  -parallel-testing-enabled YES \
-  CODE_SIGNING_ALLOWED=NO
+xcrun simctl install booted \
+  ./Build/Products/Debug-iphonesimulator/MapHealth.app
+
+xcrun simctl launch booted com.parkerrex.maphealth
 ```
 
-## Simulator Commands
+## Signing environment variables
 
-### List Available Simulators
-
-```bash
-xcrun simctl list devices available
-```
-
-### Boot Simulator
-
-```bash
-xcrun simctl boot "iPhone 15"
-```
-
-### Install App on Simulator
-
-```bash
-xcrun simctl install booted ./Build/Products/Debug-iphonesimulator/MapHealth.app
-```
-
-### Launch App on Simulator
-
-```bash
-xcrun simctl launch booted com.map.health
-```
-
-### Open Simulator App
-
-```bash
-open -a Simulator
-```
-
-## Code Signing
-
-### Without Signing (CI/Testing)
-
-```bash
-CODE_SIGNING_ALLOWED=NO
-```
-
-### Automatic Signing
-
-```bash
--allowProvisioningUpdates \
-DEVELOPMENT_TEAM="YOUR_TEAM_ID"
-```
-
-### Manual Signing
-
-```bash
-CODE_SIGN_IDENTITY="Apple Development" \
-PROVISIONING_PROFILE_SPECIFIER="MapHealth Dev" \
-DEVELOPMENT_TEAM="YOUR_TEAM_ID"
-```
-
-## Derived Data
-
-### Custom Location
-
-```bash
-xcodebuild build \
-  -scheme MapHealth \
-  -derivedDataPath .build/DerivedData
-```
-
-### Clean Derived Data
-
-```bash
-rm -rf ~/Library/Developer/Xcode/DerivedData
-# or
-rm -rf .build/DerivedData
-```
-
-## Environment Variables
-
-| Variable | Description |
-|----------|-------------|
-| `CODE_SIGNING_ALLOWED=NO` | Skip code signing |
+| Variable | Meaning |
+|---------|---------|
+| `CODE_SIGNING_ALLOWED=NO` | Skip signing |
 | `DEVELOPMENT_TEAM` | Apple Developer Team ID |
-| `CODE_SIGN_IDENTITY` | Signing certificate name |
-| `PROVISIONING_PROFILE_SPECIFIER` | Provisioning profile name |
+| `CODE_SIGN_IDENTITY` | Signing cert name |
+| `PROVISIONING_PROFILE_SPECIFIER` | Profile name |
 
-## Common Issues
+## Common failures
 
-### "No scheme named X"
-
-The scheme may not be shared. Check:
-```bash
-ls ios/MapHealth.xcodeproj/xcshareddata/xcschemes/
-```
-
-### "Provisioning profile" errors
-
-Run with `-allowProvisioningUpdates` or set up signing in Xcode once.
-
-### Simulator not found
-
-List available simulators:
-```bash
-xcrun simctl list devices available
-```
-
-### Build cache issues
-
-Clean and rebuild:
-```bash
-xcodebuild clean -scheme MapHealth
-rm -rf .build
-xcodebuild build -scheme MapHealth ...
-```
+- **"No scheme named X"**: Share the scheme in Xcode or use a scheme that actually exists.
+- **Provisioning profile errors**: run once with `-allowProvisioningUpdates`.
+- **Simulator not found**: `xcrun simctl list devices available`.
+- **Stale build output**: `xcodebuild clean -scheme <APP_SCHEME>` then rebuild.

@@ -22,4 +22,8 @@ public enum LLMSource: String, CaseIterable, Identifiable, Codable {
             LocalizedStringResource("LOCAL_LLM_LABEL")
         }
     }
+
+    public static var chatSources: [LLMSource] {
+        [.openai, .claude]
+    }
 }

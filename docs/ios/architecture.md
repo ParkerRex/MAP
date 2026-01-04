@@ -1,191 +1,84 @@
-# iOS Architecture
+# iOS Architecture (Map)
 
-## Overview
+## Layers
 
-The Map Health iOS app uses a two-module architecture:
+- **MapHealthCore (SPM library)**: business logic, HealthKit, API clients, models.
+- **MapHealth app target (Xcode)**: SwiftUI UI, onboarding, tabs.
 
-- **MapHealthCore** - Pure Swift library containing business logic
-- **MapHealthApp** - Thin SwiftUI app shell
+The UI is not in SPM. It lives in the Xcode target under `ios/MapHealth/`.
 
-This separation enables:
-- Unit testing without iOS simulator
-- Code reuse across platforms (iOS, macOS, watchOS)
-- Faster CI builds
-- Better testability through dependency injection
-
-## Module Structure
+## Directory map
 
 ```
 ios/
-├── Package.swift                    # SPM manifest
 ├── Sources/
-│   ├── MapHealthCore/              # Business logic library
-│   │   ├── Models/
-│   │   │   ├── HealthData.swift         # Health metrics model
-│   │   │   └── ChatMessage.swift        # Chat message model
-│   │   ├── Services/
-│   │   │   ├── MapAPIClient.swift       # Backend sync client
-│   │   │   └── BackgroundSync.swift     # Background task manager
-│   │   ├── HealthKit/
-│   │   │   ├── HealthDataFetcher.swift  # HealthKit queries
-│   │   │   ├── HealthDataFetcher+Process.swift
-│   │   │   ├── HealthDataFetcherError.swift
-│   │   │   ├── HealthDataInterpreter.swift  # LLM context builder
-│   │   │   ├── HealthKitAuthorizationManager.swift
-│   │   │   └── PromptGenerator.swift    # System prompt builder
-│   │   ├── Helpers/
-│   │   │   ├── Date+Extensions.swift
-│   │   │   ├── Binding+Negate.swift
-│   │   │   ├── CodableArray+RawRepresentable.swift
-│   │   │   └── String+ModuleLocalized.swift
-│   │   └── SharedContext/
-│   │       ├── StorageKeys.swift        # AppStorage keys
-│   │       └── FeatureFlags.swift       # Command-line flags
-│   │
-│   └── MapHealthApp/               # SwiftUI app
-│       ├── MapHealthApp.swift           # @main entry point
-│       ├── MapHealthAppDelegate.swift   # App delegate hooks
-│       ├── MapHealthStandard.swift      # Placeholder (unused)
-│       ├── MapHealthTestingSetup.swift  # Test configuration
-│       ├── Views/
-│       │   ├── HealthChatView.swift     # Main chat UI
-│       │   └── SettingsView.swift
-│       ├── Onboarding/
-│       │   ├── OnboardingFlow.swift
-│       │   ├── HealthKitPermissions.swift
-│       │   └── OpenAI/
-│       └── Resources/
-│           └── Localizable.xcstrings
-│
-├── Tests/
-│   └── MapHealthCoreTests/
-│       └── PromptGeneratorTests.swift
-│
-└── MapHealth.xcodeproj/            # For device builds & signing
+│   └── MapHealthCore/
+│       ├── Models/              # HealthData, task/calendar models, LLM source
+│       ├── Services/            # MapAPIClient, TasksService, CalendarService, ClaudeAPIClient
+│       ├── HealthKit/            # HealthDataFetcher, PromptGenerator, HealthDataInterpreter
+│       ├── Helpers/             # Extensions + utilities
+│       └── SharedContext/        # FeatureFlags, StorageKeys
+├── MapHealth/                    # SwiftUI app target (Xcode)
+│   ├── Views/                    # Main tabs, chat, calendar, todos
+│   ├── Onboarding/               # Google auth, OpenAI key, model selection, HealthKit perms
+│   └── Supporting Files/         # Info.plist, entitlements, assets
+├── Tests/                        # Swift Testing (MapHealthCore)
+├── MapHealthTests/               # Xcode unit tests
+├── MapHealthUITests/             # Xcode UI tests
+└── MapHealth.xcodeproj
 ```
 
-## Data Flow
+## Backend contracts (Map API)
+
+- Base URL: DEBUG `https://mapyourlife.org`, Release `https://app.map.ai`
+- OAuth start: `/api/auth/google?platform=ios` (returns `token` in callback URL)
+- Session token stored in Keychain, sent as `Authorization: Bearer <token>`
+- 401s trigger re-auth via `MapAPIClient.onAuthenticationRequired`
+
+Key endpoints used by iOS:
+
+- `/api/auth/me` (profile)
+- `/api/health/apple-health/sync` and `/api/health/apple-health/status`
+- `/api/tasks`, `/api/tags`
+- `/api/calendar/calendars`, `/api/calendar/events`, `/api/calendar/colors`, `/api/calendar/sync`
+- `/api/claude/*` (Claude key, status, chat, disconnect)
+
+## Data flows
+
+### Health sync
 
 ```
-┌─────────────────┐     ┌──────────────────┐     ┌─────────────────┐
-│   Apple Health  │────▶│ HealthDataFetcher │────▶│   HealthData    │
-└─────────────────┘     └──────────────────┘     └─────────────────┘
-                                                          │
-                        ┌──────────────────┐              │
-                        │  PromptGenerator │◀─────────────┘
-                        └──────────────────┘
-                                 │
-                                 ▼
-                        ┌──────────────────┐
-                        │HealthDataInterpreter│
-                        └──────────────────┘
-                                 │
-                                 ▼
-                        ┌──────────────────┐     ┌─────────────────┐
-                        │  OpenAI Client   │────▶│  HealthChatView │
-                        └──────────────────┘     └─────────────────┘
+Apple Health -> HealthDataFetcher -> [HealthData]
+                            -> MapAPIClient.syncHealthData
+                            -> POST /api/health/apple-health/sync
 ```
 
-## Key Classes
+### Chat (OpenAI)
 
-### HealthDataFetcher
-
-Queries HealthKit for health metrics.
-
-```swift
-public final class HealthDataFetcher {
-    public func fetchLastTwoWeeksStepCount() async throws -> [Double]
-    public func fetchLastTwoWeeksSleep() async throws -> [Double]
-    public func fetchAndProcessHealthData() async -> [HealthData]
-}
+```
+HealthDataFetcher -> PromptGenerator -> system prompt
+User message -> HealthDataInterpreter -> OpenAIClient
+               -> https://api.openai.com/v1/chat/completions
 ```
 
-### HealthDataInterpreter
+### Tasks + Calendar
 
-Builds LLM context with health data and manages chat sessions.
-
-```swift
-@MainActor
-public final class HealthDataInterpreter: ObservableObject {
-    @Published public var messages: [ChatMessage]
-    public func prepareSession(model: String) async
-    public func queryLLM() async throws
-    public func resetChat() async
-}
+```
+TasksService / CalendarService -> MapAPIClient -> Map backend
 ```
 
-### MapAPIClient
+## Key classes
 
-HTTP client for syncing health data to the backend.
+- `MapAPIClient`: Map backend HTTP client. Handles auth token + retries.
+- `TasksService`: task CRUD + local caching.
+- `CalendarService`: calendar fetch, selection, event CRUD, sync.
+- `HealthDataFetcher`: HealthKit queries (last 14 days).
+- `HealthDataInterpreter`: OpenAI chat orchestration + prompt building.
+- `ClaudeAPIClient`: Claude chat through Map backend.
 
-Authentication uses a session token stored in Keychain and sent as a `Bearer` token.
-On 401 responses, the app triggers an inline Google re-auth flow.
+## Feature flags (command-line)
 
-```swift
-public class MapAPIClient {
-    public static let shared = MapAPIClient()
-
-    public func syncHealthData(_ healthData: [HealthData]) async throws -> SyncResponse
-    public func getHealthStatus() async throws -> HealthConnectionStatus
-}
-```
-
-### BackgroundSyncManager
-
-Manages iOS background tasks for automatic data sync.
-
-```swift
-public class BackgroundSyncManager {
-    public static let shared = BackgroundSyncManager()
-    public static let taskIdentifier = "com.map.health.sync"
-
-    public func registerBackgroundTasks()
-    public func scheduleBackgroundSync()
-    public func performSync() async throws
-    public func enableBackgroundDelivery()
-}
-```
-
-## Design Patterns
-
-### Observable Pattern
-
-Core services use `ObservableObject` for SwiftUI reactivity:
-
-```swift
-public final class HealthDataInterpreter: ObservableObject { ... }
-```
-
-### Dependency Injection
-
-Dependency injection is done via SwiftUI `environmentObject` and explicit initializers.
-
-### Environment Access
-
-Core services are shared via SwiftUI `environmentObject`:
-
-```swift
-@EnvironmentObject private var healthDataInterpreter: HealthDataInterpreter
-```
-
-### Feature Flags
-
-Command-line arguments control app behavior:
-
-```swift
-public enum FeatureFlags {
-    public static let skipOnboarding = CommandLine.arguments.contains("--skipOnboarding")
-    public static let mockMode = CommandLine.arguments.contains("--mockMode")
-}
-```
-
-## Storage Keys
-
-Centralized storage key management:
-
-```swift
-public enum StorageKeys {
-    public static let onboardingFlowComplete = "onboardingFlow.complete"
-    public static let openAIModel = "openAI.model"
-}
-```
+- `--skipOnboarding`
+- `--showOnboarding`
+- `--resetKeychainStorage`
+- `--mockMode`

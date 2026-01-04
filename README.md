@@ -14,7 +14,7 @@ A personal productivity dashboard integrating calendar, tasks, notes, and health
 ### iOS App
 - **Apple Health Sync** - Pulls 25+ health metrics from HealthKit
 - **Background Sync** - Automatically syncs when new health data arrives
-- **AI Chat** - Chat with an LLM about your health data (OpenAI/Local Llama)
+- **AI Chat** - Chat with an LLM about your health data (OpenAI or Claude)
 - **Sleep Tracking** - Full sleep stage analysis (Core, Deep, REM, Awake)
 - **Heart & Recovery** - HRV, resting HR, VO2 Max, respiratory rate
 - **Activity** - Steps, distance, exercise time, stand time, flights climbed
@@ -32,8 +32,10 @@ A personal productivity dashboard integrating calendar, tasks, notes, and health
 
 ### iOS
 - **Platform**: iOS 17+ / Swift 5.9
-- **Framework**: Stanford Spezi (HealthKit, LLM, Chat, Onboarding)
-- **Build**: Swift Package Manager + Xcode 16.2
+- **UI**: SwiftUI
+- **Health**: HealthKit
+- **LLM**: OpenAI (device-side, user key)
+- **Build**: Xcode 16.2 target + SPM for MapHealthCore
 
 ## Getting Started
 
@@ -85,10 +87,10 @@ cloudflared tunnel run map-ai
 ```bash
 cd ios
 
-# Build with Swift Package Manager
+# Build MapHealthCore only
 swift build
 
-# Or open in Xcode
+# Build/run the app target
 open MapHealth.xcodeproj
 ```
 
@@ -126,17 +128,15 @@ src/                            # Web Dashboard
 └── types/                      # TypeScript types
 
 ios/                            # iOS App
-├── Package.swift               # Swift Package Manager config
-├── Sources/
-│   ├── MapHealthApp/           # Main app target
-│   │   ├── MapHealthApp.swift  # App entry point
-│   │   ├── Views/              # SwiftUI views
-│   │   └── Onboarding/         # Onboarding flow
-│   └── MapHealthCore/          # Shared library
-│       ├── HealthKit/          # HealthKit queries
-│       ├── Services/           # API client, background sync
-│       └── Models/             # Data models
-└── Tests/                      # Unit tests
+├── Sources/MapHealthCore/      # Shared library
+│   ├── HealthKit/              # HealthKit queries
+│   ├── Services/               # API client, background sync
+│   └── Models/                 # Data models
+├── MapHealth/                  # SwiftUI app target (Xcode)
+├── MapHealth.xcodeproj         # Xcode project
+├── Tests/MapHealthCoreTests/   # Swift Testing
+├── MapHealthTests/             # Xcode unit tests
+└── MapHealthUITests/           # Xcode UI tests
 ```
 
 ## Authentication

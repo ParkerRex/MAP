@@ -6,8 +6,8 @@ import SwiftUI
 ///
 /// Flow:
 /// 1. Google Sign-In - Authenticate with Google (required)
-/// 2. OpenAI API Key
-/// 3. OpenAI Model Selection
+/// 2. LLM Source Selection (OpenAI or Claude)
+/// 3. LLM Auth + Model Selection
 /// 4. HealthKit Permissions - Required for health data access
 struct OnboardingFlow: View {
     @AppStorage(StorageKeys.onboardingFlowComplete) var completedOnboardingFlow = false
@@ -16,10 +16,21 @@ struct OnboardingFlow: View {
     var body: some View {
         NavigationStack(path: $path) {
             GoogleSignInView {
-                path.append(.openAIKey)
+                path.append(.llmSource)
             }
             .navigationDestination(for: OnboardingRoute.self) { route in
                 switch route {
+                case .llmSource:
+                    LLMSourceSelection { source in
+                        switch source {
+                        case .openai:
+                            path.append(.openAIKey)
+                        case .claude:
+                            path.append(.claudeAuth)
+                        case .fog, .local:
+                            path.append(.openAIKey)
+                        }
+                    }
                 case .openAIKey:
                     OpenAIAPIKey {
                         path.append(.openAIModel)
@@ -31,6 +42,10 @@ struct OnboardingFlow: View {
                         } else {
                             completedOnboardingFlow = true
                         }
+                    }
+                case .claudeAuth:
+                    ClaudeAuthView {
+                        path.append(.claudeModel)
                     }
                 case .claudeModel:
                     ClaudeModelSelection {

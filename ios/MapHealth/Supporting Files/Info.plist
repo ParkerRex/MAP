@@ -16,6 +16,10 @@
 			</array>
 		</dict>
 	</array>
+	<key>NSHealthShareUsageDescription</key>
+	<string>Map needs access to your Apple Health data to sync metrics and power health insights.</string>
+	<key>NSHealthUpdateUsageDescription</key>
+	<string>Map may write wellness insights back to Apple Health if you enable it.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

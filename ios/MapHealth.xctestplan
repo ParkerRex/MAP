@@ -23,7 +23,7 @@
         "enabled" : false
       },
       {
-        "argument" : "--resetSecureStorage",
+        "argument" : "--resetKeychainStorage",
         "enabled" : false
       }
     ],

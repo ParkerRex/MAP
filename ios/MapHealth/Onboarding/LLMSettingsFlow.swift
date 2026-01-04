@@ -6,8 +6,15 @@ struct LLMSettingsFlow: View {
 
     var body: some View {
         NavigationStack(path: $path) {
-            OpenAIAPIKey {
-                path.append(.openAIModel)
+            LLMSourceSelection { source in
+                switch source {
+                case .openai:
+                    path.append(.openAIKey)
+                case .claude:
+                    path.append(.claudeAuth)
+                case .fog, .local:
+                    path.append(.openAIKey)
+                }
             }
             .navigationTitle("LLM_SETTINGS_TITLE")
             .navigationBarTitleDisplayMode(.inline)
@@ -21,8 +28,20 @@ struct LLMSettingsFlow: View {
             }
             .navigationDestination(for: OnboardingRoute.self) { route in
                 switch route {
+                case .openAIKey:
+                    OpenAIAPIKey {
+                        path.append(.openAIModel)
+                    }
                 case .openAIModel:
                     OpenAIModelSelection {
+                        dismiss()
+                    }
+                case .claudeAuth:
+                    ClaudeAuthView {
+                        path.append(.claudeModel)
+                    }
+                case .claudeModel:
+                    ClaudeModelSelection {
                         dismiss()
                     }
                 default:

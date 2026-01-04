@@ -1,157 +1,74 @@
-# Map Health iOS
+# Map iOS
 
-Native iOS app for syncing Apple Health data to the Map backend.
+This is the iOS client for the Map backend (app.map.ai). It is not a standalone health app.
 
----
+## Reality check
 
-## ⚠️ REQUIRED: Complete Xcode Project Migration
+- No backend, no app. You need a live Map API session.
+- HealthKit requires a physical iPhone.
+- Chat requires a user-provided OpenAI key.
 
-> **The iOS project has been migrated to Swift Package Manager structure.**
-> You must complete the following steps in Xcode before the app will build.
-
-### Manual Steps Required
-
-1. **Open `MapHealth.xcodeproj` in Xcode**
-
-2. **Remove missing file references** (they'll appear red)
-   - Delete all red file references from the project navigator
-   - These are the old file locations that no longer exist
-
-3. **Add new source files to MapHealth target**
-   - Right-click MapHealth target → Add Files to "MapHealth"
-   - Navigate to `Sources/MapHealthApp/`
-   - Select all files and folders
-   - Ensure "Add to targets: MapHealth" is checked
-
-4. **Add MapHealthCore as a local package dependency**
-   - File → Add Package Dependencies
-   - Click "Add Local..."
-   - Select the `ios/` folder (contains Package.swift)
-   - Add `MapHealthCore` to the MapHealth target
-
-5. **Verify Info.plist and Entitlements**
-   - Build Settings → Info.plist File: `MapHealth/Supporting Files/Info.plist`
-   - Build Settings → Code Signing Entitlements: `MapHealth/Supporting Files/MapHealth.entitlements`
-
-6. **Build and run** to verify everything works
-
----
-
-## Project Structure (SPM)
+## Project structure
 
 ```
 ios/
-├── Package.swift                    # SPM manifest
-├── Sources/
-│   ├── MapHealthCore/              # Pure Swift library (testable)
-│   │   ├── Models/                 # HealthData, LLMSource
-│   │   ├── Services/               # MapAPIClient, BackgroundSync
-│   │   ├── HealthKit/              # HealthDataFetcher, Interpreter
-│   │   ├── Helpers/                # Extensions
-│   │   └── SharedContext/          # StorageKeys, FeatureFlags
-│   └── MapHealthApp/               # SwiftUI app shell
-│       ├── Views/                  # HealthChatView, SettingsView
-│       ├── Onboarding/             # Full onboarding flow
-│       └── Resources/              # Localizable.xcstrings
-├── Tests/
-│   └── MapHealthCoreTests/         # Unit tests
-├── MapHealth/
-│   └── Supporting Files/           # Info.plist, entitlements
-├── MapHealth.xcodeproj/            # Xcode project (for device builds)
-├── MapHealthUITests/               # UI tests
-└── scripts/
-    └── deploy.sh                   # CLI device deployment
+├── Sources/MapHealthCore/         # SPM library (models, services, HealthKit)
+├── MapHealth/                     # SwiftUI app target (Xcode)
+├── MapHealth.xcodeproj            # Device builds + signing
+├── Tests/MapHealthCoreTests/      # Swift Testing (SPM)
+├── MapHealthTests/                # Xcode unit tests
+├── MapHealthUITests/              # Xcode UI tests
+└── scripts/deploy.sh              # Device deployment helper
 ```
 
-## Features
+## What the app does
 
-- **Full HealthKit Integration** - Pulls 25+ health metrics from Apple Health
-- **Background Sync** - Automatically syncs data when new health data arrives
-- **AI Chat** - Chat with an LLM about your health data (OpenAI/Local Llama/Fog)
-- **Sleep Tracking** - Full sleep stage analysis (Core, Deep, REM, Awake)
-- **Heart & Recovery** - HRV, resting HR, VO2 Max, respiratory rate
-- **Activity** - Steps, distance, exercise time, stand time, flights climbed
-- **Body Metrics** - Weight, body fat %, lean mass
+- Google OAuth sign-in and token storage in Keychain.
+- Apple Health sync to Map backend.
+- Tasks + calendar CRUD via Map API.
+- Chat UI that calls OpenAI directly or Claude via the Map backend.
 
-## Requirements
+## Backend endpoints (used by iOS)
 
-- Xcode 16.2+
-- iOS 17.0+
-- Physical device (HealthKit requires real device, not simulator)
+- `/api/auth/google?platform=ios`
+- `/api/auth/me`
+- `/api/health/apple-health/sync`
+- `/api/health/apple-health/status`
+- `/api/tasks`, `/api/tags`
+- `/api/calendar/calendars`, `/api/calendar/events`, `/api/calendar/colors`, `/api/calendar/sync`
 
-## CLI Commands
+Base URLs are hardcoded in `ios/MapHealth/AppConfig.swift`:
+
+- DEBUG: `https://mapyourlife.org`
+- Release: `https://app.map.ai`
+
+## Build + test (CLI)
 
 ```bash
-# Verify package structure
-swift package describe
+cd ios
 
-# Build MapHealthCore for simulator
-xcodebuild build -scheme MapHealthCore -sdk iphonesimulator \
+# Find scheme names
+xcodebuild -list -project MapHealth.xcodeproj
+
+# Build app (simulator)
+xcodebuild build \
+  -project MapHealth.xcodeproj \
+  -scheme <APP_SCHEME> \
+  -sdk iphonesimulator \
   -destination "platform=iOS Simulator,name=iPhone 15"
 
-# Build full app for simulator
-xcodebuild build -scheme MapHealth -sdk iphonesimulator \
-  -destination "platform=iOS Simulator,name=iPhone 15"
+# Core tests
+swift test
 
-# Run unit tests
-xcodebuild test -scheme MapHealthCore -sdk iphonesimulator \
+# UI tests
+xcodebuild test \
+  -project MapHealth.xcodeproj \
+  -scheme <APP_SCHEME> \
+  -sdk iphonesimulator \
   -destination "platform=iOS Simulator,name=iPhone 15" \
-  CODE_SIGNING_ALLOWED=NO
-
-# Deploy to physical device
-./scripts/deploy.sh
+  -only-testing:MapHealthUITests
 ```
 
-## Data Types Collected
+## Docs
 
-### Activity
-- Step count
-- Distance (walking/running, cycling)
-- Active/Basal energy burned
-- Exercise time
-- Stand time
-- Flights climbed
-
-### Heart & Recovery
-- Heart rate (resting, walking average)
-- HRV (SDNN)
-- VO2 Max
-- Oxygen saturation (SpO2)
-- Respiratory rate
-
-### Sleep (8 Sleep compatible)
-- Total sleep duration
-- Sleep stages (Core, Deep, REM, Awake)
-- Time in bed
-
-### Body
-- Weight
-- Body fat percentage
-- Lean body mass
-
-## Backend API
-
-The app syncs to these endpoints:
-
-- `POST /api/health/apple-health/sync` - Upload health data
-- `GET /api/health/apple-health/status` - Check connection status
-
-## Dependencies
-
-- SwiftUI
-- HealthKit
-- BackgroundTasks
-
-## Documentation
-
-See [docs/ios/](../docs/ios/) for detailed documentation:
-
-- [Architecture](../docs/ios/architecture.md) - Module structure and data flow
-- [CLI Development](../docs/ios/cli-development.md) - Building without Xcode IDE
-- [Device Deployment](../docs/ios/device-deployment.md) - Physical iPhone deployment
-- [HealthKit Integration](../docs/ios/healthkit.md) - Health data fetching
-- [LLM Integration](../docs/ios/llm.md) - AI chat configuration
-
-## License
-
-MIT
+See `docs/ios/` for architecture, HealthKit, LLM, testing, and deployment.

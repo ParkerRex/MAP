@@ -7,8 +7,13 @@ public class ClaudeAPIClient {
     private let baseURL: URL
     private let session: URLSession
 
-    public init(baseURL: URL = URL(string: "https://app.map.ai")!) {
-        self.baseURL = baseURL
+    public init(baseURL: URL? = nil) {
+        #if DEBUG
+        let defaultBaseURL = URL(string: "https://mapyourlife.org")!
+        #else
+        let defaultBaseURL = URL(string: "https://app.map.ai")!
+        #endif
+        self.baseURL = baseURL ?? defaultBaseURL
         self.session = URLSession.shared
     }
 
@@ -20,6 +25,7 @@ public class ClaudeAPIClient {
 
         var request = URLRequest(url: endpoint)
         request.httpMethod = "GET"
+        applyAuthHeader(to: &request)
 
         let (data, response) = try await session.data(for: request)
 
@@ -51,6 +57,7 @@ public class ClaudeAPIClient {
         var request = URLRequest(url: endpoint)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        applyAuthHeader(to: &request)
 
         let body = ClaudeChatRequest(
             messages: messages,
@@ -91,11 +98,12 @@ public class ClaudeAPIClient {
         AsyncThrowingStream { continuation in
             Task {
                 do {
-                    let endpoint = baseURL.appendingPathComponent("/api/claude/chat")
+        let endpoint = baseURL.appendingPathComponent("/api/claude/chat")
 
                     var request = URLRequest(url: endpoint)
                     request.httpMethod = "POST"
                     request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+                    applyAuthHeader(to: &request)
 
                     let body = ClaudeChatRequest(
                         messages: messages,
@@ -155,6 +163,7 @@ public class ClaudeAPIClient {
 
         var request = URLRequest(url: endpoint)
         request.httpMethod = "POST"
+        applyAuthHeader(to: &request)
 
         let (data, response) = try await session.data(for: request)
 
@@ -168,6 +177,14 @@ public class ClaudeAPIClient {
 
         let result = try JSONDecoder().decode(DisconnectResponse.self, from: data)
         return result.success
+    }
+
+    // MARK: - Auth
+
+    private func applyAuthHeader(to request: inout URLRequest) {
+        if let token = KeychainService.shared.getSessionToken() {
+            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        }
     }
 }
 

@@ -6,6 +6,8 @@ import SwiftUI
 struct ChatView: View {
     @AppStorage(StorageKeys.onboardingFlowComplete) var completedOnboardingFlow = false
     @AppStorage(StorageKeys.openAIModel) private var openAIModel = StorageKeys.Defaults.openAIModel
+    @AppStorage(StorageKeys.claudeModel) private var claudeModel = StorageKeys.Defaults.claudeModel
+    @AppStorage(StorageKeys.llmSource) private var llmSourceRaw = StorageKeys.Defaults.llmSource
 
     @EnvironmentObject private var healthDataInterpreter: HealthDataInterpreter
     @Environment(\.webAuthenticationSession) private var webAuthSession
@@ -18,6 +20,11 @@ struct ChatView: View {
     private static let openAIModels: [ModelOption] = [
         ModelOption(id: "gpt-4o", name: "GPT-4o"),
         ModelOption(id: "gpt-4o-mini", name: "GPT-4o mini")
+    ]
+    private static let claudeModels: [ModelOption] = [
+        ModelOption(id: "claude-opus-4-20250514", name: "Opus (Most Capable)"),
+        ModelOption(id: "claude-sonnet-4-20250514", name: "Sonnet (Balanced)"),
+        ModelOption(id: "claude-3-5-haiku-20241022", name: "Haiku (Fast & Cheap)")
     ]
 
     var body: some View {
@@ -61,8 +68,15 @@ struct ChatView: View {
         } message: {
             Text(errorMessage)
         }
+        .onChange(of: llmSourceRaw) { _, _ in
+            modelSettingRefreshId = UUID()
+        }
         .task(id: modelSettingRefreshId) {
-            await healthDataInterpreter.prepareSession(model: openAIModel)
+            await healthDataInterpreter.prepareSession(
+                source: llmSource,
+                openAIModel: openAIModel,
+                claudeModel: claudeModel
+            )
         }
         .task {
             MapAPIClient.shared.onAuthenticationRequired = {
@@ -86,14 +100,21 @@ struct ChatView: View {
 
     private var modelSelector: some View {
         Menu {
-            ForEach(Self.openAIModels) { model in
+            ForEach(modelsForSource) { model in
                 Button {
-                    openAIModel = model.id
+                    switch llmSource {
+                    case .openai:
+                        openAIModel = model.id
+                    case .claude:
+                        claudeModel = model.id
+                    case .fog, .local:
+                        break
+                    }
                     modelSettingRefreshId = UUID()
                 } label: {
                     HStack {
                         Text(model.name)
-                        if openAIModel == model.id {
+                        if currentModelId == model.id {
                             Spacer()
                             Image(systemName: "checkmark")
                         }
@@ -113,7 +134,33 @@ struct ChatView: View {
     }
 
     private var currentModelName: String {
-        Self.openAIModels.first { $0.id == openAIModel }?.name ?? openAIModel
+        modelsForSource.first { $0.id == currentModelId }?.name ?? currentModelId
+    }
+
+    private var currentModelId: String {
+        switch llmSource {
+        case .openai:
+            return openAIModel
+        case .claude:
+            return claudeModel
+        case .fog, .local:
+            return openAIModel
+        }
+    }
+
+    private var modelsForSource: [ModelOption] {
+        switch llmSource {
+        case .openai:
+            return Self.openAIModels
+        case .claude:
+            return Self.claudeModels
+        case .fog, .local:
+            return Self.openAIModels
+        }
+    }
+
+    private var llmSource: LLMSource {
+        LLMSource(rawValue: llmSourceRaw) ?? .openai
     }
 
     @MainActor

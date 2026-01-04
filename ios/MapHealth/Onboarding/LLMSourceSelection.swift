@@ -2,7 +2,7 @@ import MapHealthCore
 import SwiftUI
 
 struct LLMSourceSelection: View {
-    @State private var llmSource: LLMSource = .openai
+    @AppStorage(StorageKeys.llmSource) private var llmSourceRaw = StorageKeys.Defaults.llmSource
     let onContinue: (LLMSource) -> Void
 
     var body: some View {
@@ -20,10 +20,10 @@ struct LLMSourceSelection: View {
     }
 
     private var sourceSelector: some View {
-        Picker("LLM_SOURCE_PICKER_LABEL", selection: $llmSource) {
-            ForEach(LLMSource.allCases) { source in
+        Picker("LLM_SOURCE_PICKER_LABEL", selection: $llmSourceRaw) {
+            ForEach(LLMSource.chatSources) { source in
                 Text(source.localizedDescription)
-                    .tag(source)
+                    .tag(source.rawValue)
             }
         }
         .pickerStyle(.wheel)
@@ -31,6 +31,10 @@ struct LLMSourceSelection: View {
         .padding(16)
         .mapHealthGlassSurface(cornerRadius: 20, tint: .accentColor.opacity(0.08))
         .accessibilityIdentifier("llmSourcePicker")
+    }
+
+    private var llmSource: LLMSource {
+        LLMSource(rawValue: llmSourceRaw) ?? .openai
     }
 }
 

@@ -90,8 +90,8 @@
             argument = "--showOnboarding"
             isEnabled = "NO">
          </CommandLineArgument>
-         <CommandLineArgument
-            argument = "--resetSecureStorage"
+       <CommandLineArgument
+            argument = "--resetKeychainStorage"
             isEnabled = "NO">
          </CommandLineArgument>
       </CommandLineArguments>

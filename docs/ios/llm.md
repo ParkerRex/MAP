@@ -1,30 +1,40 @@
 # LLM Integration
 
-MapHealth uses a lightweight OpenAI client to generate responses based on recent HealthKit data.
+This app can chat through OpenAI (device-side) or Claude (via Map backend).
 
-## Overview
+## OpenAI (device-side)
 
-- OpenAI-only (no local/fog providers).
-- API key stored in Keychain via `KeychainService`.
-- Chat UI is custom SwiftUI with Liquid Glass styling.
+- Client: `OpenAIClient` (`ios/Sources/MapHealthCore/Services/OpenAIClient.swift`)
+- Endpoint: `https://api.openai.com/v1/chat/completions`
+- Key storage: Keychain (`KeychainService.saveOpenAIKey`)
+- Models exposed in UI: `gpt-4o`, `gpt-4o-mini`
+- Model preference stored in `AppStorage` under `StorageKeys.openAIModel`
 
-## Key Components
+Chat flow is owned by `HealthDataInterpreter`:
 
-- `OpenAIClient` (`ios/Sources/MapHealthCore/Services/OpenAIClient.swift`)
-  - Sends `chat/completions` requests to OpenAI.
-- `HealthDataInterpreter` (`ios/Sources/MapHealthCore/HealthKit/HealthDataInterpreter.swift`)
-  - Generates system prompt from HealthKit data.
-  - Manages chat messages and calls `OpenAIClient`.
+- Builds a system prompt from the last 14 days of HealthKit data.
+- Sends messages to OpenAI with that system prompt.
+- No streaming, no function calling.
 
-## API Key Storage
+If the OpenAI key is missing, chat fails immediately with `OpenAIClientError.missingAPIKey`.
 
-Use `KeychainService` to persist the OpenAI key:
+## Claude (backend integration)
 
-```swift
-try KeychainService.shared.saveOpenAIKey("sk-...")
-```
+Claude calls go through the Map backend, not directly from the device. The app sends the user session token as `Authorization: Bearer <token>`.
 
-## Model Selection
+- Client: `ClaudeAPIClient` (`ios/Sources/MapHealthCore/Services/ClaudeAPIClient.swift`)
+- Base URL: `https://app.map.ai`
+- Endpoints: `/api/claude/status`, `/api/claude/chat`, `/api/claude/disconnect`
+- API key is uploaded to the backend via `MapAPIClient.setClaudeApiKey` (`/api/claude/key`)
 
-The selected model is stored in `AppStorage` under `StorageKeys.openAIModel`.
+Claude is wired into chat. Select Claude in LLM settings, then pick a Claude model.
 
+## Other LLM sources
+
+`LLMSource` defines `openai`, `claude`, `fog`, `local`. Only OpenAI and Claude are wired into chat.
+
+## Storage keys
+
+- `StorageKeys.openAIModel` (default `gpt-4o`)
+- `StorageKeys.claudeModel` (default `claude-sonnet-4-20250514`)
+- `StorageKeys.llmSource` (default `openai`)

@@ -6,6 +6,8 @@ import SwiftUI
 struct HealthChatView: View {
     @AppStorage(StorageKeys.onboardingFlowComplete) var completedOnboardingFlow = false
     @AppStorage(StorageKeys.openAIModel) private var openAIModel = StorageKeys.Defaults.openAIModel
+    @AppStorage(StorageKeys.claudeModel) private var claudeModel = StorageKeys.Defaults.claudeModel
+    @AppStorage(StorageKeys.llmSource) private var llmSourceRaw = StorageKeys.Defaults.llmSource
 
     @EnvironmentObject private var healthDataInterpreter: HealthDataInterpreter
     @Environment(\.webAuthenticationSession) private var webAuthSession
@@ -61,8 +63,15 @@ struct HealthChatView: View {
         } message: {
             Text(self.errorMessage)
         }
+        .onChange(of: llmSourceRaw) { _, _ in
+            modelSettingRefreshId = UUID()
+        }
         .task(id: self.modelSettingRefreshId) {
-            await healthDataInterpreter.prepareSession(model: openAIModel)
+            await healthDataInterpreter.prepareSession(
+                source: llmSource,
+                openAIModel: openAIModel,
+                claudeModel: claudeModel
+            )
         }
         .task {
             MapAPIClient.shared.onAuthenticationRequired = {
@@ -139,5 +148,9 @@ struct HealthChatView: View {
             )
             return false
         }
+    }
+
+    private var llmSource: LLMSource {
+        LLMSource(rawValue: llmSourceRaw) ?? .openai
     }
 }

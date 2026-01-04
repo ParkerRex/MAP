@@ -4,6 +4,7 @@ public enum StorageKeys {
     public enum Defaults {
         public static let openAIModel = "gpt-4o"
         public static let claudeModel = "claude-sonnet-4-20250514"
+        public static let llmSource = "openai"
     }
 
     // MARK: - Onboarding
@@ -13,4 +14,6 @@ public enum StorageKeys {
     public static let openAIModel = "openAI.model"
     /// A Claude model string indicating the model to use
     public static let claudeModel = "claude.model"
+    /// Selected LLM source (openai, claude, fog, local)
+    public static let llmSource = "llm.source"
 }
