@@ -154,12 +154,27 @@ struct CalendarTimelineView: View {
     }
 
     private var hourStripes: some View {
+        let isToday = calendar.isDateInToday(selectedDate)
+        let currentHour = calendar.component(.hour, from: Date())
+
         VStack(spacing: 0) {
             ForEach(0..<24, id: \.self) { hour in
-                Rectangle()
-                    .fill(hour.isMultiple(of: 2) ? Color.secondary.opacity(0.04) : Color.clear)
-                    .frame(height: hourHeight)
-                    .padding(.leading, timelineLeadingInset - 4)
+                ZStack(alignment: .top) {
+                    Rectangle()
+                        .fill(hour.isMultiple(of: 2) ? Color.secondary.opacity(0.04) : Color.clear)
+
+                    Rectangle()
+                        .fill(Color.secondary.opacity(0.12))
+                        .frame(height: 1)
+                        .offset(y: hourHeight / 2)
+
+                    if isToday && hour == currentHour {
+                        Rectangle()
+                            .fill(Color.accentColor.opacity(0.06))
+                    }
+                }
+                .frame(height: hourHeight)
+                .padding(.leading, timelineLeadingInset - 4)
             }
         }
     }
