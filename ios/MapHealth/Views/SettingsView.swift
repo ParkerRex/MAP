@@ -61,7 +61,7 @@ struct SettingsView: View {
 
     private var settingsList: some View {
         ScrollView {
-            LazyVStack(spacing: 24) {
+            VStack(spacing: 24) {
                 self.accountSection
                 self.changeModelSettings
                 self.chatSettings
@@ -190,6 +190,7 @@ struct SettingsView: View {
         }
     }
 
+    @MainActor
     private func loadProfile() async {
         guard MapAPIClient.shared.isAuthenticated else { return }
 

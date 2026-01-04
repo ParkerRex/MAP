@@ -268,9 +268,14 @@ struct HealthView: View {
 
     private func dataSourceBadge(icon: String, label: String, connected: Bool, color: Color) -> some View {
         HStack(spacing: 4) {
-            Image(systemName: icon).font(.caption2)
-            Text(label).font(.caption2)
-            Circle().fill(connected ? Color.green : Color.orange).frame(width: 6, height: 6)
+            Image(systemName: icon)
+                .font(.caption2)
+                .foregroundStyle(color)
+            Text(label)
+                .font(.caption2)
+            Circle()
+                .fill(connected ? color : Color.orange)
+                .frame(width: 6, height: 6)
         }
         .foregroundStyle(.secondary)
     }

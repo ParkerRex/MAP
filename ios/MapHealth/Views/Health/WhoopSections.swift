@@ -110,15 +110,23 @@ struct StrainCard: View {
 
 struct WhoopSleepQualitySection: View {
     let sleep: WhoopSleep?
+    let showsHeader: Bool
+
+    init(sleep: WhoopSleep?, showsHeader: Bool = true) {
+        self.sleep = sleep
+        self.showsHeader = showsHeader
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                Image(systemName: "moon.stars.fill")
-                    .foregroundStyle(.indigo)
-                Text("Sleep Quality")
-                    .font(.headline)
-                    .foregroundStyle(.secondary)
+            if showsHeader {
+                HStack {
+                    Image(systemName: "moon.stars.fill")
+                        .foregroundStyle(.indigo)
+                    Text("Sleep Quality")
+                        .font(.headline)
+                        .foregroundStyle(.secondary)
+                }
             }
 
             LazyVGrid(
@@ -194,15 +202,23 @@ struct SleepQualityMetric: View {
 
 struct WhoopWorkoutsSection: View {
     let workouts: [WhoopWorkout]
+    let showsHeader: Bool
+
+    init(workouts: [WhoopWorkout], showsHeader: Bool = true) {
+        self.workouts = workouts
+        self.showsHeader = showsHeader
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                Image(systemName: "figure.run")
-                    .foregroundStyle(.orange)
-                Text("Recent Workouts")
-                    .font(.headline)
-                    .foregroundStyle(.secondary)
+            if showsHeader {
+                HStack {
+                    Image(systemName: "figure.run")
+                        .foregroundStyle(.orange)
+                    Text("Recent Workouts")
+                        .font(.headline)
+                        .foregroundStyle(.secondary)
+                }
             }
 
             ForEach(workouts.prefix(3)) { workout in
