@@ -267,12 +267,14 @@ struct HealthView: View {
 
     // MARK: - Data Loading
 
+    @MainActor
     private func loadAllData() async {
         async let healthTask: () = healthService.refresh()
         async let whoopTask: () = loadWhoopData()
         _ = await (healthTask, whoopTask)
     }
 
+    @MainActor
     private func requestPermission() async {
         do {
             try await healthKitManager.requestAuthorization()
@@ -282,6 +284,7 @@ struct HealthView: View {
         }
     }
 
+    @MainActor
     private func loadWhoopData() async {
         guard apiClient.isAuthenticated else { return }
 

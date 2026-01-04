@@ -1,3 +1,4 @@
+import CoreLocation
 import MapHealthCore
 import SwiftUI
 
@@ -11,6 +12,9 @@ struct CalendarView: View {
     @State private var eventToDelete: CalendarEvent?
     @State private var showingDeleteConfirmation = false
     @GestureState private var dayDragOffset: CGFloat = 0
+    @State private var hasLoadedInitialData = false
+    @State private var weather: WeatherData?
+    @StateObject private var locationManager = LocationManager()
 
     private let feedbackGenerator = UIImpactFeedbackGenerator(style: .medium)
     private let calendar = Calendar.current
@@ -97,16 +101,11 @@ struct CalendarView: View {
         }
         .task {
             await loadData()
+            hasLoadedInitialData = true
         }
-        .onChange(of: selectedDate) { _, _ in
-            Task {
-                await loadEvents()
-            }
-        }
-        .onChange(of: viewMode) { _, _ in
-            Task {
-                await loadEvents()
-            }
+        .task(id: eventsLoadToken) {
+            guard hasLoadedInitialData else { return }
+            await loadEvents()
         }
     }
 
@@ -302,10 +301,20 @@ struct CalendarView: View {
         }
     }
 
+    @MainActor
     private func loadData() async {
         await calendarService.fetchCalendars()
         await calendarService.fetchColors()
         await loadEvents()
+    }
+
+    private var eventsLoadToken: EventsLoadToken {
+        EventsLoadToken(date: selectedDate, viewMode: viewMode)
+    }
+
+    private struct EventsLoadToken: Hashable {
+        let date: Date
+        let viewMode: CalendarViewMode
     }
 
     private func loadEvents() async {
