@@ -114,14 +114,21 @@ struct CalendarTimelineView: View {
                     .font(.subheadline.weight(.semibold))
                     .foregroundStyle(.secondary)
 
-                if timedEvents.isEmpty {
-                    Text("Tap the grid to add a time")
-                        .font(.caption2)
-                        .foregroundStyle(.tertiary)
-                }
+                Text(timelineSubtitle)
+                    .font(.caption2)
+                    .foregroundStyle(.tertiary)
             }
 
             Spacer()
+
+            if let freeSlot = nextAvailableSlot {
+                Text("\(freeSlot)")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.secondary)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 6)
+                    .mapHealthGlassSurface(cornerRadius: 10, tint: .primary.opacity(0.03))
+            }
 
             Button {
                 scrollRequest += 1
@@ -136,6 +143,53 @@ struct CalendarTimelineView: View {
             .buttonStyle(.plain)
         }
         .padding(.horizontal, 4)
+    }
+
+    private var timelineSubtitle: String {
+        if timedEvents.isEmpty {
+            return "Tap the grid to add a time"
+        }
+        let totalMinutes = timedEvents.reduce(0) { partialResult, event in
+            partialResult + Int(eventDuration(event))
+        }
+        let hours = totalMinutes / 60
+        let minutes = totalMinutes % 60
+        if hours == 0 {
+            return "\(minutes)m scheduled"
+        }
+        if minutes == 0 {
+            return "\(hours)h scheduled"
+        }
+        return "\(hours)h \(minutes)m scheduled"
+    }
+
+    private var nextAvailableSlot: String? {
+        guard !timedEvents.isEmpty else { return nil }
+        let now = calendar.isDateInToday(selectedDate) ? Date() : startOfDay(for: selectedDate)
+        let sorted = timedEvents.sorted { ($0.startDate ?? .distantPast) < ($1.startDate ?? .distantPast) }
+
+        var cursor = now
+        for event in sorted {
+            guard let start = event.startDate else { continue }
+            let end = eventEnd(event, fallbackStart: start)
+            if cursor < start {
+                let gapMinutes = Int(start.timeIntervalSince(cursor) / 60)
+                if gapMinutes >= 30 {
+                    return "Next free: \(cursor.formatted(.dateTime.hour().minute()))"
+                }
+            }
+            if end > cursor {
+                cursor = end
+            }
+        }
+
+        let endOfDay = calendar.date(bySettingHour: 23, minute: 59, second: 0, of: selectedDate) ?? selectedDate
+        let tailGap = Int(endOfDay.timeIntervalSince(cursor) / 60)
+        if tailGap >= 30 {
+            return "Next free: \(cursor.formatted(.dateTime.hour().minute()))"
+        }
+
+        return nil
     }
 
     private var timelineTapLayer: some View {
@@ -341,6 +395,10 @@ struct CalendarTimelineView: View {
         return calendar.date(from: components) ?? selectedDate
     }
 
+    private func startOfDay(for date: Date) -> Date {
+        calendar.startOfDay(for: date)
+    }
+
     private var timedEventLayout: [TimelineLayoutEvent] {
         buildTimelineLayout(for: timedEvents)
     }
@@ -455,6 +513,7 @@ struct TimelineEventCard: View {
     let onDelete: () -> Void
 
     private let feedbackGenerator = UIImpactFeedbackGenerator(style: .light)
+    private let calendar = Calendar.current
 
     var body: some View {
         Button {
@@ -467,16 +526,27 @@ struct TimelineEventCard: View {
                     .fill(eventColor)
                     .frame(width: 4)
 
-                VStack(alignment: .leading, spacing: 2) {
+                VStack(alignment: .leading, spacing: 4) {
                     Text(event.summary ?? "Untitled Event")
                         .font(isCompact ? .subheadline.weight(.medium) : .footnote.weight(.semibold))
                         .foregroundStyle(.primary)
                         .lineLimit(isCompact ? 1 : 2)
 
                     if !isCompact {
-                        Text(event.timeString)
-                            .font(.caption2)
-                            .foregroundStyle(.secondary)
+                        HStack(spacing: 6) {
+                            Text(event.timeString)
+                                .font(.caption2)
+                                .foregroundStyle(.secondary)
+                                .padding(.horizontal, 6)
+                                .padding(.vertical, 3)
+                                .background(.ultraThinMaterial, in: Capsule())
+
+                            if let duration = durationLabel {
+                                Text(duration)
+                                    .font(.caption2)
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
                     }
 
                     if let location = event.location, !location.isEmpty, !isCompact {
@@ -539,6 +609,20 @@ struct TimelineEventCard: View {
             return Color(hex: colors.background) ?? .accentColor
         }
         return googleCalendarColor(for: event.colorId)
+    }
+
+    private var durationLabel: String? {
+        guard let start = event.startDate, let end = event.endDate else { return nil }
+        let minutes = max(0, Int(end.timeIntervalSince(start) / 60))
+        if minutes < 60 {
+            return "\(minutes)m"
+        }
+        let hours = minutes / 60
+        let remainder = minutes % 60
+        if remainder == 0 {
+            return "\(hours)h"
+        }
+        return "\(hours)h \(remainder)m"
     }
 
     private func openInMaps(_ location: String) {

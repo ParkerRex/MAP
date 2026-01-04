@@ -313,16 +313,25 @@ extension TodosView {
                 .labelStyle(.iconOnly)
 
                 Menu {
-                    Button("No Project") {
-                        bulkAssignProject(nil)
-                    }
-                    let tags = tasksService.tags.sorted {
-                        $0.title.localizedCaseInsensitiveCompare($1.title) == .orderedAscending
-                    }
-                    ForEach(tags) { tag in
-                        Button(tag.title) {
-                            bulkAssignProject(tag.id)
+                    Section("Move to Project") {
+                        Button("No Project") {
+                            bulkAssignProject(nil)
                         }
+                        let tags = tasksService.tags.sorted {
+                            $0.title.localizedCaseInsensitiveCompare($1.title) == .orderedAscending
+                        }
+                        ForEach(tags) { tag in
+                            Button(tag.title) {
+                                bulkAssignProject(tag.id)
+                            }
+                        }
+                    }
+
+                    Section("Set Due Date") {
+                        Button("Today") { bulkSetDueDate(.today) }
+                        Button("Tomorrow") { bulkSetDueDate(.tomorrow) }
+                        Button("Next Week") { bulkSetDueDate(.nextWeek) }
+                        Button("Clear") { bulkSetDueDate(.clear) }
                     }
                 } label: {
                     Image(systemName: "folder")
@@ -733,6 +742,41 @@ extension TodosView {
                 try? await tasksService.updateTask(
                     task,
                     tags: tagId.map { [$0] } ?? []
+                )
+            }
+            await MainActor.run { clearSelection() }
+        }
+    }
+
+    private enum BulkDueDate {
+        case today
+        case tomorrow
+        case nextWeek
+        case clear
+    }
+
+    private func bulkSetDueDate(_ choice: BulkDueDate) {
+        let targetDate: Date?
+        switch choice {
+        case .today:
+            targetDate = Calendar.current.startOfDay(for: Date())
+        case .tomorrow:
+            targetDate = Calendar.current.date(
+                byAdding: .day,
+                value: 1,
+                to: Calendar.current.startOfDay(for: Date())
+            )
+        case .nextWeek:
+            targetDate = DateHelpers.nextMonday()
+        case .clear:
+            targetDate = nil
+        }
+
+        Task {
+            for task in selectedTasks {
+                try? await tasksService.updateTask(
+                    task,
+                    dueAt: targetDate
                 )
             }
             await MainActor.run { clearSelection() }
