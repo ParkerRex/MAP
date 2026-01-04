@@ -68,7 +68,7 @@ struct HealthView: View {
     }
 
     private var healthBody: some View {
-        LazyVStack(spacing: 18) {
+        LazyVStack(spacing: 16) {
             headerSection
 
             if healthService.needsPermission {
@@ -172,11 +172,11 @@ struct HealthView: View {
     // MARK: - Header Section
 
     private var headerSection: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: 6) {
             Text("Health")
                 .font(.system(size: 28, weight: .bold, design: .rounded))
 
-            HStack(spacing: 12) {
+            HStack(spacing: 10) {
                 Text(Date(), format: .dateTime.weekday(.wide).month(.abbreviated).day())
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
@@ -190,15 +190,15 @@ struct HealthView: View {
 
             dataSourcesRow
         }
-        .padding(.bottom, 4)
+        .padding(.bottom, 2)
     }
 
     private func updatedBadge(_ timestamp: Date) -> some View {
         Text("Updated \(timestamp, style: .relative) ago")
             .font(.caption2)
             .foregroundStyle(.tertiary)
-            .padding(.horizontal, 10)
-            .padding(.vertical, 4)
+            .padding(.horizontal, 8)
+            .padding(.vertical, 3)
             .background(Color.primary.opacity(0.06), in: Capsule())
     }
 
@@ -244,53 +244,64 @@ struct HealthView: View {
     // MARK: - Data Sources Row
 
     private var dataSourcesRow: some View {
-        HStack(spacing: 12) {
-            dataSourceBadge(icon: "heart.text.square", label: "Apple Health", connected: !healthService.needsPermission, color: .red)
-            if apiClient.isAuthenticated {
-                dataSourceBadge(icon: "bolt.heart", label: "WHOOP", connected: whoopConnected, color: .green)
+        ViewThatFits(in: .horizontal) {
+            HStack(spacing: 12) {
+                dataSourceBadge(icon: "heart.text.square", label: "Apple Health", connected: !healthService.needsPermission, color: .red)
+                if apiClient.isAuthenticated {
+                    dataSourceBadge(icon: "bolt.heart", label: "WHOOP", connected: whoopConnected, color: .green)
+                }
+            }
+
+            VStack(alignment: .leading, spacing: 4) {
+                dataSourceBadge(icon: "heart.text.square", label: "Apple Health", connected: !healthService.needsPermission, color: .red)
+                if apiClient.isAuthenticated {
+                    dataSourceBadge(icon: "bolt.heart", label: "WHOOP", connected: whoopConnected, color: .green)
+                }
             }
         }
     }
 
     private func dataSourceBadge(icon: String, label: String, connected: Bool, color: Color) -> some View {
-        HStack(spacing: 4) {
+        HStack(spacing: 6) {
             Image(systemName: icon)
                 .font(.caption2)
                 .foregroundStyle(color)
             Text(label)
                 .font(.caption2)
+                .foregroundStyle(.secondary)
             Circle()
                 .fill(connected ? color : Color.orange)
                 .frame(width: 6, height: 6)
         }
-        .fontWeight(.semibold)
-        .foregroundStyle(.secondary)
-        .padding(.horizontal, 10)
-        .padding(.vertical, 6)
-        .background(Color.primary.opacity(0.04), in: Capsule())
     }
 
     private func sectionHeader(title: String, systemImage: String, footnote: String? = nil) -> some View {
-        HStack(spacing: 8) {
-            Image(systemName: systemImage)
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
-            Text(title)
-                .font(.subheadline.weight(.semibold))
-                .foregroundStyle(.primary)
-
-            if let footnote {
-                Text(footnote)
+        VStack(spacing: 6) {
+            HStack(spacing: 8) {
+                Image(systemName: systemImage)
                     .font(.caption)
                     .foregroundStyle(.secondary)
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 4)
-                    .background(Color.primary.opacity(0.06), in: Capsule())
+                Text(title.uppercased())
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.secondary)
+                    .tracking(0.6)
+
+                if let footnote {
+                    Text(footnote)
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 3)
+                        .background(Color.primary.opacity(0.06), in: Capsule())
+                }
+
+                Spacer()
             }
 
-            Spacer()
+            Divider()
+                .foregroundStyle(.quaternary)
         }
-        .padding(.top, 4)
+        .padding(.top, 2)
     }
 
     private func section<Content: View>(
@@ -299,7 +310,7 @@ struct HealthView: View {
         footnote: String? = nil,
         @ViewBuilder content: () -> Content
     ) -> some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 10) {
             sectionHeader(title: title, systemImage: systemImage, footnote: footnote)
             content()
         }

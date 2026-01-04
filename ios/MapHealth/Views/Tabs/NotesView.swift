@@ -10,6 +10,8 @@ struct NotesView: View {
     @State private var showingNewFolder = false
     @State private var newFolderName = ""
     @AppStorage("notes.pinnedIds") private var pinnedIdsStorage = ""
+    @State private var noteFilter: NoteFilter = .all
+    @State private var searchScope: SearchScope = .all
 
     var body: some View {
         NavigationStack {
@@ -21,6 +23,11 @@ struct NotesView: View {
             .scrollContentBackground(.hidden)
             .scrollDismissesKeyboard(.interactively)
             .searchable(text: $searchText, prompt: "Search notes")
+            .searchScopes($searchScope) {
+                ForEach(SearchScope.allCases, id: \.self) { scope in
+                    Text(scope.title).tag(scope)
+                }
+            }
             .refreshable { await notesService.refresh() }
             .task { await loadNotesIfNeeded() }
             .navigationTitle("Notes")
@@ -56,6 +63,9 @@ struct NotesView: View {
                 Button("Create") { createFolder() }
                     .disabled(newFolderName.trimmed.isEmpty)
                 Button("Cancel", role: .cancel) { newFolderName = "" }
+            }
+            .safeAreaInset(edge: .top) {
+                filterBar
             }
             .safeAreaInset(edge: .bottom) {
                 bottomBar
@@ -118,7 +128,7 @@ extension NotesView {
                 .listRowSeparator(.hidden)
                 .listRowBackground(Color.clear)
             }
-        } else if filteredNotes.isEmpty {
+        } else if visibleNotes.isEmpty {
             Section {
                 emptyState
             }
@@ -152,17 +162,29 @@ extension NotesView {
         guard !query.isEmpty else { return notes }
 
         return notes.filter { note in
-            (note.title ?? "").localizedCaseInsensitiveContains(query) ||
-            (note.content ?? "").localizedCaseInsensitiveContains(query)
+            let titleMatches = (note.title ?? "").localizedCaseInsensitiveContains(query)
+            let contentMatches = (note.content ?? "").localizedCaseInsensitiveContains(query)
+            switch searchScope {
+            case .all:
+                return titleMatches || contentMatches
+            case .title:
+                return titleMatches
+            case .content:
+                return contentMatches
+            }
         }
     }
 
     private var pinnedNotes: [MapNote] {
-        filteredNotes.filter { pinnedIds.contains($0.id) }
+        applyFilter(filteredNotes.filter { pinnedIds.contains($0.id) })
     }
 
     private var unpinnedNotes: [MapNote] {
-        filteredNotes.filter { !pinnedIds.contains($0.id) }
+        applyFilter(filteredNotes.filter { !pinnedIds.contains($0.id) })
+    }
+
+    private var visibleNotes: [MapNote] {
+        applyFilter(filteredNotes)
     }
 
     private var sortedNotes: [MapNote] {
@@ -213,7 +235,8 @@ extension NotesView {
             NoteRow(
                 note: note,
                 folderName: folderName(for: note),
-                showFolder: selectedFolderId == nil
+                showFolder: selectedFolderId == nil,
+                isPinned: pinnedIds.contains(note.id)
             )
         }
         .listRowInsets(EdgeInsets(top: 12, leading: 16, bottom: 12, trailing: 16))
@@ -242,10 +265,10 @@ extension NotesView {
                 .font(.system(size: 48, weight: .light))
                 .foregroundStyle(.yellow.opacity(0.8))
 
-            Text(searchText.trimmed.isEmpty ? "No notes yet" : "No matching notes")
+            Text(emptyStateTitle)
                 .font(.headline)
 
-            Text(searchText.trimmed.isEmpty ? "Tap the pen to start a note" : "Try a different search term")
+            Text(emptyStateSubtitle)
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
 
@@ -287,6 +310,24 @@ extension NotesView {
             return folder.name
         }
         return "All Notes"
+    }
+
+    private var emptyStateTitle: String {
+        if !searchText.trimmed.isEmpty { return "No matching notes" }
+        switch noteFilter {
+        case .all: return "No notes yet"
+        case .pinned: return "No pinned notes"
+        case .recent: return "No recent notes"
+        }
+    }
+
+    private var emptyStateSubtitle: String {
+        if !searchText.trimmed.isEmpty { return "Try a different search term" }
+        switch noteFilter {
+        case .all: return "Tap the pen to start a note"
+        case .pinned: return "Pin notes for quick access"
+        case .recent: return "Notes edited in the last 7 days will appear here"
+        }
     }
 }
 
@@ -399,7 +440,7 @@ extension NotesView {
     }
 
     private var noteCountLabel: String {
-        let count = filteredNotes.count
+        let count = visibleNotes.count
         return count == 1 ? "1 Note" : "\(count) Notes"
     }
 }
@@ -410,13 +451,24 @@ private struct NoteRow: View {
     let note: MapNote
     let folderName: String?
     let showFolder: Bool
+    let isPinned: Bool
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text(noteTitle)
-                .font(.headline)
-                .foregroundStyle(.primary)
-                .lineLimit(1)
+            HStack(spacing: 6) {
+                Text(noteTitle)
+                    .font(.headline)
+                    .foregroundStyle(.primary)
+                    .lineLimit(1)
+
+                if isPinned {
+                    Image(systemName: "pin.fill")
+                        .font(.caption2)
+                        .foregroundStyle(.yellow)
+                }
+
+                Spacer(minLength: 0)
+            }
 
             if !previewText.isEmpty {
                 HStack(alignment: .firstTextBaseline, spacing: 6) {
@@ -760,6 +812,72 @@ private enum SortOrder {
 private enum EditorMode {
     case edit
     case preview
+}
+
+private enum NoteFilter: CaseIterable {
+    case all
+    case pinned
+    case recent
+
+    var title: String {
+        switch self {
+        case .all: "All"
+        case .pinned: "Pinned"
+        case .recent: "Recent"
+        }
+    }
+}
+
+private enum SearchScope: CaseIterable {
+    case all
+    case title
+    case content
+
+    var title: String {
+        switch self {
+        case .all: "All"
+        case .title: "Title"
+        case .content: "Content"
+        }
+    }
+}
+
+private extension NotesView {
+    private var filterBar: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 8) {
+                ForEach(NoteFilter.allCases, id: \.self) { filter in
+                    Button {
+                        noteFilter = filter
+                    } label: {
+                        Text(filter.title)
+                            .font(.subheadline.weight(.semibold))
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 6)
+                            .background(noteFilter == filter ? Color.yellow.opacity(0.25) : Color(.secondarySystemGroupedBackground))
+                            .foregroundStyle(noteFilter == filter ? .primary : .secondary)
+                            .clipShape(Capsule())
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 8)
+        }
+        .background(Color(.systemGroupedBackground))
+    }
+
+    private func applyFilter(_ notes: [MapNote]) -> [MapNote] {
+        switch noteFilter {
+        case .all:
+            return notes
+        case .pinned:
+            return notes.filter { pinnedIds.contains($0.id) }
+        case .recent:
+            let cutoff = Calendar.current.date(byAdding: .day, value: -7, to: Date()) ?? Date()
+            return notes.filter { ($0.updatedAt ?? $0.createdAt) >= cutoff }
+        }
+    }
 }
 
 private struct MarkdownChip: View {
