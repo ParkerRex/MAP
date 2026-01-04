@@ -22,20 +22,17 @@ struct CalendarView: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
-                // Week strip header
+                calendarHUD
+
+                // Week strip
                 CalendarWeekStrip(
                     selectedDate: $selectedDate,
                     events: calendarService.events,
-                    onDateDoubleTap: { _ in showingCreateEvent = true }
+                    onDateDoubleTap: { _ in showingCreateEvent = true },
+                    showsHeader: false
                 )
                 .padding(.horizontal, 20)
-                .padding(.top, 8)
                 .padding(.bottom, 12)
-
-                // View mode picker (compact)
-                viewModePicker
-                    .padding(.horizontal, 20)
-                    .padding(.bottom, 8)
 
                 Divider()
                     .padding(.horizontal, 20)
@@ -45,20 +42,6 @@ struct CalendarView: View {
             }
             .navigationTitle("Calendar")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    calendarPickerButton
-                }
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button {
-                        feedbackGenerator.impactOccurred()
-                        showingCreateEvent = true
-                    } label: {
-                        Image(systemName: "plus")
-                            .font(.body.weight(.semibold))
-                    }
-                }
-            }
             .refreshable {
                 await loadData()
             }
@@ -101,11 +84,70 @@ struct CalendarView: View {
         }
         .task {
             await loadData()
+            if let location = locationManager.location {
+                await loadWeather(location: location)
+            }
             hasLoadedInitialData = true
+        }
+        .onChange(of: locationManager.location) { _, location in
+            guard let location else { return }
+            Task {
+                await loadWeather(location: location)
+            }
         }
         .task(id: eventsLoadToken) {
             guard hasLoadedInitialData else { return }
             await loadEvents()
+        }
+    }
+
+    // MARK: - Calendar HUD
+
+    private var calendarHUD: some View {
+        VStack(spacing: 12) {
+            headerRow
+            controlsRow
+            viewModePicker
+        }
+        .padding(16)
+        .mapHealthGlassSurface(cornerRadius: 20, tint: .accentColor.opacity(0.04))
+        .padding(.horizontal, 20)
+        .padding(.top, 8)
+        .padding(.bottom, 12)
+    }
+
+    private var headerRow: some View {
+        HStack(alignment: .top, spacing: 12) {
+            VStack(alignment: .leading, spacing: 6) {
+                Text(selectedDate.formatted(.dateTime.weekday(.wide)))
+                    .font(.title3.weight(.semibold))
+
+                Text(selectedDate.formatted(.dateTime.month(.wide).day().year()))
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+
+                HStack(spacing: 8) {
+                    if !calendar.isDateInToday(selectedDate) {
+                        todayChip
+                    }
+
+                    eventCountChip
+                }
+            }
+
+            Spacer()
+
+            if let weather {
+                weatherBadge(weather)
+            }
+        }
+    }
+
+    private var controlsRow: some View {
+        HStack(spacing: 12) {
+            calendarPickerButton
+            Spacer()
+            addEventButton
         }
     }
 
@@ -274,7 +316,72 @@ struct CalendarView: View {
                 Image(systemName: "chevron.down")
                     .font(.caption2.weight(.semibold))
             }
+            .font(.subheadline.weight(.medium))
+            .foregroundStyle(.primary)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
+            .mapHealthGlassSurface(cornerRadius: 14, tint: .accentColor.opacity(0.06))
         }
+        .buttonStyle(.plain)
+    }
+
+    private var addEventButton: some View {
+        Button {
+            feedbackGenerator.impactOccurred()
+            showingCreateEvent = true
+        } label: {
+            Label("New", systemImage: "plus")
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(.primary)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 8)
+                .mapHealthGlassSurface(cornerRadius: 14, tint: .accentColor.opacity(0.12))
+        }
+        .buttonStyle(.plain)
+    }
+
+    private var todayChip: some View {
+        Button {
+            withAnimation(.snappy(duration: 0.3)) {
+                selectedDate = Date()
+            }
+            feedbackGenerator.impactOccurred()
+        } label: {
+            Text("Today")
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(Color.accentColor)
+                .padding(.horizontal, 10)
+                .padding(.vertical, 4)
+                .mapHealthGlassSurface(cornerRadius: 10, tint: Color.accentColor.opacity(0.1))
+        }
+        .buttonStyle(.plain)
+    }
+
+    private var eventCountChip: some View {
+        Text(eventCountLabel)
+            .font(.caption.weight(.medium))
+            .foregroundStyle(.secondary)
+            .padding(.horizontal, 8)
+            .padding(.vertical, 4)
+            .mapHealthGlassSurface(cornerRadius: 10, tint: .primary.opacity(0.03))
+    }
+
+    private var eventCountLabel: String {
+        let count = eventsForSelectedDay.count
+        return count == 1 ? "1 event" : "\(count) events"
+    }
+
+    private func weatherBadge(_ weather: WeatherData) -> some View {
+        HStack(spacing: 6) {
+            Image(systemName: weather.icon)
+                .symbolRenderingMode(.multicolor)
+            Text("\(weather.temperature)°")
+                .fontWeight(.semibold)
+        }
+        .font(.caption)
+        .padding(.horizontal, 10)
+        .padding(.vertical, 6)
+        .mapHealthGlassSurface(cornerRadius: 12, tint: .blue.opacity(0.08))
     }
 
     private var calendarPickerTitle: String {
@@ -306,6 +413,18 @@ struct CalendarView: View {
         await calendarService.fetchCalendars()
         await calendarService.fetchColors()
         await loadEvents()
+    }
+
+    @MainActor
+    private func loadWeather(location: CLLocation) async {
+        do {
+            weather = try await WeatherService.shared.getCurrentWeather(
+                latitude: location.coordinate.latitude,
+                longitude: location.coordinate.longitude
+            )
+        } catch {
+            // Silently fail - weather is optional
+        }
     }
 
     private var eventsLoadToken: EventsLoadToken {

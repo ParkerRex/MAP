@@ -127,6 +127,122 @@ public class MapAPIClient {
         ).tags
     }
 
+    /// Get a single tag
+    public func getTag(id: String) async throws -> TaskTag {
+        return try await request(
+            endpoint: "/api/tags/\(id)",
+            method: "GET",
+            responseType: TagResponse.self
+        ).tag
+    }
+
+    /// Create a new tag
+    public func createTag(_ request: CreateTagRequest) async throws -> TaskTag {
+        return try await self.request(
+            endpoint: "/api/tags",
+            method: "POST",
+            body: request,
+            responseType: TagResponse.self
+        ).tag
+    }
+
+    /// Update an existing tag
+    public func updateTag(id: String, _ request: UpdateTagRequest) async throws -> TaskTag {
+        return try await self.request(
+            endpoint: "/api/tags/\(id)",
+            method: "PUT",
+            body: request,
+            responseType: TagResponse.self
+        ).tag
+    }
+
+    /// Delete a tag
+    public func deleteTag(id: String) async throws {
+        _ = try await request(
+            endpoint: "/api/tags/\(id)",
+            method: "DELETE",
+            responseType: SuccessResponse.self
+        )
+    }
+
+    // MARK: - Notes
+
+    /// Get all notes for the current user
+    public func getNotes() async throws -> [MapNote] {
+        return try await request(
+            endpoint: "/api/notes",
+            method: "GET",
+            responseType: NotesResponse.self
+        ).notes
+    }
+
+    /// Create a new note
+    public func createNote(_ request: CreateNoteRequest) async throws -> MapNote {
+        return try await self.request(
+            endpoint: "/api/notes",
+            method: "POST",
+            body: request,
+            responseType: NoteResponse.self
+        ).note
+    }
+
+    /// Update an existing note
+    public func updateNote(id: String, _ request: UpdateNoteRequest) async throws -> MapNote {
+        return try await self.request(
+            endpoint: "/api/notes/\(id)",
+            method: "PUT",
+            body: request,
+            responseType: NoteResponse.self
+        ).note
+    }
+
+    /// Delete a note
+    public func deleteNote(id: String) async throws {
+        _ = try await request(
+            endpoint: "/api/notes/\(id)",
+            method: "DELETE",
+            responseType: SuccessResponse.self
+        )
+    }
+
+    /// Get all folders for the current user
+    public func getFolders() async throws -> [MapFolder] {
+        return try await request(
+            endpoint: "/api/folders",
+            method: "GET",
+            responseType: FoldersResponse.self
+        ).folders
+    }
+
+    /// Create a new folder
+    public func createFolder(name: String) async throws -> MapFolder {
+        return try await request(
+            endpoint: "/api/folders",
+            method: "POST",
+            body: CreateFolderRequest(name: name),
+            responseType: FolderResponse.self
+        ).folder
+    }
+
+    /// Update an existing folder
+    public func updateFolder(id: String, name: String) async throws -> MapFolder {
+        return try await request(
+            endpoint: "/api/folders/\(id)",
+            method: "PUT",
+            body: UpdateFolderRequest(name: name),
+            responseType: FolderResponse.self
+        ).folder
+    }
+
+    /// Delete a folder
+    public func deleteFolder(id: String) async throws {
+        _ = try await request(
+            endpoint: "/api/folders/\(id)",
+            method: "DELETE",
+            responseType: SuccessResponse.self
+        )
+    }
+
     // MARK: - Health Data Sync
 
     /// Sync health data to Map backend

@@ -11,6 +11,7 @@ struct MainTabView: View {
         case chat = "Chat"
         case calendar = "Cal"
         case todos = "Todos"
+        case notes = "Notes"
         case health = "Health"
 
         var icon: String {
@@ -19,6 +20,7 @@ struct MainTabView: View {
             case .chat: "bubble.left.and.bubble.right"
             case .calendar: "calendar"
             case .todos: "checklist"
+            case .notes: "note.text"
             case .health: "heart"
             }
         }
@@ -66,6 +68,8 @@ struct MainTabView: View {
             CalendarView()
         case .todos:
             TodosView()
+        case .notes:
+            NotesView()
         case .health:
             HealthView()
         }
