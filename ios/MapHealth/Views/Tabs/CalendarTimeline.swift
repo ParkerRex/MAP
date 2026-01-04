@@ -109,9 +109,17 @@ struct CalendarTimelineView: View {
 
     private var timelineHeader: some View {
         HStack {
-            Text("Timeline")
-                .font(.subheadline.weight(.semibold))
-                .foregroundStyle(.secondary)
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Timeline")
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(.secondary)
+
+                if timedEvents.isEmpty {
+                    Text("Tap the grid to add a time")
+                        .font(.caption2)
+                        .foregroundStyle(.tertiary)
+                }
+            }
 
             Spacer()
 
