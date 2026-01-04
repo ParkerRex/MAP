@@ -74,6 +74,7 @@ TasksService / CalendarService -> MapAPIClient -> Map backend
 - `CalendarService`: calendar fetch, selection, event CRUD, sync.
 - `HealthDataFetcher`: HealthKit queries (last 14 days).
 - `HealthDataInterpreter`: OpenAI chat orchestration + prompt building.
+- `BackgroundSyncManager`: iOS background delivery + sync scheduling (no-op on macOS builds).
 - `ClaudeAPIClient`: Claude chat through Map backend.
 
 ## Feature flags (command-line)

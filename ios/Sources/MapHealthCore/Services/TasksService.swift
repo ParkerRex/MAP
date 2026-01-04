@@ -110,6 +110,46 @@ public class TasksService: ObservableObject {
         tasks.removeAll { $0.id == task.id }
     }
 
+    // MARK: - Tag Operations
+
+    @discardableResult
+    public func createTag(title: String) async throws -> TaskTag {
+        let request = CreateTagRequest(title: title)
+        let tag = try await apiClient.createTag(request)
+        tags.append(tag)
+        tags.sort { $0.title.localizedCaseInsensitiveCompare($1.title) == .orderedAscending }
+        return tag
+    }
+
+    @discardableResult
+    public func updateTag(_ tag: TaskTag, title: String) async throws -> TaskTag {
+        let request = UpdateTagRequest(title: title)
+        let updated = try await apiClient.updateTag(id: tag.id, request)
+
+        if let index = tags.firstIndex(where: { $0.id == tag.id }) {
+            tags[index] = updated
+        }
+
+        tasks = tasks.map { task in
+            guard task.tags.contains(where: { $0.id == tag.id }) else { return task }
+            var updatedTask = task
+            updatedTask.tags = task.tags.map { $0.id == tag.id ? updated : $0 }
+            return updatedTask
+        }
+
+        return updated
+    }
+
+    public func deleteTag(_ tag: TaskTag) async throws {
+        try await apiClient.deleteTag(id: tag.id)
+        tags.removeAll { $0.id == tag.id }
+        tasks = tasks.map { task in
+            var updatedTask = task
+            updatedTask.tags = task.tags.filter { $0.id != tag.id }
+            return updatedTask
+        }
+    }
+
     // MARK: - Computed Properties
 
     /// Tasks that are not completed, sorted by creation date (newest first)

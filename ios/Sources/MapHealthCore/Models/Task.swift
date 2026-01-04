@@ -157,6 +157,22 @@ public struct CreateTaskRequest: Codable {
     }
 }
 
+public struct CreateTagRequest: Codable {
+    public let title: String
+
+    public init(title: String) {
+        self.title = title
+    }
+}
+
+public struct UpdateTagRequest: Codable {
+    public let title: String?
+
+    public init(title: String?) {
+        self.title = title
+    }
+}
+
 public struct UpdateTaskRequest: Encodable {
     public var title: String?
     public var body: String?

@@ -1,12 +1,29 @@
 import MapHealthCore
 import SwiftUI
 
-struct TaskRow: View {
+struct TaskRow<ProjectMenu: View>: View {
     let task: MapTask
     let projectTitle: String?
     let onToggle: () -> Void
     let onTap: () -> Void
     let onDelete: () -> Void
+    let projectMenu: ProjectMenu
+
+    init(
+        task: MapTask,
+        projectTitle: String? = nil,
+        onToggle: @escaping () -> Void,
+        onTap: @escaping () -> Void,
+        onDelete: @escaping () -> Void,
+        @ViewBuilder projectMenu: () -> ProjectMenu = { EmptyView() }
+    ) {
+        self.task = task
+        self.projectTitle = projectTitle
+        self.onToggle = onToggle
+        self.onTap = onTap
+        self.onDelete = onDelete
+        self.projectMenu = projectMenu()
+    }
 
     var body: some View {
         HStack(spacing: 14) {
@@ -40,6 +57,7 @@ struct TaskRow: View {
             Button(action: onTap) {
                 Label("Edit", systemImage: "pencil")
             }
+            projectMenu
             Divider()
             Button(role: .destructive, action: onDelete) {
                 Label("Delete", systemImage: "trash")

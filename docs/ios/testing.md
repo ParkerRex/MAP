@@ -20,6 +20,8 @@ cd ios
 swift test
 ```
 
+Background sync is iOS-only. On macOS builds the BackgroundSyncManager is a no-op so SwiftPM tests can run.
+
 ## Run Xcode tests
 
 Find a scheme first, then run tests through xcodebuild.
