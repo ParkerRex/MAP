@@ -17,7 +17,11 @@ struct ProjectsListView: View {
             newProjectRow
 
             if filteredTags.isEmpty {
-                emptyState
+                if searchText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                    emptyState
+                } else {
+                    searchEmptyState
+                }
             } else {
                 if !favoriteTags.isEmpty {
                     Section("Favorites") {
@@ -262,6 +266,23 @@ struct ProjectsListView: View {
             Text("No projects yet")
                 .font(.headline)
             Text("Create a project to group tasks.")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 40)
+        .listRowBackground(Color.clear)
+        .listRowSeparator(.hidden)
+    }
+
+    private var searchEmptyState: some View {
+        VStack(spacing: 10) {
+            Image(systemName: "magnifyingglass")
+                .font(.system(size: 32, weight: .light))
+                .foregroundStyle(.secondary)
+            Text("No matching projects")
+                .font(.headline)
+            Text("Try a different search term.")
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
         }

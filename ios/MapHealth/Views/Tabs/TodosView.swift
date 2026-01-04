@@ -14,6 +14,9 @@ struct TodosView: View {
     @State private var newProjectTitle = ""
     @State private var selectedTaskIds: Set<MapTask.ID> = []
     @State private var projectSearchText = ""
+    @State private var selectedNewTaskProjectId: String?
+    @State private var isBulkProcessing = false
+    @State private var showingBulkDeleteConfirmation = false
     @Environment(\.editMode) private var editMode
 
     enum TaskFilter: String, CaseIterable {
@@ -100,6 +103,16 @@ struct TodosView: View {
                     TextField("Name", text: $newProjectTitle)
                     Button("Create") { createProject() }
                     Button("Cancel", role: .cancel) {}
+                }
+                .confirmationDialog(
+                    "Delete selected tasks?",
+                    isPresented: $showingBulkDeleteConfirmation,
+                    titleVisibility: .visible
+                ) {
+                    Button("Delete", role: .destructive) { bulkDeleteConfirmed() }
+                    Button("Cancel", role: .cancel) {}
+                } message: {
+                    Text("This action cannot be undone.")
                 }
                 .onChange(of: editMode?.wrappedValue) { _, newValue in
                     if newValue != .active {
@@ -275,9 +288,19 @@ extension TodosView {
         VStack(spacing: 0) {
             Divider()
             HStack(spacing: 12) {
-                Image(systemName: "plus.circle.fill")
-                    .font(.title3)
-                    .foregroundStyle(newTaskText.isEmpty ? .secondary : .accent)
+                Menu {
+                    Button("No Project") { selectedNewTaskProjectId = nil }
+                    let tags = tasksService.tags.sorted {
+                        $0.title.localizedCaseInsensitiveCompare($1.title) == .orderedAscending
+                    }
+                    ForEach(tags) { tag in
+                        Button(tag.title) { selectedNewTaskProjectId = tag.id }
+                    }
+                } label: {
+                    Image(systemName: "plus.circle.fill")
+                        .font(.title3)
+                        .foregroundStyle(newTaskText.isEmpty ? .secondary : .accent)
+                }
 
                 TextField("Add a task...", text: $newTaskText)
                     .focused($isAddingTask)
@@ -306,7 +329,11 @@ extension TodosView {
         VStack(spacing: 0) {
             Divider()
             HStack(spacing: 16) {
-                Text("\(selectedTaskIds.count) selected")
+                if isBulkProcessing {
+                    ProgressView()
+                } else {
+                    Text("\(selectedTaskIds.count) selected")
+                }
                     .font(.subheadline.weight(.semibold))
 
                 Spacer()
@@ -317,6 +344,7 @@ extension TodosView {
                     Label("Complete", systemImage: "checkmark.circle")
                 }
                 .labelStyle(.iconOnly)
+                .disabled(isBulkProcessing)
 
                 Menu {
                     Section("Move to Project") {
@@ -342,12 +370,14 @@ extension TodosView {
                 } label: {
                     Image(systemName: "folder")
                 }
+                .disabled(isBulkProcessing)
 
                 Button(role: .destructive) {
-                    bulkDelete()
+                    showingBulkDeleteConfirmation = true
                 } label: {
                     Image(systemName: "trash")
                 }
+                .disabled(isBulkProcessing)
             }
             .font(.body.weight(.semibold))
             .padding(.horizontal, 16)
@@ -365,7 +395,10 @@ extension TodosView {
         newTaskText = ""
 
         Task {
-            try? await tasksService.createTask(title: taskText, dueAt: nil)
+            if let task = try? await tasksService.createTask(title: taskText, dueAt: nil),
+               let tagId = selectedNewTaskProjectId {
+                _ = try? await tasksService.updateTask(task, tags: [tagId])
+            }
         }
     }
 }
@@ -740,6 +773,8 @@ extension TodosView {
     }
 
     private func bulkComplete() {
+        guard !selectedTaskIds.isEmpty else { return }
+        isBulkProcessing = true
         Task {
             for task in selectedTasks where !task.isCompleted {
                 try? await tasksService.toggleTask(task)
@@ -749,6 +784,8 @@ extension TodosView {
     }
 
     private func bulkAssignProject(_ tagId: String?) {
+        guard !selectedTaskIds.isEmpty else { return }
+        isBulkProcessing = true
         Task {
             for task in selectedTasks {
                 try? await tasksService.updateTask(
@@ -768,6 +805,7 @@ extension TodosView {
     }
 
     private func bulkSetDueDate(_ choice: BulkDueDate) {
+        guard !selectedTaskIds.isEmpty else { return }
         let targetDate: Date?
         switch choice {
         case .today:
@@ -785,6 +823,7 @@ extension TodosView {
         }
 
         Task {
+            isBulkProcessing = true
             for task in selectedTasks {
                 try? await tasksService.updateTask(
                     task,
@@ -795,7 +834,9 @@ extension TodosView {
         }
     }
 
-    private func bulkDelete() {
+    private func bulkDeleteConfirmed() {
+        guard !selectedTaskIds.isEmpty else { return }
+        isBulkProcessing = true
         Task {
             for task in selectedTasks {
                 try? await tasksService.deleteTask(task)
@@ -807,6 +848,7 @@ extension TodosView {
     private func clearSelection() {
         selectedTaskIds.removeAll()
         editMode?.wrappedValue = .inactive
+        isBulkProcessing = false
     }
 
     private func isToday(_ date: Date?) -> Bool {
