@@ -29,8 +29,11 @@ xcodebuild build \
   -project MapHealth.xcodeproj \
   -scheme <APP_SCHEME> \
   -sdk iphonesimulator \
-  -destination "platform=iOS Simulator,name=iPhone 15"
+  -destination "platform=iOS Simulator,name=iPhone 16,OS=18.6"
 ```
+
+Use whatever simulator exists on your machine:
+`xcrun simctl list devices available`.
 
 ### Device (unsigned)
 
@@ -69,7 +72,7 @@ xcodebuild test \
   -project MapHealth.xcodeproj \
   -scheme <APP_SCHEME> \
   -sdk iphonesimulator \
-  -destination "platform=iOS Simulator,name=iPhone 15" \
+  -destination "platform=iOS Simulator,name=iPhone 16,OS=18.6" \
   CODE_SIGNING_ALLOWED=NO
 ```
 
@@ -81,7 +84,7 @@ xcodebuild test \
   -project MapHealth.xcodeproj \
   -scheme <APP_SCHEME> \
   -sdk iphonesimulator \
-  -destination "platform=iOS Simulator,name=iPhone 15" \
+  -destination "platform=iOS Simulator,name=iPhone 16,OS=18.6" \
   CODE_SIGNING_ALLOWED=NO \
   | xcbeautify
 ```
@@ -110,5 +113,6 @@ xcrun simctl launch booted com.parkerrex.maphealth
 
 - **"No scheme named X"**: Share the scheme in Xcode or use a scheme that actually exists.
 - **Provisioning profile errors**: run once with `-allowProvisioningUpdates`.
-- **Simulator not found**: `xcrun simctl list devices available`.
+- **Simulator not found**: list devices and pick one: `xcrun simctl list devices available`.
+- **SwiftLint build tool failures**: lint runs during build; fix the violation or the build fails.
 - **Stale build output**: `xcodebuild clean -scheme <APP_SCHEME>` then rebuild.

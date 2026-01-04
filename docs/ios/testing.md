@@ -33,9 +33,12 @@ xcodebuild test \
   -project MapHealth.xcodeproj \
   -scheme <APP_SCHEME> \
   -sdk iphonesimulator \
-  -destination "platform=iOS Simulator,name=iPhone 15" \
+  -destination "platform=iOS Simulator,name=iPhone 16,OS=18.6" \
   CODE_SIGNING_ALLOWED=NO
 ```
+
+Pick a device that actually exists on your machine:
+`xcrun simctl list devices available`.
 
 ## UI tests
 
@@ -44,7 +47,7 @@ xcodebuild test \
   -project MapHealth.xcodeproj \
   -scheme <APP_SCHEME> \
   -sdk iphonesimulator \
-  -destination "platform=iOS Simulator,name=iPhone 15" \
+  -destination "platform=iOS Simulator,name=iPhone 16,OS=18.6" \
   -only-testing:MapHealthUITests
 ```
 
@@ -64,3 +67,4 @@ These are the flags the app actually reads:
 - Simulator has no real HealthKit data.
 - Use a physical iPhone for anything HealthKit-related.
 - Use mock data paths in previews and tests if you just need UI coverage.
+ - SwiftLint runs during Xcode builds and will fail the build if it hits a violation.
