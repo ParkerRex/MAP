@@ -1,3 +1,4 @@
+// swiftlint:disable type_body_length
 import MapHealthCore
 import SwiftUI
 
@@ -19,6 +20,8 @@ struct CalendarTimelineView: View {
     private let timelineLeadingInset: CGFloat = 56
     private let timelineTrailingInset: CGFloat = 8
     private let timelineColumnSpacing: CGFloat = 6
+    private let lightFeedbackGenerator = UIImpactFeedbackGenerator(style: .light)
+    private let mediumFeedbackGenerator = UIImpactFeedbackGenerator(style: .medium)
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -131,6 +134,7 @@ struct CalendarTimelineView: View {
             }
 
             Button {
+                lightFeedbackGenerator.impactOccurred()
                 scrollRequest += 1
             } label: {
                 Label(timelineFocusLabel, systemImage: "scope")
@@ -140,7 +144,7 @@ struct CalendarTimelineView: View {
                     .padding(.vertical, 6)
                     .mapHealthGlassSurface(cornerRadius: 10, tint: .primary.opacity(0.03))
             }
-            .buttonStyle(.plain)
+            .mapHealthPressable()
         }
         .padding(.horizontal, 4)
     }
@@ -200,6 +204,7 @@ struct CalendarTimelineView: View {
                     .onEnded { value in
                         let distance = hypot(value.translation.width, value.translation.height)
                         guard distance < 6 else { return }
+                        mediumFeedbackGenerator.impactOccurred()
                         onCreateEventAt(dateForTimelineOffset(value.location.y))
                     }
             )
@@ -576,7 +581,7 @@ struct TimelineEventCard: View {
                     .strokeBorder(eventColor.opacity(0.3), lineWidth: 1)
             )
         }
-        .buttonStyle(.plain)
+        .mapHealthPressable()
         .contextMenu {
             Button { onTap() } label: {
                 Label("View Details", systemImage: "info.circle")
@@ -663,7 +668,7 @@ private struct AllDayEventChip: View {
             .background(eventColor.opacity(0.12))
             .clipShape(Capsule())
         }
-        .buttonStyle(.plain)
+        .mapHealthPressable()
         .contextMenu {
             Button { onTap() } label: {
                 Label("View Details", systemImage: "info.circle")

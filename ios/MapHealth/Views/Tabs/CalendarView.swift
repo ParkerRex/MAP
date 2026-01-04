@@ -1,3 +1,4 @@
+// swiftlint:disable type_body_length
 import CoreLocation
 import MapHealthCore
 import SwiftUI
@@ -19,6 +20,7 @@ struct CalendarView: View {
     @StateObject private var locationManager = LocationManager()
 
     private let feedbackGenerator = UIImpactFeedbackGenerator(style: .medium)
+    private let lightFeedbackGenerator = UIImpactFeedbackGenerator(style: .light)
     private let calendar = Calendar.current
 
     var body: some View {
@@ -342,7 +344,7 @@ struct CalendarView: View {
             .padding(.vertical, 8)
             .mapHealthGlassSurface(cornerRadius: 14, tint: .accentColor.opacity(0.06))
         }
-        .buttonStyle(.plain)
+        .mapHealthPressable()
     }
 
     private var addEventButton: some View {
@@ -358,15 +360,15 @@ struct CalendarView: View {
                 .padding(.vertical, 8)
                 .mapHealthGlassSurface(cornerRadius: 14, tint: .accentColor.opacity(0.12))
         }
-        .buttonStyle(.plain)
+        .mapHealthPressable()
     }
 
     private var todayChip: some View {
         Button {
+            lightFeedbackGenerator.impactOccurred()
             withAnimation(.snappy(duration: 0.3)) {
                 selectedDate = Date()
             }
-            feedbackGenerator.impactOccurred()
         } label: {
             Text("Today")
                 .font(.caption.weight(.semibold))
@@ -375,7 +377,7 @@ struct CalendarView: View {
                 .padding(.vertical, 4)
                 .mapHealthGlassSurface(cornerRadius: 10, tint: Color.accentColor.opacity(0.1))
         }
-        .buttonStyle(.plain)
+        .mapHealthPressable()
     }
 
     private var eventCountChip: some View {
@@ -422,7 +424,7 @@ struct CalendarView: View {
                 .padding(.vertical, 8)
                 .mapHealthGlassSurface(cornerRadius: 14, tint: .primary.opacity(0.03))
         }
-        .buttonStyle(.plain)
+        .mapHealthPressable()
     }
 
     private var calendarPickerTitle: String {
