@@ -57,6 +57,20 @@ public class MapAPIClient {
         ).user
     }
 
+    /// Update the GitHub username for the current user
+    public func updateGithubUsername(_ username: String?) async throws -> UserProfile {
+        struct GithubUsernamePayload: Codable {
+            let githubUsername: String?
+        }
+
+        return try await request(
+            endpoint: "/api/auth/me",
+            method: "PATCH",
+            body: GithubUsernamePayload(githubUsername: username),
+            responseType: ProfileResponse.self
+        ).user
+    }
+
     // MARK: - Claude API Key
 
     public func setClaudeApiKey(_ apiKey: String) async throws {
@@ -657,6 +671,7 @@ public struct UserProfile: Codable {
     public var firstName: String?
     public var lastName: String?
     public var profilePhotoUrl: String?
+    public var githubUsername: String?
 
     public init(
         id: String,
@@ -664,7 +679,8 @@ public struct UserProfile: Codable {
         displayName: String? = nil,
         firstName: String? = nil,
         lastName: String? = nil,
-        profilePhotoUrl: String? = nil
+        profilePhotoUrl: String? = nil,
+        githubUsername: String? = nil
     ) {
         self.id = id
         self.email = email
@@ -672,6 +688,7 @@ public struct UserProfile: Codable {
         self.firstName = firstName
         self.lastName = lastName
         self.profilePhotoUrl = profilePhotoUrl
+        self.githubUsername = githubUsername
     }
 }
 

@@ -111,14 +111,16 @@ struct StrainCard: View {
 struct WhoopSleepQualitySection: View {
     let sleep: WhoopSleep?
     let showsHeader: Bool
+    let showsSurface: Bool
 
-    init(sleep: WhoopSleep?, showsHeader: Bool = true) {
+    init(sleep: WhoopSleep?, showsHeader: Bool = true, showsSurface: Bool = true) {
         self.sleep = sleep
         self.showsHeader = showsHeader
+        self.showsSurface = showsSurface
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        let content = VStack(alignment: .leading, spacing: 12) {
             if showsHeader {
                 HStack {
                     Image(systemName: "moon.stars.fill")
@@ -174,7 +176,13 @@ struct WhoopSleepQualitySection: View {
             }
         }
         .padding(16)
-        .mapHealthGlassSurface(cornerRadius: 16, tint: .indigo.opacity(0.05))
+
+        if showsSurface {
+            content
+                .mapHealthGlassSurface(cornerRadius: 16, tint: .indigo.opacity(0.05))
+        } else {
+            content
+        }
     }
 }
 

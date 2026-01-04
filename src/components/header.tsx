@@ -25,7 +25,8 @@ export const Header: React.FC<HeaderProps> = ({ className }) => {
   const { user, isLoading, logout } = useAuth();
 
   const hiddenRoutes = ["/", "/login", "/signup", "/auth/error"];
-  if (hiddenRoutes.includes(pathname)) {
+  const isHomeRoute = pathname === "/";
+  if (hiddenRoutes.includes(pathname) && !(isHomeRoute && user)) {
     return null;
   }
 

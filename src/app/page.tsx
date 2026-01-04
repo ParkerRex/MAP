@@ -1,14 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
 import {
   RiArrowRightLine,
   RiCalendarLine,
   RiHeartPulseLine,
   RiSparklingLine,
 } from "react-icons/ri";
+import { GitHubContributionGraph, normalizeGithubUsername } from "@/components/github-contribution-graph";
 import { Button } from "@/components/ui/button";
 import { Icons } from "@/components/ui/icons";
 import { useAuth } from "@/hooks/use-auth";
@@ -39,14 +38,8 @@ const integrations = [
 ];
 
 export default function HomePage() {
-  const router = useRouter();
   const { user, isLoading } = useAuth();
-
-  useEffect(() => {
-    if (!isLoading && user) {
-      router.replace("/calendar");
-    }
-  }, [user, isLoading, router]);
+  const githubUsername = normalizeGithubUsername(user?.githubUsername);
 
   if (isLoading) {
     return (
@@ -282,9 +275,43 @@ export default function HomePage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-950">
-      <div className="animate-pulse">
-        <Icons.LogoSmall className="h-8 w-8 text-white" />
+    <div className="mx-auto w-full max-w-5xl space-y-8 px-4 py-8">
+      <div className="space-y-2">
+        <h1 className="text-2xl font-semibold tracking-tight">
+          Welcome back{user.displayName ? `, ${user.displayName}` : ""}.
+        </h1>
+        <p className="text-sm text-muted-foreground">
+          Your GitHub streak lives here alongside your MAP workspace.
+        </p>
+      </div>
+
+      {githubUsername ? (
+        <GitHubContributionGraph username={githubUsername} />
+      ) : (
+        <div className="rounded-lg border border-dashed p-6">
+          <p className="text-sm font-medium">Add your GitHub username</p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Connect it once to show your contribution graph on Home.
+          </p>
+          <Button asChild className="mt-4" size="sm">
+            <Link href="/settings">Set up GitHub</Link>
+          </Button>
+        </div>
+      )}
+
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <Button asChild variant="outline" className="justify-start">
+          <Link href="/calendar">Calendar</Link>
+        </Button>
+        <Button asChild variant="outline" className="justify-start">
+          <Link href="/tasks">Tasks</Link>
+        </Button>
+        <Button asChild variant="outline" className="justify-start">
+          <Link href="/notes">Notes</Link>
+        </Button>
+        <Button asChild variant="outline" className="justify-start">
+          <Link href="/health">Health</Link>
+        </Button>
       </div>
     </div>
   );

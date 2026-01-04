@@ -12,6 +12,7 @@ import {
 import { cn } from "./ui/cn";
 import { Icons } from "./ui/icons";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/tooltip";
+import { useAuth } from "@/hooks/use-auth";
 
 const navItems = [
   { href: "/calendar", label: "Calendar", icon: RiCalendarLine },
@@ -25,12 +26,13 @@ const authRoutes = ["/", "/login", "/signup", "/auth/error"];
 
 export function Sidebar() {
   const pathname = usePathname();
+  const { user } = useAuth();
 
   // Hide sidebar on auth pages (exact match for "/" since all paths start with it)
   const isAuthPage = authRoutes.some((route) =>
     route === "/" ? pathname === "/" : pathname.startsWith(route),
   );
-  if (isAuthPage) return null;
+  if (isAuthPage && !(pathname === "/" && user)) return null;
 
   return (
     <TooltipProvider delayDuration={100}>

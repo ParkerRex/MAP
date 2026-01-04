@@ -1,14 +1,17 @@
 "use client";
 
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import type React from "react";
 import { useEffect, useState } from "react";
+import { GitHubContributionGraph, normalizeGithubUsername } from "@/components/github-contribution-graph";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { useAuth } from "@/hooks/use-auth";
+import { api, queryKeys } from "@/lib/api";
 import { useGoogleStatus } from "@/hooks/use-calendar";
 import { useClaudeConnect, useClaudeDisconnect, useClaudeStatus } from "@/hooks/use-claude";
 import { useOpenAIConnect, useOpenAIDisconnect, useOpenAIStatus } from "@/hooks/use-openai";
@@ -144,6 +147,7 @@ function APIKeyInput({
 export default function SettingsPage() {
   const router = useRouter();
   const { user, isLoading, logout, isLoggingOut } = useAuth();
+  const queryClient = useQueryClient();
   const { data: googleStatus } = useGoogleStatus();
   const { data: claudeStatus } = useClaudeStatus();
   const { data: openaiStatus } = useOpenAIStatus();
@@ -153,12 +157,31 @@ export default function SettingsPage() {
   const openaiDisconnect = useOpenAIDisconnect();
   const [claudeKey, setClaudeKey] = useState("");
   const [openaiKey, setOpenaiKey] = useState("");
+  const [githubUsername, setGithubUsername] = useState("");
+  const [githubError, setGithubError] = useState<string | null>(null);
+
+  const updateGithubMutation = useMutation({
+    mutationFn: (value: string | null) => api.auth.updateProfile({ githubUsername: value }),
+    onSuccess: (data) => {
+      queryClient.setQueryData(queryKeys.auth.me, data);
+      setGithubUsername(normalizeGithubUsername(data.user.githubUsername));
+    },
+    onError: () => {
+      setGithubError("Could not update GitHub username.");
+    },
+  });
 
   useEffect(() => {
     if (!isLoading && !user) {
       router.replace("/login");
     }
   }, [isLoading, user, router]);
+
+  useEffect(() => {
+    if (user) {
+      setGithubUsername(normalizeGithubUsername(user.githubUsername));
+    }
+  }, [user]);
 
   if (isLoading || !user) {
     return (
@@ -179,6 +202,9 @@ export default function SettingsPage() {
         .slice(0, 2)
         .toUpperCase()
     : (user.email?.[0]?.toUpperCase() ?? "U");
+  const normalizedGithubUsername = normalizeGithubUsername(githubUsername);
+  const savedGithubUsername = normalizeGithubUsername(user.githubUsername);
+  const hasGithubChanges = normalizedGithubUsername !== savedGithubUsername;
 
   return (
     <div className="mx-auto w-full max-w-2xl space-y-8 px-4 py-8">
@@ -207,6 +233,53 @@ export default function SettingsPage() {
               <p className="text-sm text-muted-foreground truncate">{user.email}</p>
             </div>
             <ConnectionStatus connected={googleStatus?.connected ?? false} />
+          </div>
+
+          <div className="space-y-3 rounded-lg border bg-muted/30 p-4">
+            <div>
+              <p className="text-sm font-medium">GitHub</p>
+              <p className="text-xs text-muted-foreground">
+                Show your contribution graph on your MAP home screen.
+              </p>
+            </div>
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+              <div className="flex flex-1 items-center gap-2">
+                <span className="text-sm text-muted-foreground">@</span>
+                <Input
+                  value={githubUsername}
+                  onChange={(e) => {
+                    setGithubError(null);
+                    setGithubUsername(e.target.value.replace(/^@+/, ""));
+                  }}
+                  placeholder="octocat"
+                  className="flex-1"
+                />
+              </div>
+              <Button
+                size="sm"
+                onClick={async () => {
+                  setGithubError(null);
+                  try {
+                    await updateGithubMutation.mutateAsync(
+                      normalizedGithubUsername ? normalizedGithubUsername : null,
+                    );
+                  } catch {
+                    // handled in onError
+                  }
+                }}
+                disabled={!hasGithubChanges || updateGithubMutation.isPending}
+              >
+                {updateGithubMutation.isPending ? "Saving..." : "Save"}
+              </Button>
+            </div>
+            {githubError && <p className="text-xs text-destructive">{githubError}</p>}
+            {normalizedGithubUsername ? (
+              <GitHubContributionGraph username={normalizedGithubUsername} />
+            ) : (
+              <p className="text-xs text-muted-foreground">
+                Add your GitHub username to show your contribution graph.
+              </p>
+            )}
           </div>
         </SettingsSection>
 

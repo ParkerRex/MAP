@@ -40,6 +40,7 @@ export const users = pgTable("users", {
   lastName: text("last_name"),
   locale: text("locale"),
   profilePhotoUrl: text("profile_photo_url"),
+  githubUsername: text("github_username"),
   status: text("status").notNull().default("active"),
 });
 

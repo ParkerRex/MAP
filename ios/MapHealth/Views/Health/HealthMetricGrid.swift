@@ -8,9 +8,24 @@ struct QuickStatsRow: View {
     let calories: Double?
     let exerciseMinutes: Double?
     let isLoading: Bool
+    let showsSurface: Bool
+
+    init(
+        steps: Double?,
+        calories: Double?,
+        exerciseMinutes: Double?,
+        isLoading: Bool,
+        showsSurface: Bool = true
+    ) {
+        self.steps = steps
+        self.calories = calories
+        self.exerciseMinutes = exerciseMinutes
+        self.isLoading = isLoading
+        self.showsSurface = showsSurface
+    }
 
     var body: some View {
-        ViewThatFits(in: .horizontal) {
+        let content = ViewThatFits(in: .horizontal) {
             HStack(spacing: 0) {
                 QuickStat(
                     value: formatCompact(steps),
@@ -72,7 +87,13 @@ struct QuickStatsRow: View {
         }
         .padding(.vertical, 16)
         .frame(maxWidth: .infinity)
-        .mapHealthGlassSurface(cornerRadius: 16, tint: .clear)
+
+        if showsSurface {
+            content
+                .mapHealthGlassSurface(cornerRadius: 16, tint: .clear)
+        } else {
+            content
+        }
     }
 
     private func formatCompact(_ value: Double?) -> String {
@@ -234,9 +255,26 @@ struct SleepCompactCard: View {
     let average7d: Double?
     let trend: HealthMetricTrend?
     let isLoading: Bool
+    let showsSurface: Bool
+
+    init(
+        sleepHours: Double?,
+        sleepStages: SleepStages?,
+        average7d: Double?,
+        trend: HealthMetricTrend?,
+        isLoading: Bool,
+        showsSurface: Bool = true
+    ) {
+        self.sleepHours = sleepHours
+        self.sleepStages = sleepStages
+        self.average7d = average7d
+        self.trend = trend
+        self.isLoading = isLoading
+        self.showsSurface = showsSurface
+    }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        let content = VStack(alignment: .leading, spacing: 12) {
             // Header
             HStack {
                 HStack(spacing: 6) {
@@ -280,7 +318,13 @@ struct SleepCompactCard: View {
         }
         .padding(16)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .mapHealthGlassSurface(cornerRadius: 18, tint: .indigo.opacity(0.05))
+
+        if showsSurface {
+            content
+                .mapHealthGlassSurface(cornerRadius: 18, tint: .indigo.opacity(0.05))
+        } else {
+            content
+        }
     }
 
     private func formatSleepDuration(_ hours: Double?) -> String {
@@ -375,9 +419,26 @@ struct HeartSectionCard: View {
     let restingHRTrend: HealthMetricTrend?
     let hrvTrend: HealthMetricTrend?
     let isLoading: Bool
+    let showsSurface: Bool
+
+    init(
+        restingHR: Double?,
+        hrv: Double?,
+        restingHRTrend: HealthMetricTrend?,
+        hrvTrend: HealthMetricTrend?,
+        isLoading: Bool,
+        showsSurface: Bool = true
+    ) {
+        self.restingHR = restingHR
+        self.hrv = hrv
+        self.restingHRTrend = restingHRTrend
+        self.hrvTrend = hrvTrend
+        self.isLoading = isLoading
+        self.showsSurface = showsSurface
+    }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        let content = VStack(alignment: .leading, spacing: 12) {
             HStack(spacing: 6) {
                 Image(systemName: "heart.fill")
                     .foregroundStyle(.red)
@@ -439,6 +500,12 @@ struct HeartSectionCard: View {
         }
         .padding(16)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .mapHealthGlassSurface(cornerRadius: 18, tint: .red.opacity(0.04))
+
+        if showsSurface {
+            content
+                .mapHealthGlassSurface(cornerRadius: 18, tint: .red.opacity(0.04))
+        } else {
+            content
+        }
     }
 }

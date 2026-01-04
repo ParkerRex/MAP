@@ -18,6 +18,7 @@ struct HomeView: View {
     @State private var sleepHours: Double?
     @State private var restingHeartRate: Double?
     @State private var healthNeedsPermission = false
+    @State private var userProfile: UserProfile?
 
     // Weather state
     @State private var weather: WeatherData?
@@ -75,6 +76,7 @@ struct HomeView: View {
     private var homeScrollContent: some View {
         VStack(spacing: 16) {
             headerSection
+            githubSection
             scheduleWidget
             tasksWidget
             healthWidget
@@ -103,6 +105,25 @@ struct HomeView: View {
         .padding(.bottom, 8)
     }
 
+    private var githubSection: some View {
+        Group {
+            if MapAPIClient.shared.isAuthenticated {
+                if !normalizedGithubUsername.isEmpty {
+                    GitHubContributionCard(username: normalizedGithubUsername)
+                } else {
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("GitHub activity")
+                            .font(.headline)
+                        Text("Add your GitHub username in Settings to show your contribution graph.")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                    .mapHealthGlassCard()
+                }
+            }
+        }
+    }
+
     private var greetingText: String {
         let hour = Calendar.current.component(.hour, from: Date())
         switch hour {
@@ -111,6 +132,12 @@ struct HomeView: View {
         case 17..<22: return "Good evening"
         default: return "Good night"
         }
+    }
+
+    private var normalizedGithubUsername: String {
+        userProfile?.githubUsername?
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .replacingOccurrences(of: "^@", with: "", options: .regularExpression) ?? ""
     }
 
     private func weatherBadge(_ weather: WeatherData) -> some View {
@@ -573,8 +600,9 @@ struct HomeView: View {
         async let eventsTask: () = loadTodayEvents()
         async let tasksTask: () = loadTodayTasks()
         async let healthTask: () = loadHealthData()
+        async let profileTask: () = loadProfile()
 
-        _ = await (eventsTask, tasksTask, healthTask)
+        _ = await (eventsTask, tasksTask, healthTask, profileTask)
 
         if isInitialLoad {
             withAnimation(.easeOut(duration: 0.3)) {
@@ -601,8 +629,9 @@ struct HomeView: View {
         async let eventsTask: () = loadTodayEvents()
         async let tasksTask: () = loadTodayTasks()
         async let healthTask: () = loadHealthData()
+        async let profileTask: () = loadProfile()
 
-        _ = await (eventsTask, tasksTask, healthTask)
+        _ = await (eventsTask, tasksTask, healthTask, profileTask)
 
         HapticFeedback.success()
     }
@@ -657,6 +686,20 @@ struct HomeView: View {
             healthNeedsPermission = false
         } catch {
             healthNeedsPermission = true
+        }
+    }
+
+    @MainActor
+    private func loadProfile() async {
+        guard MapAPIClient.shared.isAuthenticated else {
+            userProfile = nil
+            return
+        }
+
+        do {
+            userProfile = try await MapAPIClient.shared.getProfile()
+        } catch {
+            // Profile fetch failed - keep previous value
         }
     }
 

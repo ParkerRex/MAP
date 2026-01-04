@@ -15,6 +15,10 @@ struct SettingsView: View {
     @State private var showSignOutAlert = false
     @State private var userProfile: UserProfile?
     @State private var isLoadingProfile = false
+    @State private var githubUsername = ""
+    @State private var savedGithubUsername = ""
+    @State private var isSavingGithub = false
+    @State private var githubError: String?
     @Binding var modelSettingRefreshId: UUID
     @State private var showLLMSettings = false
 
@@ -67,6 +71,7 @@ struct SettingsView: View {
         ScrollView {
             VStack(spacing: 24) {
                 accountSection
+                githubSection
                 modelSection
                 appearanceSection
                 chatSection
@@ -144,6 +149,73 @@ struct SettingsView: View {
                     iconTint: .orange,
                     title: "ACCOUNT_NOT_SIGNED_IN",
                     subtitle: "ACCOUNT_SIGNED_IN"
+                )
+            }
+        }
+    }
+
+    private var githubSection: some View {
+        settingsSection(
+            title: "GitHub",
+            subtitle: "Show your contribution graph on Home."
+        ) {
+            if MapAPIClient.shared.isAuthenticated {
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("GitHub username")
+                        .font(.subheadline.weight(.semibold))
+
+                    HStack(spacing: 8) {
+                        Text("@")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                        TextField(
+                            "octocat",
+                            text: Binding(
+                                get: { githubUsername },
+                                set: { newValue in
+                                    githubError = nil
+                                    githubUsername = newValue.replacingOccurrences(of: "^@+", with: "", options: .regularExpression)
+                                }
+                            )
+                        )
+                            .textInputAutocapitalization(.never)
+                            .autocorrectionDisabled()
+                    }
+                    .padding(12)
+                    .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+
+                    Button {
+                        Task {
+                            await saveGithubUsername()
+                        }
+                    } label: {
+                        Text(isSavingGithub ? "Saving..." : "Save")
+                            .frame(maxWidth: .infinity)
+                    }
+                    .mapHealthGlassButtonStyle(prominent: true)
+                    .disabled(!githubHasChanges || isSavingGithub)
+
+                    if let githubError {
+                        Text(githubError)
+                            .font(.caption)
+                            .foregroundStyle(.red)
+                    }
+
+                    if !normalizedGithubUsername.isEmpty {
+                        GitHubContributionCard(username: normalizedGithubUsername)
+                    } else {
+                        Text("Add your username to show the contribution graph.")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+            } else {
+                settingsRow(
+                    icon: "person.crop.circle.badge.exclamationmark",
+                    iconTint: .orange,
+                    title: "ACCOUNT_NOT_SIGNED_IN",
+                    subtitle: "Sign in to add your GitHub username.",
+                    showsChevron: false
                 )
             }
         }
@@ -330,6 +402,16 @@ struct SettingsView: View {
         return "\(bundleVersion) (\(buildNumber))"
     }
 
+    private var normalizedGithubUsername: String {
+        githubUsername
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .replacingOccurrences(of: "^@", with: "", options: .regularExpression)
+    }
+
+    private var githubHasChanges: Bool {
+        normalizedGithubUsername != savedGithubUsername
+    }
+
     private var llmSource: LLMSource {
         LLMSource(rawValue: llmSourceRaw) ?? .openai
     }
@@ -340,13 +422,42 @@ struct SettingsView: View {
 
         isLoadingProfile = true
         do {
-            userProfile = try await MapAPIClient.shared.getProfile()
+            let profile = try await MapAPIClient.shared.getProfile()
+            userProfile = profile
+            let savedUsername = profile.githubUsername?
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+                .replacingOccurrences(of: "^@", with: "", options: .regularExpression) ?? ""
+            savedGithubUsername = savedUsername
+            githubUsername = savedUsername
         } catch {
             // Profile fetch failed, show fallback UI
             let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "com.yourcompany.app", category: "Settings")
             logger.error("Failed to load profile: \(error.localizedDescription)")
         }
         isLoadingProfile = false
+    }
+
+    @MainActor
+    private func saveGithubUsername() async {
+        guard MapAPIClient.shared.isAuthenticated else { return }
+        guard githubHasChanges else { return }
+
+        isSavingGithub = true
+        githubError = nil
+        do {
+            let updated = try await MapAPIClient.shared.updateGithubUsername(
+                normalizedGithubUsername.isEmpty ? nil : normalizedGithubUsername
+            )
+            userProfile = updated
+            let savedUsername = updated.githubUsername?
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+                .replacingOccurrences(of: "^@", with: "", options: .regularExpression) ?? ""
+            savedGithubUsername = savedUsername
+            githubUsername = savedUsername
+        } catch {
+            githubError = "Could not update GitHub username."
+        }
+        isSavingGithub = false
     }
 
     private func signOut() {

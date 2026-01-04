@@ -16,6 +16,7 @@ export interface SessionUser {
   firstName: string | null;
   lastName: string | null;
   profilePhotoUrl: string | null;
+  githubUsername: string | null;
 }
 
 function getExpiryDate(): Date {
@@ -89,6 +90,7 @@ export async function getSession(): Promise<SessionUser | null> {
       firstName: users.firstName,
       lastName: users.lastName,
       profilePhotoUrl: users.profilePhotoUrl,
+      githubUsername: users.githubUsername,
     })
     .from(sessions)
     .innerJoin(users, eq(sessions.userId, users.id))

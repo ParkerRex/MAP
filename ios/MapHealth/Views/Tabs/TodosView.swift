@@ -13,6 +13,7 @@ struct TodosView: View {
     @State private var showingCreateProject = false
     @State private var newProjectTitle = ""
     @State private var selectedTaskIds: Set<MapTask.ID> = []
+    @State private var projectSearchText = ""
     @Environment(\.editMode) private var editMode
 
     enum TaskFilter: String, CaseIterable {
@@ -76,7 +77,7 @@ struct TodosView: View {
                         .pickerStyle(.segmented)
                         .frame(maxWidth: 240)
                     }
-                    if viewMode == .tasks {
+                    if viewMode == .tasks || viewMode == .projects {
                         ToolbarItem(placement: .topBarLeading) {
                             EditButton()
                         }
@@ -110,6 +111,7 @@ struct TodosView: View {
                         selectedTaskIds.removeAll()
                         editMode?.wrappedValue = .inactive
                         searchText = ""
+                        projectSearchText = ""
                     }
                 }
         }
@@ -135,13 +137,17 @@ struct TodosView: View {
             }
             .searchable(text: $searchText, prompt: "Search tasks")
             .refreshable { await tasksService.refresh() }
+            .animation(.snappy(duration: 0.2), value: selectedFilter)
+            .animation(.snappy(duration: 0.2), value: selectedProject)
         } else {
             List {
                 ProjectsListView(
                     tasksService: tasksService,
-                    showingCreateProject: $showingCreateProject
+                    showingCreateProject: $showingCreateProject,
+                    searchText: $projectSearchText
                 )
             }
+            .searchable(text: $projectSearchText, prompt: "Search projects")
             .refreshable { await tasksService.refresh() }
         }
     }
@@ -506,10 +512,15 @@ extension TodosView {
                 .listRowBackground(Color(.secondarySystemGroupedBackground))
             }
         } header: {
-            Text(title)
-                .font(.footnote.weight(.semibold))
-                .foregroundStyle(tint)
-                .textCase(.uppercase)
+            HStack(spacing: 8) {
+                Circle()
+                    .fill(tint)
+                    .frame(width: 6, height: 6)
+                Text(title)
+            }
+            .font(.footnote.weight(.semibold))
+            .foregroundStyle(tint)
+            .textCase(.uppercase)
         }
     }
 
@@ -545,8 +556,9 @@ extension TodosView {
             }
         } header: {
             HStack(spacing: 6) {
-                Image(systemName: "checkmark.circle.fill")
-                    .foregroundStyle(.green)
+                Circle()
+                    .fill(Color.green)
+                    .frame(width: 6, height: 6)
                 Text("Completed")
                 Text("·")
                 Text("\(tasks.count)")

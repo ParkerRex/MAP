@@ -23,6 +23,7 @@ export interface AuthUser {
   firstName: string | null;
   lastName: string | null;
   profilePhotoUrl: string | null;
+  githubUsername: string | null;
 }
 
 export interface TasksResponse {
@@ -382,6 +383,11 @@ class ApiClient {
 
   auth = {
     me: () => this.request<{ user: AuthUser }>("/auth/me"),
+    updateProfile: (data: { githubUsername: string | null }) =>
+      this.request<{ user: AuthUser }>("/auth/me", {
+        method: "PATCH",
+        body: JSON.stringify(data),
+      }),
     logout: () => this.request<{ success: boolean }>("/auth/logout", { method: "POST" }),
   };
 

@@ -92,18 +92,7 @@ struct HealthView: View {
                 }
 
                 section(title: "Today", systemImage: "sun.max.fill") {
-                    QuickStatsRow(
-                        steps: snapshot?.today.steps,
-                        calories: snapshot?.today.activeEnergy,
-                        exerciseMinutes: snapshot?.today.exerciseMinutes,
-                        isLoading: healthService.isLoading
-                    )
-
-                    recoveryRow
-
-                    if whoopConnected, whoopSleep != nil {
-                        WhoopSleepQualitySection(sleep: whoopSleep, showsHeader: false)
-                    }
+                    todayCard
                 }
 
                 section(title: "Activity", systemImage: "figure.walk") {
@@ -316,6 +305,26 @@ struct HealthView: View {
         }
     }
 
+    private var todayCard: some View {
+        VStack(spacing: 12) {
+            QuickStatsRow(
+                steps: snapshot?.today.steps,
+                calories: snapshot?.today.activeEnergy,
+                exerciseMinutes: snapshot?.today.exerciseMinutes,
+                isLoading: healthService.isLoading,
+                showsSurface: false
+            )
+
+            recoveryRow
+
+            if whoopConnected, whoopSleep != nil {
+                WhoopSleepQualitySection(sleep: whoopSleep, showsHeader: false, showsSurface: false)
+            }
+        }
+        .padding(16)
+        .mapHealthGlassSurface(cornerRadius: 20, tint: .primary.opacity(0.02))
+    }
+
     private var recoveryRow: some View {
         ViewThatFits(in: .horizontal) {
             HStack(spacing: 12) {
@@ -324,7 +333,8 @@ struct HealthView: View {
                     sleepStages: snapshot?.today.sleepStages,
                     average7d: snapshot?.sleepAverage7d,
                     trend: snapshot?.sleepTrend.map(mapTrend),
-                    isLoading: healthService.isLoading
+                    isLoading: healthService.isLoading,
+                    showsSurface: false
                 )
 
                 HeartSectionCard(
@@ -332,7 +342,8 @@ struct HealthView: View {
                     hrv: whoopConnected ? whoopRecovery?.hrv : snapshot?.today.hrvSDNN,
                     restingHRTrend: snapshot?.restingHRTrend.map(mapTrend),
                     hrvTrend: snapshot?.hrvTrend.map(mapTrend),
-                    isLoading: healthService.isLoading || isLoadingWhoop
+                    isLoading: healthService.isLoading || isLoadingWhoop,
+                    showsSurface: false
                 )
             }
 
@@ -342,7 +353,8 @@ struct HealthView: View {
                     sleepStages: snapshot?.today.sleepStages,
                     average7d: snapshot?.sleepAverage7d,
                     trend: snapshot?.sleepTrend.map(mapTrend),
-                    isLoading: healthService.isLoading
+                    isLoading: healthService.isLoading,
+                    showsSurface: false
                 )
 
                 HeartSectionCard(
@@ -350,7 +362,8 @@ struct HealthView: View {
                     hrv: whoopConnected ? whoopRecovery?.hrv : snapshot?.today.hrvSDNN,
                     restingHRTrend: snapshot?.restingHRTrend.map(mapTrend),
                     hrvTrend: snapshot?.hrvTrend.map(mapTrend),
-                    isLoading: healthService.isLoading || isLoadingWhoop
+                    isLoading: healthService.isLoading || isLoadingWhoop,
+                    showsSurface: false
                 )
             }
         }
