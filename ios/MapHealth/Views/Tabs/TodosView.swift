@@ -11,16 +11,32 @@ struct TodosView: View {
     var body: some View {
         NavigationStack {
             List {
-                addTaskSection
                 taskSections
             }
             .listStyle(.plain)
             .scrollContentBackground(.hidden)
+            .scrollDismissesKeyboard(.interactively)
+            .listSectionSpacing(12)
             .searchable(text: $searchText, prompt: "Search tasks")
             .refreshable { await tasksService.refresh() }
             .task { await loadTasksIfNeeded() }
             .sheet(item: $selectedTask) { task in
                 TaskDetailSheet(task: task, tasksService: tasksService)
+            }
+            .safeAreaInset(edge: .bottom) {
+                addTaskBar
+            }
+            .navigationTitle("Tasks")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        isAddingTask = true
+                    } label: {
+                        Image(systemName: "plus")
+                            .font(.body.weight(.semibold))
+                    }
+                }
             }
         }
     }
@@ -35,12 +51,13 @@ struct TodosView: View {
 // MARK: - Add Task Section
 
 extension TodosView {
-    private var addTaskSection: some View {
-        Section {
+    private var addTaskBar: some View {
+        VStack(spacing: 0) {
+            Divider()
             HStack(spacing: 12) {
-                Circle()
-                    .strokeBorder(Color.secondary.opacity(0.3), lineWidth: 2)
-                    .frame(width: 22, height: 22)
+                Image(systemName: "plus.circle.fill")
+                    .font(.title3)
+                    .foregroundStyle(newTaskText.isEmpty ? .secondary : .accent)
 
                 TextField("Add a task...", text: $newTaskText)
                     .focused($isAddingTask)
@@ -58,7 +75,9 @@ extension TodosView {
                     .transition(.scale.combined(with: .opacity))
                 }
             }
-            .listRowInsets(EdgeInsets(top: 12, leading: 16, bottom: 12, trailing: 16))
+            .padding(.horizontal, 16)
+            .padding(.vertical, 10)
+            .background(.thinMaterial)
             .animation(.easeOut(duration: 0.15), value: newTaskText.isEmpty)
         }
     }
@@ -85,12 +104,16 @@ extension TodosView {
         if tasksService.isLoading && tasksService.tasks.isEmpty {
             Section {
                 TasksLoadingView()
+                    .listRowSeparator(.hidden)
+                    .listRowBackground(Color.clear)
             }
         } else if let error = tasksService.error {
             Section {
                 TasksErrorView(error: error) {
                     Task { await tasksService.fetchTasks() }
                 }
+                .listRowSeparator(.hidden)
+                .listRowBackground(Color.clear)
             }
         } else if tasksService.tasks.isEmpty {
             Section {
@@ -174,6 +197,9 @@ extension TodosView {
                     onTap: { selectedTask = task },
                     onDelete: { deleteTask(task) }
                 )
+                .listRowInsets(EdgeInsets(top: 12, leading: 16, bottom: 12, trailing: 16))
+                .listRowSeparator(.hidden)
+                .listRowBackground(Color(.secondarySystemGroupedBackground))
             }
         } header: {
             Text(title)
@@ -196,12 +222,17 @@ extension TodosView {
                     onTap: { selectedTask = task },
                     onDelete: { deleteTask(task) }
                 )
+                .listRowInsets(EdgeInsets(top: 12, leading: 16, bottom: 12, trailing: 16))
+                .listRowSeparator(.hidden)
+                .listRowBackground(Color(.secondarySystemGroupedBackground))
             }
             if tasks.count > 15 {
                 Text("\(tasks.count - 15) more completed")
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .frame(maxWidth: .infinity)
+                    .listRowSeparator(.hidden)
+                    .listRowBackground(Color.clear)
             }
         } header: {
             HStack(spacing: 6) {
@@ -233,6 +264,7 @@ extension TodosView {
         .frame(maxWidth: .infinity)
         .padding(.vertical, 60)
         .listRowBackground(Color.clear)
+        .listRowSeparator(.hidden)
     }
 
     private var noResultsState: some View {
@@ -251,6 +283,7 @@ extension TodosView {
         .frame(maxWidth: .infinity)
         .padding(.vertical, 60)
         .listRowBackground(Color.clear)
+        .listRowSeparator(.hidden)
     }
 }
 

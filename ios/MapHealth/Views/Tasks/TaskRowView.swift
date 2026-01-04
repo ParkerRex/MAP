@@ -8,14 +8,13 @@ struct TaskRow: View {
     let onDelete: () -> Void
 
     var body: some View {
-        Button(action: onTap) {
-            HStack(spacing: 14) {
-                checkbox
-                content
-                Spacer(minLength: 0)
-            }
+        HStack(spacing: 14) {
+            checkbox
+            content
+            Spacer(minLength: 0)
         }
-        .buttonStyle(.plain)
+        .contentShape(Rectangle())
+        .onTapGesture(perform: onTap)
         .swipeActions(edge: .trailing, allowsFullSwipe: true) {
             Button(role: .destructive, action: onDelete) {
                 Label("Delete", systemImage: "trash")
