@@ -6,6 +6,7 @@ struct NotesView: View {
     @State private var searchText = ""
     @State private var selectedFolderId: String?
     @State private var showingNewNote = false
+    @State private var sortOrder: SortOrder = .lastEdited
 
     var body: some View {
         NavigationStack {
@@ -24,12 +25,7 @@ struct NotesView: View {
                     folderMenu
                 }
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button {
-                        showingNewNote = true
-                    } label: {
-                        Image(systemName: "square.and.pencil")
-                    }
-                    .disabled(resolvedFolderId == nil)
+                    sortMenu
                 }
             }
             .navigationDestination(for: MapNote.self) { note in
@@ -49,6 +45,9 @@ struct NotesView: View {
                 } else {
                     Text("No folders available")
                 }
+            }
+            .safeAreaInset(edge: .bottom) {
+                bottomBar
             }
         }
     }
@@ -126,12 +125,14 @@ extension NotesView {
                     .listRowSeparator(.hidden)
                     .listRowBackground(Color(.secondarySystemGroupedBackground))
                 }
+            } header: {
+                listHeader
             }
         }
     }
 
     private var filteredNotes: [MapNote] {
-        var notes = notesService.sortedNotes
+        var notes = sortedNotes
 
         if let selectedFolderId {
             notes = notes.filter { $0.folderId == selectedFolderId }
@@ -143,6 +144,19 @@ extension NotesView {
         return notes.filter { note in
             (note.title ?? "").localizedCaseInsensitiveContains(query) ||
             (note.content ?? "").localizedCaseInsensitiveContains(query)
+        }
+    }
+
+    private var sortedNotes: [MapNote] {
+        switch sortOrder {
+        case .lastEdited:
+            return notesService.notes.sorted {
+                let lhsDate = $0.updatedAt ?? $0.createdAt
+                let rhsDate = $1.updatedAt ?? $1.createdAt
+                return lhsDate > rhsDate
+            }
+        case .dateCreated:
+            return notesService.notes.sorted { $0.createdAt > $1.createdAt }
         }
     }
 
@@ -167,6 +181,28 @@ extension NotesView {
         .padding(.vertical, 60)
         .listRowBackground(Color.clear)
         .listRowSeparator(.hidden)
+    }
+
+    private var listHeader: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(listHeaderTitle)
+                .font(.headline)
+                .foregroundStyle(.primary)
+            Text(noteCountLabel)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+        }
+        .textCase(nil)
+        .padding(.top, 4)
+        .padding(.bottom, 4)
+    }
+
+    private var listHeaderTitle: String {
+        if let selectedFolderId,
+           let folder = notesService.folders.first(where: { $0.id == selectedFolderId }) {
+            return folder.name
+        }
+        return "All Notes"
     }
 }
 
@@ -199,6 +235,51 @@ extension NotesView {
             return folder.name
         }
         return "All Notes"
+    }
+}
+
+// MARK: - Sort Menu
+
+extension NotesView {
+    private var sortMenu: some View {
+        Menu {
+            Button("Last Edited") { sortOrder = .lastEdited }
+            Button("Date Created") { sortOrder = .dateCreated }
+        } label: {
+            Image(systemName: "ellipsis.circle")
+                .font(.body.weight(.medium))
+        }
+    }
+}
+
+// MARK: - Bottom Bar
+
+extension NotesView {
+    private var bottomBar: some View {
+        VStack(spacing: 0) {
+            Divider()
+            HStack {
+                Text(noteCountLabel)
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+                Spacer()
+                Button {
+                    showingNewNote = true
+                } label: {
+                    Image(systemName: "square.and.pencil")
+                        .font(.title3.weight(.semibold))
+                }
+                .disabled(resolvedFolderId == nil)
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 10)
+            .background(.thinMaterial)
+        }
+    }
+
+    private var noteCountLabel: String {
+        let count = filteredNotes.count
+        return count == 1 ? "1 Note" : "\(count) Notes"
     }
 }
 
@@ -315,10 +396,19 @@ private struct NoteEditorView: View {
                     .focused($focusedField, equals: .title)
                     .lineLimit(1...3)
 
-                TextEditor(text: $content)
-                    .font(.body)
-                    .frame(minHeight: 200)
-                    .focused($focusedField, equals: .content)
+                ZStack(alignment: .topLeading) {
+                    if content.trimmed.isEmpty {
+                        Text("Note")
+                            .font(.body)
+                            .foregroundStyle(.secondary)
+                            .padding(.top, 8)
+                            .padding(.leading, 4)
+                    }
+                    TextEditor(text: $content)
+                        .font(.body)
+                        .frame(minHeight: 240)
+                        .focused($focusedField, equals: .content)
+                }
             }
             .padding(20)
         }
@@ -363,6 +453,11 @@ private struct NoteEditorView: View {
             Button("Cancel", role: .cancel) {}
         } message: {
             Text("This action cannot be undone.")
+        }
+        .onAppear {
+            if note == nil {
+                focusedField = .title
+            }
         }
     }
 
@@ -431,4 +526,9 @@ private extension String {
     var trimmed: String {
         trimmingCharacters(in: .whitespacesAndNewlines)
     }
+}
+
+private enum SortOrder {
+    case lastEdited
+    case dateCreated
 }
