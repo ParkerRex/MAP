@@ -332,31 +332,33 @@ private struct NoteRow: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
-            HStack(alignment: .firstTextBaseline, spacing: 8) {
-                Text(noteTitle)
-                    .font(.headline)
-                    .foregroundStyle(.primary)
-                    .lineLimit(1)
+            Text(noteTitle)
+                .font(.headline)
+                .foregroundStyle(.primary)
+                .lineLimit(1)
 
-                Spacer(minLength: 0)
+            if !previewText.isEmpty {
+                HStack(alignment: .firstTextBaseline, spacing: 6) {
+                    Text(noteDate)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
 
+                    if let previewAttributed {
+                        Text(previewAttributed)
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                            .lineLimit(1)
+                    } else {
+                        Text(previewText)
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                            .lineLimit(1)
+                    }
+                }
+            } else {
                 Text(noteDate)
                     .font(.caption)
                     .foregroundStyle(.secondary)
-            }
-
-            if !previewText.isEmpty {
-                if let previewAttributed {
-                    Text(previewAttributed)
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-                        .lineLimit(2)
-                } else {
-                    Text(previewText)
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-                        .lineLimit(2)
-                }
             }
 
             if showFolder, let folderName, !folderName.isEmpty {
@@ -370,7 +372,12 @@ private struct NoteRow: View {
 
     private var noteTitle: String {
         let title = note.title?.trimmed ?? ""
-        return title.isEmpty ? "Untitled" : title
+        if !title.isEmpty { return title }
+        let contentLine = note.content?
+            .split(whereSeparator: \.isNewline)
+            .map { String($0).trimmed }
+            .first(where: { !$0.isEmpty })
+        return contentLine ?? "Untitled"
     }
 
     private var previewText: String {
@@ -492,7 +499,7 @@ private struct NoteEditorView: View {
             ToolbarItem(placement: .confirmationAction) {
                 Button("Save") { saveNote() }
                     .fontWeight(.semibold)
-                    .disabled(title.trimmed.isEmpty || isSaving || !hasChanges)
+                    .disabled(isSaving || !hasChanges || (title.trimmed.isEmpty && content.trimmed.isEmpty))
             }
 
             if note != nil {
@@ -554,10 +561,11 @@ private struct NoteEditorView: View {
 
     private func saveNote() {
         let trimmedTitle = title.trimmed
-        guard !trimmedTitle.isEmpty else { return }
+        let trimmedContent = content.trimmed
+        guard !(trimmedTitle.isEmpty && trimmedContent.isEmpty) else { return }
 
         isSaving = true
-        let trimmedContent = content.trimmed
+        let resolvedTitle = trimmedTitle.isEmpty ? (firstContentLine(from: trimmedContent) ?? "Untitled") : trimmedTitle
         let contentValue = trimmedContent.isEmpty ? nil : trimmedContent
 
         Task {
@@ -565,13 +573,13 @@ private struct NoteEditorView: View {
                 if let note {
                     _ = try await notesService.updateNote(
                         note,
-                        title: trimmedTitle,
+                        title: resolvedTitle,
                         content: contentValue,
                         folderId: selectedFolderId == originalFolderId ? nil : selectedFolderId
                     )
                 } else {
                     _ = try await notesService.createNote(
-                        title: trimmedTitle,
+                        title: resolvedTitle,
                         content: contentValue,
                         folderId: selectedFolderId
                     )
@@ -589,6 +597,13 @@ private struct NoteEditorView: View {
             try? await notesService.deleteNote(note)
             await MainActor.run { dismiss() }
         }
+    }
+
+    private func firstContentLine(from content: String) -> String? {
+        content
+            .split(whereSeparator: \.isNewline)
+            .map { String($0).trimmed }
+            .first(where: { !$0.isEmpty })
     }
 
     private var editorToolbar: some View {

@@ -209,35 +209,34 @@ struct CalendarView: View {
     // MARK: - Day View
 
     private var dayView: some View {
-        ScrollView {
-            VStack(spacing: 0) {
-                if let error = calendarService.error {
-                    CalendarErrorView(message: error.localizedDescription)
-                        .padding(20)
-                } else if calendarService.isLoading && eventsForSelectedDay.isEmpty {
-                    SkeletonCalendarList(count: 3)
-                        .padding(20)
-                } else if eventsForSelectedDay.isEmpty {
-                    CalendarTimelineEmptyState(
-                        selectedDate: selectedDate,
-                        onCreateEvent: { showingCreateEvent = true }
-                    )
-                } else {
-                    CalendarTimelineView(
-                        events: eventsForSelectedDay,
-                        calendarService: calendarService,
-                        selectedDate: selectedDate,
-                        onEventTap: { selectedEvent = $0 },
-                        onEventDelete: { event in
-                            eventToDelete = event
-                            showingDeleteConfirmation = true
-                        },
-                        onCreateEvent: { showingCreateEvent = true }
-                    )
+        VStack(spacing: 0) {
+            if let error = calendarService.error {
+                CalendarErrorView(message: error.localizedDescription)
                     .padding(20)
-                }
+            } else if calendarService.isLoading && eventsForSelectedDay.isEmpty {
+                SkeletonCalendarList(count: 3)
+                    .padding(20)
+            } else if eventsForSelectedDay.isEmpty {
+                CalendarTimelineEmptyState(
+                    selectedDate: selectedDate,
+                    onCreateEvent: { showingCreateEvent = true }
+                )
+            } else {
+                CalendarTimelineView(
+                    events: eventsForSelectedDay,
+                    calendarService: calendarService,
+                    selectedDate: selectedDate,
+                    onEventTap: { selectedEvent = $0 },
+                    onEventDelete: { event in
+                        eventToDelete = event
+                        showingDeleteConfirmation = true
+                    },
+                    onCreateEvent: { showingCreateEvent = true }
+                )
+                .padding(20)
             }
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .animation(.easeInOut(duration: 0.2), value: calendarService.isLoading)
     }
 
