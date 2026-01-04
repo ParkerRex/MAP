@@ -234,7 +234,7 @@ struct HealthView: View {
             )
         }
         .padding(12)
-        .mapHealthGlassSurface(cornerRadius: 20, tint: .primary.opacity(0.02))
+        .mapHealthGlassSurface(cornerRadius: 20, tint: .primary.opacity(0.03))
     }
 
     // MARK: - Data Sources Row
@@ -329,7 +329,7 @@ struct HealthView: View {
             }
         }
         .padding(14)
-        .mapHealthGlassSurface(cornerRadius: 20, tint: .primary.opacity(0.02))
+        .mapHealthGlassSurface(cornerRadius: 20, tint: .primary.opacity(0.03))
     }
 
     private var recoveryRow: some View {

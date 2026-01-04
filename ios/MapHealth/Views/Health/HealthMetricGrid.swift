@@ -36,7 +36,7 @@ struct QuickStatsRow: View {
                 )
 
             Divider()
-                .frame(height: 40)
+                .frame(height: 32)
                 .foregroundStyle(.quaternary)
 
                 QuickStat(
@@ -48,7 +48,7 @@ struct QuickStatsRow: View {
                 )
 
             Divider()
-                .frame(height: 40)
+                .frame(height: 32)
                 .foregroundStyle(.quaternary)
 
                 QuickStat(
@@ -205,6 +205,10 @@ struct CompactMetricCard: View {
                 .mapHealthGlassSurface(cornerRadius: 14, tint: color.opacity(0.04))
         } else {
             content
+                .background(
+                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                        .stroke(Color.primary.opacity(0.06), lineWidth: 1)
+                )
         }
     }
 }
