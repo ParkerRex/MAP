@@ -7,13 +7,25 @@ struct CalendarWeekStrip: View {
     @Binding var selectedDate: Date
     let events: [CalendarEvent]
     let onDateDoubleTap: (Date) -> Void
-    let showsHeader: Bool = true
+    let showsHeader: Bool
 
     @State private var weekOffset: Int = 0
     @GestureState private var dragOffset: CGFloat = 0
 
     private let calendar = Calendar.current
     private let feedbackGenerator = UIImpactFeedbackGenerator(style: .light)
+
+    init(
+        selectedDate: Binding<Date>,
+        events: [CalendarEvent],
+        onDateDoubleTap: @escaping (Date) -> Void,
+        showsHeader: Bool = true
+    ) {
+        self._selectedDate = selectedDate
+        self.events = events
+        self.onDateDoubleTap = onDateDoubleTap
+        self.showsHeader = showsHeader
+    }
 
     var body: some View {
         VStack(spacing: 0) {
