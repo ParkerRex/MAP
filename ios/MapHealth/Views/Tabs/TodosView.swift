@@ -1,3 +1,4 @@
+// swiftlint:disable file_length
 import MapHealthCore
 import SwiftUI
 
@@ -17,6 +18,11 @@ struct TodosView: View {
     @State private var selectedNewTaskProjectId: String?
     @State private var isBulkProcessing = false
     @State private var showingBulkDeleteConfirmation = false
+    @State private var focusMode = false
+    @State private var previousFilter: TaskFilter = .all
+    @State private var inlineEditTaskId: MapTask.ID?
+    @State private var inlineEditTitle = ""
+    @State private var inlineEditNotes = ""
     @Environment(\.editMode) private var editMode
 
     enum TaskFilter: String, CaseIterable {
@@ -47,6 +53,14 @@ struct TodosView: View {
         case tasks = "Tasks"
         case projects = "Projects"
     }
+
+    struct QuickAddResult {
+        let title: String
+        let dueAt: Date?
+        let tagId: String?
+        let projectName: String?
+    }
+
 
     var body: some View {
         NavigationStack {
@@ -85,6 +99,18 @@ struct TodosView: View {
                             EditButton()
                         }
                     }
+                    if viewMode == .tasks {
+                        ToolbarItem(placement: .topBarLeading) {
+                            Button {
+                                HapticFeedback.selection()
+                                toggleFocusMode()
+                            } label: {
+                                Image(systemName: "scope")
+                                    .symbolVariant(focusMode ? .fill : .none)
+                            }
+                            .accessibilityLabel("Focus mode")
+                        }
+                    }
                     ToolbarItem(placement: .topBarTrailing) {
                         Button {
                             switch viewMode {
@@ -117,6 +143,7 @@ struct TodosView: View {
                 .onChange(of: editMode?.wrappedValue) { _, newValue in
                     if newValue != .active {
                         selectedTaskIds.removeAll()
+                        inlineEditTaskId = nil
                     }
                 }
                 .onChange(of: viewMode) { _, newValue in
@@ -125,6 +152,8 @@ struct TodosView: View {
                         editMode?.wrappedValue = .inactive
                         searchText = ""
                         projectSearchText = ""
+                        focusMode = false
+                        inlineEditTaskId = nil
                     }
                 }
         }
@@ -144,6 +173,9 @@ struct TodosView: View {
     private var contentList: some View {
         if viewMode == .tasks {
             List(selection: $selectedTaskIds) {
+                if focusMode {
+                    focusSummarySection
+                }
                 filterSection
                 projectSection
                 taskSections
@@ -183,6 +215,9 @@ extension TodosView {
                         ) {
                             HapticFeedback.selection()
                             withAnimation(.snappy(duration: 0.2)) {
+                                if focusMode && filter != .today {
+                                    focusMode = false
+                                }
                                 selectedFilter = filter
                             }
                         }
@@ -211,6 +246,48 @@ extension TodosView {
         case .completed:
             return tasks.filter { $0.isCompleted }.count
         }
+    }
+}
+
+// MARK: - Focus Summary
+
+extension TodosView {
+    private var focusSummarySection: some View {
+        Section {
+            HStack(spacing: 16) {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Today Focus")
+                        .font(.headline)
+                    Text("\(focusPendingCount) remaining")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                }
+                Spacer()
+                ProgressView(value: focusProgress)
+                    .progressViewStyle(.circular)
+            }
+            .padding(.vertical, 8)
+        }
+        .listRowSeparator(.hidden)
+        .listRowBackground(Color(.secondarySystemGroupedBackground))
+    }
+
+    private var focusTodayTasks: [MapTask] {
+        searchedTasks.filter { isToday($0.dueAt) }
+    }
+
+    private var focusCompletedCount: Int {
+        focusTodayTasks.filter { $0.isCompleted }.count
+    }
+
+    private var focusPendingCount: Int {
+        focusTodayTasks.filter { !$0.isCompleted }.count
+    }
+
+    private var focusProgress: Double {
+        let total = focusTodayTasks.count
+        guard total > 0 else { return 0 }
+        return Double(focusCompletedCount) / Double(total)
     }
 }
 
@@ -302,7 +379,10 @@ extension TodosView {
             Divider()
             HStack(spacing: 12) {
                 Menu {
-                    Button("No Project") { selectedNewTaskProjectId = nil }
+                    Button("No Project") {
+                        HapticFeedback.selection()
+                        selectedNewTaskProjectId = nil
+                    }
                     let tags = tasksService.tags.sorted {
                         $0.title.localizedCaseInsensitiveCompare($1.title) == .orderedAscending
                     }
@@ -315,7 +395,7 @@ extension TodosView {
                 } label: {
                     Image(systemName: "plus.circle.fill")
                         .font(.title3)
-                        .foregroundStyle(newTaskText.isEmpty ? .secondary : .accent)
+                        .foregroundStyle(newTaskText.isEmpty ? Color.secondary : Color.accentColor)
                 }
 
                 TextField("Add a task...", text: $newTaskText)
@@ -346,12 +426,14 @@ extension TodosView {
         VStack(spacing: 0) {
             Divider()
             HStack(spacing: 16) {
-                if isBulkProcessing {
-                    ProgressView()
-                } else {
-                    Text("\(selectedTaskIds.count) selected")
+                Group {
+                    if isBulkProcessing {
+                        ProgressView()
+                    } else {
+                        Text("\(selectedTaskIds.count) selected")
+                    }
                 }
-                    .font(.subheadline.weight(.semibold))
+                .font(.subheadline.weight(.semibold))
 
                 Spacer()
 
@@ -382,10 +464,10 @@ extension TodosView {
                     }
 
                     Section("Set Due Date") {
-                        Button("Today") { bulkSetDueDate(.today) }
-                        Button("Tomorrow") { bulkSetDueDate(.tomorrow) }
-                        Button("Next Week") { bulkSetDueDate(.nextWeek) }
-                        Button("Clear") { bulkSetDueDate(.clear) }
+                        Button("Today") { HapticFeedback.selection(); bulkSetDueDate(.today) }
+                        Button("Tomorrow") { HapticFeedback.selection(); bulkSetDueDate(.tomorrow) }
+                        Button("Next Week") { HapticFeedback.selection(); bulkSetDueDate(.nextWeek) }
+                        Button("Clear") { HapticFeedback.selection(); bulkSetDueDate(.clear) }
                     }
                 } label: {
                     Image(systemName: "folder")
@@ -412,13 +494,21 @@ extension TodosView {
         guard !text.isEmpty else { return }
 
         HapticFeedback.success()
-        let taskText = text
+        let parsed = parseQuickAdd(text)
+        let taskText = parsed.title
         newTaskText = ""
 
         Task {
-            if let task = try? await tasksService.createTask(title: taskText, dueAt: nil),
-               let tagId = selectedNewTaskProjectId {
-                _ = try? await tasksService.updateTask(task, tags: [tagId])
+            let dueAt = parsed.dueAt
+            if let task = try? await tasksService.createTask(title: taskText, dueAt: dueAt) {
+                if let tagId = selectedNewTaskProjectId ?? parsed.tagId {
+                    _ = try? await tasksService.updateTask(task, tags: [tagId])
+                } else if let projectName = parsed.projectName {
+                    if let created = try? await tasksService.createTag(title: projectName) {
+                        _ = try? await tasksService.updateTask(task, tags: [created.id])
+                        await MainActor.run { selectedNewTaskProjectId = created.id }
+                    }
+                }
             }
         }
     }
@@ -427,6 +517,12 @@ extension TodosView {
 // MARK: - Task Sections
 
 extension TodosView {
+    private struct QuickAddResult {
+        let title: String
+        let dueAt: Date?
+        let tagId: String?
+        let projectName: String?
+    }
     @ViewBuilder
     private var taskSections: some View {
         if tasksService.isLoading && tasksService.tasks.isEmpty {
@@ -497,6 +593,11 @@ extension TodosView {
 
     @ViewBuilder
     private var activeSections: some View {
+        if focusMode {
+            focusSections
+            return
+        }
+
         if selectedFilter == .completed {
             completedSection(tasks: tasksForFilter)
             return
@@ -547,23 +648,38 @@ extension TodosView {
         }
     }
 
+    @ViewBuilder
+    private var focusSections: some View {
+        let pending = searchedTasks.filter { !$0.isCompleted }
+        let overdue = pending.filter { isOverdue($0.dueAt) }
+            .sorted { ($0.dueAt ?? .distantFuture) < ($1.dueAt ?? .distantFuture) }
+        let today = pending.filter { isToday($0.dueAt) }
+        let upcoming = pending.filter { isUpcoming($0.dueAt) }
+            .sorted { ($0.dueAt ?? .distantFuture) < ($1.dueAt ?? .distantFuture) }
+
+        if !overdue.isEmpty {
+            taskSection(title: "Overdue", tasks: overdue, tint: .red)
+        }
+
+        if !today.isEmpty {
+            taskSection(title: "Today", tasks: today, tint: .orange)
+        }
+
+        if overdue.isEmpty && today.isEmpty && !upcoming.isEmpty {
+            taskSection(title: "Upcoming", tasks: upcoming, tint: .blue)
+        }
+
+        if overdue.isEmpty && today.isEmpty && upcoming.isEmpty {
+            Section {
+                filteredEmptyState
+            }
+        }
+    }
+
     private func taskSection(title: String, tasks: [MapTask], tint: Color) -> some View {
         Section {
             ForEach(tasks) { task in
-                TaskRow(
-                    task: task,
-                    projectTitle: selectedProject == .all ? task.tags.first?.title : nil,
-                    projectTint: ProjectStyling.tint(for: task.tags.first?.id),
-                    onToggle: { toggleTask(task) },
-                    onTap: { if !isEditing { selectedTask = task } },
-                    onDelete: { deleteTask(task) }
-                ) {
-                    projectMenu(for: task)
-                }
-                .tag(task.id)
-                .listRowInsets(EdgeInsets(top: 12, leading: 16, bottom: 12, trailing: 16))
-                .listRowSeparator(.hidden)
-                .listRowBackground(Color(.secondarySystemGroupedBackground))
+                taskRow(for: task)
             }
         } header: {
             HStack(spacing: 8) {
@@ -585,20 +701,7 @@ extension TodosView {
 
         return Section {
             ForEach(sortedTasks) { task in
-                TaskRow(
-                    task: task,
-                    projectTitle: selectedProject == .all ? task.tags.first?.title : nil,
-                    projectTint: ProjectStyling.tint(for: task.tags.first?.id),
-                    onToggle: { toggleTask(task) },
-                    onTap: { if !isEditing { selectedTask = task } },
-                    onDelete: { deleteTask(task) }
-                ) {
-                    projectMenu(for: task)
-                }
-                .tag(task.id)
-                .listRowInsets(EdgeInsets(top: 12, leading: 16, bottom: 12, trailing: 16))
-                .listRowSeparator(.hidden)
-                .listRowBackground(Color(.secondarySystemGroupedBackground))
+                taskRow(for: task)
             }
             if tasks.count > 15 {
                 Text("\(tasks.count - 15) more completed")
@@ -728,6 +831,51 @@ extension TodosView {
     }
 }
 
+// MARK: - Task Rows
+
+extension TodosView {
+    @ViewBuilder
+    private func taskRow(for task: MapTask) -> some View {
+        if inlineEditTaskId == task.id {
+            InlineEditRow(
+                title: $inlineEditTitle,
+                notes: $inlineEditNotes,
+                isSaving: isBulkProcessing,
+                onCancel: cancelInlineEdit,
+                onSave: { saveInlineEdit(for: task) }
+            )
+            .listRowInsets(rowInsets)
+            .listRowSeparator(.hidden)
+            .listRowBackground(Color(.secondarySystemGroupedBackground))
+        } else {
+            TaskRow(
+                task: task,
+                projectTitle: selectedProject == .all ? task.tags.first?.title : nil,
+                projectTint: ProjectStyling.tint(for: task.tags.first?.id),
+                onToggle: { toggleTask(task) },
+                onTap: { if !isEditing { selectedTask = task } },
+                onDelete: { deleteTask(task) }
+            ) {
+                projectMenu(for: task)
+            } extraMenu: {
+                Button("Quick Edit") {
+                    beginInlineEdit(for: task)
+                }
+            }
+            .tag(task.id)
+            .listRowInsets(rowInsets)
+            .listRowSeparator(.hidden)
+            .listRowBackground(Color(.secondarySystemGroupedBackground))
+        }
+    }
+
+    private var rowInsets: EdgeInsets {
+        focusMode
+        ? EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16)
+        : EdgeInsets(top: 12, leading: 16, bottom: 12, trailing: 16)
+    }
+}
+
 // MARK: - Actions
 
 extension TodosView {
@@ -787,6 +935,38 @@ extension TodosView {
                 task,
                 tags: tagId.map { [$0] } ?? []
             )
+        }
+    }
+
+    private func beginInlineEdit(for task: MapTask) {
+        HapticFeedback.light()
+        inlineEditTaskId = task.id
+        inlineEditTitle = task.title
+        inlineEditNotes = task.body ?? ""
+    }
+
+    private func cancelInlineEdit() {
+        HapticFeedback.selection()
+        inlineEditTaskId = nil
+        inlineEditTitle = ""
+        inlineEditNotes = ""
+    }
+
+    private func saveInlineEdit(for task: MapTask) {
+        let title = inlineEditTitle.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !title.isEmpty else { return }
+        HapticFeedback.success()
+        isBulkProcessing = true
+        Task {
+            try? await tasksService.updateTask(
+                task,
+                title: title,
+                body: inlineEditNotes.trimmingCharacters(in: .whitespacesAndNewlines)
+            )
+            await MainActor.run {
+                isBulkProcessing = false
+                inlineEditTaskId = nil
+            }
         }
     }
 
@@ -898,6 +1078,103 @@ extension TodosView {
             await MainActor.run { newProjectTitle = "" }
         }
     }
+
+    private func toggleFocusMode() {
+        if focusMode {
+            focusMode = false
+            selectedFilter = previousFilter
+        } else {
+            previousFilter = selectedFilter
+            focusMode = true
+            selectedFilter = .today
+        }
+    }
+
+    private func parseQuickAdd(_ input: String) -> QuickAddResult {
+        var working = input
+        let lower = working.lowercased()
+        var dueAt: Date?
+
+        if lower.contains("tomorrow") {
+            dueAt = Calendar.current.date(
+                byAdding: .day,
+                value: 1,
+                to: Calendar.current.startOfDay(for: Date())
+            )
+            working = working.replacingOccurrences(of: "tomorrow", with: "", options: .caseInsensitive)
+        } else if lower.contains("today") {
+            dueAt = Calendar.current.startOfDay(for: Date())
+            working = working.replacingOccurrences(of: "today", with: "", options: .caseInsensitive)
+        } else if lower.contains("next week") {
+            dueAt = DateHelpers.nextMonday()
+            working = working.replacingOccurrences(of: "next week", with: "", options: .caseInsensitive)
+        } else if let weekday = parseWeekday(in: lower) {
+            dueAt = weekday
+            if let token = weekdayToken(in: lower) {
+                working = working.replacingOccurrences(of: token, with: "", options: .caseInsensitive)
+            }
+        }
+
+        let (tagId, cleaned, projectName) = parseProjectToken(in: working)
+        let title = cleaned.trimmingCharacters(in: .whitespacesAndNewlines)
+        let resolvedTagId = tagId ?? tasksService.tags.first(where: {
+            guard let projectName else { return false }
+            return $0.title.compare(projectName, options: .caseInsensitive) == .orderedSame
+        })?.id
+        return QuickAddResult(
+            title: title.isEmpty ? input : title,
+            dueAt: dueAt,
+            tagId: resolvedTagId,
+            projectName: projectName
+        )
+    }
+
+    private func parseProjectToken(in input: String) -> (String?, String, String?) {
+        guard let tokenRange = input.range(of: "(^|\\s)[#@]([\\w-]+)", options: .regularExpression) else {
+            return (nil, input, nil)
+        }
+
+        let token = String(input[tokenRange])
+        let name = token.trimmingCharacters(in: .whitespacesAndNewlines)
+            .dropFirst()
+        let projectName = String(name)
+
+        let tagId = tasksService.tags.first(where: {
+            $0.title.compare(projectName, options: .caseInsensitive) == .orderedSame
+        })?.id
+
+        let cleaned = input.replacingOccurrences(of: token, with: "", options: .regularExpression)
+        return (tagId, cleaned, projectName.isEmpty ? nil : projectName)
+    }
+
+    private func parseWeekday(in lower: String) -> Date? {
+        let calendar = Calendar.current
+        let weekdays = [
+            "monday": 2, "mon": 2,
+            "tuesday": 3, "tue": 3,
+            "wednesday": 4, "wed": 4,
+            "thursday": 5, "thu": 5,
+            "friday": 6, "fri": 6,
+            "saturday": 7, "sat": 7,
+            "sunday": 1, "sun": 1
+        ]
+        for (key, value) in weekdays where lower.contains(key) {
+            let today = Date()
+            let currentWeekday = calendar.component(.weekday, from: today)
+            var daysToAdd = value - currentWeekday
+            if daysToAdd <= 0 { daysToAdd += 7 }
+            let start = calendar.startOfDay(for: today)
+            return calendar.date(byAdding: .day, value: daysToAdd, to: start)
+        }
+        return nil
+    }
+
+    private func weekdayToken(in lower: String) -> String? {
+        for token in ["monday","mon","tuesday","tue","wednesday","wed","thursday","thu","friday","fri","saturday","sat","sunday","sun"] {
+            if lower.contains(token) { return token }
+        }
+        return nil
+    }
 }
 
 // MARK: - Filter Chip
@@ -991,5 +1268,44 @@ private struct ProjectChip: View {
         }
         .buttonStyle(.plain)
         .animation(.snappy(duration: 0.2), value: isSelected)
+    }
+}
+
+// MARK: - Inline Edit Row
+
+private struct InlineEditRow: View {
+    @Binding var title: String
+    @Binding var notes: String
+    let isSaving: Bool
+    let onCancel: () -> Void
+    let onSave: () -> Void
+    @FocusState private var isTitleFocused: Bool
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            TextField("Title", text: $title)
+                .font(.body.weight(.medium))
+                .focused($isTitleFocused)
+                .submitLabel(.done)
+                .onSubmit(onSave)
+
+            TextField("Notes", text: $notes, axis: .vertical)
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+                .lineLimit(1...3)
+
+            HStack {
+                Button("Cancel", action: onCancel)
+                    .buttonStyle(.bordered)
+                    .controlSize(.small)
+                Spacer()
+                Button("Save", action: onSave)
+                    .buttonStyle(.borderedProminent)
+                    .controlSize(.small)
+                    .disabled(title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isSaving)
+            }
+        }
+        .padding(.vertical, 4)
+        .onAppear { isTitleFocused = true }
     }
 }

@@ -1,7 +1,7 @@
 import MapHealthCore
 import SwiftUI
 
-struct TaskRow<ProjectMenu: View>: View {
+struct TaskRow<ProjectMenu: View, ExtraMenu: View>: View {
     let task: MapTask
     let projectTitle: String?
     let projectTint: Color?
@@ -9,6 +9,7 @@ struct TaskRow<ProjectMenu: View>: View {
     let onTap: () -> Void
     let onDelete: () -> Void
     let projectMenu: ProjectMenu
+    let extraMenu: ExtraMenu
 
     init(
         task: MapTask,
@@ -17,7 +18,8 @@ struct TaskRow<ProjectMenu: View>: View {
         onToggle: @escaping () -> Void,
         onTap: @escaping () -> Void,
         onDelete: @escaping () -> Void,
-        @ViewBuilder projectMenu: () -> ProjectMenu = { EmptyView() }
+        @ViewBuilder projectMenu: () -> ProjectMenu = { EmptyView() },
+        @ViewBuilder extraMenu: () -> ExtraMenu = { EmptyView() }
     ) {
         self.task = task
         self.projectTitle = projectTitle
@@ -26,6 +28,7 @@ struct TaskRow<ProjectMenu: View>: View {
         self.onTap = onTap
         self.onDelete = onDelete
         self.projectMenu = projectMenu()
+        self.extraMenu = extraMenu()
     }
 
     var body: some View {
@@ -61,6 +64,7 @@ struct TaskRow<ProjectMenu: View>: View {
                 Label("Edit", systemImage: "pencil")
             }
             projectMenu
+            extraMenu
             Divider()
             Button(role: .destructive, action: onDelete) {
                 Label("Delete", systemImage: "trash")
