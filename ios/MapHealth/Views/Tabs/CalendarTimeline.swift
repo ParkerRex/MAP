@@ -12,6 +12,7 @@ struct CalendarTimelineView: View {
     let onCreateEvent: () -> Void
 
     @State private var currentTimeOffset: CGFloat = 0
+    @State private var scrollRequest: Int = 0
     private let hourHeight: CGFloat = 60
     private let calendar = Calendar.current
 
@@ -33,22 +34,34 @@ struct CalendarTimelineView: View {
 
     private var allDaySection: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("All Day")
-                .font(.caption.weight(.semibold))
-                .foregroundStyle(.secondary)
-                .textCase(.uppercase)
-                .padding(.leading, 4)
+            HStack(spacing: 8) {
+                Text("All Day")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.secondary)
+                    .textCase(.uppercase)
 
-            VStack(spacing: 6) {
-                ForEach(allDayEvents) { event in
-                    TimelineEventCard(
-                        event: event,
-                        calendarService: calendarService,
-                        isCompact: true,
-                        onTap: { onEventTap(event) },
-                        onDelete: { onEventDelete(event) }
-                    )
+                Text("\(allDayEvents.count)")
+                    .font(.caption2.weight(.semibold))
+                    .foregroundStyle(.secondary)
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 2)
+                    .mapHealthGlassSurface(cornerRadius: 8, tint: .primary.opacity(0.03))
+            }
+            .padding(.leading, 4)
+
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 8) {
+                    ForEach(allDayEvents) { event in
+                        AllDayEventChip(
+                            event: event,
+                            calendarService: calendarService,
+                            onTap: { onEventTap(event) },
+                            onDelete: { onEventDelete(event) }
+                        )
+                    }
                 }
+                .padding(.horizontal, 4)
+                .padding(.vertical, 2)
             }
         }
     }
@@ -57,21 +70,25 @@ struct CalendarTimelineView: View {
 
     private var timelineSection: some View {
         ScrollViewReader { proxy in
-            ScrollView(.vertical, showsIndicators: false) {
-                ZStack(alignment: .topLeading) {
-                    // Hour grid lines
-                    hourGrid
+            VStack(spacing: 12) {
+                timelineHeader
 
-                    // Current time indicator
-                    if calendar.isDateInToday(selectedDate) {
-                        currentTimeIndicator
+                ScrollView(.vertical, showsIndicators: false) {
+                    ZStack(alignment: .topLeading) {
+                        hourStripes
+                        hourGrid
+
+                        // Current time indicator
+                        if calendar.isDateInToday(selectedDate) {
+                            currentTimeIndicator
+                        }
+
+                        // Events overlaid on timeline
+                        eventBlocks
                     }
-
-                    // Events overlaid on timeline
-                    eventBlocks
+                    .frame(height: hourHeight * 24)
+                    .id("timeline")
                 }
-                .frame(height: hourHeight * 24)
-                .id("timeline")
             }
             .onAppear {
                 scrollToRelevantTime(proxy: proxy)
@@ -79,7 +96,37 @@ struct CalendarTimelineView: View {
             .onChange(of: selectedDate) { _, _ in
                 scrollToRelevantTime(proxy: proxy)
             }
+            .onChange(of: scrollRequest) { _, _ in
+                scrollToRelevantTime(proxy: proxy)
+            }
         }
+    }
+
+    private var timelineHeader: some View {
+        HStack {
+            Text("Timeline")
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(.secondary)
+
+            Spacer()
+
+            Button {
+                scrollRequest += 1
+            } label: {
+                Label(timelineFocusLabel, systemImage: "scope")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.primary)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 6)
+                    .mapHealthGlassSurface(cornerRadius: 10, tint: .primary.opacity(0.03))
+            }
+            .buttonStyle(.plain)
+        }
+        .padding(.horizontal, 4)
+    }
+
+    private var timelineFocusLabel: String {
+        calendar.isDateInToday(selectedDate) ? "Now" : "Focus"
     }
 
     // MARK: - Hour Grid
@@ -103,6 +150,17 @@ struct CalendarTimelineView: View {
         }
     }
 
+    private var hourStripes: some View {
+        VStack(spacing: 0) {
+            ForEach(0..<24, id: \.self) { hour in
+                Rectangle()
+                    .fill(hour.isMultiple(of: 2) ? Color.secondary.opacity(0.04) : Color.clear)
+                    .frame(height: hourHeight)
+                    .padding(.leading, 52)
+            }
+        }
+    }
+
     // MARK: - Current Time Indicator
 
     private var currentTimeIndicator: some View {
@@ -111,12 +169,18 @@ struct CalendarTimelineView: View {
         let minute = calendar.component(.minute, from: now)
         let offset = CGFloat(hour) * hourHeight + CGFloat(minute) / 60.0 * hourHeight
 
-        return HStack(spacing: 0) {
-            Text("NOW")
-                .font(.caption2.weight(.bold))
-                .foregroundStyle(.red)
-                .frame(width: 44, alignment: .trailing)
-                .padding(.trailing, 4)
+        return HStack(spacing: 8) {
+            HStack(spacing: 6) {
+                Text("NOW")
+                    .font(.caption2.weight(.bold))
+                Text(now.formatted(.dateTime.hour().minute()))
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+            }
+            .padding(.horizontal, 8)
+            .padding(.vertical, 4)
+            .foregroundStyle(.red)
+            .mapHealthGlassSurface(cornerRadius: 10, tint: .red.opacity(0.08))
 
             Circle()
                 .fill(.red)
@@ -126,7 +190,8 @@ struct CalendarTimelineView: View {
                 .fill(.red)
                 .frame(height: 1.5)
         }
-        .offset(y: offset - 4)
+        .padding(.leading, 8)
+        .offset(y: offset - 12)
     }
 
     // MARK: - Event Blocks
@@ -311,6 +376,56 @@ struct TimelineEventCard: View {
         if let url = URL(string: "maps://?q=\(encoded)") {
             UIApplication.shared.open(url)
         }
+    }
+}
+
+// MARK: - All Day Chip
+
+private struct AllDayEventChip: View {
+    let event: CalendarEvent
+    let calendarService: CalendarService
+    let onTap: () -> Void
+    let onDelete: () -> Void
+
+    private let feedbackGenerator = UIImpactFeedbackGenerator(style: .light)
+
+    var body: some View {
+        Button {
+            feedbackGenerator.impactOccurred()
+            onTap()
+        } label: {
+            HStack(spacing: 8) {
+                Circle()
+                    .fill(eventColor)
+                    .frame(width: 8, height: 8)
+
+                Text(event.summary ?? "Untitled")
+                    .font(.subheadline.weight(.medium))
+                    .foregroundStyle(.primary)
+                    .lineLimit(1)
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
+            .background(eventColor.opacity(0.12))
+            .clipShape(Capsule())
+        }
+        .buttonStyle(.plain)
+        .contextMenu {
+            Button { onTap() } label: {
+                Label("View Details", systemImage: "info.circle")
+            }
+            Divider()
+            Button(role: .destructive) { onDelete() } label: {
+                Label("Delete", systemImage: "trash")
+            }
+        }
+    }
+
+    private var eventColor: Color {
+        if let colors = calendarService.colorForEvent(event) {
+            return Color(hex: colors.background) ?? .accentColor
+        }
+        return googleCalendarColor(for: event.colorId)
     }
 }
 

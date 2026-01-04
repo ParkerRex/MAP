@@ -14,12 +14,14 @@ struct NotesView: View {
                 notesContent
             }
             .listStyle(.plain)
+            .listSectionSpacing(12)
             .scrollContentBackground(.hidden)
             .scrollDismissesKeyboard(.interactively)
             .searchable(text: $searchText, prompt: "Search notes")
             .refreshable { await notesService.refresh() }
             .task { await loadNotesIfNeeded() }
             .navigationTitle("Notes")
+            .navigationBarTitleDisplayMode(.large)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     folderMenu
@@ -189,6 +191,18 @@ extension NotesView {
             Text(searchText.trimmed.isEmpty ? "Tap the pen to start a note" : "Try a different search term")
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
+
+            if searchText.trimmed.isEmpty {
+                Button {
+                    showingNewNote = true
+                } label: {
+                    Label("New Note", systemImage: "square.and.pencil")
+                        .font(.subheadline.weight(.semibold))
+                }
+                .buttonStyle(.borderedProminent)
+                .tint(.yellow)
+                .disabled(resolvedFolderId == nil)
+            }
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 60)
@@ -224,13 +238,17 @@ extension NotesView {
 extension NotesView {
     private var folderMenu: some View {
         Menu {
-            Button("All Notes") { selectedFolderId = nil }
+            Picker("Folder", selection: $selectedFolderId) {
+                Text("All Notes")
+                    .tag(String?.none)
 
-            if !notesService.folders.isEmpty {
-                Divider()
+                if !notesService.folders.isEmpty {
+                    Divider()
 
-                ForEach(notesService.folders) { folder in
-                    Button(folder.name) { selectedFolderId = folder.id }
+                    ForEach(notesService.folders) { folder in
+                        Text(folderMenuTitle(for: folder))
+                            .tag(Optional<String>.some(folder.id))
+                    }
                 }
             }
         } label: {
@@ -249,6 +267,13 @@ extension NotesView {
         }
         return "All Notes"
     }
+
+    private func folderMenuTitle(for folder: MapFolder) -> String {
+        if let count = folder.notesCount {
+            return "\(folder.name) (\(count))"
+        }
+        return folder.name
+    }
 }
 
 // MARK: - Sort Menu
@@ -256,8 +281,10 @@ extension NotesView {
 extension NotesView {
     private var sortMenu: some View {
         Menu {
-            Button("Last Edited") { sortOrder = .lastEdited }
-            Button("Date Created") { sortOrder = .dateCreated }
+            Picker("Sort", selection: $sortOrder) {
+                Text("Last Edited").tag(SortOrder.lastEdited)
+                Text("Date Created").tag(SortOrder.dateCreated)
+            }
         } label: {
             Image(systemName: "ellipsis.circle")
                 .font(.body.weight(.medium))
@@ -374,6 +401,7 @@ private struct NoteEditorView: View {
     @State private var selectedFolderId: String
     @State private var isSaving = false
     @State private var showingDeleteConfirmation = false
+    @State private var editorMode: EditorMode = .edit
 
     private let originalFolderId: String
 
@@ -404,23 +432,33 @@ private struct NoteEditorView: View {
             VStack(alignment: .leading, spacing: 16) {
                 folderPicker
 
+                Picker("Mode", selection: $editorMode) {
+                    Text("Edit").tag(EditorMode.edit)
+                    Text("Preview").tag(EditorMode.preview)
+                }
+                .pickerStyle(.segmented)
+
                 TextField("Title", text: $title, axis: .vertical)
                     .font(.title3.weight(.semibold))
                     .focused($focusedField, equals: .title)
                     .lineLimit(1...3)
 
-                ZStack(alignment: .topLeading) {
-                    if content.trimmed.isEmpty {
-                        Text("Note")
+                if editorMode == .edit {
+                    ZStack(alignment: .topLeading) {
+                        if content.trimmed.isEmpty {
+                            Text("Note")
+                                .font(.body)
+                                .foregroundStyle(.secondary)
+                                .padding(.top, 8)
+                                .padding(.leading, 4)
+                        }
+                        TextEditor(text: $content)
                             .font(.body)
-                            .foregroundStyle(.secondary)
-                            .padding(.top, 8)
-                            .padding(.leading, 4)
+                            .frame(minHeight: 240)
+                            .focused($focusedField, equals: .content)
                     }
-                    TextEditor(text: $content)
-                        .font(.body)
-                        .frame(minHeight: 240)
-                        .focused($focusedField, equals: .content)
+                } else {
+                    markdownPreview
                 }
             }
             .padding(20)
@@ -533,6 +571,26 @@ private struct NoteEditorView: View {
             await MainActor.run { dismiss() }
         }
     }
+
+    private var markdownPreview: some View {
+        let previewText = content.trimmed.isEmpty ? "Nothing to preview yet." : content
+        let attributed = try? AttributedString(markdown: previewText)
+        return VStack(alignment: .leading, spacing: 8) {
+            if let attributed {
+                Text(attributed)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            } else {
+                Text(previewText)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
+        }
+        .font(.body)
+        .foregroundStyle(.primary)
+        .padding(12)
+        .frame(maxWidth: .infinity, minHeight: 240, alignment: .topLeading)
+        .background(Color(.secondarySystemGroupedBackground))
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+    }
 }
 
 private extension String {
@@ -544,4 +602,9 @@ private extension String {
 private enum SortOrder {
     case lastEdited
     case dateCreated
+}
+
+private enum EditorMode {
+    case edit
+    case preview
 }

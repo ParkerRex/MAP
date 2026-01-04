@@ -11,6 +11,7 @@ struct CalendarView: View {
     @State private var selectedEvent: CalendarEvent?
     @State private var eventToDelete: CalendarEvent?
     @State private var showingDeleteConfirmation = false
+    @State private var showingDatePicker = false
     @GestureState private var dayDragOffset: CGFloat = 0
     @State private var hasLoadedInitialData = false
     @State private var weather: WeatherData?
@@ -53,6 +54,9 @@ struct CalendarView: View {
                     calendarService: calendarService,
                     selectedDate: selectedDate
                 )
+            }
+            .sheet(isPresented: $showingDatePicker) {
+                DatePickerSheet(selectedDate: $selectedDate)
             }
             .sheet(item: $selectedEvent) { event in
                 EventDetailSheet(
@@ -147,6 +151,7 @@ struct CalendarView: View {
         HStack(spacing: 12) {
             calendarPickerButton
             Spacer()
+            jumpToDateButton
             addEventButton
         }
     }
@@ -372,16 +377,36 @@ struct CalendarView: View {
     }
 
     private func weatherBadge(_ weather: WeatherData) -> some View {
-        HStack(spacing: 6) {
+        HStack(spacing: 8) {
             Image(systemName: weather.icon)
                 .symbolRenderingMode(.multicolor)
-            Text("\(weather.temperature)°")
-                .fontWeight(.semibold)
+            VStack(alignment: .leading, spacing: 2) {
+                Text("\(weather.temperature)°")
+                    .fontWeight(.semibold)
+                Text(weather.conditionText)
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+            }
         }
         .font(.caption)
         .padding(.horizontal, 10)
         .padding(.vertical, 6)
         .mapHealthGlassSurface(cornerRadius: 12, tint: .blue.opacity(0.08))
+    }
+
+    private var jumpToDateButton: some View {
+        Button {
+            feedbackGenerator.impactOccurred()
+            showingDatePicker = true
+        } label: {
+            Label("Jump", systemImage: "calendar.badge.clock")
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(.primary)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 8)
+                .mapHealthGlassSurface(cornerRadius: 14, tint: .primary.opacity(0.03))
+        }
+        .buttonStyle(.plain)
     }
 
     private var calendarPickerTitle: String {
@@ -484,5 +509,36 @@ struct CalendarView: View {
             return Color(hex: backgroundColor) ?? .accentColor
         }
         return .accentColor
+    }
+}
+
+// MARK: - Date Picker Sheet
+
+private struct DatePickerSheet: View {
+    @Binding var selectedDate: Date
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        NavigationStack {
+            VStack {
+                DatePicker(
+                    "Select date",
+                    selection: $selectedDate,
+                    displayedComponents: [.date]
+                )
+                .datePickerStyle(.graphical)
+                .labelsHidden()
+                .padding(20)
+
+                Spacer()
+            }
+            .navigationTitle("Jump to Date")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Done") { dismiss() }
+                }
+            }
+        }
     }
 }

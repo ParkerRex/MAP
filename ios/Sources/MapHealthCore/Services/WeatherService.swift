@@ -10,6 +10,10 @@ public struct WeatherData {
         Self.iconForCode(weatherCode, isDay: isDay)
     }
 
+    public var conditionText: String {
+        Self.conditionForCode(weatherCode)
+    }
+
     private static func iconForCode(_ code: Int, isDay: Bool) -> String {
         switch code {
         case 0: return isDay ? "sun.max.fill" : "moon.stars.fill"
@@ -22,6 +26,25 @@ public struct WeatherData {
         case 80, 81, 82: return "cloud.heavyrain.fill"
         case 95, 96, 99: return "cloud.bolt.rain.fill"
         default: return "thermometer.medium"
+        }
+    }
+
+    private static func conditionForCode(_ code: Int) -> String {
+        switch code {
+        case 0: return "Clear"
+        case 1: return "Mostly clear"
+        case 2: return "Partly cloudy"
+        case 3: return "Overcast"
+        case 45, 48: return "Fog"
+        case 51, 53, 55: return "Drizzle"
+        case 61, 63, 65: return "Rain"
+        case 66, 67: return "Freezing rain"
+        case 71, 73, 75, 77: return "Snow"
+        case 80, 81, 82: return "Showers"
+        case 85, 86: return "Snow showers"
+        case 95: return "Thunderstorm"
+        case 96, 99: return "Thunderstorm"
+        default: return "Weather"
         }
     }
 }

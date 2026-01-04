@@ -68,7 +68,7 @@ struct HealthView: View {
     }
 
     private var healthBody: some View {
-        LazyVStack(spacing: 24) {
+        LazyVStack(spacing: 18) {
             headerSection
 
             if healthService.needsPermission {
@@ -80,7 +80,7 @@ struct HealthView: View {
                     section(
                         title: "WHOOP",
                         systemImage: "bolt.heart.fill",
-                        footnote: whoopConnected ? "Connected" : "Not connected"
+                        footnote: whoopConnected ? "Connected" : nil
                     ) {
                         HealthHeroCard(
                             recovery: whoopRecovery,
@@ -91,7 +91,7 @@ struct HealthView: View {
                     }
                 }
 
-                section(title: "Highlights", systemImage: "sparkles") {
+                section(title: "Today", systemImage: "sun.max.fill") {
                     QuickStatsRow(
                         steps: snapshot?.today.steps,
                         calories: snapshot?.today.activeEnergy,
@@ -99,25 +99,11 @@ struct HealthView: View {
                         isLoading: healthService.isLoading
                     )
 
-                    SleepCompactCard(
-                        sleepHours: snapshot?.today.sleepHours,
-                        sleepStages: snapshot?.today.sleepStages,
-                        average7d: snapshot?.sleepAverage7d,
-                        trend: snapshot?.sleepTrend.map(mapTrend),
-                        isLoading: healthService.isLoading
-                    )
+                    recoveryRow
 
                     if whoopConnected, whoopSleep != nil {
                         WhoopSleepQualitySection(sleep: whoopSleep, showsHeader: false)
                     }
-
-                    HeartSectionCard(
-                        restingHR: whoopConnected ? whoopRecovery?.restingHR : snapshot?.today.restingHeartRate,
-                        hrv: whoopConnected ? whoopRecovery?.hrv : snapshot?.today.hrvSDNN,
-                        restingHRTrend: snapshot?.restingHRTrend.map(mapTrend),
-                        hrvTrend: snapshot?.hrvTrend.map(mapTrend),
-                        isLoading: healthService.isLoading || isLoadingWhoop
-                    )
                 }
 
                 section(title: "Activity", systemImage: "figure.walk") {
@@ -283,10 +269,10 @@ struct HealthView: View {
     private func sectionHeader(title: String, systemImage: String, footnote: String? = nil) -> some View {
         HStack(spacing: 8) {
             Image(systemName: systemImage)
-                .font(.caption)
+                .font(.subheadline)
                 .foregroundStyle(.secondary)
             Text(title)
-                .font(.headline)
+                .font(.subheadline.weight(.semibold))
                 .foregroundStyle(.primary)
 
             if let footnote {
@@ -312,6 +298,46 @@ struct HealthView: View {
         VStack(alignment: .leading, spacing: 12) {
             sectionHeader(title: title, systemImage: systemImage, footnote: footnote)
             content()
+        }
+    }
+
+    private var recoveryRow: some View {
+        ViewThatFits(in: .horizontal) {
+            HStack(spacing: 12) {
+                SleepCompactCard(
+                    sleepHours: snapshot?.today.sleepHours,
+                    sleepStages: snapshot?.today.sleepStages,
+                    average7d: snapshot?.sleepAverage7d,
+                    trend: snapshot?.sleepTrend.map(mapTrend),
+                    isLoading: healthService.isLoading
+                )
+
+                HeartSectionCard(
+                    restingHR: whoopConnected ? whoopRecovery?.restingHR : snapshot?.today.restingHeartRate,
+                    hrv: whoopConnected ? whoopRecovery?.hrv : snapshot?.today.hrvSDNN,
+                    restingHRTrend: snapshot?.restingHRTrend.map(mapTrend),
+                    hrvTrend: snapshot?.hrvTrend.map(mapTrend),
+                    isLoading: healthService.isLoading || isLoadingWhoop
+                )
+            }
+
+            VStack(spacing: 12) {
+                SleepCompactCard(
+                    sleepHours: snapshot?.today.sleepHours,
+                    sleepStages: snapshot?.today.sleepStages,
+                    average7d: snapshot?.sleepAverage7d,
+                    trend: snapshot?.sleepTrend.map(mapTrend),
+                    isLoading: healthService.isLoading
+                )
+
+                HeartSectionCard(
+                    restingHR: whoopConnected ? whoopRecovery?.restingHR : snapshot?.today.restingHeartRate,
+                    hrv: whoopConnected ? whoopRecovery?.hrv : snapshot?.today.hrvSDNN,
+                    restingHRTrend: snapshot?.restingHRTrend.map(mapTrend),
+                    hrvTrend: snapshot?.hrvTrend.map(mapTrend),
+                    isLoading: healthService.isLoading || isLoadingWhoop
+                )
+            }
         }
     }
 
