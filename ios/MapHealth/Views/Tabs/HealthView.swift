@@ -196,10 +196,10 @@ struct HealthView: View {
     private func updatedBadge(_ timestamp: Date) -> some View {
         Text("Updated \(timestamp, style: .relative) ago")
             .font(.caption2)
-            .foregroundStyle(.secondary)
+            .foregroundStyle(.tertiary)
             .padding(.horizontal, 10)
             .padding(.vertical, 4)
-            .background(.ultraThinMaterial, in: Capsule())
+            .background(Color.primary.opacity(0.06), in: Capsule())
     }
 
     // MARK: - Activity Grid
@@ -263,7 +263,11 @@ struct HealthView: View {
                 .fill(connected ? color : Color.orange)
                 .frame(width: 6, height: 6)
         }
+        .fontWeight(.semibold)
         .foregroundStyle(.secondary)
+        .padding(.horizontal, 10)
+        .padding(.vertical, 6)
+        .background(Color.primary.opacity(0.04), in: Capsule())
     }
 
     private func sectionHeader(title: String, systemImage: String, footnote: String? = nil) -> some View {

@@ -10,6 +10,7 @@ struct SettingsView: View {
     @AppStorage(StorageKeys.openAIModel) private var openAIModel = StorageKeys.Defaults.openAIModel
     @AppStorage(StorageKeys.claudeModel) private var claudeModel = StorageKeys.Defaults.claudeModel
     @AppStorage(StorageKeys.llmSource) private var llmSourceRaw = StorageKeys.Defaults.llmSource
+    @AppStorage(StorageKeys.appearanceMode) private var appearanceModeRaw = StorageKeys.Defaults.appearanceMode
 
     @State private var showSignOutAlert = false
     @State private var userProfile: UserProfile?
@@ -67,6 +68,7 @@ struct SettingsView: View {
             VStack(spacing: 24) {
                 accountSection
                 modelSection
+                appearanceSection
                 chatSection
                 infoSection
             }
@@ -203,6 +205,26 @@ struct SettingsView: View {
         }
     }
 
+    private var appearanceSection: some View {
+        settingsSection(
+            title: "Appearance",
+            subtitle: "Choose how Map Health looks."
+        ) {
+            VStack(alignment: .leading, spacing: 12) {
+                Picker("Appearance", selection: $appearanceModeRaw) {
+                    ForEach(AppearanceMode.allCases, id: \.rawValue) { mode in
+                        Text(mode.title).tag(mode.rawValue)
+                    }
+                }
+                .pickerStyle(.segmented)
+
+                Text("System follows your device setting.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+        }
+    }
+
     private var infoSection: some View {
         settingsSection(
             title: "SETTINGS_DISCLAIMER_TITLE",
@@ -335,6 +357,23 @@ struct SettingsView: View {
         onboardingFlowComplete = false
 
         dismiss()
+    }
+}
+
+private enum AppearanceMode: String, CaseIterable {
+    case system
+    case light
+    case dark
+
+    var title: String {
+        switch self {
+        case .system:
+            return "System"
+        case .light:
+            return "Light"
+        case .dark:
+            return "Dark"
+        }
     }
 }
 

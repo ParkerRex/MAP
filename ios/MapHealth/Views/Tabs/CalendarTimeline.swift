@@ -15,6 +15,9 @@ struct CalendarTimelineView: View {
     @State private var scrollRequest: Int = 0
     private let hourHeight: CGFloat = 60
     private let calendar = Calendar.current
+    private let timelineLeadingInset: CGFloat = 56
+    private let timelineTrailingInset: CGFloat = 8
+    private let timelineColumnSpacing: CGFloat = 6
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -156,7 +159,7 @@ struct CalendarTimelineView: View {
                 Rectangle()
                     .fill(hour.isMultiple(of: 2) ? Color.secondary.opacity(0.04) : Color.clear)
                     .frame(height: hourHeight)
-                    .padding(.leading, 52)
+                    .padding(.leading, timelineLeadingInset - 4)
             }
         }
     }
@@ -197,23 +200,35 @@ struct CalendarTimelineView: View {
     // MARK: - Event Blocks
 
     private var eventBlocks: some View {
-        ForEach(timedEvents) { event in
-            if let startDate = event.startDate {
-                let topOffset = offsetForTime(startDate)
-                let duration = eventDuration(event)
-                let height = max(duration / 60.0 * hourHeight, 30) // Min 30pt height
+        GeometryReader { geometry in
+            let layout = timedEventLayout
+            let availableWidth = max(
+                0,
+                geometry.size.width - timelineLeadingInset - timelineTrailingInset
+            )
 
-                TimelineEventCard(
-                    event: event,
-                    calendarService: calendarService,
-                    isCompact: false,
-                    onTap: { onEventTap(event) },
-                    onDelete: { onEventDelete(event) }
-                )
-                .frame(height: height)
-                .padding(.leading, 56)
-                .padding(.trailing, 4)
-                .offset(y: topOffset)
+            ForEach(layout) { item in
+                if let startDate = item.event.startDate {
+                    let topOffset = offsetForTime(startDate)
+                    let duration = eventDuration(item.event)
+                    let height = max(duration / 60.0 * hourHeight, 30) // Min 30pt height
+                    let columnWidth = columnWidth(
+                        availableWidth: availableWidth,
+                        columns: item.columns
+                    )
+                    let xOffset = timelineLeadingInset + CGFloat(item.column) *
+                        (columnWidth + timelineColumnSpacing)
+
+                    TimelineEventCard(
+                        event: item.event,
+                        calendarService: calendarService,
+                        isCompact: false,
+                        onTap: { onEventTap(item.event) },
+                        onDelete: { onEventDelete(item.event) }
+                    )
+                    .frame(width: columnWidth, height: height)
+                    .offset(x: xOffset, y: topOffset)
+                }
             }
         }
     }
@@ -273,6 +288,109 @@ struct CalendarTimelineView: View {
             }
         }
     }
+
+    private var timedEventLayout: [TimelineLayoutEvent] {
+        buildTimelineLayout(for: timedEvents)
+    }
+
+    private func buildTimelineLayout(for events: [CalendarEvent]) -> [TimelineLayoutEvent] {
+        let sorted = events.sorted { lhs, rhs in
+            (lhs.startDate ?? .distantPast) < (rhs.startDate ?? .distantPast)
+        }
+
+        var clusters: [[CalendarEvent]] = []
+        var currentCluster: [CalendarEvent] = []
+        var currentEnd: Date?
+
+        for event in sorted {
+            guard let start = event.startDate else { continue }
+            let end = eventEnd(event, fallbackStart: start)
+
+            if currentCluster.isEmpty {
+                currentCluster = [event]
+                currentEnd = end
+                continue
+            }
+
+            if let clusterEnd = currentEnd, start < clusterEnd {
+                currentCluster.append(event)
+                if end > clusterEnd {
+                    currentEnd = end
+                }
+            } else {
+                clusters.append(currentCluster)
+                currentCluster = [event]
+                currentEnd = end
+            }
+        }
+
+        if !currentCluster.isEmpty {
+            clusters.append(currentCluster)
+        }
+
+        var result: [TimelineLayoutEvent] = []
+        var idCounter = 0
+
+        for cluster in clusters {
+            var columnEndTimes: [Date] = []
+            var assignments: [(CalendarEvent, Int)] = []
+
+            for event in cluster {
+                guard let start = event.startDate else { continue }
+                let end = eventEnd(event, fallbackStart: start)
+
+                var assignedColumn: Int?
+                for index in columnEndTimes.indices {
+                    if columnEndTimes[index] <= start {
+                        assignedColumn = index
+                        columnEndTimes[index] = end
+                        break
+                    }
+                }
+
+                if assignedColumn == nil {
+                    columnEndTimes.append(end)
+                    assignedColumn = columnEndTimes.count - 1
+                }
+
+                assignments.append((event, assignedColumn ?? 0))
+            }
+
+            let columns = max(1, columnEndTimes.count)
+            for (event, column) in assignments {
+                result.append(
+                    TimelineLayoutEvent(
+                        id: idCounter,
+                        event: event,
+                        column: column,
+                        columns: columns
+                    )
+                )
+                idCounter += 1
+            }
+        }
+
+        return result
+    }
+
+    private func eventEnd(_ event: CalendarEvent, fallbackStart: Date) -> Date {
+        event.endDate ?? fallbackStart.addingTimeInterval(60 * 60)
+    }
+
+    private func columnWidth(availableWidth: CGFloat, columns: Int) -> CGFloat {
+        let spacing = timelineColumnSpacing * CGFloat(max(0, columns - 1))
+        let width = (availableWidth - spacing) / CGFloat(max(1, columns))
+        return max(0, width)
+    }
+}
+
+// MARK: - Timeline Layout
+
+private struct TimelineLayoutEvent: Identifiable {
+    let id: Int
+    let event: CalendarEvent
+    let column: Int
+    let columns: Int
 }
 
 // MARK: - Timeline Event Card
