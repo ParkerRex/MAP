@@ -3,6 +3,7 @@ import SwiftUI
 
 struct TaskRow: View {
     let task: MapTask
+    let projectTitle: String?
     let onToggle: () -> Void
     let onTap: () -> Void
     let onDelete: () -> Void
@@ -86,12 +87,24 @@ struct TaskRow: View {
     }
 
     private var hasSubtitle: Bool {
-        task.dueAt != nil || (task.body != nil && !task.body!.isEmpty)
+        projectTitle != nil ||
+        task.dueAt != nil ||
+        (task.body != nil && !task.body!.isEmpty)
     }
 
     @ViewBuilder
     private var subtitleRow: some View {
         HStack(spacing: 6) {
+            if let projectTitle {
+                Text(projectTitle)
+                    .font(.caption.weight(.semibold))
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 3)
+                    .background(Color(.tertiarySystemGroupedBackground))
+                    .clipShape(Capsule())
+                    .foregroundStyle(.secondary)
+            }
+
             if let dueAt = task.dueAt {
                 dueDateLabel(dueAt)
             }

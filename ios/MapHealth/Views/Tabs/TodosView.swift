@@ -7,10 +7,12 @@ struct TodosView: View {
     @State private var selectedTask: MapTask?
     @State private var searchText = ""
     @FocusState private var isAddingTask: Bool
+    @State private var selectedTagId: String?
 
     var body: some View {
         NavigationStack {
             List {
+                projectSection
                 taskSections
             }
             .listStyle(.plain)
@@ -42,9 +44,63 @@ struct TodosView: View {
     }
 
     private func loadTasksIfNeeded() async {
-        if tasksService.tasks.isEmpty {
-            await tasksService.fetchTasks()
+        if tasksService.tasks.isEmpty || tasksService.tags.isEmpty {
+            await tasksService.refresh()
         }
+    }
+}
+
+// MARK: - Projects
+
+extension TodosView {
+    @ViewBuilder
+    private var projectSection: some View {
+        let tags = tasksService.tags.sorted { $0.title.localizedCaseInsensitiveCompare($1.title) == .orderedAscending }
+
+        if !tags.isEmpty {
+            Section {
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 8) {
+                        ProjectChip(
+                            title: "All",
+                            count: taskCount(for: nil),
+                            isSelected: selectedTagId == nil
+                        ) {
+                            selectedTagId = nil
+                        }
+
+                        ForEach(tags) { tag in
+                            ProjectChip(
+                                title: tag.title,
+                                count: taskCount(for: tag.id),
+                                isSelected: selectedTagId == tag.id
+                            ) {
+                                selectedTagId = tag.id
+                            }
+                        }
+                    }
+                    .padding(.vertical, 6)
+                }
+                .scrollClipDisabled()
+                .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 8, trailing: 16))
+                .listRowSeparator(.hidden)
+                .listRowBackground(Color.clear)
+            } header: {
+                Text("Projects")
+                    .font(.footnote.weight(.semibold))
+                    .foregroundStyle(.secondary)
+                    .textCase(.uppercase)
+            }
+        }
+    }
+
+    private func taskCount(for tagId: String?) -> Int {
+        if let tagId {
+            return tasksService.tasks.filter { task in
+                task.tags.contains { $0.id == tagId }
+            }.count
+        }
+        return tasksService.tasks.count
     }
 }
 
@@ -130,8 +186,13 @@ extension TodosView {
 
     private var filteredTasks: [MapTask] {
         let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !query.isEmpty else { return tasksService.tasks }
-        return tasksService.tasks.filter { task in
+        let tagFiltered = tasksService.tasks.filter { task in
+            guard let selectedTagId else { return true }
+            return task.tags.contains { $0.id == selectedTagId }
+        }
+
+        guard !query.isEmpty else { return tagFiltered }
+        return tagFiltered.filter { task in
             task.title.localizedCaseInsensitiveContains(query) ||
             (task.body?.localizedCaseInsensitiveContains(query) ?? false) ||
             task.tags.contains { $0.title.localizedCaseInsensitiveContains(query) }
@@ -193,6 +254,7 @@ extension TodosView {
             ForEach(tasks) { task in
                 TaskRow(
                     task: task,
+                    projectTitle: selectedTagId == nil ? task.tags.first?.title : nil,
                     onToggle: { toggleTask(task) },
                     onTap: { selectedTask = task },
                     onDelete: { deleteTask(task) }
@@ -218,6 +280,7 @@ extension TodosView {
             ForEach(sortedTasks) { task in
                 TaskRow(
                     task: task,
+                    projectTitle: selectedTagId == nil ? task.tags.first?.title : nil,
                     onToggle: { toggleTask(task) },
                     onTap: { selectedTask = task },
                     onDelete: { deleteTask(task) }
@@ -298,5 +361,36 @@ extension TodosView {
     private func deleteTask(_ task: MapTask) {
         HapticFeedback.warning()
         Task { try? await tasksService.deleteTask(task) }
+    }
+}
+
+// MARK: - Project Chip
+
+private struct ProjectChip: View {
+    let title: String
+    let count: Int
+    let isSelected: Bool
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 6) {
+                Text(title)
+                Text("\(count)")
+                    .font(.caption.weight(.bold))
+                    .foregroundStyle(isSelected ? .white.opacity(0.9) : .secondary)
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 2)
+                    .background(isSelected ? Color.white.opacity(0.2) : Color(.tertiarySystemGroupedBackground))
+                    .clipShape(Capsule())
+            }
+            .font(.subheadline.weight(.semibold))
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
+            .background(isSelected ? Color.accentColor : Color(.secondarySystemGroupedBackground))
+            .foregroundStyle(isSelected ? .white : .primary)
+            .clipShape(Capsule())
+        }
+        .buttonStyle(.plain)
     }
 }

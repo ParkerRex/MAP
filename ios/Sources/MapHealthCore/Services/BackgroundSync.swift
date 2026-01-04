@@ -1,8 +1,11 @@
-import BackgroundTasks
 import Foundation
+#if os(iOS)
+import BackgroundTasks
 import HealthKit
+#endif
 
 /// Manages background syncing of health data to Map backend
+#if os(iOS)
 public class BackgroundSyncManager {
     public static let shared = BackgroundSyncManager()
     public static let taskIdentifier = "com.map.health.sync"
@@ -111,3 +114,21 @@ public class BackgroundSyncManager {
         healthStore.execute(query)
     }
 }
+#else
+public class BackgroundSyncManager {
+    public static let shared = BackgroundSyncManager()
+    public static let taskIdentifier = "com.map.health.sync"
+
+    private init() {}
+
+    public func registerBackgroundTasks() {}
+
+    public func scheduleBackgroundSync() {}
+
+    public func performSync() async throws {}
+
+    public func enableBackgroundDelivery() {}
+
+    public func setupBackgroundObservers() {}
+}
+#endif
