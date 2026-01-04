@@ -181,7 +181,10 @@ extension TodosView {
                             tint: filter.tint,
                             isSelected: selectedFilter == filter
                         ) {
-                            selectedFilter = filter
+                            HapticFeedback.selection()
+                            withAnimation(.snappy(duration: 0.2)) {
+                                selectedFilter = filter
+                            }
                         }
                     }
                 }
@@ -227,7 +230,10 @@ extension TodosView {
                         tint: .secondary,
                         isSelected: selectedProject == .all
                     ) {
-                        selectedProject = .all
+                        HapticFeedback.selection()
+                        withAnimation(.snappy(duration: 0.2)) {
+                            selectedProject = .all
+                        }
                     }
 
                     ProjectChip(
@@ -236,7 +242,10 @@ extension TodosView {
                         tint: .secondary,
                         isSelected: selectedProject == .none
                     ) {
-                        selectedProject = .none
+                        HapticFeedback.selection()
+                        withAnimation(.snappy(duration: 0.2)) {
+                            selectedProject = .none
+                        }
                     }
 
                     ForEach(tags) { tag in
@@ -246,11 +255,15 @@ extension TodosView {
                             tint: ProjectStyling.tint(for: tag.id),
                             isSelected: selectedProject == .tag(tag.id)
                         ) {
-                            selectedProject = .tag(tag.id)
+                            HapticFeedback.selection()
+                            withAnimation(.snappy(duration: 0.2)) {
+                                selectedProject = .tag(tag.id)
+                            }
                         }
                     }
 
                     AddProjectChip {
+                        HapticFeedback.light()
                         showingCreateProject = true
                     }
                 }
@@ -294,7 +307,10 @@ extension TodosView {
                         $0.title.localizedCaseInsensitiveCompare($1.title) == .orderedAscending
                     }
                     ForEach(tags) { tag in
-                        Button(tag.title) { selectedNewTaskProjectId = tag.id }
+                        Button(tag.title) {
+                            HapticFeedback.selection()
+                            selectedNewTaskProjectId = tag.id
+                        }
                     }
                 } label: {
                     Image(systemName: "plus.circle.fill")
@@ -309,6 +325,7 @@ extension TodosView {
 
                 if !newTaskText.isEmpty {
                     Button {
+                        HapticFeedback.light()
                         createTask()
                     } label: {
                         Image(systemName: "arrow.up.circle.fill")
@@ -339,6 +356,7 @@ extension TodosView {
                 Spacer()
 
                 Button {
+                    HapticFeedback.light()
                     bulkComplete()
                 } label: {
                     Label("Complete", systemImage: "checkmark.circle")
@@ -349,6 +367,7 @@ extension TodosView {
                 Menu {
                     Section("Move to Project") {
                         Button("No Project") {
+                            HapticFeedback.selection()
                             bulkAssignProject(nil)
                         }
                         let tags = tasksService.tags.sorted {
@@ -356,6 +375,7 @@ extension TodosView {
                         }
                         ForEach(tags) { tag in
                             Button(tag.title) {
+                                HapticFeedback.selection()
                                 bulkAssignProject(tag.id)
                             }
                         }
@@ -373,6 +393,7 @@ extension TodosView {
                 .disabled(isBulkProcessing)
 
                 Button(role: .destructive) {
+                    HapticFeedback.warning()
                     showingBulkDeleteConfirmation = true
                 } label: {
                     Image(systemName: "trash")
@@ -760,6 +781,7 @@ extension TodosView {
     }
 
     private func updateTaskProject(_ task: MapTask, tagId: String?) {
+        HapticFeedback.selection()
         Task {
             try? await tasksService.updateTask(
                 task,
@@ -836,6 +858,7 @@ extension TodosView {
 
     private func bulkDeleteConfirmed() {
         guard !selectedTaskIds.isEmpty else { return }
+        HapticFeedback.warning()
         isBulkProcessing = true
         Task {
             for task in selectedTasks {
@@ -903,9 +926,11 @@ private struct FilterChip: View {
             .padding(.vertical, 8)
             .background(isSelected ? tint : Color(.secondarySystemGroupedBackground))
             .foregroundStyle(isSelected ? .white : .primary)
+            .scaleEffect(isSelected ? 1.02 : 1.0)
             .clipShape(Capsule())
         }
         .buttonStyle(.plain)
+        .animation(.snappy(duration: 0.2), value: isSelected)
     }
 }
 
@@ -961,8 +986,10 @@ private struct ProjectChip: View {
             .padding(.vertical, 8)
             .background(isSelected ? Color.accentColor : Color(.secondarySystemGroupedBackground))
             .foregroundStyle(isSelected ? .white : .primary)
+            .scaleEffect(isSelected ? 1.02 : 1.0)
             .clipShape(Capsule())
         }
         .buttonStyle(.plain)
+        .animation(.snappy(duration: 0.2), value: isSelected)
     }
 }

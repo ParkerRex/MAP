@@ -57,10 +57,14 @@ struct ProjectsListView: View {
             count: taskCount(for: tag),
             tint: ProjectStyling.tint(for: tag.id),
             isFavorite: favoriteOrder.contains(tag.id),
-            onToggleFavorite: { toggleFavorite(tag) }
+            onToggleFavorite: {
+                HapticFeedback.selection()
+                toggleFavorite(tag)
+            }
         )
         .swipeActions(edge: .leading, allowsFullSwipe: false) {
             Button {
+                HapticFeedback.selection()
                 toggleFavorite(tag)
             } label: {
                 Label(
@@ -71,6 +75,7 @@ struct ProjectsListView: View {
             .tint(.yellow)
 
             Button("Rename") {
+                HapticFeedback.light()
                 renameTitle = tag.title
                 renamingTag = tag
             }
@@ -78,6 +83,7 @@ struct ProjectsListView: View {
         }
         .swipeActions(edge: .trailing, allowsFullSwipe: true) {
             Button(role: .destructive) {
+                HapticFeedback.warning()
                 deletingTag = tag
             } label: {
                 Label("Delete", systemImage: "trash")
@@ -241,6 +247,7 @@ struct ProjectsListView: View {
 
     private var newProjectRow: some View {
         Button {
+            HapticFeedback.light()
             showingCreateProject = true
         } label: {
             HStack(spacing: 12) {
@@ -335,6 +342,7 @@ private struct ProjectRow: View {
                 Image(systemName: isFavorite ? "star.fill" : "star")
                     .font(.subheadline)
                     .foregroundStyle(isFavorite ? .yellow : .secondary)
+                    .symbolEffect(.bounce, value: isFavorite)
             }
             .buttonStyle(.borderless)
         }
