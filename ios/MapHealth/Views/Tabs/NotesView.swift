@@ -346,10 +346,17 @@ private struct NoteRow: View {
             }
 
             if !previewText.isEmpty {
-                Text(previewText)
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-                    .lineLimit(2)
+                if let previewAttributed {
+                    Text(previewAttributed)
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(2)
+                } else {
+                    Text(previewText)
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(2)
+                }
             }
 
             if showFolder, let folderName, !folderName.isEmpty {
@@ -369,6 +376,11 @@ private struct NoteRow: View {
     private var previewText: String {
         let content = note.content?.trimmed ?? ""
         return content.replacingOccurrences(of: "\n", with: " ")
+    }
+
+    private var previewAttributed: AttributedString? {
+        guard !previewText.isEmpty else { return nil }
+        return try? AttributedString(markdown: previewText)
     }
 
     private var noteDate: String {
