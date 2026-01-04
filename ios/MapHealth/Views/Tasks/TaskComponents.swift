@@ -55,3 +55,17 @@ enum DateHelpers {
         )!
     }
 }
+
+// MARK: - Project Styling
+
+enum ProjectStyling {
+    private static let palette: [Color] = [
+        .blue, .teal, .green, .orange, .red, .pink, .indigo
+    ]
+
+    static func tint(for id: String?) -> Color {
+        guard let id, !id.isEmpty else { return .secondary }
+        let hash = id.unicodeScalars.reduce(0) { $0 &+ Int($1.value) }
+        return palette[hash % palette.count]
+    }
+}

@@ -450,12 +450,19 @@ private struct NoteEditorView: View {
                 }
                 .pickerStyle(.segmented)
 
+                if note != nil {
+                    Text(lastEditedLabel)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+
                 TextField("Title", text: $title, axis: .vertical)
                     .font(.title3.weight(.semibold))
                     .focused($focusedField, equals: .title)
                     .lineLimit(1...3)
 
                 if editorMode == .edit {
+                    editorToolbar
                     ZStack(alignment: .topLeading) {
                         if content.trimmed.isEmpty {
                             Text("Note")
@@ -584,6 +591,32 @@ private struct NoteEditorView: View {
         }
     }
 
+    private var editorToolbar: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 8) {
+                MarkdownChip(title: "H1") { insertSnippet("# ") }
+                MarkdownChip(title: "H2") { insertSnippet("## ") }
+                MarkdownChip(title: "Bold") { insertSnippet("**bold**") }
+                MarkdownChip(title: "Italic") { insertSnippet("*italic*") }
+                MarkdownChip(title: "List") { insertSnippet("- ") }
+                MarkdownChip(title: "Checklist") { insertSnippet("- [ ] ") }
+                MarkdownChip(title: "Quote") { insertSnippet("> ") }
+                MarkdownChip(title: "Code") { insertSnippet("`code`") }
+                MarkdownChip(title: "Block") { insertSnippet("```\ncode\n```") }
+            }
+            .padding(.vertical, 4)
+        }
+    }
+
+    private var lastEditedLabel: String {
+        guard let note else { return "" }
+        let date = note.updatedAt ?? note.createdAt
+        let formatter = DateFormatter()
+        formatter.dateStyle = .medium
+        formatter.timeStyle = .short
+        return "Last edited \(formatter.string(from: date))"
+    }
+
     private var markdownPreview: some View {
         let previewText = content.trimmed.isEmpty ? "Nothing to preview yet." : content
         let attributed = try? AttributedString(markdown: previewText)
@@ -603,6 +636,18 @@ private struct NoteEditorView: View {
         .background(Color(.secondarySystemGroupedBackground))
         .clipShape(RoundedRectangle(cornerRadius: 12))
     }
+
+    private func insertSnippet(_ snippet: String) {
+        let trimmed = content.trimmed
+        if trimmed.isEmpty {
+            content = snippet
+        } else if content.hasSuffix("\n") {
+            content += snippet
+        } else {
+            content += "\n" + snippet
+        }
+        focusedField = .content
+    }
 }
 
 private extension String {
@@ -619,4 +664,21 @@ private enum SortOrder {
 private enum EditorMode {
     case edit
     case preview
+}
+
+private struct MarkdownChip: View {
+    let title: String
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            Text(title)
+                .font(.caption.weight(.semibold))
+                .padding(.horizontal, 10)
+                .padding(.vertical, 6)
+                .background(Color(.secondarySystemGroupedBackground))
+                .clipShape(Capsule())
+        }
+        .buttonStyle(.plain)
+    }
 }

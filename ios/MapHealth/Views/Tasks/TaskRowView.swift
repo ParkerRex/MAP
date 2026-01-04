@@ -4,6 +4,7 @@ import SwiftUI
 struct TaskRow<ProjectMenu: View>: View {
     let task: MapTask
     let projectTitle: String?
+    let projectTint: Color?
     let onToggle: () -> Void
     let onTap: () -> Void
     let onDelete: () -> Void
@@ -12,6 +13,7 @@ struct TaskRow<ProjectMenu: View>: View {
     init(
         task: MapTask,
         projectTitle: String? = nil,
+        projectTint: Color? = nil,
         onToggle: @escaping () -> Void,
         onTap: @escaping () -> Void,
         onDelete: @escaping () -> Void,
@@ -19,6 +21,7 @@ struct TaskRow<ProjectMenu: View>: View {
     ) {
         self.task = task
         self.projectTitle = projectTitle
+        self.projectTint = projectTint
         self.onToggle = onToggle
         self.onTap = onTap
         self.onDelete = onDelete
@@ -114,6 +117,10 @@ struct TaskRow<ProjectMenu: View>: View {
     private var subtitleRow: some View {
         HStack(spacing: 6) {
             if let projectTitle {
+                Circle()
+                    .fill(projectTint ?? .secondary)
+                    .frame(width: 6, height: 6)
+
                 Text(projectTitle)
                     .font(.caption.weight(.semibold))
                     .padding(.horizontal, 8)

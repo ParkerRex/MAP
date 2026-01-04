@@ -9,7 +9,11 @@ struct TodosView: View {
     @FocusState private var isAddingTask: Bool
     @State private var selectedFilter: TaskFilter = .all
     @State private var selectedProject: ProjectFilter = .all
-    @State private var showingProjects = false
+    @State private var viewMode: ViewMode = .tasks
+    @State private var showingCreateProject = false
+    @State private var newProjectTitle = ""
+    @State private var selectedTaskIds: Set<MapTask.ID> = []
+    @Environment(\.editMode) private var editMode
 
     enum TaskFilter: String, CaseIterable {
         case all = "All"
@@ -35,54 +39,110 @@ struct TodosView: View {
         case tag(String)
     }
 
+    enum ViewMode: String, CaseIterable {
+        case tasks = "Tasks"
+        case projects = "Projects"
+    }
+
     var body: some View {
         NavigationStack {
-            List {
-                filterSection
-                projectSection
-                taskSections
-            }
-            .listStyle(.plain)
-            .scrollContentBackground(.hidden)
-            .scrollDismissesKeyboard(.interactively)
-            .listSectionSpacing(12)
-            .searchable(text: $searchText, prompt: "Search tasks")
-            .refreshable { await tasksService.refresh() }
-            .task { await loadTasksIfNeeded() }
-            .sheet(item: $selectedTask) { task in
-                TaskDetailSheet(task: task, tasksService: tasksService)
-            }
-            .sheet(isPresented: $showingProjects) {
-                ProjectsSheet(tasksService: tasksService)
-            }
-            .safeAreaInset(edge: .bottom) {
-                addTaskBar
-            }
-            .navigationTitle("Tasks")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    Button {
-                        showingProjects = true
-                    } label: {
-                        Label("Projects", systemImage: "folder")
+            contentList
+                .listStyle(.plain)
+                .scrollContentBackground(.hidden)
+                .scrollDismissesKeyboard(.interactively)
+                .listSectionSpacing(12)
+                .task { await loadTasksIfNeeded() }
+                .sheet(item: $selectedTask) { task in
+                    TaskDetailSheet(task: task, tasksService: tasksService)
+                }
+                .safeAreaInset(edge: .bottom) {
+                    if viewMode == .tasks {
+                        if isEditing && !selectedTaskIds.isEmpty {
+                            bulkActionBar
+                        } else {
+                            addTaskBar
+                        }
                     }
                 }
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button {
-                        isAddingTask = true
-                    } label: {
-                        Image(systemName: "plus")
-                            .font(.body.weight(.semibold))
+                .navigationTitle(viewMode == .tasks ? "Tasks" : "Projects")
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .principal) {
+                        Picker("", selection: $viewMode) {
+                            ForEach(ViewMode.allCases, id: \.self) { mode in
+                                Text(mode.rawValue).tag(mode)
+                            }
+                        }
+                        .pickerStyle(.segmented)
+                        .frame(maxWidth: 240)
+                    }
+                    if viewMode == .tasks {
+                        ToolbarItem(placement: .topBarLeading) {
+                            EditButton()
+                        }
+                    }
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button {
+                            switch viewMode {
+                            case .tasks:
+                                isAddingTask = true
+                            case .projects:
+                                showingCreateProject = true
+                            }
+                        } label: {
+                            Image(systemName: "plus")
+                                .font(.body.weight(.semibold))
+                        }
                     }
                 }
-            }
+                .alert("New Project", isPresented: $showingCreateProject) {
+                    TextField("Name", text: $newProjectTitle)
+                    Button("Create") { createProject() }
+                    Button("Cancel", role: .cancel) {}
+                }
+                .onChange(of: editMode?.wrappedValue) { _, newValue in
+                    if newValue != .active {
+                        selectedTaskIds.removeAll()
+                    }
+                }
+                .onChange(of: viewMode) { _, newValue in
+                    if newValue == .projects {
+                        selectedTaskIds.removeAll()
+                        editMode?.wrappedValue = .inactive
+                        searchText = ""
+                    }
+                }
         }
     }
 
     private func loadTasksIfNeeded() async {
         if tasksService.tasks.isEmpty || tasksService.tags.isEmpty {
             await tasksService.refresh()
+        }
+    }
+
+    private var isEditing: Bool {
+        editMode?.wrappedValue == .active
+    }
+
+    @ViewBuilder
+    private var contentList: some View {
+        if viewMode == .tasks {
+            List(selection: $selectedTaskIds) {
+                filterSection
+                projectSection
+                taskSections
+            }
+            .searchable(text: $searchText, prompt: "Search tasks")
+            .refreshable { await tasksService.refresh() }
+        } else {
+            List {
+                ProjectsListView(
+                    tasksService: tasksService,
+                    showingCreateProject: $showingCreateProject
+                )
+            }
+            .refreshable { await tasksService.refresh() }
         }
     }
 }
@@ -139,48 +199,53 @@ extension TodosView {
     private var projectSection: some View {
         let tags = tasksService.tags.sorted { $0.title.localizedCaseInsensitiveCompare($1.title) == .orderedAscending }
 
-        if !tags.isEmpty || !tasksService.tasks.isEmpty {
-            Section {
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 8) {
-                        ProjectChip(
-                            title: "All",
-                            count: taskCount(for: .all),
-                            isSelected: selectedProject == .all
-                        ) {
-                            selectedProject = .all
-                        }
+        Section {
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 8) {
+                    ProjectChip(
+                        title: "All",
+                        count: taskCount(for: .all),
+                        tint: .secondary,
+                        isSelected: selectedProject == .all
+                    ) {
+                        selectedProject = .all
+                    }
 
-                        ProjectChip(
-                            title: "No Project",
-                            count: taskCount(for: .none),
-                            isSelected: selectedProject == .none
-                        ) {
-                            selectedProject = .none
-                        }
+                    ProjectChip(
+                        title: "No Project",
+                        count: taskCount(for: .none),
+                        tint: .secondary,
+                        isSelected: selectedProject == .none
+                    ) {
+                        selectedProject = .none
+                    }
 
-                        ForEach(tags) { tag in
-                            ProjectChip(
-                                title: tag.title,
-                                count: taskCount(for: .tag(tag.id)),
-                                isSelected: selectedProject == .tag(tag.id)
-                            ) {
-                                selectedProject = .tag(tag.id)
-                            }
+                    ForEach(tags) { tag in
+                        ProjectChip(
+                            title: tag.title,
+                            count: taskCount(for: .tag(tag.id)),
+                            tint: ProjectStyling.tint(for: tag.id),
+                            isSelected: selectedProject == .tag(tag.id)
+                        ) {
+                            selectedProject = .tag(tag.id)
                         }
                     }
-                    .padding(.vertical, 6)
+
+                    AddProjectChip {
+                        showingCreateProject = true
+                    }
                 }
-                .scrollClipDisabled()
-                .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 8, trailing: 16))
-                .listRowSeparator(.hidden)
-                .listRowBackground(Color.clear)
-            } header: {
-                Text("Projects")
-                    .font(.footnote.weight(.semibold))
-                    .foregroundStyle(.secondary)
-                    .textCase(.uppercase)
+                .padding(.vertical, 6)
             }
+            .scrollClipDisabled()
+            .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 8, trailing: 16))
+            .listRowSeparator(.hidden)
+            .listRowBackground(Color.clear)
+        } header: {
+            Text("Projects")
+                .font(.footnote.weight(.semibold))
+                .foregroundStyle(.secondary)
+                .textCase(.uppercase)
         }
     }
 
@@ -228,6 +293,51 @@ extension TodosView {
             .padding(.vertical, 10)
             .background(.thinMaterial)
             .animation(.easeOut(duration: 0.15), value: newTaskText.isEmpty)
+        }
+    }
+
+    private var bulkActionBar: some View {
+        VStack(spacing: 0) {
+            Divider()
+            HStack(spacing: 16) {
+                Text("\(selectedTaskIds.count) selected")
+                    .font(.subheadline.weight(.semibold))
+
+                Spacer()
+
+                Button {
+                    bulkComplete()
+                } label: {
+                    Label("Complete", systemImage: "checkmark.circle")
+                }
+                .labelStyle(.iconOnly)
+
+                Menu {
+                    Button("No Project") {
+                        bulkAssignProject(nil)
+                    }
+                    let tags = tasksService.tags.sorted {
+                        $0.title.localizedCaseInsensitiveCompare($1.title) == .orderedAscending
+                    }
+                    ForEach(tags) { tag in
+                        Button(tag.title) {
+                            bulkAssignProject(tag.id)
+                        }
+                    }
+                } label: {
+                    Image(systemName: "folder")
+                }
+
+                Button(role: .destructive) {
+                    bulkDelete()
+                } label: {
+                    Image(systemName: "trash")
+                }
+            }
+            .font(.body.weight(.semibold))
+            .padding(.horizontal, 16)
+            .padding(.vertical, 10)
+            .background(.thinMaterial)
         }
     }
 
@@ -374,12 +484,14 @@ extension TodosView {
                 TaskRow(
                     task: task,
                     projectTitle: selectedProject == .all ? task.tags.first?.title : nil,
+                    projectTint: ProjectStyling.tint(for: task.tags.first?.id),
                     onToggle: { toggleTask(task) },
-                    onTap: { selectedTask = task },
+                    onTap: { if !isEditing { selectedTask = task } },
                     onDelete: { deleteTask(task) }
                 ) {
                     projectMenu(for: task)
                 }
+                .tag(task.id)
                 .listRowInsets(EdgeInsets(top: 12, leading: 16, bottom: 12, trailing: 16))
                 .listRowSeparator(.hidden)
                 .listRowBackground(Color(.secondarySystemGroupedBackground))
@@ -402,12 +514,14 @@ extension TodosView {
                 TaskRow(
                     task: task,
                     projectTitle: selectedProject == .all ? task.tags.first?.title : nil,
+                    projectTint: ProjectStyling.tint(for: task.tags.first?.id),
                     onToggle: { toggleTask(task) },
-                    onTap: { selectedTask = task },
+                    onTap: { if !isEditing { selectedTask = task } },
                     onDelete: { deleteTask(task) }
                 ) {
                     projectMenu(for: task)
                 }
+                .tag(task.id)
                 .listRowInsets(EdgeInsets(top: 12, leading: 16, bottom: 12, trailing: 16))
                 .listRowSeparator(.hidden)
                 .listRowBackground(Color(.secondarySystemGroupedBackground))
@@ -584,7 +698,7 @@ extension TodosView {
             Divider()
 
             Button("Manage Projects") {
-                showingProjects = true
+                viewMode = .projects
             }
         } label: {
             Label("Project", systemImage: "folder")
@@ -598,6 +712,45 @@ extension TodosView {
                 tags: tagId.map { [$0] } ?? []
             )
         }
+    }
+
+    private var selectedTasks: [MapTask] {
+        tasksService.tasks.filter { selectedTaskIds.contains($0.id) }
+    }
+
+    private func bulkComplete() {
+        Task {
+            for task in selectedTasks where !task.isCompleted {
+                try? await tasksService.toggleTask(task)
+            }
+            await MainActor.run { clearSelection() }
+        }
+    }
+
+    private func bulkAssignProject(_ tagId: String?) {
+        Task {
+            for task in selectedTasks {
+                try? await tasksService.updateTask(
+                    task,
+                    tags: tagId.map { [$0] } ?? []
+                )
+            }
+            await MainActor.run { clearSelection() }
+        }
+    }
+
+    private func bulkDelete() {
+        Task {
+            for task in selectedTasks {
+                try? await tasksService.deleteTask(task)
+            }
+            await MainActor.run { clearSelection() }
+        }
+    }
+
+    private func clearSelection() {
+        selectedTaskIds.removeAll()
+        editMode?.wrappedValue = .inactive
     }
 
     private func isToday(_ date: Date?) -> Bool {
@@ -614,6 +767,15 @@ extension TodosView {
         guard let date else { return false }
         let startOfToday = Calendar.current.startOfDay(for: Date())
         return date >= startOfToday && !Calendar.current.isDateInToday(date)
+    }
+
+    private func createProject() {
+        let trimmed = newProjectTitle.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return }
+        Task {
+            try? await tasksService.createTag(title: trimmed)
+            await MainActor.run { newProjectTitle = "" }
+        }
     }
 }
 
@@ -649,17 +811,44 @@ private struct FilterChip: View {
     }
 }
 
+// MARK: - Add Project Chip
+
+private struct AddProjectChip: View {
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 6) {
+                Image(systemName: "plus")
+                    .font(.caption.weight(.bold))
+                Text("Add")
+            }
+            .font(.subheadline.weight(.semibold))
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
+            .background(Color(.secondarySystemGroupedBackground))
+            .foregroundStyle(.primary)
+            .clipShape(Capsule())
+        }
+        .buttonStyle(.plain)
+    }
+}
+
 // MARK: - Project Chip
 
 private struct ProjectChip: View {
     let title: String
     let count: Int
+    let tint: Color
     let isSelected: Bool
     let action: () -> Void
 
     var body: some View {
         Button(action: action) {
             HStack(spacing: 6) {
+                Circle()
+                    .fill(tint)
+                    .frame(width: 6, height: 6)
                 Text(title)
                 Text("\(count)")
                     .font(.caption.weight(.bold))

@@ -183,6 +183,7 @@ struct TaskDetailSheet: View {
             HStack(spacing: 8) {
                 ProjectSelectionChip(
                     title: "No Project",
+                    tint: nil,
                     isSelected: selectedTagId == nil
                 ) {
                     selectedTagId = nil
@@ -191,6 +192,7 @@ struct TaskDetailSheet: View {
                 ForEach(tags) { tag in
                     ProjectSelectionChip(
                         title: tag.title,
+                        tint: ProjectStyling.tint(for: tag.id),
                         isSelected: selectedTagId == tag.id
                     ) {
                         selectedTagId = tag.id
@@ -301,18 +303,26 @@ private struct DateChip: View {
 
 private struct ProjectSelectionChip: View {
     let title: String
+    let tint: Color?
     let isSelected: Bool
     let action: () -> Void
 
     var body: some View {
         Button(action: action) {
-            Text(title)
-                .font(.subheadline.weight(.semibold))
-                .padding(.horizontal, 12)
-                .padding(.vertical, 8)
-                .background(isSelected ? Color.accentColor : Color(.tertiarySystemGroupedBackground))
-                .foregroundStyle(isSelected ? .white : .primary)
-                .clipShape(Capsule())
+            HStack(spacing: 6) {
+                if let tint {
+                    Circle()
+                        .fill(tint)
+                        .frame(width: 6, height: 6)
+                }
+                Text(title)
+            }
+            .font(.subheadline.weight(.semibold))
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
+            .background(isSelected ? Color.accentColor : Color(.tertiarySystemGroupedBackground))
+            .foregroundStyle(isSelected ? .white : .primary)
+            .clipShape(Capsule())
         }
         .buttonStyle(.plain)
     }
