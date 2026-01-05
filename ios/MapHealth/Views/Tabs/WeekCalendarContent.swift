@@ -27,7 +27,7 @@ struct WeekCalendarContent: View {
                 weekEventsContent
             }
         }
-        .gesture(weekSwipeGesture)
+        .simultaneousGesture(weekSwipeGesture)
         .offset(x: dragOffset)
         .animation(.easeInOut(duration: 0.2), value: calendarService.isLoading)
     }
@@ -67,10 +67,12 @@ struct WeekCalendarContent: View {
     private var weekSwipeGesture: some Gesture {
         DragGesture(minimumDistance: 40)
             .updating($dragOffset) { value, state, _ in
-                state = value.translation.width * 0.15
+                let isHorizontal = abs(value.translation.width) > abs(value.translation.height)
+                state = isHorizontal ? value.translation.width * 0.15 : 0
             }
             .onEnded { value in
                 let threshold: CGFloat = 60
+                guard abs(value.translation.width) > abs(value.translation.height) else { return }
                 if value.translation.width > threshold {
                     navigateWeek(by: -1)
                 } else if value.translation.width < -threshold {

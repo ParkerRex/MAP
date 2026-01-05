@@ -2,6 +2,12 @@ import MapHealthCore
 import SwiftUI
 
 extension CalendarTimelineView {
+    private static let hourFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "h a"
+        return formatter
+    }()
+
     var allDayEvents: [CalendarEvent] {
         events.filter { $0.isAllDay }.sorted { ($0.summary ?? "") < ($1.summary ?? "") }
     }
@@ -26,12 +32,10 @@ extension CalendarTimelineView {
     }
 
     func hourLabel(for hour: Int) -> String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "h a"
         var components = DateComponents()
         components.hour = hour
         if let date = calendar.date(from: components) {
-            return formatter.string(from: date)
+            return Self.hourFormatter.string(from: date)
         }
         return "\(hour)"
     }

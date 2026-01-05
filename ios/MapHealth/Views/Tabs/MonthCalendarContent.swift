@@ -21,7 +21,7 @@ struct MonthCalendarContent: View {
 
             selectedDayEvents
         }
-        .gesture(monthSwipeGesture)
+        .simultaneousGesture(monthSwipeGesture)
         .offset(x: dragOffset)
     }
 
@@ -136,10 +136,12 @@ struct MonthCalendarContent: View {
     private var monthSwipeGesture: some Gesture {
         DragGesture(minimumDistance: 50)
             .updating($dragOffset) { value, state, _ in
-                state = value.translation.width * 0.1
+                let isHorizontal = abs(value.translation.width) > abs(value.translation.height)
+                state = isHorizontal ? value.translation.width * 0.1 : 0
             }
             .onEnded { value in
                 let threshold: CGFloat = 60
+                guard abs(value.translation.width) > abs(value.translation.height) else { return }
                 if value.translation.width > threshold {
                     navigateMonth(by: -1)
                 } else if value.translation.width < -threshold {

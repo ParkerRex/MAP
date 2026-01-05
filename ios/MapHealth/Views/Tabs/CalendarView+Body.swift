@@ -100,7 +100,7 @@ extension CalendarView {
         switch viewMode {
         case .day:
             dayView
-                .gesture(daySwipeGesture)
+                .simultaneousGesture(daySwipeGesture)
                 .offset(x: dayDragOffset)
         case .week:
             weekView
@@ -163,10 +163,12 @@ extension CalendarView {
     private var daySwipeGesture: some Gesture {
         DragGesture(minimumDistance: 30)
             .updating($dayDragOffset) { value, state, _ in
-                state = value.translation.width * 0.2
+                let isHorizontal = abs(value.translation.width) > abs(value.translation.height)
+                state = isHorizontal ? value.translation.width * 0.2 : 0
             }
             .onEnded { value in
                 let threshold: CGFloat = 60
+                guard abs(value.translation.width) > abs(value.translation.height) else { return }
                 if value.translation.width > threshold {
                     navigateDay(by: -1)
                 } else if value.translation.width < -threshold {

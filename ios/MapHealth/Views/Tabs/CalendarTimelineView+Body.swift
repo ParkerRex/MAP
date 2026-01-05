@@ -174,7 +174,7 @@ extension CalendarTimelineView {
     private var timelineTapLayer: some View {
         Color.clear
             .contentShape(Rectangle())
-            .gesture(
+            .simultaneousGesture(
                 DragGesture(minimumDistance: 0)
                     .onEnded { value in
                         let distance = hypot(value.translation.width, value.translation.height)
