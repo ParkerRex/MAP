@@ -5,7 +5,7 @@ import { updateTaskSchema } from "@/lib/validations/tasks";
 
 export const GET = withAuth(async (user, _request, { params }) => {
   const { taskId } = await params;
-  const task = await tasksDb.getTaskById(taskId, user.id);
+  const task = await tasksDb.getTaskWithTags(taskId, user.id);
 
   if (!task) {
     throw notFound("Task");
@@ -27,18 +27,24 @@ export const PUT = withAuth(async (user, request, { params }) => {
 
   const { title, body: taskBody, dueAt, completed, tags } = parsed.data;
 
+  const loadTaskWithTags = async () => {
+    const task = await tasksDb.getTaskWithTags(taskId, user.id);
+    if (!task) throw notFound("Task");
+    return task;
+  };
+
   // Handle toggle complete
   if (typeof completed === "boolean") {
     const task = await tasksDb.toggleTaskComplete(taskId, user.id, completed);
     if (!task) throw notFound("Task");
-    return { task };
+    return { task: await loadTaskWithTags() };
   }
 
   // Handle due date update
   if (dueAt !== undefined) {
     const task = await tasksDb.updateTaskDueDate(taskId, user.id, dueAt ? new Date(dueAt) : null);
     if (!task) throw notFound("Task");
-    return { task };
+    return { task: await loadTaskWithTags() };
   }
 
   // Handle tags update
@@ -59,7 +65,7 @@ export const PUT = withAuth(async (user, request, { params }) => {
     throw notFound("Task");
   }
 
-  return { task };
+  return { task: await loadTaskWithTags() };
 });
 
 export const DELETE = withAuth(async (user, _request, { params }) => {

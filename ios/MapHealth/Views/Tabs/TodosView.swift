@@ -515,11 +515,17 @@ extension TodosView {
         let parsed = parseQuickAdd(text)
         let taskText = parsed.title
         newTaskText = ""
+        let fallbackProjectTagId: String?
+        if case .tag(let tagId) = selectedProject {
+            fallbackProjectTagId = tagId
+        } else {
+            fallbackProjectTagId = nil
+        }
 
         Task {
             let dueAt = parsed.dueAt
             if let task = try? await tasksService.createTask(title: taskText, dueAt: dueAt) {
-                if let tagId = selectedNewTaskProjectId ?? parsed.tagId {
+                if let tagId = selectedNewTaskProjectId ?? parsed.tagId ?? fallbackProjectTagId {
                     _ = try? await tasksService.updateTask(task, tags: [tagId])
                 } else if let projectName = parsed.projectName {
                     if let created = try? await tasksService.createTag(title: projectName) {

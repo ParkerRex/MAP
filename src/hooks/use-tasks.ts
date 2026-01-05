@@ -20,11 +20,18 @@ export function useTasks() {
   });
 }
 
+type CreateTaskMutationInput = {
+  title: string;
+  body?: string;
+  dueAt?: string;
+  tags?: { id: string; title: string }[];
+};
+
 export function useCreateTask() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data: { title: string; body?: string; dueAt?: string }) => api.tasks.create(data),
+    mutationFn: ({ tags: _tags, ...data }: CreateTaskMutationInput) => api.tasks.create(data),
     onMutate: async (newTask) => {
       await queryClient.cancelQueries({ queryKey: queryKeys.tasks.all });
       const previous = queryClient.getQueryData<TasksResponse>(queryKeys.tasks.all);
@@ -56,7 +63,7 @@ export function useCreateTask() {
             result: null,
             actualDuration: null,
             estimatedDuration: null,
-            tags: [],
+            tags: newTask.tags ?? [],
           } as TaskWithTags,
         ],
       }));

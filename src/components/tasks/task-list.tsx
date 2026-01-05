@@ -140,7 +140,21 @@ const TaskList: React.FC = () => {
   };
 
   const handleCreateTaskFromInput = (title: string) => {
-    createTask.mutate({ title });
+    const selectedTagObjects = selectedTags
+      .map((tagTitle) => tags.find((tag) => tag.title === tagTitle))
+      .filter((tag): tag is { id: string; title: string } => Boolean(tag));
+    const tagIds = selectedTagObjects.map((tag) => tag.id);
+
+    createTask.mutate(
+      { title, tags: selectedTagObjects },
+      tagIds.length
+        ? {
+            onSuccess: (data) => {
+              updateTaskTags.mutate({ taskId: data.task.id, tags: tagIds });
+            },
+          }
+        : undefined,
+    );
   };
 
   const getAllTags = useCallback(
