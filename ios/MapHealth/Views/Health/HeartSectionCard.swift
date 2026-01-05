@@ -29,7 +29,7 @@ struct HeartSectionCard: View {
         let content = VStack(alignment: .leading, spacing: 12) {
             HStack(spacing: 6) {
                 Image(systemName: "heart.fill")
-                    .foregroundStyle(.red)
+                    .foregroundStyle(.accentColor)
                 Text("Heart")
                     .font(.subheadline)
                     .fontWeight(.medium)
@@ -89,7 +89,7 @@ struct HeartSectionCard: View {
 
         if showsSurface {
             content
-                .mapHealthGlassSurface(cornerRadius: 18, tint: .red.opacity(0.04))
+                .mapHealthGlassSurface(cornerRadius: 18, tint: .accentColor.opacity(0.04))
         } else {
             content
         }

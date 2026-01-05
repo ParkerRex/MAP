@@ -13,7 +13,7 @@ extension HealthView {
         VStack(spacing: 20) {
             Image(systemName: "heart.text.square.fill")
                 .font(.system(size: 80))
-                .foregroundStyle(.red)
+                .foregroundStyle(.accentColor)
 
             Text("Access Your Health Data")
                 .font(.title2)
@@ -33,7 +33,7 @@ extension HealthView {
         }
         .frame(maxWidth: .infinity)
         .padding(32)
-        .mapHealthGlassSurface(cornerRadius: 24, tint: .red.opacity(0.08))
+        .mapHealthGlassSurface(cornerRadius: 24, tint: .accentColor.opacity(0.08))
     }
 
     func errorView(_ message: String) -> some View {
@@ -132,7 +132,7 @@ extension HealthView {
                     icon: "heart.text.square",
                     label: "Apple Health",
                     connected: !healthService.needsPermission,
-                    color: .red
+                    color: .accentColor
                 )
                 if apiClient.isAuthenticated {
                     dataSourceBadge(
@@ -149,7 +149,7 @@ extension HealthView {
                     icon: "heart.text.square",
                     label: "Apple Health",
                     connected: !healthService.needsPermission,
-                    color: .red
+                    color: .accentColor
                 )
                 if apiClient.isAuthenticated {
                     dataSourceBadge(

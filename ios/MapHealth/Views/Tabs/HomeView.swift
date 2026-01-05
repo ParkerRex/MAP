@@ -407,7 +407,7 @@ struct HomeView: View {
             VStack(alignment: .leading, spacing: 12) {
                 widgetHeader(
                     icon: "heart.fill",
-                    iconColor: .red,
+                    iconColor: .accentColor,
                     title: "Health",
                     badge: nil
                 )
@@ -449,7 +449,7 @@ struct HomeView: View {
         HStack(spacing: 12) {
             Image(systemName: "heart.text.square")
                 .font(.title2)
-                .foregroundStyle(.red.opacity(0.6))
+                .foregroundStyle(.accentColor.opacity(0.6))
 
             VStack(alignment: .leading, spacing: 2) {
                 Text("Connect HealthKit")
@@ -468,7 +468,7 @@ struct HomeView: View {
         HStack(spacing: 12) {
             Image(systemName: "figure.walk.motion")
                 .font(.title2)
-                .foregroundStyle(.red.opacity(0.6))
+                .foregroundStyle(.accentColor.opacity(0.6))
 
             VStack(alignment: .leading, spacing: 2) {
                 Text("No data yet")
@@ -508,7 +508,7 @@ struct HomeView: View {
                         icon: "heart.fill",
                         value: "\(Int(heartRate))",
                         label: "resting bpm",
-                        color: .red
+                        color: .accentColor
                     )
                 }
             }
