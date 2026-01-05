@@ -42,23 +42,20 @@ A personal productivity dashboard integrating calendar, tasks, notes, and health
 ### Web Dashboard
 
 ```bash
-# Start Docker services (Postgres)
-docker-compose up -d
-
 # Install dependencies
 bun install
 
 # Use the repo's Node version
 source ~/.nvm/nvm.sh && nvm use
 
-# Push database schema
-bun run db:push
-
-# Start dev server
-bun run dev
+# Start all dev services (Postgres + web + Cloudflare tunnel + iOS Simulator)
+bun run dev:all
 ```
 
 Dashboard runs on http://localhost:3000 (or next available port if 3000 is taken)
+
+The `dev:all` script streams logs from each service in one terminal and shuts
+everything down (including Docker) on Ctrl+C.
 
 #### Public URL (Cloudflare Tunnel)
 
