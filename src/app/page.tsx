@@ -275,7 +275,7 @@ export default function HomePage() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-5xl space-y-8 px-4 py-8">
+    <div className="mx-auto w-full max-w-5xl space-y-8 px-4 pb-8 pt-3">
       <div className="space-y-2">
         <h1 className="text-2xl font-semibold tracking-tight">
           Welcome back{user.displayName ? `, ${user.displayName}` : ""}.

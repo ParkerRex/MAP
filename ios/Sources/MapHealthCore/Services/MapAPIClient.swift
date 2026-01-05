@@ -100,6 +100,15 @@ public class MapAPIClient {
         )
     }
 
+    /// Mark a GitHub notification thread as read
+    public func markGitHubNotificationRead(threadId: String) async throws -> SuccessResponse {
+        return try await request(
+            endpoint: "/api/github/notifications/\(threadId)/read",
+            method: "POST",
+            responseType: SuccessResponse.self
+        )
+    }
+
     // MARK: - Claude API Key
 
     public func setClaudeApiKey(_ apiKey: String) async throws {

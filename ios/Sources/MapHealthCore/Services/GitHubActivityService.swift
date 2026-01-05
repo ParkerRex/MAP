@@ -48,6 +48,16 @@ public final class GitHubActivityService: ObservableObject {
         await refresh()
     }
 
+    public func handleSelection(_ item: GitHubActionItem) async {
+        guard item.type == .notification else { return }
+        do {
+            _ = try await apiClient.markGitHubNotificationRead(threadId: item.id)
+            await refresh()
+        } catch {
+            self.error = error
+        }
+    }
+
     public func reset() {
         connectionStatus = nil
         activity = nil

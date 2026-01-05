@@ -23,6 +23,11 @@ struct HomeView: View {
 
     // Weather state
     @State private var weather: WeatherData?
+    @State private var weatherLocation: CLLocation?
+    @State private var weeklyForecast: [DailyForecast] = []
+    @State private var isForecastLoading = false
+    @State private var forecastError: String?
+    @State private var isShowingForecast = false
     @StateObject private var locationManager = LocationManager()
 
     // GitHub state
@@ -54,6 +59,17 @@ struct HomeView: View {
         }
         .sheet(isPresented: $showSettings) {
             SettingsView(modelSettingRefreshId: $modelSettingRefreshId)
+        }
+        .sheet(isPresented: $isShowingForecast) {
+            WeeklyForecastSheet(
+                forecast: weeklyForecast,
+                isLoading: isForecastLoading,
+                errorMessage: forecastError,
+                onRetry: {
+                    guard let location = weatherLocation else { return }
+                    Task { await loadWeeklyForecast(location: location) }
+                }
+            )
         }
                 .task(id: modelSettingRefreshId) {
                     await loadAllData()
@@ -106,7 +122,12 @@ struct HomeView: View {
                 Spacer()
 
                 if let weather = weather {
-                    weatherBadge(weather)
+                    Button {
+                        showWeeklyForecast()
+                    } label: {
+                        weatherBadge(weather)
+                    }
+                    .buttonStyle(.plain)
                 }
             }
 
@@ -127,7 +148,10 @@ struct HomeView: View {
                     errorMessage: githubSectionError,
                     isConnecting: isConnectingGitHub,
                     onConnect: { Task { await connectGitHub() } },
-                    onRetry: { Task { await githubService.refresh() } }
+                    onRetry: { Task { await githubService.refresh() } },
+                    onSelectItem: { item in
+                        Task { await githubService.handleSelection(item) }
+                    }
                 )
             }
         }
@@ -158,6 +182,15 @@ struct HomeView: View {
         .padding(.horizontal, 12)
         .padding(.vertical, 6)
         .background(.ultraThinMaterial, in: Capsule())
+    }
+
+    private func showWeeklyForecast() {
+        isShowingForecast = true
+        guard let location = weatherLocation else {
+            forecastError = "Location unavailable"
+            return
+        }
+        Task { await loadWeeklyForecast(location: location) }
     }
 
     // MARK: - Schedule Widget
@@ -779,6 +812,7 @@ struct HomeView: View {
 
     @MainActor
     private func loadWeather(location: CLLocation) async {
+        weatherLocation = location
         do {
             weather = try await WeatherService.shared.getCurrentWeather(
                 latitude: location.coordinate.latitude,
@@ -786,6 +820,91 @@ struct HomeView: View {
             )
         } catch {
             // Silently fail - weather is optional
+        }
+    }
+
+    @MainActor
+    private func loadWeeklyForecast(location: CLLocation) async {
+        isForecastLoading = true
+        forecastError = nil
+        do {
+            weeklyForecast = try await WeatherService.shared.getWeeklyForecast(
+                latitude: location.coordinate.latitude,
+                longitude: location.coordinate.longitude
+            )
+        } catch {
+            forecastError = "Could not load forecast"
+        }
+        isForecastLoading = false
+    }
+}
+
+private struct WeeklyForecastSheet: View {
+    let forecast: [DailyForecast]
+    let isLoading: Bool
+    let errorMessage: String?
+    let onRetry: () -> Void
+
+    var body: some View {
+        NavigationStack {
+            Group {
+                if isLoading {
+                    VStack(spacing: 12) {
+                        ProgressView()
+                        Text("Loading forecast...")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                } else if let errorMessage {
+                    VStack(spacing: 12) {
+                        Image(systemName: "cloud.sun.rain")
+                            .font(.title2)
+                            .foregroundStyle(.secondary)
+                        Text(errorMessage)
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                        Button("Try Again") {
+                            onRetry()
+                        }
+                        .buttonStyle(.bordered)
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                } else {
+                    ScrollView {
+                        VStack(spacing: 12) {
+                            ForEach(forecast) { day in
+                                HStack(spacing: 12) {
+                                    Image(systemName: day.icon)
+                                        .symbolRenderingMode(.multicolor)
+                                        .font(.title3)
+
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        Text(day.date, format: .dateTime.weekday(.wide))
+                                            .font(.subheadline.weight(.semibold))
+                                        Text(day.conditionText)
+                                            .font(.caption)
+                                            .foregroundStyle(.secondary)
+                                    }
+
+                                    Spacer()
+
+                                    Text("\(day.high)° / \(day.low)°")
+                                        .font(.subheadline.weight(.semibold))
+                                        .foregroundStyle(.primary)
+                                }
+                                .padding(.horizontal, 16)
+                                .padding(.vertical, 12)
+                                .mapHealthGlassCard()
+                            }
+                        }
+                        .padding(.horizontal, 20)
+                        .padding(.vertical, 16)
+                    }
+                }
+            }
+            .navigationTitle("7-Day Forecast")
+            .navigationBarTitleDisplayMode(.inline)
         }
     }
 }

@@ -7,7 +7,7 @@ import {
   fetchGitHubContributionCalendar,
   getGitHubUser,
   listGitHubNotifications,
-  mapNotificationsToItems,
+  mapNotificationsToItemsWithState,
   mapSearchResultsToItems,
   searchGitHubIssues,
 } from "@/lib/github";
@@ -71,8 +71,13 @@ export async function GET() {
       }
     }
 
+    const notificationItems = await mapNotificationsToItemsWithState(notifications, accessToken);
+    const filteredNotificationItems = notificationItems.filter(
+      (item) => item.state !== "closed" && item.state !== "merged",
+    );
+
     const actionItems = [
-      ...mapNotificationsToItems(notifications),
+      ...filteredNotificationItems,
       ...mapSearchResultsToItems(pullRequests, "pullRequest", "Review requested"),
       ...mapSearchResultsToItems(issues, "task", "Assigned"),
     ]
