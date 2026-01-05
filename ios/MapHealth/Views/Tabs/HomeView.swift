@@ -257,34 +257,37 @@ struct HomeView: View {
     // MARK: - Tasks Widget
 
     private var tasksWidget: some View {
-        HomeWidgetButton(action: { navigateToTab(.todos) }, content: {
-            VStack(alignment: .leading, spacing: 12) {
-                HStack {
-                    widgetHeader(
-                        icon: "checkmark.circle",
-                        iconColor: .orange,
-                        title: "Tasks",
-                        badge: nil
-                    )
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                widgetHeader(
+                    icon: "checkmark.circle",
+                    iconColor: .orange,
+                    title: "Tasks",
+                    badge: nil
+                )
 
-                    Spacer()
+                Spacer()
 
-                    if !todayTasks.isEmpty {
-                        taskProgressRing
-                    }
-                }
-
-                if isInitialLoad {
-                    tasksLoadingSkeleton
-                } else if let error = tasksError {
-                    widgetError(error, icon: "exclamationmark.triangle")
-                } else if todayTasks.isEmpty {
-                    emptyTasksState
-                } else {
-                    tasksContent
+                if !todayTasks.isEmpty {
+                    taskProgressRing
                 }
             }
-        })
+
+            if isInitialLoad {
+                tasksLoadingSkeleton
+            } else if let error = tasksError {
+                widgetError(error, icon: "exclamationmark.triangle")
+            } else if todayTasks.isEmpty {
+                emptyTasksState
+            } else {
+                tasksContent
+            }
+        }
+        .mapHealthGlassCard()
+        .contentShape(Rectangle())
+        .onTapGesture {
+            navigateToTab(.todos)
+        }
     }
 
     private var taskProgressRing: some View {
@@ -381,9 +384,12 @@ struct HomeView: View {
 
     private func taskRow(_ task: MapTask) -> some View {
         HStack(spacing: 10) {
-            Image(systemName: task.isCompleted ? "checkmark.circle.fill" : "circle")
-                .foregroundStyle(task.isCompleted ? Color.accentColor : Color.secondary.opacity(0.4))
-                .font(.title3)
+            Button(action: { toggleTask(task) }) {
+                Image(systemName: task.isCompleted ? "checkmark.circle.fill" : "circle")
+                    .foregroundStyle(task.isCompleted ? Color.accentColor : Color.secondary.opacity(0.4))
+                    .font(.title3)
+            }
+            .buttonStyle(.plain)
 
             Text(task.title)
                 .font(.subheadline)
@@ -689,6 +695,16 @@ struct HomeView: View {
             }
         } catch {
             tasksError = "Could not load tasks"
+        }
+    }
+
+    @MainActor
+    private func toggleTask(_ task: MapTask) {
+        Task {
+            guard let updated = try? await tasksService.toggleTask(task) else { return }
+            if let index = todayTasks.firstIndex(where: { $0.id == updated.id }) {
+                todayTasks[index] = updated
+            }
         }
     }
 
