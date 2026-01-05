@@ -92,7 +92,7 @@ struct CalendarWeekStrip: View {
         }
         .padding(.vertical, 8)
         .padding(.horizontal, 4)
-        .mapHealthGlassSurface(cornerRadius: 16, tint: .accentColor.opacity(0.03))
+        .mapHealthGlassSurface(cornerRadius: 16, tint: Color.accentColor.opacity(0.03))
         .offset(x: dragOffset)
     }
 
@@ -204,9 +204,9 @@ struct WeekDayCell: View {
         if isSelected && isToday {
             return .white
         } else if isSelected {
-            return .accentColor
+            return Color.accentColor
         } else if isToday {
-            return .accentColor
+            return Color.accentColor
         } else {
             return .primary
         }

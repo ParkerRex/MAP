@@ -115,7 +115,7 @@ struct SkeletonTasksList: View {
 // MARK: - Skeleton Metric Card
 
 struct SkeletonMetricCard: View {
-    var color: Color = .accentColor
+    var color: Color = Color.accentColor
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {

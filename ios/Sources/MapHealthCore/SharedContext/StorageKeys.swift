@@ -2,7 +2,7 @@
 /// storage information including the `AppStorage` and `SceneStorage`
 public enum StorageKeys {
     public enum Defaults {
-        public static let openAIModel = "gpt-4o"
+        public static let openAIModel = "gpt-5.2"
         public static let claudeModel = "claude-sonnet-4-20250514"
         public static let llmSource = "openai"
         public static let appearanceMode = "system"

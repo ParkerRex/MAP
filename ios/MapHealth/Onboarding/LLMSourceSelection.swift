@@ -29,7 +29,7 @@ struct LLMSourceSelection: View {
         .pickerStyle(.wheel)
         .frame(maxWidth: .infinity)
         .padding(16)
-        .mapHealthGlassSurface(cornerRadius: 20, tint: .accentColor.opacity(0.08))
+        .mapHealthGlassSurface(cornerRadius: 20, tint: Color.accentColor.opacity(0.08))
         .accessibilityIdentifier("llmSourcePicker")
     }
 

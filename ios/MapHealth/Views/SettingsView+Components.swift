@@ -23,7 +23,7 @@ extension SettingsView {
             }
             .padding(16)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .mapHealthGlassSurface(cornerRadius: 20, tint: .accentColor.opacity(0.04))
+            .mapHealthGlassSurface(cornerRadius: 20, tint: Color.accentColor.opacity(0.04))
         }
     }
 

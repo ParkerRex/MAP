@@ -26,7 +26,7 @@ struct ClaudeAuthView: View {
                     .textFieldStyle(.roundedBorder)
             }
             .padding(20)
-            .mapHealthGlassSurface(cornerRadius: 24, tint: .accentColor.opacity(0.08))
+            .mapHealthGlassSurface(cornerRadius: 24, tint: Color.accentColor.opacity(0.08))
         } footer: {
             Button {
                 saveApiKey()

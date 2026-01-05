@@ -60,7 +60,7 @@ struct MonthCalendarContent: View {
             }
         }
         .padding(14)
-        .mapHealthGlassSurface(cornerRadius: 16, tint: .accentColor.opacity(0.03))
+        .mapHealthGlassSurface(cornerRadius: 16, tint: Color.accentColor.opacity(0.03))
     }
 
     private var selectedDayEvents: some View {
@@ -267,9 +267,9 @@ struct MonthDayCell: View {
         if isSelected && isToday {
             return .white
         } else if isSelected {
-            return .accentColor
+            return Color.accentColor
         } else if isToday {
-            return .accentColor
+            return Color.accentColor
         } else if !isCurrentMonth {
             return .secondary.opacity(0.4)
         } else {

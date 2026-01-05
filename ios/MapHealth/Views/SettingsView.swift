@@ -3,7 +3,6 @@ import OSLog
 import SwiftUI
 
 struct SettingsView: View {
-    @EnvironmentObject var healthDataInterpreter: HealthDataInterpreter
     @Environment(\.dismiss) var dismiss
 
     @AppStorage(StorageKeys.onboardingFlowComplete) var onboardingFlowComplete = false

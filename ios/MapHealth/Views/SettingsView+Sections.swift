@@ -180,29 +180,6 @@ extension SettingsView {
         }
     }
 
-    var chatSection: some View {
-        settingsSection(
-            title: "SETTINGS_CHAT",
-            subtitle: "Manage your chat history and preferences."
-        ) {
-            Button {
-                Task {
-                    await healthDataInterpreter.resetChat()
-                    dismiss()
-                }
-            } label: {
-                settingsRow(
-                    icon: "arrow.counterclockwise",
-                    iconTint: .orange,
-                    title: "SETTINGS_CHAT_RESET",
-                    subtitle: "Clears your current conversation"
-                )
-            }
-            .buttonStyle(.plain)
-            .accessibilityIdentifier("resetButton")
-        }
-    }
-
     var appearanceSection: some View {
         settingsSection(
             title: "Appearance",

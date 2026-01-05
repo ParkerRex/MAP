@@ -87,7 +87,7 @@ struct CalendarEventRow: View {
 
     private var eventColor: Color {
         if let colors = calendarService.colorForEvent(event) {
-            return Color(hex: colors.background) ?? .accentColor
+            return Color(hex: colors.background) ?? Color.accentColor
         }
         return googleCalendarColor(for: event.colorId)
     }
@@ -145,7 +145,7 @@ struct CompactEventRow: View {
 
     private var eventColor: Color {
         if let colors = calendarService.colorForEvent(event) {
-            return Color(hex: colors.background) ?? .accentColor
+            return Color(hex: colors.background) ?? Color.accentColor
         }
         return googleCalendarColor(for: event.colorId)
     }
@@ -171,7 +171,7 @@ struct CalendarEmptyStateView: View {
         }
         .frame(maxWidth: .infinity, alignment: .center)
         .padding(32)
-        .mapHealthGlassSurface(cornerRadius: 16, tint: .accentColor.opacity(0.04))
+        .mapHealthGlassSurface(cornerRadius: 16, tint: Color.accentColor.opacity(0.04))
     }
 }
 
@@ -222,7 +222,7 @@ func googleCalendarColor(for colorId: String?) -> Color {
         "10": .init(red: 0.31, green: 0.71, blue: 0.53), // Basil
         "11": .init(red: 0.82, green: 0.31, blue: 0.31)  // Tomato
     ]
-    return colors[colorId ?? ""] ?? .accentColor
+    return colors[colorId ?? ""] ?? Color.accentColor
 }
 
 // MARK: - Color Extension

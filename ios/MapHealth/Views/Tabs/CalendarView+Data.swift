@@ -79,11 +79,11 @@ extension CalendarView {
 
     func calendarColor(for calendar: CalendarInfo) -> Color {
         if let colors = calendarService.colorForCalendar(calendar) {
-            return Color(hex: colors.background) ?? .accentColor
+            return Color(hex: colors.background) ?? Color.accentColor
         }
         if let backgroundColor = calendar.backgroundColor {
-            return Color(hex: backgroundColor) ?? .accentColor
+            return Color(hex: backgroundColor) ?? Color.accentColor
         }
-        return .accentColor
+        return Color.accentColor
     }
 }

@@ -39,7 +39,7 @@ extension View {
     }
 
     @ViewBuilder
-    func mapHealthGlassCard(tint: Color = .accentColor.opacity(0.06)) -> some View {
+    func mapHealthGlassCard(tint: Color = Color.accentColor.opacity(0.06)) -> some View {
         self
             .padding(16)
             .frame(maxWidth: .infinity, alignment: .leading)

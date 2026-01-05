@@ -11,6 +11,7 @@
 		27859C222A34F2BF00397C85 /* XCTestExtensions in Frameworks */ = {isa = PBXBuildFile; productRef = 27859C212A34F2BF00397C85 /* XCTestExtensions */; };
 		27859C252A34F2D000397C85 /* XCTHealthKit in Frameworks */ = {isa = PBXBuildFile; productRef = 27859C242A34F2D000397C85 /* XCTHealthKit */; };
 		27859C282A34F2DE00397C85 /* XCTRuntimeAssertions in Frameworks */ = {isa = PBXBuildFile; productRef = 27859C272A34F2DE00397C85 /* XCTRuntimeAssertions */; };
+		08B9E7696BA0ED796D72BD6C /* AppIntents.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 67F1B19D59491F64CD4AD61E /* AppIntents.framework */; };
 		5FA52E092F05A4FB00203C33 /* MapHealthCore in Frameworks */ = {isa = PBXBuildFile; productRef = 5FA52E082F05A4FB00203C33 /* MapHealthCore */; };
 /* End PBXBuildFile section */
 
@@ -35,6 +36,7 @@
 		27B2495A2A06590E0091E52C /* MapHealthTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MapHealthTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		2F4E21D529F0518B0067EE98 /* MapHealthUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MapHealthUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		6509F9492E852EF300F6945C /* MapHealth.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = MapHealth.xctestplan; sourceTree = "<group>"; };
+		67F1B19D59491F64CD4AD61E /* AppIntents.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppIntents.framework; path = System/Library/Frameworks/AppIntents.framework; sourceTree = SDKROOT; };
 		653A254D283387FE005D4D48 /* MapHealth.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MapHealth.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -78,6 +80,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				08B9E7696BA0ED796D72BD6C /* AppIntents.framework in Frameworks */,
 				5FA52E092F05A4FB00203C33 /* MapHealthCore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -111,6 +114,7 @@
 		653A258B283395A7005D4D48 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				67F1B19D59491F64CD4AD61E /* AppIntents.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -484,6 +488,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = "MapHealth Icon";
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				EXTRACT_APP_INTENTS_METADATA = NO;
 				CODE_SIGN_ENTITLEMENTS = "MapHealth/Supporting Files/MapHealth.entitlements";
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
@@ -657,6 +662,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = "MapHealth Icon";
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				EXTRACT_APP_INTENTS_METADATA = NO;
 				CODE_SIGN_ENTITLEMENTS = "MapHealth/Supporting Files/MapHealth.entitlements";
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
@@ -706,6 +712,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = "MapHealth Icon";
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				EXTRACT_APP_INTENTS_METADATA = NO;
 				CODE_SIGN_ENTITLEMENTS = "MapHealth/Supporting Files/MapHealth.entitlements";
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;

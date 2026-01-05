@@ -250,15 +250,15 @@ extension CalendarTimelineView {
             }
             .padding(.horizontal, 8)
             .padding(.vertical, 4)
-            .foregroundStyle(.accentColor)
-            .mapHealthGlassSurface(cornerRadius: 10, tint: .accentColor.opacity(0.08))
+            .foregroundStyle(Color.accentColor)
+            .mapHealthGlassSurface(cornerRadius: 10, tint: Color.accentColor.opacity(0.08))
 
             Circle()
-                .fill(.accentColor)
+                .fill(Color.accentColor)
                 .frame(width: 8, height: 8)
 
             Rectangle()
-                .fill(.accentColor)
+                .fill(Color.accentColor)
                 .frame(height: 1.5)
         }
         .padding(.leading, 8)

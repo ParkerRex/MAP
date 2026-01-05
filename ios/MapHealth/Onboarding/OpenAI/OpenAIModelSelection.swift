@@ -11,15 +11,15 @@ struct OpenAIModelSelection: View {
             subtitle: "MODEL_SELECTION_SUBTITLE"
         ) {
             Picker("MODEL_SELECTION_TITLE", selection: $openAIModel) {
-                ForEach(Self.models, id: \.self) { model in
-                    Text(verbatim: model)
-                        .tag(model)
+                ForEach(LLMModelCatalog.openAIModels) { model in
+                    Text(model.name)
+                        .tag(model.id)
                 }
             }
             .pickerStyle(.wheel)
             .accessibilityIdentifier("modelPicker")
             .padding(16)
-            .mapHealthGlassSurface(cornerRadius: 20, tint: .accentColor.opacity(0.08))
+            .mapHealthGlassSurface(cornerRadius: 20, tint: Color.accentColor.opacity(0.08))
         } footer: {
             Button("OPEN_AI_MODEL_SAVE_ACTION") {
                 onContinue()
@@ -27,9 +27,4 @@ struct OpenAIModelSelection: View {
             .mapHealthGlassButtonStyle(prominent: true)
         }
     }
-
-    private static let models: [String] = [
-        "gpt-4o",
-        "gpt-4o-mini"
-    ]
 }

@@ -49,7 +49,7 @@ struct MessageRow: View {
             RoundedRectangle(cornerRadius: 16, style: .continuous)
                 .fill(.clear)
                 .glassEffect(
-                    .regular.tint(isUser ? .accentColor.opacity(0.2) : .primary.opacity(0.05)),
+                    .regular.tint(isUser ? Color.accentColor.opacity(0.2) : .primary.opacity(0.05)),
                     in: .rect(cornerRadius: 16)
                 )
         } else {

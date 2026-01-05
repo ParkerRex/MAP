@@ -6,11 +6,11 @@ extension SettingsView {
     var currentModelDisplayName: String {
         switch llmSource {
         case .openai:
-            return "OpenAI · \(openAIModel)"
+            return "OpenAI · \(LLMModelCatalog.displayName(for: openAIModel, source: .openai))"
         case .claude:
-            return "Claude · \(claudeModel)"
+            return "Claude · \(LLMModelCatalog.displayName(for: claudeModel, source: .claude))"
         case .fog, .local:
-            return "Local · \(openAIModel)"
+            return "Local · \(LLMModelCatalog.displayName(for: openAIModel, source: .openai))"
         }
     }
 

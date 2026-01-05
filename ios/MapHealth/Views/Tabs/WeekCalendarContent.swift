@@ -169,7 +169,7 @@ struct WeekDaySection: View {
         .padding(14)
         .mapHealthGlassSurface(
             cornerRadius: 16,
-            tint: isSelected ? .accentColor.opacity(0.06) : .accentColor.opacity(0.02)
+            tint: isSelected ? Color.accentColor.opacity(0.06) : Color.accentColor.opacity(0.02)
         )
     }
 }
@@ -238,7 +238,7 @@ struct CompactEventCard: View {
 
     private var eventColor: Color {
         if let colors = calendarService.colorForEvent(event) {
-            return Color(hex: colors.background) ?? .accentColor
+            return Color(hex: colors.background) ?? Color.accentColor
         }
         return googleCalendarColor(for: event.colorId)
     }

@@ -16,35 +16,29 @@ struct ChatView: View {
     @State private var modelSettingRefreshId = UUID()
     @State private var messageTaskId = 0
     @State private var isReauthenticating = false
-
-    private static let openAIModels: [ModelOption] = [
-        ModelOption(id: "gpt-4o", name: "GPT-4o"),
-        ModelOption(id: "gpt-4o-mini", name: "GPT-4o mini")
-    ]
-    private static let claudeModels: [ModelOption] = [
-        ModelOption(id: "claude-opus-4-20250514", name: "Opus (Most Capable)"),
-        ModelOption(id: "claude-sonnet-4-20250514", name: "Sonnet (Balanced)"),
-        ModelOption(id: "claude-3-5-haiku-20241022", name: "Haiku (Fast & Cheap)")
-    ]
+    @State private var showLLMSettings = false
 
     var body: some View {
         NavigationStack {
-            GlassChatView(
-                chat: Binding(
-                    get: { healthDataInterpreter.messages },
-                    set: { healthDataInterpreter.messages = $0 }
-                ),
-                isInputEnabled: !healthDataInterpreter.isGenerating,
-                isGenerating: healthDataInterpreter.isGenerating
-            )
-            .toolbar {
-                ToolbarItem(placement: .principal) {
-                    modelSelector
-                }
-                ToolbarItem(placement: .primaryAction) {
-                    resetChatButton
-                }
+            VStack(spacing: 12) {
+                chatModelHeader
+                    .padding(.horizontal, 16)
+                    .padding(.top, 12)
+
+                GlassChatView(
+                    chat: Binding(
+                        get: { healthDataInterpreter.messages },
+                        set: { healthDataInterpreter.messages = $0 }
+                    ),
+                    isInputEnabled: !healthDataInterpreter.isGenerating,
+                    isGenerating: healthDataInterpreter.isGenerating
+                )
             }
+            .sheet(
+                isPresented: $showLLMSettings,
+                onDismiss: { modelSettingRefreshId = UUID() },
+                content: { LLMSettingsFlow() }
+            )
             .onChange(of: healthDataInterpreter.messages, initial: true) { _, newValue in
                 if newValue.last?.role == .user {
                     messageTaskId += 1
@@ -85,56 +79,81 @@ struct ChatView: View {
         }
     }
 
-    private var resetChatButton: some View {
-        Button {
-            Task {
-                await healthDataInterpreter.resetChat()
-            }
-        } label: {
-            Image(systemName: "arrow.counterclockwise")
-                .accessibilityLabel(Text("SETTINGS_CHAT_RESET"))
-        }
-        .mapHealthGlassButtonStyle()
-        .accessibilityIdentifier("resetChatButton")
-    }
-
-    private var modelSelector: some View {
-        Menu {
-            ForEach(modelsForSource) { model in
+    private var chatModelHeader: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Text("LLM_SETTINGS_TITLE")
+                    .font(.headline)
+                Spacer()
                 Button {
-                    switch llmSource {
-                    case .openai:
-                        openAIModel = model.id
-                    case .claude:
-                        claudeModel = model.id
-                    case .fog, .local:
-                        break
-                    }
-                    modelSettingRefreshId = UUID()
+                    showLLMSettings = true
                 } label: {
-                    HStack {
-                        Text(model.name)
-                        if currentModelId == model.id {
-                            Spacer()
-                            Image(systemName: "checkmark")
-                        }
+                    HStack(spacing: 6) {
+                        Image(systemName: "key.fill")
+                        Text("API_KEY_TITLE")
                     }
                 }
+                .mapHealthGlassButtonStyle()
+                .accessibilityIdentifier("apiKeyButton")
             }
-        } label: {
-            HStack(spacing: 4) {
-                Text(currentModelName)
-                    .font(.headline)
-                Image(systemName: "chevron.down")
-                    .font(.caption.weight(.semibold))
+
+            Picker("LLM_SOURCE_PICKER_LABEL", selection: $llmSourceRaw) {
+                ForEach(LLMSource.chatSources) { source in
+                    Text(source.localizedDescription)
+                        .tag(source.rawValue)
+                }
             }
-            .foregroundStyle(.primary)
+            .pickerStyle(.segmented)
+            .accessibilityIdentifier("llmSourcePicker")
+
+            HStack {
+                Text("MODEL_SELECTION_TITLE")
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(.secondary)
+                Spacer()
+                Picker(selection: selectedModelBinding) {
+                    ForEach(modelsForSource) { model in
+                        Text(model.name)
+                            .tag(model.id)
+                    }
+                } label: {
+                    HStack(spacing: 4) {
+                        Text(currentModelName)
+                            .font(.subheadline.weight(.semibold))
+                        Image(systemName: "chevron.down")
+                            .font(.caption.weight(.semibold))
+                    }
+                    .foregroundStyle(.primary)
+                }
+                .pickerStyle(.menu)
+                .accessibilityIdentifier("modelSelector")
+            }
         }
-        .accessibilityIdentifier("modelSelector")
+        .padding(16)
+        .mapHealthGlassSurface(cornerRadius: 20, tint: Color.accentColor.opacity(0.06))
+    }
+
+    private var selectedModelBinding: Binding<String> {
+        Binding(
+            get: { currentModelId },
+            set: { updateModelSelection($0) }
+        )
+    }
+
+    private func updateModelSelection(_ modelId: String) {
+        switch llmSource {
+        case .openai:
+            openAIModel = modelId
+        case .claude:
+            claudeModel = modelId
+        case .fog, .local:
+            openAIModel = modelId
+        }
+        modelSettingRefreshId = UUID()
     }
 
     private var currentModelName: String {
-        modelsForSource.first { $0.id == currentModelId }?.name ?? currentModelId
+        LLMModelCatalog.displayName(for: currentModelId, source: llmSource)
     }
 
     private var currentModelId: String {
@@ -148,15 +167,8 @@ struct ChatView: View {
         }
     }
 
-    private var modelsForSource: [ModelOption] {
-        switch llmSource {
-        case .openai:
-            return Self.openAIModels
-        case .claude:
-            return Self.claudeModels
-        case .fog, .local:
-            return Self.openAIModels
-        }
+    private var modelsForSource: [LLMModelOption] {
+        LLMModelCatalog.models(for: llmSource, currentModelId: currentModelId)
     }
 
     private var llmSource: LLMSource {
@@ -208,9 +220,4 @@ struct ChatView: View {
             return false
         }
     }
-}
-
-private struct ModelOption: Identifiable {
-    let id: String
-    let name: String
 }

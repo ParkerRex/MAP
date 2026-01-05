@@ -10,7 +10,7 @@ extension CalendarView {
             viewModePicker
         }
         .padding(16)
-        .mapHealthGlassSurface(cornerRadius: 20, tint: .accentColor.opacity(0.04))
+        .mapHealthGlassSurface(cornerRadius: 20, tint: Color.accentColor.opacity(0.04))
         .padding(.horizontal, 20)
         .padding(.top, 8)
         .padding(.bottom, 12)

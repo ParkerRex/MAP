@@ -55,7 +55,6 @@ extension SettingsView {
                 githubSection
                 modelSection
                 appearanceSection
-                chatSection
                 infoSection
             }
             .padding(.horizontal, 20)

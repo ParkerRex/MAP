@@ -20,7 +20,7 @@ struct OpenAIAPIKey: View {
                     .accessibilityLabel(Text("API_KEY_TITLE"))
             }
             .padding(20)
-            .mapHealthGlassSurface(cornerRadius: 24, tint: .accentColor.opacity(0.08))
+            .mapHealthGlassSurface(cornerRadius: 24, tint: Color.accentColor.opacity(0.08))
         } footer: {
             Button("ONBOARDING_NEXT") {
                 saveKey()

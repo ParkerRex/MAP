@@ -49,22 +49,10 @@ final class HealthChatViewUITests: XCTestCase {
         try app.secureTextFields["OpenAI API Key"].enter(value: "sk-123456789")
         app.buttons["Next"].firstMatch.tap()
         XCTAssert(app.pickerWheels.firstMatch.waitForExistence(timeout: 1))
-        app.pickerWheels.firstMatch.adjust(toPickerWheelValue: "gpt-4o")
+        app.pickerWheels.firstMatch.adjust(toPickerWheelValue: "GPT-5.2")
         app.buttons["Save OpenAI Model"].firstMatch.tap()
-        
+
         XCTAssert(app.staticTexts["Map Health"].waitForExistence(timeout: 2))
         settingsButton.tap()
-        app.buttons["resetButton"].firstMatch.tap()
-        
-        XCTAssert(app.staticTexts["Map Health"].waitForExistence(timeout: 2))
-    }
-    
-    func testResetChat() throws {
-        let app = XCUIApplication()
-        try app.conductOnboardingIfNeeded()
-        
-        let resetChatButton = app.buttons["resetChatButton"]
-        XCTAssertTrue(resetChatButton.waitForExistence(timeout: 5))
-        resetChatButton.tap()
     }
 }

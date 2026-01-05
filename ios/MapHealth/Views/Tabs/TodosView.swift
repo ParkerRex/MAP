@@ -34,7 +34,7 @@ struct TodosView: View {
 
         var tint: Color {
             switch self {
-            case .all: .accentColor
+            case .all: Color.accentColor
             case .today: .orange
             case .upcoming: .blue
             case .overdue: .red

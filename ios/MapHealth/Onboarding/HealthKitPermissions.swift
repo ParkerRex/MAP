@@ -17,12 +17,12 @@ struct HealthKitPermissions: View {
                 Image(systemName: "heart.text.square.fill")
                     .accessibilityHidden(true)
                     .font(.system(size: 150))
-                    .foregroundColor(.accentColor)
+                    .foregroundColor(Color.accentColor)
                 Text("HEALTHKIT_PERMISSIONS_DESCRIPTION")
                     .multilineTextAlignment(.center)
             }
             .padding(20)
-            .mapHealthGlassSurface(cornerRadius: 24, tint: .accentColor.opacity(0.08))
+            .mapHealthGlassSurface(cornerRadius: 24, tint: Color.accentColor.opacity(0.08))
         } footer: {
             Button("HEALTHKIT_PERMISSIONS_BUTTON") {
                 Task {

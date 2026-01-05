@@ -33,9 +33,6 @@ struct HealthChatView: View {
                 ToolbarItem(placement: .primaryAction) {
                     self.settingsButton
                 }
-                ToolbarItem(placement: .primaryAction) {
-                    self.resetChatButton
-                }
             }
             .onChange(of: healthDataInterpreter.messages, initial: true) { _, newValue in
                 if newValue.last?.role == .user {
@@ -89,19 +86,6 @@ struct HealthChatView: View {
         }
         .mapHealthGlassButtonStyle()
         .accessibilityIdentifier("settingsButton")
-    }
-
-    private var resetChatButton: some View {
-        Button {
-            Task {
-                await healthDataInterpreter.resetChat()
-            }
-        } label: {
-            Image(systemName: "arrow.counterclockwise")
-                .accessibilityLabel(Text("SETTINGS_CHAT_RESET"))
-        }
-        .mapHealthGlassButtonStyle()
-        .accessibilityIdentifier("resetChatButton")
     }
 
     @MainActor

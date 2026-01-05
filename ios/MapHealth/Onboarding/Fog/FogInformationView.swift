@@ -50,7 +50,7 @@ struct FogInformationView: View {
             }
         }
         .padding(16)
-        .mapHealthGlassSurface(cornerRadius: 20, tint: .accentColor.opacity(0.06))
+        .mapHealthGlassSurface(cornerRadius: 20, tint: Color.accentColor.opacity(0.06))
     }
 }
 

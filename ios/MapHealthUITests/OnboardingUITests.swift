@@ -62,7 +62,7 @@ extension XCUIApplication {
 
         let picker = pickers["modelPicker"]
         let optionToSelect = picker.pickerWheels.element(boundBy: 0)
-        optionToSelect.adjust(toPickerWheelValue: "gpt-4o")
+        optionToSelect.adjust(toPickerWheelValue: "GPT-5.2")
 
         buttons["Save OpenAI Model"].tap()
     }
