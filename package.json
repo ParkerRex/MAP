@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev --hostname 0.0.0.0",
+    "dev:all": "scripts/dev-start.sh",
     "build": "next build",
     "start": "next start",
     "lint": "biome check --write .",
