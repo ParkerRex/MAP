@@ -1,6 +1,6 @@
 "use client";
 
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import type React from "react";
 import { useEffect, useState } from "react";
@@ -11,9 +11,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { useAuth } from "@/hooks/use-auth";
-import { api, queryKeys } from "@/lib/api";
+import { queryKeys } from "@/lib/api";
 import { useGoogleStatus } from "@/hooks/use-calendar";
 import { useClaudeConnect, useClaudeDisconnect, useClaudeStatus } from "@/hooks/use-claude";
+import { useGitHubDisconnect, useGitHubStatus } from "@/hooks/use-github";
 import { useOpenAIConnect, useOpenAIDisconnect, useOpenAIStatus } from "@/hooks/use-openai";
 
 function SettingsSection({
@@ -149,39 +150,22 @@ export default function SettingsPage() {
   const { user, isLoading, logout, isLoggingOut } = useAuth();
   const queryClient = useQueryClient();
   const { data: googleStatus } = useGoogleStatus();
+  const { data: githubStatus, isLoading: isGithubStatusLoading } = useGitHubStatus();
   const { data: claudeStatus } = useClaudeStatus();
   const { data: openaiStatus } = useOpenAIStatus();
   const claudeConnect = useClaudeConnect();
   const claudeDisconnect = useClaudeDisconnect();
+  const githubDisconnect = useGitHubDisconnect();
   const openaiConnect = useOpenAIConnect();
   const openaiDisconnect = useOpenAIDisconnect();
   const [claudeKey, setClaudeKey] = useState("");
   const [openaiKey, setOpenaiKey] = useState("");
-  const [githubUsername, setGithubUsername] = useState("");
-  const [githubError, setGithubError] = useState<string | null>(null);
-
-  const updateGithubMutation = useMutation({
-    mutationFn: (value: string | null) => api.auth.updateProfile({ githubUsername: value }),
-    onSuccess: (data) => {
-      queryClient.setQueryData(queryKeys.auth.me, data);
-      setGithubUsername(normalizeGithubUsername(data.user.githubUsername));
-    },
-    onError: () => {
-      setGithubError("Could not update GitHub username.");
-    },
-  });
 
   useEffect(() => {
     if (!isLoading && !user) {
       router.replace("/login");
     }
   }, [isLoading, user, router]);
-
-  useEffect(() => {
-    if (user) {
-      setGithubUsername(normalizeGithubUsername(user.githubUsername));
-    }
-  }, [user]);
 
   if (isLoading || !user) {
     return (
@@ -202,9 +186,10 @@ export default function SettingsPage() {
         .slice(0, 2)
         .toUpperCase()
     : (user.email?.[0]?.toUpperCase() ?? "U");
-  const normalizedGithubUsername = normalizeGithubUsername(githubUsername);
-  const savedGithubUsername = normalizeGithubUsername(user.githubUsername);
-  const hasGithubChanges = normalizedGithubUsername !== savedGithubUsername;
+  const connectedGithubUsername = normalizeGithubUsername(
+    githubStatus?.username ?? user.githubUsername,
+  );
+  const isGitHubConnected = githubStatus?.connected ?? false;
 
   return (
     <div className="mx-auto w-full max-w-2xl space-y-8 px-4 py-8">
@@ -239,45 +224,75 @@ export default function SettingsPage() {
             <div>
               <p className="text-sm font-medium">GitHub</p>
               <p className="text-xs text-muted-foreground">
-                Show your contribution graph on your MAP home screen.
+                Connect GitHub to sync contributions, notifications, and PRs.
               </p>
             </div>
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-              <div className="flex flex-1 items-center gap-2">
-                <span className="text-sm text-muted-foreground">@</span>
-                <Input
-                  value={githubUsername}
-                  onChange={(e) => {
-                    setGithubError(null);
-                    setGithubUsername(e.target.value.replace(/^@+/, ""));
-                  }}
-                  placeholder="octocat"
-                  className="flex-1"
-                />
+
+            <div className="flex items-center justify-between gap-3 rounded-lg border bg-background/60 p-3">
+              <div className="flex items-center gap-3">
+                {githubStatus?.avatarUrl ? (
+                  <img
+                    src={githubStatus.avatarUrl}
+                    alt={connectedGithubUsername || "GitHub"}
+                    className="h-10 w-10 rounded-full object-cover ring-2 ring-border"
+                  />
+                ) : (
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted text-xs font-semibold text-muted-foreground ring-2 ring-border">
+                    GH
+                  </div>
+                )}
+                <div>
+                  <p className="text-sm font-medium">
+                    {isGitHubConnected
+                      ? connectedGithubUsername
+                        ? `@${connectedGithubUsername}`
+                        : "GitHub connected"
+                      : "Not connected"}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {isGitHubConnected
+                      ? "Your GitHub activity will appear on Home."
+                      : "Connect GitHub to show contributions and review requests."}
+                  </p>
+                </div>
               </div>
-              <Button
-                size="sm"
-                onClick={async () => {
-                  setGithubError(null);
-                  try {
-                    await updateGithubMutation.mutateAsync(
-                      normalizedGithubUsername ? normalizedGithubUsername : null,
-                    );
-                  } catch {
-                    // handled in onError
-                  }
-                }}
-                disabled={!hasGithubChanges || updateGithubMutation.isPending}
-              >
-                {updateGithubMutation.isPending ? "Saving..." : "Save"}
-              </Button>
+              <ConnectionStatus connected={isGitHubConnected} />
             </div>
-            {githubError && <p className="text-xs text-destructive">{githubError}</p>}
-            {normalizedGithubUsername ? (
-              <GitHubContributionGraph username={normalizedGithubUsername} />
+
+            <div className="flex flex-wrap gap-2">
+              {isGitHubConnected ? (
+                <>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() =>
+                      queryClient.invalidateQueries({ queryKey: queryKeys.github.all })
+                    }
+                    disabled={isGithubStatusLoading}
+                  >
+                    {isGithubStatusLoading ? "Refreshing..." : "Refresh"}
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={() => githubDisconnect.mutateAsync()}
+                    disabled={githubDisconnect.isPending}
+                  >
+                    {githubDisconnect.isPending ? "Disconnecting..." : "Disconnect"}
+                  </Button>
+                </>
+              ) : (
+                <Button asChild size="sm">
+                  <a href="/api/github/oauth">Connect GitHub</a>
+                </Button>
+              )}
+            </div>
+
+            {connectedGithubUsername ? (
+              <GitHubContributionGraph username={connectedGithubUsername} />
             ) : (
               <p className="text-xs text-muted-foreground">
-                Add your GitHub username to show your contribution graph.
+                Connect GitHub to show your contribution graph.
               </p>
             )}
           </div>

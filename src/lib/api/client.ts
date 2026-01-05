@@ -131,6 +131,31 @@ export interface WhoopSyncResponse {
   };
 }
 
+// GitHub Response Types
+export interface GitHubActionItem {
+  id: string;
+  type: "notification" | "pullRequest" | "task";
+  title: string;
+  repository?: string;
+  reason?: string;
+  url?: string;
+  updatedAt?: string;
+  state?: "open" | "closed" | "merged" | "draft" | "blocked" | "pending";
+}
+
+export interface GitHubActivityResponse {
+  contributionsGraphUrl: string | null;
+  actionItems: GitHubActionItem[];
+}
+
+export interface GitHubStatusResponse {
+  connected: boolean;
+  username?: string | null;
+  avatarUrl?: string | null;
+  profileUrl?: string | null;
+  lastSyncAt?: string | null;
+}
+
 // Claude Types
 export interface ClaudeChatMessage {
   role: "user" | "assistant";
@@ -379,6 +404,12 @@ class ApiClient {
 
   google = {
     status: () => this.request<{ connected: boolean }>("/google/status"),
+  };
+
+  github = {
+    status: () => this.request<GitHubStatusResponse>("/github/status"),
+    activity: () => this.request<GitHubActivityResponse>("/github/activity"),
+    disconnect: () => this.request<{ success: boolean }>("/github/disconnect", { method: "POST" }),
   };
 
   auth = {

@@ -18,7 +18,9 @@ extension SettingsView {
                 }
                 .accessibilityIdentifier("settingsList")
                 .task {
-                    await loadProfile()
+                    async let profileTask: () = loadProfile()
+                    async let githubTask: () = githubService.refresh()
+                    _ = await (profileTask, githubTask)
                 }
         }
         .background(OnboardingBackground())

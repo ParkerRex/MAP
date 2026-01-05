@@ -329,13 +329,15 @@ public final class HealthDataService: ObservableObject {
         }
 
         var result: [HKCategorySample] = []
-        var coveredUntil: Date = .distantPast
+        // Track coverage per sleep value so "in bed" doesn't mask asleep stages.
+        var coveredUntilByValue: [Int: Date] = [:]
 
         for sample in sorted {
+            let coveredUntil = coveredUntilByValue[sample.value] ?? .distantPast
             if sample.endDate <= coveredUntil { continue }
             result.append(sample)
             if sample.endDate > coveredUntil {
-                coveredUntil = sample.endDate
+                coveredUntilByValue[sample.value] = sample.endDate
             }
         }
 
@@ -358,4 +360,3 @@ public enum HealthDataError: LocalizedError {
         }
     }
 }
-

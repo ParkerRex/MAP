@@ -71,6 +71,35 @@ public class MapAPIClient {
         ).user
     }
 
+    // MARK: - GitHub
+
+    /// Check GitHub connection status for the current user
+    public func getGitHubConnectionStatus() async throws -> GitHubConnectionStatus {
+        return try await request(
+            endpoint: "/api/github/status",
+            method: "GET",
+            responseType: GitHubConnectionStatus.self
+        )
+    }
+
+    /// Fetch GitHub activity snapshot (notifications, PRs, tasks, contributions graph URL)
+    public func getGitHubActivity() async throws -> GitHubActivitySnapshot {
+        return try await request(
+            endpoint: "/api/github/activity",
+            method: "GET",
+            responseType: GitHubActivitySnapshot.self
+        )
+    }
+
+    /// Disconnect GitHub for the current user
+    public func disconnectGitHub() async throws -> SuccessResponse {
+        return try await request(
+            endpoint: "/api/github/disconnect",
+            method: "POST",
+            responseType: SuccessResponse.self
+        )
+    }
+
     // MARK: - Claude API Key
 
     public func setClaudeApiKey(_ apiKey: String) async throws {

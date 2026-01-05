@@ -4,6 +4,7 @@ import SwiftUI
 
 struct SettingsView: View {
     @Environment(\.dismiss) var dismiss
+    @Environment(\.webAuthenticationSession) var webAuthSession
 
     @AppStorage(StorageKeys.onboardingFlowComplete) var onboardingFlowComplete = false
     @AppStorage(StorageKeys.openAIModel) var openAIModel = StorageKeys.Defaults.openAIModel
@@ -14,10 +15,9 @@ struct SettingsView: View {
     @State var showSignOutAlert = false
     @State var userProfile: UserProfile?
     @State var isLoadingProfile = false
-    @State var githubUsername = ""
-    @State var savedGithubUsername = ""
-    @State var isSavingGithub = false
-    @State var githubError: String?
+    @StateObject var githubService = GitHubActivityService.shared
+    @State var isConnectingGitHub = false
+    @State var githubConnectError: String?
     @Binding var modelSettingRefreshId: UUID
     @State var showLLMSettings = false
 }

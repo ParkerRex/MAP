@@ -1,4 +1,5 @@
 // swiftlint:disable file_length
+import AuthenticationServices
 import CoreLocation
 import HealthKit
 import MapHealthCore
@@ -18,12 +19,17 @@ struct HomeView: View {
     @State private var sleepHours: Double?
     @State private var restingHeartRate: Double?
     @State private var healthNeedsPermission = false
-    @State private var userProfile: UserProfile?
     @StateObject private var tasksService = TasksService.shared
 
     // Weather state
     @State private var weather: WeatherData?
     @StateObject private var locationManager = LocationManager()
+
+    // GitHub state
+    @Environment(\.webAuthenticationSession) private var webAuthSession
+    @StateObject private var githubService = GitHubActivityService.shared
+    @State private var isConnectingGitHub = false
+    @State private var githubConnectError: String?
 
     // Loading states - only true on initial load, not refresh
     @State private var isInitialLoad = true
@@ -109,18 +115,15 @@ struct HomeView: View {
     private var githubSection: some View {
         Group {
             if MapAPIClient.shared.isAuthenticated {
-                if !normalizedGithubUsername.isEmpty {
-                    GitHubContributionCard(username: normalizedGithubUsername)
-                } else {
-                    VStack(alignment: .leading, spacing: 6) {
-                        Text("GitHub activity")
-                            .font(.headline)
-                        Text("Add your GitHub username in Settings to show your contribution graph.")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
-                    .mapHealthGlassCard()
-                }
+                GitHubActivityCard(
+                    connectionStatus: githubService.connectionStatus,
+                    activity: githubService.activity,
+                    isLoading: githubService.isLoading,
+                    errorMessage: githubSectionError,
+                    isConnecting: isConnectingGitHub,
+                    onConnect: { Task { await connectGitHub() } },
+                    onRetry: { Task { await githubService.refresh() } }
+                )
             }
         }
     }
@@ -135,10 +138,8 @@ struct HomeView: View {
         }
     }
 
-    private var normalizedGithubUsername: String {
-        userProfile?.githubUsername?
-            .trimmingCharacters(in: .whitespacesAndNewlines)
-            .replacingOccurrences(of: "^@", with: "", options: .regularExpression) ?? ""
+    private var githubSectionError: String? {
+        githubConnectError ?? githubService.error?.localizedDescription
     }
 
     private func weatherBadge(_ weather: WeatherData) -> some View {
@@ -626,6 +627,34 @@ struct HomeView: View {
         .accessibilityIdentifier("settingsButton")
     }
 
+    // MARK: - GitHub OAuth
+
+    @MainActor
+    private func connectGitHub() async {
+        guard !isConnectingGitHub else { return }
+        isConnectingGitHub = true
+        githubConnectError = nil
+        defer { isConnectingGitHub = false }
+
+        do {
+            guard let sessionToken = KeychainService.shared.getSessionToken(), !sessionToken.isEmpty else {
+                githubConnectError = "Please sign in again to connect GitHub."
+                return
+            }
+            let callbackURL = try await webAuthSession.authenticate(
+                using: GitHubOAuth.authURL(sessionToken: sessionToken),
+                callbackURLScheme: GitHubOAuth.callbackScheme,
+                preferredBrowserSession: .shared
+            )
+            try GitHubOAuth.handleCallbackURL(callbackURL)
+            await githubService.refresh()
+        } catch ASWebAuthenticationSessionError.canceledLogin {
+            return
+        } catch {
+            githubConnectError = error.localizedDescription
+        }
+    }
+
     // MARK: - Data Loading
 
     @MainActor
@@ -633,9 +662,9 @@ struct HomeView: View {
         async let eventsTask: () = loadTodayEvents()
         async let tasksTask: () = loadTodayTasks()
         async let healthTask: () = loadHealthData()
-        async let profileTask: () = loadProfile()
+        async let githubTask: () = githubService.refresh()
 
-        _ = await (eventsTask, tasksTask, healthTask, profileTask)
+        _ = await (eventsTask, tasksTask, healthTask, githubTask)
 
         if isInitialLoad {
             withAnimation(.easeOut(duration: 0.3)) {
@@ -662,9 +691,9 @@ struct HomeView: View {
         async let eventsTask: () = loadTodayEvents()
         async let tasksTask: () = loadTodayTasks()
         async let healthTask: () = loadHealthData()
-        async let profileTask: () = loadProfile()
+        async let githubTask: () = githubService.refresh()
 
-        _ = await (eventsTask, tasksTask, healthTask, profileTask)
+        _ = await (eventsTask, tasksTask, healthTask, githubTask)
 
         HapticFeedback.success()
     }
@@ -729,20 +758,6 @@ struct HomeView: View {
             healthNeedsPermission = false
         } catch {
             healthNeedsPermission = true
-        }
-    }
-
-    @MainActor
-    private func loadProfile() async {
-        guard MapAPIClient.shared.isAuthenticated else {
-            userProfile = nil
-            return
-        }
-
-        do {
-            userProfile = try await MapAPIClient.shared.getProfile()
-        } catch {
-            // Profile fetch failed - keep previous value
         }
     }
 

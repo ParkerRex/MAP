@@ -46,6 +46,11 @@ export const queryKeys = {
   google: {
     status: ["google", "status"] as const,
   },
+  github: {
+    status: ["github", "status"] as const,
+    activity: ["github", "activity"] as const,
+    all: ["github"] as const,
+  },
   claude: {
     status: ["claude", "status"] as const,
     all: ["claude"] as const,

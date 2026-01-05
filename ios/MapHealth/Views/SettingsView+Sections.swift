@@ -78,61 +78,27 @@ extension SettingsView {
     var githubSection: some View {
         settingsSection(
             title: "GitHub",
-            subtitle: "Show your contribution graph on Home."
+            subtitle: "Sync contributions, notifications, PRs, and tasks."
         ) {
             if MapAPIClient.shared.isAuthenticated {
                 VStack(alignment: .leading, spacing: 12) {
-                    Text("GitHub username")
-                        .font(.subheadline.weight(.semibold))
-
-                    HStack(spacing: 8) {
-                        Text("@")
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
-                        TextField(
-                            "octocat",
-                            text: Binding(
-                                get: { githubUsername },
-                                set: { newValue in
-                                    githubError = nil
-                                    let sanitized = newValue.replacingOccurrences(
-                                        of: "^@+",
-                                        with: "",
-                                        options: .regularExpression
-                                    )
-                                    githubUsername = sanitized
-                                }
-                            )
-                        )
-                        .textInputAutocapitalization(.never)
-                        .autocorrectionDisabled()
-                    }
-                    .padding(12)
-                    .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
-
-                    Button {
-                        Task {
-                            await saveGithubUsername()
+                    if githubService.isLoading && githubService.connectionStatus == nil {
+                        HStack(spacing: 12) {
+                            ProgressView()
+                            Text("Checking GitHub connection...")
+                                .font(.subheadline)
+                                .foregroundStyle(.secondary)
                         }
-                    } label: {
-                        Text(isSavingGithub ? "Saving..." : "Save")
-                            .frame(maxWidth: .infinity)
+                    } else if let connection = githubService.connectionStatus, connection.connected {
+                        githubConnectedRow(connection)
+                    } else {
+                        githubDisconnectedRow
                     }
-                    .mapHealthGlassButtonStyle(prominent: true)
-                    .disabled(!githubHasChanges || isSavingGithub)
 
-                    if let githubError {
-                        Text(githubError)
+                    if let githubSectionError {
+                        Text(githubSectionError)
                             .font(.caption)
                             .foregroundStyle(.red)
-                    }
-
-                    if !normalizedGithubUsername.isEmpty {
-                        GitHubContributionCard(username: normalizedGithubUsername)
-                    } else {
-                        Text("Add your username to show the contribution graph.")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
                     }
                 }
             } else {
@@ -140,10 +106,98 @@ extension SettingsView {
                     icon: "person.crop.circle.badge.exclamationmark",
                     iconTint: .orange,
                     title: "ACCOUNT_NOT_SIGNED_IN",
-                    subtitle: "Sign in to add your GitHub username.",
+                    subtitle: "Sign in to connect GitHub.",
                     showsChevron: false
                 )
             }
+        }
+    }
+
+    private func githubConnectedRow(_ connection: GitHubConnectionStatus) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(spacing: 12) {
+                if let avatarUrl = connection.avatarUrl,
+                   let url = URL(string: avatarUrl) {
+                    AsyncImage(url: url) { image in
+                        image
+                            .resizable()
+                            .aspectRatio(contentMode: .fill)
+                    } placeholder: {
+                        githubAvatarPlaceholder
+                    }
+                    .frame(width: 44, height: 44)
+                    .clipShape(Circle())
+                } else {
+                    githubAvatarPlaceholder
+                }
+
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(connection.username.map { "@\($0)" } ?? "GitHub connected")
+                        .font(.subheadline.weight(.semibold))
+                    Text("Your GitHub activity will appear on Home.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+
+                Spacer()
+
+                statusPill(label: "Connected", color: .green)
+            }
+
+            HStack(spacing: 12) {
+                Button {
+                    Task {
+                        await githubService.refresh()
+                    }
+                } label: {
+                    Text("Refresh")
+                        .frame(maxWidth: .infinity)
+                }
+                .mapHealthGlassButtonStyle()
+                .disabled(githubService.isLoading)
+
+                Button(role: .destructive) {
+                    Task {
+                        await disconnectGitHub()
+                    }
+                } label: {
+                    Text("Disconnect")
+                        .frame(maxWidth: .infinity)
+                }
+                .mapHealthGlassButtonStyle()
+                .disabled(githubService.isLoading)
+            }
+        }
+    }
+
+    private var githubDisconnectedRow: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Connect GitHub to show contributions and review requests on Home.")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+
+            Button {
+                Task {
+                    await connectGitHub()
+                }
+            } label: {
+                Text(isConnectingGitHub ? "Connecting..." : "Connect GitHub")
+                    .frame(maxWidth: .infinity)
+            }
+            .mapHealthGlassButtonStyle(prominent: true)
+            .disabled(isConnectingGitHub)
+        }
+    }
+
+    private var githubAvatarPlaceholder: some View {
+        ZStack {
+            Circle()
+                .fill(Color.secondary.opacity(0.2))
+                .frame(width: 44, height: 44)
+
+            Image(systemName: "person.fill")
+                .font(.system(size: 18, weight: .semibold))
+                .foregroundStyle(.secondary)
         }
     }
 
