@@ -19,21 +19,23 @@ struct GitHubContributionCard: View {
                 .font(.caption)
                 .foregroundStyle(.secondary)
 
-            GitHubContributionWebView(url: githubGraphURL)
-                .frame(height: 130)
-                .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+            GitHubContributionWebView(contributionsURL: githubContributionsURL)
+                .frame(height: 96)
+                .padding(12)
+                .frame(maxWidth: .infinity)
+                .background(Color.white, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
         }
         .mapHealthGlassCard()
     }
 
-    private var githubGraphURL: URL {
-        let base = "https://ghchart.rshah.org/20b14f/"
-        return URL(string: base + normalizedUsername)! // swiftlint:disable:this force_unwrapping
+    private var githubContributionsURL: URL {
+        let base = "https://github.com/users/"
+        return URL(string: base + normalizedUsername + "/contributions")! // swiftlint:disable:this force_unwrapping
     }
 }
 
 private struct GitHubContributionWebView: UIViewRepresentable {
-    let url: URL
+    let contributionsURL: URL
 
     func makeCoordinator() -> Coordinator {
         Coordinator()
@@ -52,13 +54,32 @@ private struct GitHubContributionWebView: UIViewRepresentable {
     }
 
     func updateUIView(_ webView: WKWebView, context: Context) {
-        guard context.coordinator.lastURL != url else { return }
-        context.coordinator.lastURL = url
-        webView.load(URLRequest(url: url))
+        guard context.coordinator.lastURL != contributionsURL else { return }
+        context.coordinator.lastURL = contributionsURL
+        webView.loadHTMLString(html(for: contributionsURL), baseURL: nil)
     }
 
     final class Coordinator {
         var lastURL: URL?
+    }
+
+    private func html(for contributionsURL: URL) -> String {
+        """
+        <!doctype html>
+        <html>
+          <head>
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <style>
+              :root { color-scheme: light; }
+              body { margin: 0; padding: 0; background: transparent; }
+              img { width: 100%; height: auto; display: block; }
+            </style>
+          </head>
+          <body>
+            <img src="\(contributionsURL.absoluteString)" alt="GitHub contributions">
+          </body>
+        </html>
+        """
     }
 }
 
