@@ -30,8 +30,8 @@ struct TaskDetailSheet: View {
     }
 
     private var hasChanges: Bool {
-        title.trimmed != task.title ||
-        notes.trimmed != (task.body ?? "") ||
+        title.trimmingCharacters(in: .whitespacesAndNewlines) != task.title ||
+        notes.trimmingCharacters(in: .whitespacesAndNewlines) != (task.body ?? "") ||
         dueDate != task.dueAt ||
         selectedTagId != task.tags.first?.id
     }
@@ -94,7 +94,11 @@ struct TaskDetailSheet: View {
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Save") { saveTask() }
                         .fontWeight(.semibold)
-                        .disabled(title.trimmed.isEmpty || isSaving || !hasChanges)
+                        .disabled(
+                            title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                            || isSaving
+                            || !hasChanges
+                        )
                 }
                 ToolbarItem(placement: .keyboard) {
                     HStack {
@@ -207,7 +211,7 @@ struct TaskDetailSheet: View {
         Button {
             HapticFeedback.success()
             Task {
-                try? await tasksService.toggleTask(task)
+                _ = try? await tasksService.toggleTask(task)
                 dismiss()
             }
         } label: {
@@ -239,7 +243,7 @@ struct TaskDetailSheet: View {
     }
 
     private func saveTask() {
-        guard !title.trimmed.isEmpty else { return }
+        guard !title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
 
         isSaving = true
         HapticFeedback.success()
@@ -248,8 +252,10 @@ struct TaskDetailSheet: View {
             do {
                 try await tasksService.updateTask(
                     task,
-                    title: title.trimmed,
-                    body: notes.trimmed.isEmpty ? nil : notes.trimmed,
+                    title: title.trimmingCharacters(in: .whitespacesAndNewlines),
+                    body: notes.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                    ? nil
+                    : notes.trimmingCharacters(in: .whitespacesAndNewlines),
                     dueAt: dueDate,
                     tags: selectedTagId.map { [$0] } ?? []
                 )
@@ -264,7 +270,7 @@ struct TaskDetailSheet: View {
     private func deleteTask() {
         HapticFeedback.warning()
         Task {
-            try? await tasksService.deleteTask(task)
+            _ = try? await tasksService.deleteTask(task)
             await MainActor.run { dismiss() }
         }
     }
@@ -325,13 +331,5 @@ private struct ProjectSelectionChip: View {
             .clipShape(Capsule())
         }
         .buttonStyle(.plain)
-    }
-}
-
-// MARK: - String Extension
-
-private extension String {
-    var trimmed: String {
-        trimmingCharacters(in: .whitespacesAndNewlines)
     }
 }

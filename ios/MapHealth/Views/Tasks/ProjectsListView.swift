@@ -72,7 +72,9 @@ struct ProjectsListView: View {
             }
         }
     }
+}
 
+extension ProjectsListView {
     private func projectRow(for tag: TaskTag) -> some View {
         ProjectRow(
             title: tag.title,
@@ -179,7 +181,7 @@ struct ProjectsListView: View {
 
     private func normalizeOrders(with tags: [TaskTag]) {
         let allIds = Set(tags.map(\.id))
-        var favorites = favoriteOrder.filter { allIds.contains($0) }
+        let favorites = favoriteOrder.filter { allIds.contains($0) }
         var order = projectOrder.filter { allIds.contains($0) && !favorites.contains($0) }
 
         let known = Set(favorites + order)
@@ -281,7 +283,7 @@ struct ProjectsListView: View {
         let trimmed = renameTitle.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return }
         Task {
-            try? await tasksService.updateTag(tag, title: trimmed)
+            _ = try? await tasksService.updateTag(tag, title: trimmed)
             await MainActor.run { renamingTag = nil }
         }
     }
@@ -289,7 +291,7 @@ struct ProjectsListView: View {
     private func deleteProject() {
         guard let tag = deletingTag else { return }
         Task {
-            try? await tasksService.deleteTag(tag)
+            _ = try? await tasksService.deleteTag(tag)
             await MainActor.run { deletingTag = nil }
         }
     }

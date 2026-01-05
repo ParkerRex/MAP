@@ -209,20 +209,20 @@ struct CalendarSectionHeader: View {
 // MARK: - Google Calendar Colors
 
 func googleCalendarColor(for colorId: String?) -> Color {
-    switch colorId {
-    case "1": return .init(red: 0.48, green: 0.65, blue: 0.85)  // Lavender
-    case "2": return .init(red: 0.35, green: 0.73, blue: 0.53)  // Sage
-    case "3": return .init(red: 0.55, green: 0.45, blue: 0.75)  // Grape
-    case "4": return .init(red: 0.91, green: 0.47, blue: 0.49)  // Flamingo
-    case "5": return .init(red: 0.96, green: 0.76, blue: 0.31)  // Banana
-    case "6": return .init(red: 0.95, green: 0.60, blue: 0.36)  // Tangerine
-    case "7": return .init(red: 0.26, green: 0.76, blue: 0.78)  // Peacock
-    case "8": return .init(red: 0.61, green: 0.61, blue: 0.61)  // Graphite
-    case "9": return .init(red: 0.32, green: 0.59, blue: 0.86)  // Blueberry
-    case "10": return .init(red: 0.31, green: 0.71, blue: 0.53) // Basil
-    case "11": return .init(red: 0.82, green: 0.31, blue: 0.31) // Tomato
-    default: return .accentColor
-    }
+    let colors: [String: Color] = [
+        "1": .init(red: 0.48, green: 0.65, blue: 0.85),  // Lavender
+        "2": .init(red: 0.35, green: 0.73, blue: 0.53),  // Sage
+        "3": .init(red: 0.55, green: 0.45, blue: 0.75),  // Grape
+        "4": .init(red: 0.91, green: 0.47, blue: 0.49),  // Flamingo
+        "5": .init(red: 0.96, green: 0.76, blue: 0.31),  // Banana
+        "6": .init(red: 0.95, green: 0.60, blue: 0.36),  // Tangerine
+        "7": .init(red: 0.26, green: 0.76, blue: 0.78),  // Peacock
+        "8": .init(red: 0.61, green: 0.61, blue: 0.61),  // Graphite
+        "9": .init(red: 0.32, green: 0.59, blue: 0.86),  // Blueberry
+        "10": .init(red: 0.31, green: 0.71, blue: 0.53), // Basil
+        "11": .init(red: 0.82, green: 0.31, blue: 0.31)  // Tomato
+    ]
+    return colors[colorId ?? ""] ?? .accentColor
 }
 
 // MARK: - Color Extension

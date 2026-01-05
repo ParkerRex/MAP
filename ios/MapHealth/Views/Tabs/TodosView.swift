@@ -61,7 +61,6 @@ struct TodosView: View {
         let projectName: String?
     }
 
-
     var body: some View {
         NavigationStack {
             contentList
@@ -376,7 +375,7 @@ extension TodosView {
 extension TodosView {
     private var addTaskBar: some View {
         let quickAddPreview = parseQuickAdd(newTaskText)
-        VStack(spacing: 0) {
+        return VStack(spacing: 0) {
             Divider()
             VStack(spacing: 6) {
                 HStack(spacing: 12) {
@@ -860,14 +859,14 @@ extension TodosView {
                 projectTint: ProjectStyling.tint(for: task.tags.first?.id),
                 onToggle: { toggleTask(task) },
                 onTap: { if !isEditing { selectedTask = task } },
-                onDelete: { deleteTask(task) }
-            ) {
-                projectMenu(for: task)
-            } extraMenu: {
-                Button("Quick Edit") {
-                    beginInlineEdit(for: task)
+                onDelete: { deleteTask(task) },
+                projectMenu: { projectMenu(for: task) },
+                extraMenu: {
+                    Button("Quick Edit") {
+                        beginInlineEdit(for: task)
+                    }
                 }
-            }
+            )
             .tag(task.id)
             .listRowInsets(rowInsets)
             .listRowSeparator(.hidden)
@@ -887,12 +886,12 @@ extension TodosView {
 extension TodosView {
     private func toggleTask(_ task: MapTask) {
         HapticFeedback.success()
-        Task { try? await tasksService.toggleTask(task) }
+        Task { _ = try? await tasksService.toggleTask(task) }
     }
 
     private func deleteTask(_ task: MapTask) {
         HapticFeedback.warning()
-        Task { try? await tasksService.deleteTask(task) }
+        Task { _ = try? await tasksService.deleteTask(task) }
     }
 
     @ViewBuilder
@@ -937,7 +936,7 @@ extension TodosView {
     private func updateTaskProject(_ task: MapTask, tagId: String?) {
         HapticFeedback.selection()
         Task {
-            try? await tasksService.updateTask(
+            _ = try? await tasksService.updateTask(
                 task,
                 tags: tagId.map { [$0] } ?? []
             )
@@ -964,7 +963,7 @@ extension TodosView {
         HapticFeedback.success()
         isBulkProcessing = true
         Task {
-            try? await tasksService.updateTask(
+            _ = try? await tasksService.updateTask(
                 task,
                 title: title,
                 body: inlineEditNotes.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -985,7 +984,7 @@ extension TodosView {
         isBulkProcessing = true
         Task {
             for task in selectedTasks where !task.isCompleted {
-                try? await tasksService.toggleTask(task)
+                _ = try? await tasksService.toggleTask(task)
             }
             await MainActor.run { clearSelection() }
         }
@@ -996,7 +995,7 @@ extension TodosView {
         isBulkProcessing = true
         Task {
             for task in selectedTasks {
-                try? await tasksService.updateTask(
+                _ = try? await tasksService.updateTask(
                     task,
                     tags: tagId.map { [$0] } ?? []
                 )
@@ -1033,7 +1032,7 @@ extension TodosView {
         Task {
             isBulkProcessing = true
             for task in selectedTasks {
-                try? await tasksService.updateTask(
+                _ = try? await tasksService.updateTask(
                     task,
                     dueAt: targetDate
                 )
@@ -1048,7 +1047,7 @@ extension TodosView {
         isBulkProcessing = true
         Task {
             for task in selectedTasks {
-                try? await tasksService.deleteTask(task)
+                _ = try? await tasksService.deleteTask(task)
             }
             await MainActor.run { clearSelection() }
         }
@@ -1080,7 +1079,7 @@ extension TodosView {
         let trimmed = newProjectTitle.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return }
         Task {
-            try? await tasksService.createTag(title: trimmed)
+            _ = try? await tasksService.createTag(title: trimmed)
             await MainActor.run { newProjectTitle = "" }
         }
     }
@@ -1098,68 +1097,89 @@ extension TodosView {
 
     private func parseQuickAdd(_ input: String) -> QuickAddResult {
         var working = input
-        let lower = working.lowercased()
-        var dueAt: Date?
-        var timeComponents: DateComponents?
-
-        if lower.contains("tomorrow") {
-            dueAt = Calendar.current.date(
-                byAdding: .day,
-                value: 1,
-                to: Calendar.current.startOfDay(for: Date())
-            )
-            working = working.replacingOccurrences(of: "tomorrow", with: "", options: .caseInsensitive)
-        } else if lower.contains("today") {
-            dueAt = Calendar.current.startOfDay(for: Date())
-            working = working.replacingOccurrences(of: "today", with: "", options: .caseInsensitive)
-        } else if lower.contains("next week") {
-            dueAt = DateHelpers.nextMonday()
-            working = working.replacingOccurrences(of: "next week", with: "", options: .caseInsensitive)
-        } else if let relative = parseRelativeDate(in: lower) {
-            dueAt = relative
-            if let token = relativeToken(in: lower) {
-                working = working.replacingOccurrences(of: token, with: "", options: .caseInsensitive)
-            }
-        } else if let weekday = parseWeekday(in: lower) {
-            dueAt = weekday
-            if let token = weekdayToken(in: lower) {
-                working = working.replacingOccurrences(of: token, with: "", options: .caseInsensitive)
-            }
+        var lower = working.lowercased()
+        let dateParse = parseDueDate(in: working, lower: lower)
+        working = dateParse.cleaned
+        lower = working.lowercased()
+        let timeComponents = parseTime(in: lower)
+        if let token = timeToken(in: lower) {
+            working = working.replacingOccurrences(of: token, with: "", options: .caseInsensitive)
         }
 
-        if let time = parseTime(in: lower) {
-            timeComponents = time
-            if let token = timeToken(in: lower) {
-                working = working.replacingOccurrences(of: token, with: "", options: .caseInsensitive)
-            }
-        }
-
-        if let base = dueAt, let timeComponents {
-            dueAt = Calendar.current.date(
-                bySettingHour: timeComponents.hour ?? 0,
-                minute: timeComponents.minute ?? 0,
-                second: 0,
-                of: base
-            )
-        }
-
-        let (tagId, cleaned, projectName) = parseProjectToken(in: working)
-        let title = cleaned.trimmingCharacters(in: .whitespacesAndNewlines)
-        let resolvedTagId = tagId ?? tasksService.tags.first(where: {
-            guard let projectName else { return false }
-            return $0.title.compare(projectName, options: .caseInsensitive) == .orderedSame
-        })?.id
+        let resolvedDueAt = resolveDate(dateParse.dueAt, with: timeComponents)
+        let projectParse = parseProjectToken(in: working)
+        let title = projectParse.cleaned.trimmingCharacters(in: .whitespacesAndNewlines)
+        let resolvedTagId = resolveTagId(
+            from: projectParse.tagId,
+            projectName: projectParse.projectName
+        )
         return QuickAddResult(
             title: title.isEmpty ? input : title,
-            dueAt: dueAt,
+            dueAt: resolvedDueAt,
             tagId: resolvedTagId,
-            projectName: projectName
+            projectName: projectParse.projectName
         )
     }
 
-    private func parseProjectToken(in input: String) -> (String?, String, String?) {
+    private func parseDueDate(in input: String, lower: String) -> (dueAt: Date?, cleaned: String) {
+        let simpleTokens: [(String, () -> Date?)] = [
+            ("tomorrow", {
+                Calendar.current.date(
+                    byAdding: .day,
+                    value: 1,
+                    to: Calendar.current.startOfDay(for: Date())
+                )
+            }),
+            ("today", { Calendar.current.startOfDay(for: Date()) }),
+            ("next week", { DateHelpers.nextMonday() })
+        ]
+
+        if let match = simpleTokens.first(where: { lower.contains($0.0) }) {
+            let cleaned = input.replacingOccurrences(of: match.0, with: "", options: .caseInsensitive)
+            return (match.1(), cleaned)
+        }
+        if let relative = parseRelativeDate(in: lower) {
+            let cleaned = removeToken(from: input, token: relativeToken(in: lower))
+            return (relative, cleaned)
+        }
+        if let weekday = parseWeekday(in: lower) {
+            let cleaned = removeToken(from: input, token: weekdayToken(in: lower))
+            return (weekday, cleaned)
+        }
+        return (nil, input)
+    }
+
+    private func removeToken(from input: String, token: String?) -> String {
+        guard let token else { return input }
+        return input.replacingOccurrences(of: token, with: "", options: .caseInsensitive)
+    }
+
+    private func resolveDate(_ date: Date?, with timeComponents: DateComponents?) -> Date? {
+        guard let date, let timeComponents else { return date }
+        return Calendar.current.date(
+            bySettingHour: timeComponents.hour ?? 0,
+            minute: timeComponents.minute ?? 0,
+            second: 0,
+            of: date
+        )
+    }
+
+    private func resolveTagId(from tagId: String?, projectName: String?) -> String? {
+        tagId ?? tasksService.tags.first(where: {
+            guard let projectName else { return false }
+            return $0.title.compare(projectName, options: .caseInsensitive) == .orderedSame
+        })?.id
+    }
+
+    private struct ProjectTokenParse {
+        let tagId: String?
+        let cleaned: String
+        let projectName: String?
+    }
+
+    private func parseProjectToken(in input: String) -> ProjectTokenParse {
         guard let tokenRange = input.range(of: "(^|\\s)[#@]([\\w-]+)", options: .regularExpression) else {
-            return (nil, input, nil)
+            return ProjectTokenParse(tagId: nil, cleaned: input, projectName: nil)
         }
 
         let token = String(input[tokenRange])
@@ -1172,19 +1192,26 @@ extension TodosView {
         })?.id
 
         let cleaned = input.replacingOccurrences(of: token, with: "", options: .regularExpression)
-        return (tagId, cleaned, projectName.isEmpty ? nil : projectName)
+        return ProjectTokenParse(tagId: tagId, cleaned: cleaned, projectName: projectName.isEmpty ? nil : projectName)
     }
 
     private func parseWeekday(in lower: String) -> Date? {
         let calendar = Calendar.current
         let weekdays = [
-            "monday": 2, "mon": 2,
-            "tuesday": 3, "tue": 3,
-            "wednesday": 4, "wed": 4,
-            "thursday": 5, "thu": 5,
-            "friday": 6, "fri": 6,
-            "saturday": 7, "sat": 7,
-            "sunday": 1, "sun": 1
+            "monday": 2,
+            "mon": 2,
+            "tuesday": 3,
+            "tue": 3,
+            "wednesday": 4,
+            "wed": 4,
+            "thursday": 5,
+            "thu": 5,
+            "friday": 6,
+            "fri": 6,
+            "saturday": 7,
+            "sat": 7,
+            "sunday": 1,
+            "sun": 1
         ]
         for (key, value) in weekdays where lower.contains(key) {
             let today = Date()
@@ -1198,8 +1225,17 @@ extension TodosView {
     }
 
     private func weekdayToken(in lower: String) -> String? {
-        for token in ["monday","mon","tuesday","tue","wednesday","wed","thursday","thu","friday","fri","saturday","sat","sunday","sun"] {
-            if lower.contains(token) { return token }
+        let tokens = [
+            "monday", "mon",
+            "tuesday", "tue",
+            "wednesday", "wed",
+            "thursday", "thu",
+            "friday", "fri",
+            "saturday", "sat",
+            "sunday", "sun"
+        ]
+        for token in tokens where lower.contains(token) {
+            return token
         }
         return nil
     }
@@ -1216,7 +1252,8 @@ extension TodosView {
             let token = String(lower[match])
             let number = token.components(separatedBy: CharacterSet.decimalDigits.inverted).joined()
             if let weeks = Int(number) {
-                return Calendar.current.date(byAdding: .day, value: weeks * 7, to: Calendar.current.startOfDay(for: Date()))
+                let start = Calendar.current.startOfDay(for: Date())
+                return Calendar.current.date(byAdding: .day, value: weeks * 7, to: start)
             }
         }
         return nil
@@ -1286,8 +1323,12 @@ extension TodosView {
         }
         let timeFormatter = DateFormatter()
         timeFormatter.dateFormat = "h:mm a"
-        let hasTime = calendar.component(.hour, from: date) != 0 || calendar.component(.minute, from: date) != 0
-        return hasTime ? "\(formatter.string(from: date)) \(timeFormatter.string(from: date))" : formatter.string(from: date)
+        let hasTime = calendar.component(.hour, from: date) != 0
+        || calendar.component(.minute, from: date) != 0
+        if hasTime {
+            return "\(formatter.string(from: date)) \(timeFormatter.string(from: date))"
+        }
+        return formatter.string(from: date)
     }
 }
 
