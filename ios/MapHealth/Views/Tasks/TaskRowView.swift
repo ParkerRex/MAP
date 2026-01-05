@@ -54,7 +54,7 @@ struct TaskRow<ProjectMenu: View, ExtraMenu: View>: View {
                     systemImage: task.isCompleted ? "arrow.uturn.backward" : "checkmark"
                 )
             }
-            .tint(.green)
+            .tint(.accentColor)
         }
         .contextMenu {
             Button(action: onToggle) {
@@ -80,19 +80,19 @@ struct TaskRow<ProjectMenu: View, ExtraMenu: View>: View {
             ZStack {
                 Circle()
                     .strokeBorder(
-                        task.isCompleted ? Color.green : Color.secondary.opacity(0.4),
+                        task.isCompleted ? Color.accentColor : Color.secondary.opacity(0.4),
                         lineWidth: 2
                     )
                     .frame(width: 24, height: 24)
 
                 if task.isCompleted {
                     Circle()
-                        .fill(Color.green)
+                        .fill(Color.accentColor)
                         .frame(width: 24, height: 24)
 
                     Image(systemName: "checkmark")
                         .font(.system(size: 11, weight: .bold))
-                        .foregroundStyle(.white)
+                        .foregroundStyle(.black)
                 }
             }
             .animation(.spring(response: 0.25, dampingFraction: 0.6), value: task.isCompleted)

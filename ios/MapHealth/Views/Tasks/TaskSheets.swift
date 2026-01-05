@@ -220,7 +220,7 @@ struct TaskDetailSheet: View {
                 systemImage: task.isCompleted ? "circle" : "checkmark.circle.fill"
             )
             .font(.body.weight(.medium))
-            .foregroundStyle(task.isCompleted ? Color.primary : Color.green)
+            .foregroundStyle(task.isCompleted ? Color.primary : Color.accentColor)
             .frame(maxWidth: .infinity)
             .padding(.vertical, 14)
             .background(Color(.secondarySystemGroupedBackground))
@@ -298,7 +298,7 @@ private struct DateChip: View {
             .padding(.horizontal, 12)
             .padding(.vertical, 8)
             .background(isSelected ? Color.accentColor : Color(.tertiarySystemGroupedBackground))
-            .foregroundStyle(isSelected ? .white : .primary)
+            .foregroundStyle(isSelected ? Color.black : .primary)
             .clipShape(Capsule())
         }
         .animation(.easeOut(duration: 0.15), value: isSelected)
@@ -327,7 +327,7 @@ private struct ProjectSelectionChip: View {
             .padding(.horizontal, 12)
             .padding(.vertical, 8)
             .background(isSelected ? Color.accentColor : Color(.tertiarySystemGroupedBackground))
-            .foregroundStyle(isSelected ? .white : .primary)
+            .foregroundStyle(isSelected ? Color.black : .primary)
             .clipShape(Capsule())
         }
         .buttonStyle(.plain)

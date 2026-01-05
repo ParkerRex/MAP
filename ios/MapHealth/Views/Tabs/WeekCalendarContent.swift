@@ -135,7 +135,7 @@ struct WeekDaySection: View {
                     if isToday {
                         Text("TODAY")
                             .font(.caption2.weight(.bold))
-                            .foregroundStyle(.white)
+                            .foregroundStyle(Color.black)
                             .padding(.horizontal, 8)
                             .padding(.vertical, 3)
                             .background(Color.accentColor)

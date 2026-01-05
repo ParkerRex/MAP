@@ -31,7 +31,7 @@ struct MessageRow: View {
 
             Image(systemName: isUser ? "person.fill" : "sparkles")
                 .font(.system(size: 12, weight: .semibold))
-                .foregroundStyle(.white)
+                .foregroundStyle(isUser ? Color.black : Color.white)
         }
     }
 

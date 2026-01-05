@@ -38,7 +38,7 @@ struct TodosView: View {
             case .today: .orange
             case .upcoming: .blue
             case .overdue: .red
-            case .completed: .green
+            case .completed: .accentColor
             }
         }
     }
@@ -725,7 +725,7 @@ extension TodosView {
         } header: {
             HStack(spacing: 6) {
                 Circle()
-                    .fill(Color.green)
+                    .fill(Color.accentColor)
                     .frame(width: 6, height: 6)
                 Text("Completed")
                 Text("·")
@@ -807,7 +807,7 @@ extension TodosView {
         VStack(spacing: 12) {
             Image(systemName: "checkmark.circle")
                 .font(.system(size: 48, weight: .light))
-                .foregroundStyle(.green.opacity(0.8))
+                .foregroundStyle(Color.accentColor.opacity(0.8))
 
             Text("No tasks yet")
                 .font(.headline)
@@ -1413,7 +1413,7 @@ private struct ProjectChip: View {
                 Text(title)
                 Text("\(count)")
                     .font(.caption.weight(.bold))
-                    .foregroundStyle(isSelected ? .white.opacity(0.9) : .secondary)
+                    .foregroundStyle(isSelected ? Color.black.opacity(0.85) : .secondary)
                     .padding(.horizontal, 6)
                     .padding(.vertical, 2)
                     .background(isSelected ? Color.white.opacity(0.2) : Color(.tertiarySystemGroupedBackground))
@@ -1423,7 +1423,7 @@ private struct ProjectChip: View {
             .padding(.horizontal, 12)
             .padding(.vertical, 8)
             .background(isSelected ? Color.accentColor : Color(.secondarySystemGroupedBackground))
-            .foregroundStyle(isSelected ? .white : .primary)
+            .foregroundStyle(isSelected ? Color.black : .primary)
             .scaleEffect(isSelected ? 1.02 : 1.0)
             .clipShape(Capsule())
         }

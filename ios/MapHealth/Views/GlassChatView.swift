@@ -220,7 +220,7 @@ struct GlassChatView: View {
         } label: {
             Image(systemName: "arrow.up")
                 .font(.system(size: 16, weight: .semibold))
-                .foregroundStyle(.white)
+                .foregroundStyle(sendButtonEnabled ? Color.black : Color.white)
                 .frame(width: 32, height: 32)
                 .background(sendButtonEnabled ? Color.accentColor : Color.gray.opacity(0.4))
                 .clipShape(Circle())

@@ -19,6 +19,7 @@ struct HomeView: View {
     @State private var restingHeartRate: Double?
     @State private var healthNeedsPermission = false
     @State private var userProfile: UserProfile?
+    @StateObject private var tasksService = TasksService.shared
 
     // Weather state
     @State private var weather: WeatherData?
@@ -364,7 +365,7 @@ struct HomeView: View {
                     Text("\(completedTasks.count) completed today")
                         .font(.caption)
                 }
-                .foregroundStyle(.green)
+                .foregroundStyle(Color.accentColor)
                 .padding(.top, 2)
             }
         }
@@ -381,7 +382,7 @@ struct HomeView: View {
     private func taskRow(_ task: MapTask) -> some View {
         HStack(spacing: 10) {
             Image(systemName: task.isCompleted ? "checkmark.circle.fill" : "circle")
-                .foregroundStyle(task.isCompleted ? .green : Color.secondary.opacity(0.4))
+                .foregroundStyle(task.isCompleted ? Color.accentColor : Color.secondary.opacity(0.4))
                 .font(.title3)
 
             Text(task.title)
