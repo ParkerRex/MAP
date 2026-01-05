@@ -43,6 +43,16 @@ extension CalendarView {
         await calendarService.fetchEvents(from: startDate, to: endDate)
     }
 
+    func loadEventsDebounced(delayNanoseconds: UInt64 = 200_000_000) async {
+        do {
+            try await Task.sleep(nanoseconds: delayNanoseconds)
+        } catch {
+            return
+        }
+        guard !Task.isCancelled else { return }
+        await loadEvents()
+    }
+
     func dateRangeForViewMode() -> (start: Date, end: Date) {
         switch viewMode {
         case .day:

@@ -91,7 +91,7 @@ extension CalendarView {
         }
         .task(id: eventsLoadToken) {
             guard hasLoadedInitialData else { return }
-            await loadEvents()
+            await loadEventsDebounced()
         }
     }
 

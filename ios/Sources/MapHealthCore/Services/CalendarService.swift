@@ -16,6 +16,7 @@ public class CalendarService: ObservableObject {
     private let apiClient: MapAPIClient
     private let userDefaults = UserDefaults.standard
     private let selectedCalendarsKey = "map.selectedCalendarIds"
+    private var eventsRequestToken: UInt = 0
 
     public init(apiClient: MapAPIClient = .shared) {
         self.apiClient = apiClient
@@ -89,6 +90,8 @@ public class CalendarService: ObservableObject {
         to endDate: Date,
         calendarId: String? = nil
     ) async {
+        eventsRequestToken &+= 1
+        let requestToken = eventsRequestToken
         isLoading = true
         error = nil
 
@@ -100,32 +103,45 @@ public class CalendarService: ObservableObject {
                     timeMin: startDate,
                     timeMax: endDate
                 )
-                events = response.events
+                if requestToken == eventsRequestToken {
+                    events = response.events
+                }
             } else {
                 // Fetch from all selected calendars
                 let calendarIds = activeCalendarIds
                 if calendarIds.isEmpty {
-                    events = []
+                    if requestToken == eventsRequestToken {
+                        events = []
+                    }
                 } else if calendarIds.count == 1 {
                     let response = try await apiClient.getEvents(
                         calendarId: calendarIds[0],
                         timeMin: startDate,
                         timeMax: endDate
                     )
-                    events = response.events
+                    if requestToken == eventsRequestToken {
+                        events = response.events
+                    }
                 } else {
-                    events = try await apiClient.getMultiCalendarEvents(
+                    let response = try await apiClient.getMultiCalendarEvents(
                         calendarIds: calendarIds,
                         timeMin: startDate,
                         timeMax: endDate
                     )
+                    if requestToken == eventsRequestToken {
+                        events = response
+                    }
                 }
             }
         } catch {
-            self.error = error
+            if requestToken == eventsRequestToken {
+                self.error = error
+            }
         }
 
-        isLoading = false
+        if requestToken == eventsRequestToken {
+            isLoading = false
+        }
     }
 
     /// Fetch calendar colors
