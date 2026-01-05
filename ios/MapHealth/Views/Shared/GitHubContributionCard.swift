@@ -1,6 +1,5 @@
 import MapHealthCore
 import SwiftUI
-import WebKit
 
 struct GitHubActivityCard: View {
     let connectionStatus: GitHubConnectionStatus?
@@ -24,16 +23,6 @@ struct GitHubActivityCard: View {
     private var avatarURL: URL? {
         guard let avatarUrl = connectionStatus?.avatarUrl else { return nil }
         return URL(string: avatarUrl)
-    }
-
-    private var contributionsURL: URL? {
-        if let urlString = activity?.contributionsGraphUrl,
-           let url = URL(string: urlString) {
-            return url
-        }
-
-        guard let username else { return nil }
-        return URL(string: "https://github.com/users/\(username)/contributions")
     }
 
     private var actionItems: [GitHubActionItem] {
@@ -137,8 +126,10 @@ struct GitHubActivityCard: View {
         VStack(alignment: .leading, spacing: 12) {
             userRow
 
-            GitHubContributionGraphView(contributionsURL: contributionsURL)
-                .frame(height: 104)
+            GitHubContributionGraphView(
+                weeks: activity?.contributionWeeks ?? [],
+                totalContributions: activity?.totalContributions
+            )
 
             if actionItems.isEmpty {
                 emptyActionState
@@ -401,7 +392,11 @@ private struct GitHubActionRow: View {
 }
 
 private struct GitHubContributionGraphView: View {
-    let contributionsURL: URL?
+    let weeks: [GitHubContributionWeek]
+    let totalContributions: Int?
+
+    private let cellSize: CGFloat = 10
+    private let cellSpacing: CGFloat = 3
 
     var body: some View {
         ZStack {
@@ -412,10 +407,7 @@ private struct GitHubContributionGraphView: View {
                         .stroke(Color.primary.opacity(0.08), lineWidth: 1)
                 )
 
-            if let contributionsURL {
-                GitHubContributionWebView(contributionsURL: contributionsURL)
-                    .padding(12)
-            } else {
+            if weeks.isEmpty {
                 VStack(spacing: 4) {
                     Text("Contributions graph")
                         .font(.subheadline.weight(.semibold))
@@ -424,48 +416,101 @@ private struct GitHubContributionGraphView: View {
                         .foregroundStyle(.secondary)
                 }
                 .padding(12)
+            } else {
+                VStack(alignment: .leading, spacing: 8) {
+                    if let totalContributions {
+                        Text("\(totalContributions) contributions in the last year")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        LazyHStack(alignment: .top, spacing: cellSpacing) {
+                            ForEach(weeks) { week in
+                                VStack(spacing: cellSpacing) {
+                                    ForEach(week.days) { day in
+                                        RoundedRectangle(cornerRadius: 2, style: .continuous)
+                                            .fill(Color(hex: day.color) ?? Color.primary.opacity(0.12))
+                                            .frame(width: cellSize, height: cellSize)
+                                            .overlay(
+                                                RoundedRectangle(cornerRadius: 2, style: .continuous)
+                                                    .stroke(Color.primary.opacity(0.06), lineWidth: 0.5)
+                                            )
+                                            .accessibilityLabel(day.accessibilityLabel)
+                                    }
+                                }
+                            }
+                        }
+                        .padding(.vertical, 2)
+                    }
+
+                    GitHubContributionLegend()
+                }
+                .padding(12)
             }
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .frame(maxWidth: .infinity)
     }
 }
 
-private struct GitHubContributionWebView: UIViewRepresentable {
-    let contributionsURL: URL
+private struct GitHubContributionLegend: View {
+    private let colors = [
+        "#ebedf0",
+        "#9be9a8",
+        "#40c463",
+        "#30a14e",
+        "#216e39"
+    ]
 
-    func makeCoordinator() -> Coordinator {
-        Coordinator()
-    }
+    var body: some View {
+        HStack(spacing: 6) {
+            Text("Less")
+                .font(.caption2)
+                .foregroundStyle(.secondary)
 
-    func makeUIView(context: Context) -> WKWebView {
-        let configuration = WKWebViewConfiguration()
-        configuration.defaultWebpagePreferences.allowsContentJavaScript = false
-        let webView = WKWebView(frame: .zero, configuration: configuration)
-        webView.isOpaque = false
-        webView.backgroundColor = .clear
-        webView.isUserInteractionEnabled = false
-        webView.scrollView.isScrollEnabled = false
-        webView.scrollView.bounces = false
-        webView.scrollView.backgroundColor = .clear
-        webView.scrollView.contentInsetAdjustmentBehavior = .never
-        return webView
-    }
+            HStack(spacing: 3) {
+                ForEach(colors, id: \.self) { hex in
+                    RoundedRectangle(cornerRadius: 2, style: .continuous)
+                        .fill(Color(hex: hex) ?? Color.primary.opacity(0.12))
+                        .frame(width: 10, height: 10)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 2, style: .continuous)
+                                .stroke(Color.primary.opacity(0.06), lineWidth: 0.5)
+                        )
+                }
+            }
 
-    func updateUIView(_ webView: WKWebView, context: Context) {
-        guard context.coordinator.lastURL != contributionsURL else { return }
-        context.coordinator.lastURL = contributionsURL
-        var request = URLRequest(url: contributionsURL)
-        request.setValue("image/svg+xml", forHTTPHeaderField: "Accept")
-        webView.load(request)
-    }
+            Text("More")
+                .font(.caption2)
+                .foregroundStyle(.secondary)
 
-    final class Coordinator {
-        var lastURL: URL?
+            Spacer()
+        }
     }
 }
+
+private extension GitHubContributionDay {
+    var accessibilityLabel: String {
+        let countText = count == 1 ? "1 contribution" : "\(count) contributions"
+        return "\(countText) on \(date)"
+    }
+}
+
 
 #if DEBUG
 #Preview {
+    let sampleWeeks = (0..<12).map { weekIndex in
+        GitHubContributionWeek(days: (0..<7).map { dayIndex in
+            let colors = ["#ebedf0", "#9be9a8", "#40c463", "#30a14e", "#216e39"]
+            return GitHubContributionDay(
+                date: "2025-12-\(String(format: "%02d", weekIndex * 7 + dayIndex + 1))",
+                count: (weekIndex + dayIndex) % 5,
+                color: colors[(weekIndex + dayIndex) % colors.count],
+                weekday: dayIndex
+            )
+        })
+    }
+
     GitHubActivityCard(
         connectionStatus: GitHubConnectionStatus(
             connected: true,
@@ -475,6 +520,8 @@ private struct GitHubContributionWebView: UIViewRepresentable {
         ),
         activity: GitHubActivitySnapshot(
             contributionsGraphUrl: "https://github.com/users/octocat/contributions",
+            contributionWeeks: sampleWeeks,
+            totalContributions: 734,
             actionItems: [
                 GitHubActionItem(
                     id: "1",

@@ -143,8 +143,21 @@ export interface GitHubActionItem {
   state?: "open" | "closed" | "merged" | "draft" | "blocked" | "pending";
 }
 
+export interface GitHubContributionDay {
+  date: string;
+  count: number;
+  color: string;
+  weekday: number;
+}
+
+export interface GitHubContributionWeek {
+  days: GitHubContributionDay[];
+}
+
 export interface GitHubActivityResponse {
   contributionsGraphUrl: string | null;
+  contributionWeeks?: GitHubContributionWeek[];
+  totalContributions?: number | null;
   actionItems: GitHubActionItem[];
 }
 

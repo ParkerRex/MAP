@@ -2,6 +2,7 @@ import { calendarDb } from "@/db/calendar";
 
 const GITHUB_API_BASE = "https://api.github.com";
 const GITHUB_AUTH_BASE = "https://github.com/login/oauth";
+const GITHUB_GRAPHQL_BASE = "https://api.github.com/graphql";
 
 export const GITHUB_SCOPES = ["read:user", "notifications", "repo"] as const;
 
@@ -9,6 +10,22 @@ export interface GitHubUser {
   login: string;
   avatar_url: string | null;
   html_url: string | null;
+}
+
+export interface GitHubContributionDay {
+  date: string;
+  contributionCount: number;
+  color: string;
+  weekday: number;
+}
+
+export interface GitHubContributionWeek {
+  contributionDays: GitHubContributionDay[];
+}
+
+export interface GitHubContributionCalendar {
+  totalContributions: number;
+  weeks: GitHubContributionWeek[];
 }
 
 interface GitHubTokenResponse {
@@ -40,6 +57,11 @@ interface GitHubSearchResult {
   html_url: string;
   repository_url: string;
   updated_at: string;
+  state?: "open" | "closed";
+  draft?: boolean;
+  pull_request?: {
+    url?: string;
+  };
 }
 
 interface GitHubSearchResponse {
@@ -133,6 +155,70 @@ export async function searchGitHubIssues(accessToken: string, query: string, lim
   return response.items ?? [];
 }
 
+export async function fetchGitHubContributionCalendar(
+  accessToken: string,
+  login: string,
+): Promise<GitHubContributionCalendar> {
+  const query = `
+    query($login: String!) {
+      user(login: $login) {
+        contributionsCollection {
+          contributionCalendar {
+            totalContributions
+            weeks {
+              contributionDays {
+                date
+                contributionCount
+                color
+                weekday
+              }
+            }
+          }
+        }
+      }
+    }
+  `;
+
+  const response = await fetch(GITHUB_GRAPHQL_BASE, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      Accept: "application/vnd.github+json",
+      "Content-Type": "application/json",
+      "User-Agent": "MapAI",
+      "X-GitHub-Api-Version": "2022-11-28",
+    },
+    body: JSON.stringify({ query, variables: { login } }),
+  });
+
+  if (!response.ok) {
+    const error = await response.text();
+    throw new Error(`GitHub GraphQL error (${response.status}): ${error}`);
+  }
+
+  const payload = (await response.json()) as {
+    data?: {
+      user?: {
+        contributionsCollection?: {
+          contributionCalendar?: GitHubContributionCalendar;
+        };
+      };
+    };
+    errors?: Array<{ message?: string }>;
+  };
+
+  if (payload.errors?.length) {
+    throw new Error(payload.errors.map((err) => err.message ?? "Unknown error").join(", "));
+  }
+
+  const calendar = payload.data?.user?.contributionsCollection?.contributionCalendar;
+  if (!calendar) {
+    throw new Error("GitHub contributions not available");
+  }
+
+  return calendar;
+}
+
 export async function createGitHubClient(userId: string, integration: {
   accessToken: string;
   refreshToken?: string | null;
@@ -208,6 +294,78 @@ export function mapNotificationsToItems(notifications: GitHubNotification[]) {
   }));
 }
 
+interface GitHubIssueSummary {
+  state?: "open" | "closed";
+  pull_request?: {
+    url?: string;
+  };
+}
+
+interface GitHubPullRequestSummary {
+  state?: "open" | "closed";
+  draft?: boolean;
+  merged_at?: string | null;
+}
+
+function mapIssueStateToItemState(summary?: GitHubPullRequestSummary | GitHubIssueSummary) {
+  if (!summary?.state) return null;
+  if ("merged_at" in summary && summary.merged_at) {
+    return "merged" as const;
+  }
+  if ("draft" in summary && summary.draft) {
+    return "draft" as const;
+  }
+  return summary.state === "closed" ? ("closed" as const) : ("open" as const);
+}
+
+export async function mapNotificationsToItemsWithState(
+  notifications: GitHubNotification[],
+  accessToken: string,
+) {
+  const items = await Promise.all(
+    notifications.map(async (notification) => {
+      let state: "open" | "closed" | "merged" | "draft" | null = null;
+      const subjectUrl = notification.subject?.url ?? null;
+
+      if (subjectUrl) {
+        try {
+          const issueSummary = await githubRequestUrl<GitHubIssueSummary>(subjectUrl, accessToken);
+          if (issueSummary.pull_request?.url) {
+            try {
+              const prSummary = await githubRequestUrl<GitHubPullRequestSummary>(
+                issueSummary.pull_request.url,
+                accessToken,
+              );
+              state = mapIssueStateToItemState(prSummary);
+            } catch {
+              state = mapIssueStateToItemState(issueSummary);
+            }
+          } else {
+            state = mapIssueStateToItemState(issueSummary);
+          }
+        } catch {
+          state = null;
+        }
+      }
+
+      return {
+        id: notification.id,
+        type: "notification" as const,
+        title: notification.subject?.title ?? "Notification",
+        repository: notification.repository?.full_name ?? null,
+        reason: notification.reason,
+        url: notification.subject?.url
+          ? convertNotificationUrl(notification.subject.url, notification.repository?.full_name)
+          : notification.repository?.html_url ?? null,
+        updatedAt: notification.updated_at,
+        state: state ?? undefined,
+      };
+    }),
+  );
+
+  return items;
+}
+
 export function mapSearchResultsToItems(
   results: GitHubSearchResult[],
   type: "pullRequest" | "task",
@@ -221,17 +379,52 @@ export function mapSearchResultsToItems(
     reason,
     url: result.html_url,
     updatedAt: result.updated_at,
-    state: "open" as const,
+    state:
+      result.draft && type === "pullRequest"
+        ? ("draft" as const)
+        : result.state === "closed"
+          ? ("closed" as const)
+          : ("open" as const),
   }));
 }
 
-async function githubRequest<T>(endpoint: string, accessToken: string): Promise<T> {
+async function githubRequest<T>(
+  endpoint: string,
+  accessToken: string,
+  init: RequestInit = {},
+): Promise<T> {
   const response = await fetch(`${GITHUB_API_BASE}${endpoint}`, {
+    ...init,
     headers: {
       Authorization: `Bearer ${accessToken}`,
       Accept: "application/vnd.github+json",
       "User-Agent": "MapAI",
       "X-GitHub-Api-Version": "2022-11-28",
+      ...(init.headers ?? {}),
+    },
+  });
+
+  if (!response.ok) {
+    const error = await response.text();
+    throw new Error(`GitHub API error (${response.status}): ${error}`);
+  }
+
+  return (await response.json()) as T;
+}
+
+async function githubRequestUrl<T>(
+  url: string,
+  accessToken: string,
+  init: RequestInit = {},
+): Promise<T> {
+  const response = await fetch(url, {
+    ...init,
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      Accept: "application/vnd.github+json",
+      "User-Agent": "MapAI",
+      "X-GitHub-Api-Version": "2022-11-28",
+      ...(init.headers ?? {}),
     },
   });
 

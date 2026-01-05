@@ -46,12 +46,47 @@ public struct GitHubActionItem: Codable, Identifiable {
     }
 }
 
+public struct GitHubContributionDay: Codable, Identifiable {
+    public var date: String
+    public var count: Int
+    public var color: String
+    public var weekday: Int
+
+    public var id: String { date }
+
+    public init(date: String, count: Int, color: String, weekday: Int) {
+        self.date = date
+        self.count = count
+        self.color = color
+        self.weekday = weekday
+    }
+}
+
+public struct GitHubContributionWeek: Codable, Identifiable {
+    public var days: [GitHubContributionDay]
+
+    public var id: String { days.first?.date ?? UUID().uuidString }
+
+    public init(days: [GitHubContributionDay]) {
+        self.days = days
+    }
+}
+
 public struct GitHubActivitySnapshot: Codable {
     public var contributionsGraphUrl: String?
+    public var contributionWeeks: [GitHubContributionWeek]
+    public var totalContributions: Int?
     public var actionItems: [GitHubActionItem]
 
-    public init(contributionsGraphUrl: String? = nil, actionItems: [GitHubActionItem] = []) {
+    public init(
+        contributionsGraphUrl: String? = nil,
+        contributionWeeks: [GitHubContributionWeek] = [],
+        totalContributions: Int? = nil,
+        actionItems: [GitHubActionItem] = []
+    ) {
         self.contributionsGraphUrl = contributionsGraphUrl
+        self.contributionWeeks = contributionWeeks
+        self.totalContributions = totalContributions
         self.actionItems = actionItems
     }
 }

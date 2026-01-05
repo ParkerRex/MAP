@@ -27,6 +27,7 @@ struct HomeView: View {
 
     // GitHub state
     @Environment(\.webAuthenticationSession) private var webAuthSession
+    @Environment(\.scenePhase) private var scenePhase
     @StateObject private var githubService = GitHubActivityService.shared
     @State private var isConnectingGitHub = false
     @State private var githubConnectError: String?
@@ -54,13 +55,17 @@ struct HomeView: View {
         .sheet(isPresented: $showSettings) {
             SettingsView(modelSettingRefreshId: $modelSettingRefreshId)
         }
-        .task(id: modelSettingRefreshId) {
-            await loadAllData()
-        }
-        .task(id: locationManager.location) {
-            guard let location = locationManager.location else { return }
-            await loadWeather(location: location)
-        }
+                .task(id: modelSettingRefreshId) {
+                    await loadAllData()
+                }
+                .onChange(of: scenePhase) { newPhase in
+                    guard newPhase == .active else { return }
+                    Task { await refreshGitHubIfNeeded() }
+                }
+                .task(id: locationManager.location) {
+                    guard let location = locationManager.location else { return }
+                    await loadWeather(location: location)
+                }
     }
 
     @ViewBuilder
@@ -70,12 +75,12 @@ struct HomeView: View {
                 homeScrollContent
             }
             .contentMargins(.horizontal, 20, for: .scrollContent)
-            .contentMargins(.vertical, 16, for: .scrollContent)
+            .contentMargins(.vertical, 6, for: .scrollContent)
         } else {
             ScrollView {
                 homeScrollContent
                     .padding(.horizontal, 20)
-                    .padding(.vertical, 16)
+                    .padding(.vertical, 6)
             }
         }
     }
@@ -109,7 +114,7 @@ struct HomeView: View {
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
         }
-        .padding(.bottom, 8)
+        .padding(.bottom, 2)
     }
 
     private var githubSection: some View {
@@ -671,6 +676,17 @@ struct HomeView: View {
                 isInitialLoad = false
             }
         }
+    }
+
+    @MainActor
+    private func refreshGitHubIfNeeded() async {
+        guard MapAPIClient.shared.isAuthenticated else { return }
+        guard !githubService.isLoading else { return }
+        if let lastUpdated = githubService.lastUpdated,
+           Date().timeIntervalSince(lastUpdated) < 60 {
+            return
+        }
+        await githubService.refresh()
     }
 
     private func refreshData() async {

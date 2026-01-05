@@ -4,6 +4,7 @@ import { handleApiError, unauthorized } from "@/lib/api/errors";
 import { getUser } from "@/lib/auth";
 import {
   createGitHubClient,
+  fetchGitHubContributionCalendar,
   getGitHubUser,
   listGitHubNotifications,
   mapNotificationsToItems,
@@ -25,6 +26,7 @@ export async function GET() {
     const githubUser = await getGitHubUser(accessToken);
 
     const login = githubUser.login;
+    const searchUserQualifier = "@me";
 
     const safeSearch = async (query: string, limit: number) => {
       try {
@@ -39,14 +41,35 @@ export async function GET() {
       listGitHubNotifications(accessToken, 6),
       login
         ? safeSearch(
-            `is:pr is:open (review-requested:${login} OR assignee:${login}) archived:false`,
+            `is:pr is:open (review-requested:${searchUserQualifier} OR assignee:${searchUserQualifier}) archived:false`,
             4,
           )
         : Promise.resolve([]),
       login
-        ? safeSearch(`is:issue is:open assignee:${login} archived:false`, 4)
+        ? safeSearch(`is:issue is:open assignee:${searchUserQualifier} archived:false`, 4)
         : Promise.resolve([]),
     ]);
+
+    let contributionWeeks: Array<{ days: { date: string; count: number; color: string; weekday: number }[] }> =
+      [];
+    let totalContributions: number | null = null;
+
+    if (login) {
+      try {
+        const calendar = await fetchGitHubContributionCalendar(accessToken, login);
+        totalContributions = calendar.totalContributions ?? null;
+        contributionWeeks = calendar.weeks.map((week) => ({
+          days: week.contributionDays.map((day) => ({
+            date: day.date,
+            count: day.contributionCount,
+            color: day.color,
+            weekday: day.weekday,
+          })),
+        }));
+      } catch (calendarError) {
+        console.error("GitHub contributions error:", calendarError);
+      }
+    }
 
     const actionItems = [
       ...mapNotificationsToItems(notifications),
@@ -69,6 +92,8 @@ export async function GET() {
       contributionsGraphUrl: githubUser.login
         ? `https://github.com/users/${githubUser.login}/contributions`
         : null,
+      contributionWeeks,
+      totalContributions,
       actionItems,
     });
   } catch (error) {
