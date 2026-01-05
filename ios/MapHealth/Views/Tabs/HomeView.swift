@@ -484,32 +484,33 @@ struct HomeView: View {
     }
 
     private var healthMetricsContent: some View {
-        HStack(spacing: 0) {
-            if let steps = steps {
-                healthMetric(
-                    icon: "figure.walk",
-                    value: formatNumber(steps),
-                    label: "steps",
-                    color: .green
-                )
-            }
+        VStack(spacing: 12) {
+            if steps != nil || sleepHours != nil {
+                HStack(spacing: 0) {
+                    if let steps = steps {
+                        healthMetric(
+                            icon: "figure.walk",
+                            value: formatNumber(steps),
+                            label: "steps",
+                            color: .green
+                        )
+                    }
 
-            if let sleep = sleepHours {
-                healthMetric(
-                    icon: "bed.double.fill",
-                    value: String(format: "%.1f", sleep),
-                    label: "hrs sleep",
-                    color: .indigo
-                )
+                    if let sleep = sleepHours {
+                        sleepBreakdownMetric(sleep)
+                    }
+                }
             }
 
             if let heartRate = restingHeartRate {
-                healthMetric(
-                    icon: "heart.fill",
-                    value: "\(Int(heartRate))",
-                    label: "resting bpm",
-                    color: .red
-                )
+                HStack(spacing: 0) {
+                    healthMetric(
+                        icon: "heart.fill",
+                        value: "\(Int(heartRate))",
+                        label: "resting bpm",
+                        color: .red
+                    )
+                }
             }
         }
     }
@@ -530,11 +531,36 @@ struct HomeView: View {
         .frame(maxWidth: .infinity)
     }
 
+    private func sleepBreakdownMetric(_ sleep: Double) -> some View {
+        VStack(spacing: 4) {
+            Image(systemName: "bed.double.fill")
+                .foregroundStyle(.indigo)
+                .font(.callout)
+            Text(formatSleepDuration(sleep))
+                .font(.title3)
+                .fontWeight(.semibold)
+                .fontDesign(.rounded)
+            Text("sleep")
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+        }
+        .frame(maxWidth: .infinity)
+    }
+
     private func formatNumber(_ number: Double) -> String {
         if number >= 1000 {
             return String(format: "%.1fk", number / 1000)
         }
         return "\(Int(number))"
+    }
+
+    private func formatSleepDuration(_ hours: Double) -> String {
+        let wholeHours = Int(hours)
+        let minutes = Int((hours - Double(wholeHours)) * 60)
+        if wholeHours > 0 {
+            return "\(wholeHours)h \(minutes)m"
+        }
+        return "\(minutes)m"
     }
 
     // MARK: - Shared Widget Components
