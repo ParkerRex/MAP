@@ -1,5 +1,5 @@
 "use client";
-import { format, formatDistanceToNow } from "date-fns";
+import { addDays, format, formatDistanceToNow, startOfDay } from "date-fns";
 import type { calendar_v3 } from "googleapis";
 import { Calendar, Clock, MapPin, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -40,19 +40,44 @@ export default function ContextPanel({
 }: ContextPanelProps) {
   const getNextEvent = (): calendar_v3.Schema$Event | undefined => {
     const now = new Date();
+    const todayStart = startOfDay(now);
+    const tomorrowStart = addDays(todayStart, 1);
+    const nowTime = now.getTime();
     const visibleEvents = events.filter((event) =>
       visibleCalendars.has(event.organizer?.email || ""),
     );
     const upcomingEvents = visibleEvents.filter((event) => {
       const startDateTime = new Date(event.start?.dateTime || event.start?.date || "");
-      return startDateTime > now;
+      const endDateTime = new Date(event.end?.dateTime || event.end?.date || "");
+      const startTime = startDateTime.getTime();
+      const endTime = Number.isNaN(endDateTime.getTime()) ? startTime : endDateTime.getTime();
+      return !Number.isNaN(startTime) && endTime > nowTime;
     });
     upcomingEvents.sort((a, b) => {
       const aStartDateTime = new Date(a.start?.dateTime || a.start?.date || "");
       const bStartDateTime = new Date(b.start?.dateTime || b.start?.date || "");
-      return aStartDateTime.getTime() - bStartDateTime.getTime();
+      const aEndDateTime = new Date(a.end?.dateTime || a.end?.date || "");
+      const bEndDateTime = new Date(b.end?.dateTime || b.end?.date || "");
+      const aStartTime = aStartDateTime.getTime();
+      const bStartTime = bStartDateTime.getTime();
+      const aEndTime = Number.isNaN(aEndDateTime.getTime()) ? aStartTime : aEndDateTime.getTime();
+      const bEndTime = Number.isNaN(bEndDateTime.getTime()) ? bStartTime : bEndDateTime.getTime();
+      const aSortTime = aStartTime <= nowTime && aEndTime >= nowTime ? nowTime : aStartTime;
+      const bSortTime = bStartTime <= nowTime && bEndTime >= nowTime ? nowTime : bStartTime;
+      return aSortTime - bSortTime;
     });
-    return upcomingEvents[0];
+    const nextEvent = upcomingEvents[0];
+    if (!nextEvent) {
+      return undefined;
+    }
+    const nextStart = new Date(nextEvent.start?.dateTime || nextEvent.start?.date || "");
+    if (Number.isNaN(nextStart.getTime())) {
+      return undefined;
+    }
+    if (nextStart >= tomorrowStart) {
+      return undefined;
+    }
+    return nextEvent;
   };
 
   const getCalendarColor = (calendarId: string | null | undefined) => {
