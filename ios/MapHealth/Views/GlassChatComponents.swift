@@ -6,55 +6,65 @@ struct MessageRow: View {
     let message: ChatMessage
 
     private var isUser: Bool { message.role == .user }
+    private var bubbleAlignment: HorizontalAlignment { isUser ? .trailing : .leading }
+    private var bubbleMaxWidth: CGFloat { 300 }
 
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
             if isUser {
-                Spacer(minLength: 24)
+                Spacer(minLength: 20)
                 messageBubble
                 avatarIcon
             } else {
                 avatarIcon
                 messageBubble
-                Spacer(minLength: 24)
+                Spacer(minLength: 20)
             }
         }
         .padding(.horizontal, 16)
-        .padding(.vertical, 12)
+        .padding(.vertical, 10)
     }
 
     private var avatarIcon: some View {
         ZStack {
             Circle()
-                .fill(isUser ? Color.accentColor : Color.purple)
+                .fill(isUser ? Color.accentColor : Color.indigo)
                 .frame(width: 28, height: 28)
 
             Image(systemName: isUser ? "person.fill" : "sparkles")
                 .font(.system(size: 12, weight: .semibold))
-                .foregroundStyle(isUser ? Color.black : Color.white)
+                .foregroundStyle(.white)
         }
+        .overlay(
+            Circle()
+                .stroke(Color.white.opacity(0.2), lineWidth: 1)
+        )
     }
 
     private var messageBubble: some View {
-        messageContent
-            .padding(.horizontal, 12)
-            .padding(.vertical, 10)
-            .background(bubbleBackground)
-            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+        VStack(alignment: bubbleAlignment, spacing: 6) {
+            messageContent
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 10)
+        .background(bubbleBackground)
+        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+        .shadow(color: .black.opacity(0.06), radius: 8, x: 0, y: 4)
+        .frame(maxWidth: bubbleMaxWidth, alignment: isUser ? .trailing : .leading)
     }
 
     @ViewBuilder
     private var bubbleBackground: some View {
         if #available(iOS 26, *) {
-            RoundedRectangle(cornerRadius: 16, style: .continuous)
+            RoundedRectangle(cornerRadius: 18, style: .continuous)
                 .fill(.clear)
                 .glassEffect(
-                    .regular.tint(isUser ? Color.accentColor.opacity(0.2) : .primary.opacity(0.05)),
-                    in: .rect(cornerRadius: 16)
+                    .regular.tint(isUser ? Color.accentColor.opacity(0.22) : .primary.opacity(0.06)),
+                    in: .rect(cornerRadius: 18)
                 )
         } else {
-            RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .fill(isUser ? Color.accentColor.opacity(0.18) : Color.primary.opacity(0.05))
+            RoundedRectangle(cornerRadius: 18, style: .continuous)
+                .fill(isUser ? Color.accentColor.opacity(0.2) : Color.primary.opacity(0.06))
         }
     }
 
@@ -93,13 +103,17 @@ struct TypingIndicatorRow: View {
         HStack(alignment: .top, spacing: 12) {
             ZStack {
                 Circle()
-                    .fill(Color.purple)
+                    .fill(Color.indigo)
                     .frame(width: 28, height: 28)
 
                 Image(systemName: "sparkles")
                     .font(.system(size: 12, weight: .semibold))
                     .foregroundStyle(.white)
             }
+            .overlay(
+                Circle()
+                    .stroke(Color.white.opacity(0.2), lineWidth: 1)
+            )
 
             HStack(spacing: 4) {
                 ForEach(0..<3, id: \.self) { index in
@@ -111,11 +125,15 @@ struct TypingIndicatorRow: View {
                 }
             }
             .padding(.top, 8)
+            .padding(.horizontal, 10)
+            .padding(.vertical, 8)
+            .background(typingBubbleBackground)
+            .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
 
             Spacer()
         }
         .padding(.horizontal, 16)
-        .padding(.vertical, 12)
+        .padding(.vertical, 10)
         .onAppear {
             startAnimation()
         }
@@ -127,6 +145,18 @@ struct TypingIndicatorRow: View {
         }
         Timer.scheduledTimer(withTimeInterval: 0.4, repeats: true) { _ in
             animationPhase = (animationPhase + 1) % 3
+        }
+    }
+
+    @ViewBuilder
+    private var typingBubbleBackground: some View {
+        if #available(iOS 26, *) {
+            RoundedRectangle(cornerRadius: 18, style: .continuous)
+                .fill(.clear)
+                .glassEffect(.regular.tint(.primary.opacity(0.05)), in: .rect(cornerRadius: 18))
+        } else {
+            RoundedRectangle(cornerRadius: 18, style: .continuous)
+                .fill(Color.primary.opacity(0.06))
         }
     }
 }

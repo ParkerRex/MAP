@@ -11,6 +11,7 @@ struct ChatView: View {
 
     @EnvironmentObject private var healthDataInterpreter: HealthDataInterpreter
     @Environment(\.webAuthenticationSession) private var webAuthSession
+
     @State private var showErrorAlert = false
     @State private var errorMessage = ""
     @State private var modelSettingRefreshId = UUID()
@@ -18,18 +19,52 @@ struct ChatView: View {
     @State private var isReauthenticating = false
     @State private var showLLMSettings = false
 
+    private var selectedModelBinding: Binding<String> {
+        Binding(
+            get: { currentModelId },
+            set: { updateModelSelection($0) }
+        )
+    }
+
+    private var currentModelName: String {
+        LLMModelCatalog.displayName(for: currentModelId, source: llmSource)
+    }
+
+    private var currentModelId: String {
+        switch llmSource {
+        case .openai:
+            return openAIModel
+        case .claude:
+            return claudeModel
+        case .fog, .local:
+            return openAIModel
+        }
+    }
+
+    private var modelsForSource: [LLMModelOption] {
+        LLMModelCatalog.models(for: llmSource, currentModelId: currentModelId)
+    }
+
+    private var llmSource: LLMSource {
+        LLMSource(rawValue: llmSourceRaw) ?? .openai
+    }
+
+    private var chatBinding: Binding<[ChatMessage]> {
+        Binding(
+            get: { healthDataInterpreter.messages },
+            set: { healthDataInterpreter.messages = $0 }
+        )
+    }
+
     var body: some View {
         NavigationStack {
             VStack(spacing: 12) {
-                chatModelHeader
+                headerCard
                     .padding(.horizontal, 16)
                     .padding(.top, 12)
 
                 GlassChatView(
-                    chat: Binding(
-                        get: { healthDataInterpreter.messages },
-                        set: { healthDataInterpreter.messages = $0 }
-                    ),
+                    chat: chatBinding,
                     isInputEnabled: !healthDataInterpreter.isGenerating,
                     isGenerating: healthDataInterpreter.isGenerating
                 )
@@ -79,23 +114,39 @@ struct ChatView: View {
         }
     }
 
-    private var chatModelHeader: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                Text("LLM_SETTINGS_TITLE")
-                    .font(.headline)
-                Spacer()
-                Button {
-                    showLLMSettings = true
-                } label: {
-                    HStack(spacing: 6) {
-                        Image(systemName: "key.fill")
-                        Text("API_KEY_TITLE")
-                    }
-                }
-                .mapHealthGlassButtonStyle()
-                .accessibilityIdentifier("apiKeyButton")
+    private var headerCard: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            headerTitleRow
+            sourcePickerRow
+            modelPickerRow
+        }
+        .padding(16)
+        .mapHealthGlassSurface(cornerRadius: 20, tint: Color.accentColor.opacity(0.06))
+    }
+
+    private var headerTitleRow: some View {
+        HStack(spacing: 12) {
+            Text("LLM_SETTINGS_TITLE")
+                .font(.title3.weight(.semibold))
+
+            Spacer()
+
+            Button {
+                showLLMSettings = true
+            } label: {
+                Label("API_KEY_TITLE", systemImage: "key.fill")
+                    .labelStyle(.titleAndIcon)
             }
+            .mapHealthGlassButtonStyle()
+            .accessibilityIdentifier("apiKeyButton")
+        }
+    }
+
+    private var sourcePickerRow: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("LLM_SOURCE_PICKER_LABEL")
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(.secondary)
 
             Picker("LLM_SOURCE_PICKER_LABEL", selection: $llmSourceRaw) {
                 ForEach(LLMSource.chatSources) { source in
@@ -105,39 +156,35 @@ struct ChatView: View {
             }
             .pickerStyle(.segmented)
             .accessibilityIdentifier("llmSourcePicker")
-
-            HStack {
-                Text("MODEL_SELECTION_TITLE")
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(.secondary)
-                Spacer()
-                Picker(selection: selectedModelBinding) {
-                    ForEach(modelsForSource) { model in
-                        Text(model.name)
-                            .tag(model.id)
-                    }
-                } label: {
-                    HStack(spacing: 4) {
-                        Text(currentModelName)
-                            .font(.subheadline.weight(.semibold))
-                        Image(systemName: "chevron.down")
-                            .font(.caption.weight(.semibold))
-                    }
-                    .foregroundStyle(.primary)
-                }
-                .pickerStyle(.menu)
-                .accessibilityIdentifier("modelSelector")
-            }
         }
-        .padding(16)
-        .mapHealthGlassSurface(cornerRadius: 20, tint: Color.accentColor.opacity(0.06))
     }
 
-    private var selectedModelBinding: Binding<String> {
-        Binding(
-            get: { currentModelId },
-            set: { updateModelSelection($0) }
-        )
+    private var modelPickerRow: some View {
+        HStack(alignment: .firstTextBaseline) {
+            Text("MODEL_SELECTION_TITLE")
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(.secondary)
+
+            Spacer()
+
+            Picker(selection: selectedModelBinding) {
+                ForEach(modelsForSource) { model in
+                    Text(model.name)
+                        .tag(model.id)
+                }
+            } label: {
+                HStack(spacing: 4) {
+                    Text(currentModelName)
+                        .font(.subheadline.weight(.semibold))
+                    Image(systemName: "chevron.down")
+                        .font(.caption.weight(.semibold))
+                }
+                .foregroundStyle(.primary)
+            }
+            .pickerStyle(.menu)
+            .accessibilityIdentifier("modelSelector")
+        }
+        .padding(.top, 4)
     }
 
     private func updateModelSelection(_ modelId: String) {
@@ -150,29 +197,6 @@ struct ChatView: View {
             openAIModel = modelId
         }
         modelSettingRefreshId = UUID()
-    }
-
-    private var currentModelName: String {
-        LLMModelCatalog.displayName(for: currentModelId, source: llmSource)
-    }
-
-    private var currentModelId: String {
-        switch llmSource {
-        case .openai:
-            return openAIModel
-        case .claude:
-            return claudeModel
-        case .fog, .local:
-            return openAIModel
-        }
-    }
-
-    private var modelsForSource: [LLMModelOption] {
-        LLMModelCatalog.models(for: llmSource, currentModelId: currentModelId)
-    }
-
-    private var llmSource: LLMSource {
-        LLMSource(rawValue: llmSourceRaw) ?? .openai
     }
 
     @MainActor

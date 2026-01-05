@@ -6,22 +6,27 @@ struct GlassChatView: View {
     @Binding var chat: [ChatMessage]
     var isInputEnabled: Bool = true
     var isGenerating: Bool = false
+
     @State private var draft = ""
     @FocusState private var isInputFocused: Bool
     @State private var bottomMarkerY: CGFloat = .zero
     @State private var scrollViewHeight: CGFloat = .zero
 
     private let scrollToLatestThreshold: CGFloat = 44
+    private let composerCornerRadius: CGFloat = 22
+    private let messageInsertAnimation = Animation.spring(response: 0.35, dampingFraction: 0.85)
+    private let quickEase = Animation.easeInOut(duration: 0.18)
 
     var body: some View {
         VStack(spacing: 0) {
             messagesScrollView
 
             Divider()
-                .opacity(0.3)
+                .opacity(0.25)
 
             composerSection
         }
+        .background(chatSurface)
     }
 
     private var messagesScrollView: some View {
@@ -34,18 +39,24 @@ struct GlassChatView: View {
                         } else {
                             ForEach(visibleMessages) { message in
                                 MessageRow(message: message)
+                                    .transition(.asymmetric(
+                                        insertion: .move(edge: .bottom).combined(with: .opacity),
+                                        removal: .opacity
+                                    ))
                                     .id(message.id)
                             }
                         }
 
                         if isGenerating {
                             TypingIndicatorRow()
+                                .transition(.opacity.combined(with: .move(edge: .bottom)))
                                 .id("typing-indicator")
                         }
 
                         bottomMarker
                     }
-                    .padding(.vertical, 16)
+                    .padding(.vertical, 20)
+                    .animation(messageInsertAnimation, value: visibleMessages.count)
                 }
                 .coordinateSpace(name: "chat-scroll")
                 .scrollDismissesKeyboard(.interactively)
@@ -60,13 +71,13 @@ struct GlassChatView: View {
                     bottomMarkerY = value
                 }
                 .onChange(of: chat.count) { _, _ in
-                    withAnimation(.easeOut(duration: 0.2)) {
+                    withAnimation(messageInsertAnimation) {
                         scrollToBottom(proxy)
                     }
                 }
                 .onChange(of: isGenerating) { _, generating in
                     if generating {
-                        withAnimation(.easeOut(duration: 0.2)) {
+                        withAnimation(messageInsertAnimation) {
                             proxy.scrollTo("typing-indicator", anchor: .bottom)
                         }
                     }
@@ -87,10 +98,12 @@ struct GlassChatView: View {
                                 .shadow(color: .black.opacity(0.15), radius: 6, x: 0, y: 3)
                         }
                         .padding(.trailing, 16)
-                        .padding(.bottom, 12)
+                        .padding(.bottom, 14)
                         .accessibilityLabel(Text("Scroll to latest"))
+                        .transition(.scale.combined(with: .opacity))
                     }
                 }
+                .animation(quickEase, value: shouldShowScrollToLatest)
             }
         }
     }
@@ -126,7 +139,9 @@ struct GlassChatView: View {
             LazyVGrid(columns: [GridItem(.adaptive(minimum: 140), spacing: 12)], spacing: 12) {
                 ForEach(chatSuggestions, id: \.self) { suggestion in
                     Button {
-                        sendMessage(text: suggestion)
+                        withAnimation(messageInsertAnimation) {
+                            sendMessage(text: suggestion)
+                        }
                     } label: {
                         Text(suggestion)
                             .font(.callout.weight(.semibold))
@@ -135,15 +150,16 @@ struct GlassChatView: View {
                             .padding(.vertical, 10)
                             .frame(maxWidth: .infinity)
                             .background(suggestionChipBackground)
-                            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
                     }
+                    .buttonStyle(.plain)
                     .accessibilityLabel(Text(suggestion))
                 }
             }
         }
         .padding(.horizontal, 24)
-        .padding(.top, 40)
-        .padding(.bottom, 20)
+        .padding(.top, 44)
+        .padding(.bottom, 24)
     }
 
     private var chatSuggestions: [String] {
@@ -199,36 +215,67 @@ struct GlassChatView: View {
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
-        .background(.ultraThinMaterial)
+        .background(composerBarBackground)
     }
 
     @ViewBuilder
     private var composerBackground: some View {
         if #available(iOS 26, *) {
-            RoundedRectangle(cornerRadius: 22, style: .continuous)
+            RoundedRectangle(cornerRadius: composerCornerRadius, style: .continuous)
                 .fill(.clear)
-                .glassEffect(.regular.tint(.primary.opacity(0.03)), in: .rect(cornerRadius: 22))
+                .glassEffect(
+                    .regular.tint(.primary.opacity(0.03)),
+                    in: .rect(cornerRadius: composerCornerRadius)
+                )
         } else {
-            RoundedRectangle(cornerRadius: 22, style: .continuous)
+            RoundedRectangle(cornerRadius: composerCornerRadius, style: .continuous)
                 .fill(.quaternary.opacity(0.5))
+        }
+    }
+
+    @ViewBuilder
+    private var composerBarBackground: some View {
+        if #available(iOS 26, *) {
+            Rectangle()
+                .fill(.clear)
+                .glassEffect(.regular.tint(.primary.opacity(0.02)), in: .rect())
+        } else {
+            Rectangle()
+                .fill(.ultraThinMaterial)
+        }
+    }
+
+    @ViewBuilder
+    private var chatSurface: some View {
+        if #available(iOS 26, *) {
+            Rectangle()
+                .fill(.clear)
+                .glassEffect(.regular.tint(.primary.opacity(0.01)), in: .rect())
+        } else {
+            Rectangle()
+                .fill(Color.clear)
         }
     }
 
     private var sendButton: some View {
         Button {
-            sendMessage()
+            withAnimation(messageInsertAnimation) {
+                sendMessage()
+            }
         } label: {
             Image(systemName: "arrow.up")
                 .font(.system(size: 16, weight: .semibold))
-                .foregroundStyle(sendButtonEnabled ? Color.black : Color.white)
-                .frame(width: 32, height: 32)
-                .background(sendButtonEnabled ? Color.accentColor : Color.gray.opacity(0.4))
+                .foregroundStyle(sendButtonEnabled ? Color.black : Color.white.opacity(0.8))
+                .frame(width: 36, height: 36)
+                .background(sendButtonEnabled ? Color.accentColor : Color.gray.opacity(0.35))
                 .clipShape(Circle())
+                .shadow(color: .black.opacity(sendButtonEnabled ? 0.18 : 0.08), radius: 6, x: 0, y: 3)
         }
         .disabled(!sendButtonEnabled)
+        .scaleEffect(sendButtonEnabled ? 1 : 0.95)
         .accessibilityLabel(Text("CHAT_SEND"))
         .accessibilityIdentifier("chatSendButton")
-        .animation(.easeInOut(duration: 0.15), value: sendButtonEnabled)
+        .animation(quickEase, value: sendButtonEnabled)
     }
 
     private var sendButtonEnabled: Bool {

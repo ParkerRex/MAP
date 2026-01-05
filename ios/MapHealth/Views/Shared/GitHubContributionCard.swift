@@ -9,6 +9,7 @@ struct GitHubActivityCard: View {
     let isConnecting: Bool
     let onConnect: () -> Void
     let onRetry: () -> Void
+    let onSelectItem: (GitHubActionItem) -> Void
 
     private var isConnected: Bool {
         connectionStatus?.connected == true
@@ -191,7 +192,7 @@ struct GitHubActivityCard: View {
     private var actionList: some View {
         VStack(alignment: .leading, spacing: 10) {
             ForEach(actionItems.prefix(4)) { item in
-                GitHubActionRow(item: item)
+                GitHubActionRow(item: item, onSelect: onSelectItem)
             }
 
             if actionItems.count > 4 {
@@ -272,6 +273,9 @@ struct GitHubActivityCard: View {
 
 private struct GitHubActionRow: View {
     let item: GitHubActionItem
+    let onSelect: (GitHubActionItem) -> Void
+    @Environment(\.openURL) private var openURL
+    @State private var isMarkingRead = false
 
     private var destinationURL: URL? {
         guard let urlString = item.url else { return nil }
@@ -313,7 +317,13 @@ private struct GitHubActionRow: View {
 
     var body: some View {
         if let destinationURL {
-            Link(destination: destinationURL) {
+            Button {
+                withAnimation(.easeOut(duration: 0.15)) {
+                    isMarkingRead = true
+                }
+                onSelect(item)
+                openURL(destinationURL)
+            } label: {
                 rowContent
             }
             .buttonStyle(.plain)
@@ -355,6 +365,8 @@ private struct GitHubActionRow: View {
                     .foregroundStyle(.tertiary)
             }
         }
+        .scaleEffect(isMarkingRead ? 0.98 : 1.0)
+        .opacity(isMarkingRead ? 0.7 : 1.0)
     }
 
     private func statePill(_ state: GitHubActionItemState) -> some View {
@@ -397,6 +409,11 @@ private struct GitHubContributionGraphView: View {
 
     private let cellSize: CGFloat = 10
     private let cellSpacing: CGFloat = 3
+    private let weekdayLabels: [Int: String] = [
+        1: "Mon",
+        3: "Wed",
+        5: "Fri"
+    ]
 
     var body: some View {
         ZStack {
@@ -424,25 +441,36 @@ private struct GitHubContributionGraphView: View {
                             .foregroundStyle(.secondary)
                     }
 
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        LazyHStack(alignment: .top, spacing: cellSpacing) {
-                            ForEach(weeks) { week in
-                                VStack(spacing: cellSpacing) {
-                                    ForEach(week.days) { day in
-                                        RoundedRectangle(cornerRadius: 2, style: .continuous)
-                                            .fill(Color(hex: day.color) ?? Color.primary.opacity(0.12))
-                                            .frame(width: cellSize, height: cellSize)
-                                            .overlay(
-                                                RoundedRectangle(cornerRadius: 2, style: .continuous)
-                                                    .stroke(Color.primary.opacity(0.06), lineWidth: 0.5)
-                                            )
-                                            .accessibilityLabel(day.accessibilityLabel)
+                    HStack(alignment: .top, spacing: 8) {
+                        VStack(alignment: .leading, spacing: cellSpacing) {
+                            ForEach(0..<7, id: \.self) { index in
+                                Text(weekdayLabels[index] ?? "")
+                                    .font(.caption2)
+                                    .foregroundStyle(.secondary)
+                                    .frame(width: 28, height: cellSize, alignment: .leading)
+                            }
+                        }
+
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            LazyHStack(alignment: .top, spacing: cellSpacing) {
+                                ForEach(weeks) { week in
+                                    VStack(spacing: cellSpacing) {
+                                        ForEach(week.days) { day in
+                                            RoundedRectangle(cornerRadius: 2, style: .continuous)
+                                                .fill(Color(hex: day.color) ?? Color.primary.opacity(0.12))
+                                                .frame(width: cellSize, height: cellSize)
+                                                .overlay(
+                                                    RoundedRectangle(cornerRadius: 2, style: .continuous)
+                                                        .stroke(Color.primary.opacity(0.06), lineWidth: 0.5)
+                                                )
+                                                .accessibilityLabel(day.accessibilityLabel)
+                                        }
                                     }
                                 }
                             }
                         }
-                        .padding(.vertical, 2)
                     }
+                    .padding(.vertical, 2)
 
                     GitHubContributionLegend()
                 }
@@ -551,7 +579,8 @@ private extension GitHubContributionDay {
         errorMessage: nil,
         isConnecting: false,
         onConnect: {},
-        onRetry: {}
+        onRetry: {},
+        onSelectItem: { _ in }
     )
     .padding()
 }
