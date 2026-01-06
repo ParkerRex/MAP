@@ -25,7 +25,7 @@ interface ContextPanelProps {
   className?: string;
   selectedEvent: ExtendedEvent | null;
   events: calendar_v3.Schema$Event[];
-  visibleCalendars: Set<string>;
+  activeCalendarIds: Set<string>;
   calendars: calendar_v3.Schema$CalendarListEntry[];
   onClearSelection?: () => void;
 }
@@ -34,7 +34,7 @@ export default function ContextPanel({
   className,
   selectedEvent,
   events,
-  visibleCalendars,
+  activeCalendarIds,
   calendars,
   onClearSelection,
 }: ContextPanelProps) {
@@ -44,7 +44,7 @@ export default function ContextPanel({
     const tomorrowStart = addDays(todayStart, 1);
     const nowTime = now.getTime();
     const visibleEvents = events.filter((event) =>
-      visibleCalendars.has(event.organizer?.email || ""),
+      activeCalendarIds.has(event.organizer?.email || ""),
     );
     const upcomingEvents = visibleEvents.filter((event) => {
       const startDateTime = new Date(event.start?.dateTime || event.start?.date || "");

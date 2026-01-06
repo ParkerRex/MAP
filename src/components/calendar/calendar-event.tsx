@@ -2,32 +2,21 @@
 import { format, isPast } from "date-fns";
 import type { calendar_v3 } from "googleapis";
 import type React from "react";
-import { useMemo, useState } from "react";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+import { useMemo } from "react";
 import {
   ContextMenu,
   ContextMenuContent,
   ContextMenuItem,
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
-import { useToast } from "@/components/ui/use-toast";
-import { useDeleteEvent } from "@/hooks/use-calendar";
 import type { ExtendedEvent } from "@/types/calendar";
 
 interface CalendarEventProps {
   events: calendar_v3.Schema$Event[];
   dayIndex: number;
   calendars: calendar_v3.Schema$CalendarListEntry[];
-  setSelectedEvent: (event: ExtendedEvent | null) => void;
+  onEventClick: (event: ExtendedEvent) => void;
+  onEventDelete: (event: calendar_v3.Schema$Event) => void;
 }
 
 const MINUTES_IN_HOUR = 60;
@@ -49,31 +38,14 @@ const CalendarEventComponent: React.FC<CalendarEventProps> = ({
   events,
   dayIndex: _dayIndex,
   calendars,
-  setSelectedEvent,
+  onEventClick,
+  onEventDelete,
 }) => {
-  const [eventToDelete, setEventToDelete] = useState<calendar_v3.Schema$Event | null>(null);
-  const deleteEvent = useDeleteEvent();
-  const { toast } = useToast();
 
   const handleEventClick = (event: calendar_v3.Schema$Event) => {
-    setSelectedEvent(event);
+    onEventClick(event);
   };
 
-  const handleDeleteEvent = async (event: calendar_v3.Schema$Event) => {
-    const calendarId = event.organizer?.email;
-    if (!calendarId || !event.id) {
-      toast({ title: "Error", description: "Cannot delete event", variant: "destructive" });
-      return;
-    }
-
-    try {
-      await deleteEvent.mutateAsync({ calendarId, eventId: event.id });
-      toast({ title: "Success", description: "Event deleted" });
-    } catch {
-      toast({ title: "Error", description: "Failed to delete event", variant: "destructive" });
-    }
-    setEventToDelete(null);
-  };
 
   const getCalendarColor = (calendarId: string | null | undefined) => {
     const calendar = calendars.find((cal) => cal.id === calendarId);
@@ -204,6 +176,9 @@ const CalendarEventComponent: React.FC<CalendarEventProps> = ({
           const isEventPast = isPast(eventEnd);
           const rgb = hexToRgb(calendarColor);
           const bgColor = rgb ? `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.15)` : `${calendarColor}26`;
+          const gradient = rgb
+            ? `linear-gradient(135deg, rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.2) 0%, rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.05) 100%)`
+            : undefined;
           const hoverBgColor = rgb
             ? `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.25)`
             : `${calendarColor}40`;
@@ -219,6 +194,7 @@ const CalendarEventComponent: React.FC<CalendarEventProps> = ({
                     {
                       ...style,
                       backgroundColor: bgColor,
+                      backgroundImage: gradient,
                       borderLeftColor: calendarColor,
                       "--hover-bg": hoverBgColor,
                     } as React.CSSProperties
@@ -252,7 +228,7 @@ const CalendarEventComponent: React.FC<CalendarEventProps> = ({
               </ContextMenuTrigger>
               <ContextMenuContent>
                 <ContextMenuItem
-                  onSelect={() => setEventToDelete(event)}
+                  onSelect={() => onEventDelete(event)}
                   className="text-destructive focus:text-destructive"
                 >
                   Delete Event
@@ -263,26 +239,6 @@ const CalendarEventComponent: React.FC<CalendarEventProps> = ({
         })}
       </div>
 
-      <AlertDialog open={!!eventToDelete} onOpenChange={() => setEventToDelete(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete Event</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to delete &quot;{eventToDelete?.summary}&quot;? This action
-              cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => eventToDelete && handleDeleteEvent(eventToDelete)}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </>
   );
 };

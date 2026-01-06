@@ -20,8 +20,9 @@ interface CalendarGridProps {
   calendars: calendar_v3.Schema$CalendarListEntry[];
   events: calendar_v3.Schema$Event[];
   currentWeekStartDate: Date;
-  visibleCalendars: Set<string>;
-  setSelectedEvent: (event: ExtendedEvent | null) => void;
+  activeCalendarIds: Set<string>;
+  onEventClick: (event: ExtendedEvent) => void;
+  onEventDelete: (event: calendar_v3.Schema$Event) => void;
 }
 
 const HOUR_HEIGHT = 64;
@@ -31,8 +32,9 @@ const CalendarGrid: FC<CalendarGridProps> = ({
   calendars,
   events,
   currentWeekStartDate,
-  visibleCalendars,
-  setSelectedEvent,
+  activeCalendarIds,
+  onEventClick,
+  onEventDelete,
 }) => {
   const gridRef = useRef<HTMLDivElement>(null);
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -50,7 +52,7 @@ const CalendarGrid: FC<CalendarGridProps> = ({
   };
 
   const filteredEvents = events.filter(
-    (event) => event.organizer?.email && visibleCalendars.has(event.organizer.email),
+    (event) => event.organizer?.email && activeCalendarIds.has(event.organizer.email),
   );
 
   const allDayEvents = filteredEvents.filter(isAllDayEvent);
@@ -146,7 +148,8 @@ const CalendarGrid: FC<CalendarGridProps> = ({
         events={allDayEvents}
         daysOfWeek={daysOfWeek}
         calendars={calendars}
-        setSelectedEvent={setSelectedEvent}
+        onEventClick={onEventClick}
+        onEventDelete={onEventDelete}
       />
 
       {/* Time grid */}
@@ -209,7 +212,8 @@ const CalendarGrid: FC<CalendarGridProps> = ({
                     })}
                     dayIndex={dayIndex}
                     calendars={calendars}
-                    setSelectedEvent={setSelectedEvent}
+                    onEventClick={onEventClick}
+                    onEventDelete={onEventDelete}
                   />
                 </div>
               );

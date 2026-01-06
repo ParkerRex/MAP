@@ -1,5 +1,4 @@
 "use client";
-import { startOfWeek } from "date-fns";
 import type { calendar_v3 } from "googleapis";
 import { Check } from "lucide-react";
 import { Calendar as UIDatePicker } from "@/components/ui/calendar";
@@ -8,24 +7,23 @@ import { Separator } from "@/components/ui/separator";
 interface CalendarMenuProps {
   className?: string;
   calendars: calendar_v3.Schema$CalendarListEntry[];
-  visibleCalendars: Set<string>;
-  toggleCalendarVisibility: (calendarId: string) => void;
-  currentWeekStartDate: Date;
-  setCurrentWeekStartDate: (date: Date) => void;
+  isCalendarSelected: (calendarId: string) => boolean;
+  toggleCalendarSelection: (calendarId: string) => void;
+  selectedDate: Date;
+  setSelectedDate: (date: Date) => void;
 }
 
 export default function CalendarMenu({
   className,
   calendars,
-  visibleCalendars,
-  toggleCalendarVisibility,
-  currentWeekStartDate,
-  setCurrentWeekStartDate,
+  isCalendarSelected,
+  toggleCalendarSelection,
+  selectedDate,
+  setSelectedDate,
 }: CalendarMenuProps) {
   const handleDateSelect = (date: Date | undefined) => {
     if (date) {
-      const weekStartDate = startOfWeek(date, { weekStartsOn: 1 });
-      setCurrentWeekStartDate(weekStartDate);
+      setSelectedDate(date);
     }
   };
 
@@ -37,7 +35,7 @@ export default function CalendarMenu({
         <UIDatePicker
           className="w-full px-2 pt-2"
           mode="single"
-          selected={currentWeekStartDate}
+          selected={selectedDate}
           onSelect={handleDateSelect}
           classNames={{
             months: "flex flex-col",
@@ -65,25 +63,25 @@ export default function CalendarMenu({
                     key={calendar.id}
                     type="button"
                     className={`flex items-center gap-2.5 w-full px-2 py-1.5 rounded-md text-left transition-colors hover:bg-muted/50 ${
-                      visibleCalendars.has(calendar.id || "")
+                      isCalendarSelected(calendar.id || "")
                         ? "text-foreground"
                         : "text-muted-foreground"
                     }`}
-                    onClick={() => toggleCalendarVisibility(calendar.id || "")}
+                    onClick={() => toggleCalendarSelection(calendar.id || "")}
                   >
                     <div
                       className={`flex h-4 w-4 items-center justify-center rounded border transition-colors ${
-                        visibleCalendars.has(calendar.id || "")
+                        isCalendarSelected(calendar.id || "")
                           ? "border-transparent"
                           : "border-muted-foreground/30"
                       }`}
                       style={{
-                        backgroundColor: visibleCalendars.has(calendar.id || "")
+                        backgroundColor: isCalendarSelected(calendar.id || "")
                           ? calendar.backgroundColor || "#3b82f6"
                           : "transparent",
                       }}
                     >
-                      {visibleCalendars.has(calendar.id || "") && (
+                      {isCalendarSelected(calendar.id || "") && (
                         <Check className="h-3 w-3 text-white" />
                       )}
                     </div>

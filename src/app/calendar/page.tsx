@@ -1,19 +1,45 @@
 "use client";
 
-import { startOfWeek } from "date-fns";
+import {
+  addDays,
+  addMonths,
+  addWeeks,
+  endOfDay,
+  endOfMonth,
+  format,
+  startOfMonth,
+  startOfWeek,
+} from "date-fns";
 import { AlertTriangle, Calendar, RefreshCw } from "lucide-react";
 import { useSearchParams } from "next/navigation";
-import { Suspense, useEffect, useMemo, useRef, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
+import CalendarDayTimeline from "@/components/calendar/calendar-day-timeline";
 import ContextPanel from "@/components/calendar/calendar-context-panel";
 import CalendarGrid from "@/components/calendar/calendar-grid";
+import CalendarJumpDialog from "@/components/calendar/calendar-jump-dialog";
 import CalendarMenu from "@/components/calendar/calendar-menu";
+import CalendarMonthView from "@/components/calendar/calendar-month-view";
+import CalendarPickerDialog from "@/components/calendar/calendar-picker-dialog";
 import CalendarToolbar from "@/components/calendar/calendar-toolbar";
+import CalendarWeekStrip from "@/components/calendar/calendar-week-strip";
+import EventDetailDialog from "@/components/calendar/event-detail-dialog";
+import { EventFormDialog } from "@/components/calendar/event-form-dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
-  isCalendarAccessRevokedError,
   useCalendarReconnect,
   useCalendars,
+  useDeleteEvent,
   useGoogleStatus,
   useMultiCalendarEvents,
   useSyncCalendars,
@@ -128,14 +154,24 @@ interface CalendarDashboardProps {
 }
 
 function CalendarDashboard({ needsReconnect, onReconnect }: CalendarDashboardProps) {
-  // UI State - just React useState
-  const [currentWeekStartDate, setCurrentWeekStartDate] = useState(() =>
-    startOfWeek(new Date(), { weekStartsOn: 1 }),
-  );
+  // UI State
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [viewMode, setViewMode] = useState<"day" | "week" | "month">("day");
+  const [showWeekStrip, setShowWeekStrip] = useState(true);
   const [selectedEvent, setSelectedEvent] = useState<ExtendedEvent | null>(null);
-  const [visibleCalendars, setVisibleCalendars] = useState<Set<string>>(new Set());
-  const hasInitializedCalendars = useRef(false);
+  const [detailOpen, setDetailOpen] = useState(false);
+  const [eventFormOpen, setEventFormOpen] = useState(false);
+  const [eventFormStartDate, setEventFormStartDate] = useState<Date | null>(null);
+  const [eventFormAllDay, setEventFormAllDay] = useState(false);
+  const [editingEvent, setEditingEvent] = useState<ExtendedEvent | null>(null);
+  const [calendarPickerOpen, setCalendarPickerOpen] = useState(false);
+  const [jumpOpen, setJumpOpen] = useState(false);
+  const [navDirection, setNavDirection] = useState<"prev" | "next">("next");
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [eventToDelete, setEventToDelete] = useState<ExtendedEvent | null>(null);
+  const [selectedCalendarIds, setSelectedCalendarIds] = useState<Set<string>>(new Set());
   const { checkForReconnect } = useCalendarReconnect();
+  const deleteEvent = useDeleteEvent();
 
   // Server state - TanStack Query
   const { data: calendarsData, error: calendarsError } = useCalendars();
@@ -148,28 +184,97 @@ function CalendarDashboard({ needsReconnect, onReconnect }: CalendarDashboardPro
     }
   }, [calendarsError, checkForReconnect]);
 
-  // Initialize visible calendars when loaded (only once)
+  // Load stored calendar selection
   useEffect(() => {
-    if (calendars.length > 0 && !hasInitializedCalendars.current) {
-      hasInitializedCalendars.current = true;
-      setVisibleCalendars(new Set(calendars.map((c) => c.id).filter(Boolean) as string[]));
+    const stored = window.localStorage.getItem("map.calendar.selectedIds");
+    if (stored) {
+      try {
+        const ids = JSON.parse(stored) as string[];
+        setSelectedCalendarIds(new Set(ids));
+      } catch {
+        setSelectedCalendarIds(new Set());
+      }
     }
+  }, []);
+
+  useEffect(() => {
+    window.localStorage.setItem(
+      "map.calendar.selectedIds",
+      JSON.stringify(Array.from(selectedCalendarIds)),
+    );
+  }, [selectedCalendarIds]);
+
+  // Clean up removed calendars
+  useEffect(() => {
+    if (calendars.length === 0) return;
+    setSelectedCalendarIds((prev) => {
+      if (prev.size === 0) return prev;
+      const valid = new Set(Array.from(prev).filter((id) => calendars.some((c) => c.id === id)));
+      return valid;
+    });
   }, [calendars]);
 
-  // Time range for events query
-  const timeMin = useMemo(() => currentWeekStartDate.toISOString(), [currentWeekStartDate]);
-  const timeMax = useMemo(
-    () => new Date(currentWeekStartDate.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString(),
-    [currentWeekStartDate],
-  );
+  const primaryCalendar = calendars.find((c) => c.primary) ?? calendars[0];
 
-  const visibleCalendarIds = useMemo(
-    () => Array.from(visibleCalendars).filter((id) => calendars.some((cal) => cal.id === id)),
-    [visibleCalendars, calendars],
-  );
+  const isCalendarSelected = (calendarId: string) => {
+    if (selectedCalendarIds.size === 0) {
+      return calendarId === primaryCalendar?.id;
+    }
+    return selectedCalendarIds.has(calendarId);
+  };
+
+  const toggleCalendarSelection = (calendarId: string) => {
+    setSelectedCalendarIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(calendarId)) {
+        next.delete(calendarId);
+      } else {
+        next.add(calendarId);
+      }
+      return next;
+    });
+  };
+
+  const activeCalendarIds = useMemo(() => {
+    if (selectedCalendarIds.size === 0) {
+      return primaryCalendar?.id ? new Set([primaryCalendar.id]) : new Set<string>();
+    }
+    return new Set(
+      Array.from(selectedCalendarIds).filter((id) => calendars.some((cal) => cal.id === id)),
+    );
+  }, [selectedCalendarIds, calendars, primaryCalendar]);
+
+  const activeCalendarList = useMemo(() => Array.from(activeCalendarIds), [activeCalendarIds]);
+
+  const calendarPickerLabel = useMemo(() => {
+    const selectedCount = selectedCalendarIds.size;
+    if (selectedCount === 0) {
+      return primaryCalendar?.summary ?? "Calendars";
+    }
+    if (selectedCount === 1) {
+      const id = Array.from(selectedCalendarIds)[0];
+      return calendars.find((cal) => cal.id === id)?.summary ?? "1 Calendar";
+    }
+    return `${selectedCount} Calendars`;
+  }, [selectedCalendarIds, calendars, primaryCalendar]);
+
+  const dateRange = useMemo(() => {
+    if (viewMode === "month") {
+      const start = startOfMonth(selectedDate);
+      const end = endOfDay(endOfMonth(selectedDate));
+      return { start, end };
+    }
+    const start = startOfWeek(selectedDate, { weekStartsOn: 1 });
+    const end = endOfDay(addDays(start, 6));
+    return { start, end };
+  }, [selectedDate, viewMode]);
+
+  // Time range for events query
+  const timeMin = useMemo(() => dateRange.start.toISOString(), [dateRange.start]);
+  const timeMax = useMemo(() => dateRange.end.toISOString(), [dateRange.end]);
 
   const { data: events = [], error: eventsError } = useMultiCalendarEvents(
-    visibleCalendarIds,
+    activeCalendarList,
     timeMin,
     timeMax,
   );
@@ -182,20 +287,62 @@ function CalendarDashboard({ needsReconnect, onReconnect }: CalendarDashboardPro
   }, [eventsError, checkForReconnect]);
 
   const visibleEvents = events.filter((event) =>
-    visibleCalendars.has(event.organizer?.email ?? ""),
+    activeCalendarIds.has(event.organizer?.email ?? ""),
   );
 
-  const toggleCalendarVisibility = (calendarId: string) => {
-    setVisibleCalendars((prev) => {
-      const next = new Set(prev);
-      if (next.has(calendarId)) {
-        next.delete(calendarId);
-      } else {
-        next.add(calendarId);
-      }
-      return next;
+  const eventsForSelectedDay = visibleEvents.filter((event) => {
+    const start = event.start?.dateTime || event.start?.date;
+    return start ? new Date(start).toDateString() === selectedDate.toDateString() : false;
+  });
+
+  const openCreateEvent = (date?: Date, allDay = false) => {
+    setEditingEvent(null);
+    setEventFormStartDate(date ?? selectedDate);
+    setEventFormAllDay(allDay);
+    setEventFormOpen(true);
+  };
+
+  const handleEventClick = (event: ExtendedEvent) => {
+    setSelectedEvent(event);
+    setDetailOpen(true);
+  };
+
+  const handleEventDeleteRequest = (event: ExtendedEvent) => {
+    setEventToDelete(event);
+    setDeleteOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!eventToDelete) return;
+    const calendarId = eventToDelete.organizer?.email;
+    if (!calendarId || !eventToDelete.id) return;
+    await deleteEvent.mutateAsync({ calendarId, eventId: eventToDelete.id });
+    setDeleteOpen(false);
+    setEventToDelete(null);
+  };
+
+  const handlePrev = () => {
+    setNavDirection("prev");
+    setSelectedDate((prev) => {
+      if (viewMode === "month") return addMonths(prev, -1);
+      if (viewMode === "week") return addWeeks(prev, -1);
+      return addDays(prev, -1);
     });
   };
+
+  const handleNext = () => {
+    setNavDirection("next");
+    setSelectedDate((prev) => {
+      if (viewMode === "month") return addMonths(prev, 1);
+      if (viewMode === "week") return addWeeks(prev, 1);
+      return addDays(prev, 1);
+    });
+  };
+
+  const currentWeekStartDate = useMemo(
+    () => startOfWeek(selectedDate, { weekStartsOn: 1 }),
+    [selectedDate],
+  );
 
   return (
     <div className="flex h-[calc(100vh-4rem)] flex-col overflow-hidden">
@@ -204,35 +351,214 @@ function CalendarDashboard({ needsReconnect, onReconnect }: CalendarDashboardPro
         <CalendarMenu
           className="hidden flex-none lg:flex"
           calendars={calendars}
-          visibleCalendars={visibleCalendars}
-          toggleCalendarVisibility={toggleCalendarVisibility}
-          currentWeekStartDate={currentWeekStartDate}
-          setCurrentWeekStartDate={setCurrentWeekStartDate}
+          isCalendarSelected={isCalendarSelected}
+          toggleCalendarSelection={toggleCalendarSelection}
+          selectedDate={selectedDate}
+          setSelectedDate={setSelectedDate}
         />
         <main className="flex min-w-0 flex-1 flex-col overflow-hidden">
           <CalendarToolbar
-            currentWeekStartDate={currentWeekStartDate}
-            setCurrentWeekStartDate={setCurrentWeekStartDate}
-            calendars={calendars}
+            selectedDate={selectedDate}
+            viewMode={viewMode}
+            onViewModeChange={setViewMode}
+            showWeekStrip={showWeekStrip}
+            onToggleWeekStrip={() => setShowWeekStrip((prev) => !prev)}
+            onPrev={handlePrev}
+            onNext={handleNext}
+            onToday={() => setSelectedDate(new Date())}
+            onJump={() => setJumpOpen(true)}
+            onOpenCalendars={() => setCalendarPickerOpen(true)}
+            onAddEvent={() => openCreateEvent()}
+            calendarPickerLabel={calendarPickerLabel}
+            eventCount={eventsForSelectedDay.length}
           />
-          <CalendarGrid
-            className="min-h-0 flex-1"
-            calendars={calendars}
-            events={visibleEvents}
-            currentWeekStartDate={currentWeekStartDate}
-            visibleCalendars={visibleCalendars}
-            setSelectedEvent={setSelectedEvent}
-          />
+          {showWeekStrip && (
+            <div className="px-4 pt-3 animate-in fade-in-0 slide-in-from-top-2 duration-200">
+              <CalendarWeekStrip
+                selectedDate={selectedDate}
+                onSelectDate={(date) => {
+                  setNavDirection(date > selectedDate ? "next" : "prev");
+                  setSelectedDate(date);
+                }}
+                onDateDoubleClick={(date) => openCreateEvent(date)}
+                events={visibleEvents}
+                calendars={calendars}
+              />
+            </div>
+          )}
+          <div className="min-h-0 flex-1 overflow-hidden px-4 pb-4 pt-4">
+            {viewMode === "day" &&
+              (eventsForSelectedDay.length === 0 ? (
+                <div className="flex h-full flex-col items-center justify-center gap-4 rounded-2xl border border-dashed border-border/60 bg-muted/20 text-center animate-in fade-in-0 duration-200">
+                  <div className="rounded-full bg-muted/40 p-3">
+                    <Calendar className="h-6 w-6 text-muted-foreground" />
+                  </div>
+                  <div>
+                    <p className="text-lg font-semibold">
+                      {selectedDate.toDateString() === new Date().toDateString()
+                        ? "Nothing scheduled today"
+                        : "No events"}
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      {selectedDate.toDateString() === new Date().toDateString()
+                        ? "Enjoy your free time or add something new"
+                        : format(selectedDate, "EEEE, MMMM d")}
+                    </p>
+                  </div>
+                  <div className="flex flex-col gap-2 sm:flex-row">
+                    <Button onClick={() => openCreateEvent()}>New Event</Button>
+                    <Button variant="outline" onClick={() => openCreateEvent(selectedDate, true)}>
+                      Add All-day
+                    </Button>
+                    <Button variant="ghost" onClick={() => setJumpOpen(true)}>
+                      Jump to date
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <div
+                  key={`day-${selectedDate.toDateString()}`}
+                  className={`h-full animate-in fade-in-0 duration-200 ${
+                    navDirection === "next" ? "slide-in-from-right-2" : "slide-in-from-left-2"
+                  }`}
+                >
+                  <CalendarDayTimeline
+                    selectedDate={selectedDate}
+                    events={visibleEvents}
+                    calendars={calendars}
+                    onEventClick={handleEventClick}
+                    onEventDelete={handleEventDeleteRequest}
+                    onCreateEvent={() => openCreateEvent()}
+                    onCreateEventAt={(date) => openCreateEvent(date)}
+                    onCreateAllDay={() => openCreateEvent(selectedDate, true)}
+                  />
+                </div>
+              ))}
+            {viewMode === "week" && (
+              <div
+                key={`week-${currentWeekStartDate.toDateString()}`}
+                className={`h-full animate-in fade-in-0 duration-200 ${
+                  navDirection === "next" ? "slide-in-from-right-2" : "slide-in-from-left-2"
+                }`}
+              >
+                <CalendarGrid
+                  className="min-h-0 flex-1"
+                  calendars={calendars}
+                  events={visibleEvents}
+                  currentWeekStartDate={currentWeekStartDate}
+                  activeCalendarIds={activeCalendarIds}
+                  onEventClick={handleEventClick}
+                  onEventDelete={handleEventDeleteRequest}
+                />
+              </div>
+            )}
+            {viewMode === "month" && (
+              <div
+                key={`month-${selectedDate.toDateString()}`}
+                className={`h-full animate-in fade-in-0 duration-200 ${
+                  navDirection === "next" ? "slide-in-from-right-2" : "slide-in-from-left-2"
+                }`}
+              >
+                <CalendarMonthView
+                  selectedDate={selectedDate}
+                  onSelectDate={(date) => {
+                    setNavDirection(date > selectedDate ? "next" : "prev");
+                    setSelectedDate(date);
+                  }}
+                  events={visibleEvents}
+                  calendars={calendars}
+                  onEventClick={handleEventClick}
+                  onEventDelete={handleEventDeleteRequest}
+                  onCreateEvent={() => openCreateEvent(selectedDate)}
+                />
+              </div>
+            )}
+          </div>
         </main>
         <ContextPanel
           className="hidden flex-none xl:flex"
           selectedEvent={selectedEvent}
           events={events}
-          visibleCalendars={visibleCalendars}
+          activeCalendarIds={activeCalendarIds}
           calendars={calendars}
           onClearSelection={() => setSelectedEvent(null)}
         />
       </div>
+
+      <CalendarPickerDialog
+        open={calendarPickerOpen}
+        onOpenChange={setCalendarPickerOpen}
+        calendars={calendars}
+        isCalendarSelected={isCalendarSelected}
+        onToggleCalendar={toggleCalendarSelection}
+      />
+      <CalendarJumpDialog
+        open={jumpOpen}
+        onOpenChange={setJumpOpen}
+        selectedDate={selectedDate}
+        onSelectDate={setSelectedDate}
+      />
+      <EventDetailDialog
+        open={detailOpen}
+        onOpenChange={(open) => {
+          setDetailOpen(open);
+          if (!open) setSelectedEvent(null);
+        }}
+        event={selectedEvent}
+        calendars={calendars}
+        onEdit={(event) => {
+          setDetailOpen(false);
+          setEditingEvent(event);
+          setEventFormStartDate(
+            event.start?.dateTime
+              ? new Date(event.start.dateTime)
+              : event.start?.date
+                ? new Date(event.start.date)
+                : null,
+          );
+          setEventFormAllDay(!!event.start?.date);
+          setEventFormOpen(true);
+        }}
+      />
+      <EventFormDialog
+        open={eventFormOpen}
+        onOpenChange={(open) => {
+          setEventFormOpen(open);
+          if (!open) setEditingEvent(null);
+        }}
+        calendars={calendars}
+        selectedDate={selectedDate}
+        initialStartDate={eventFormStartDate}
+        initialIsAllDay={eventFormAllDay}
+        editingEvent={editingEvent}
+        onSuccess={() => setEditingEvent(null)}
+      />
+      <AlertDialog
+        open={deleteOpen}
+        onOpenChange={(open) => {
+          setDeleteOpen(open);
+          if (!open) setEventToDelete(null);
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Event</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete "{eventToDelete?.summary}"? This action cannot be
+              undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDelete}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

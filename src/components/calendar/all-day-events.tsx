@@ -16,7 +16,8 @@ interface CalendarAllDayEventsProps {
   events: calendar_v3.Schema$Event[];
   daysOfWeek: Date[];
   calendars: calendar_v3.Schema$CalendarListEntry[];
-  setSelectedEvent: (event: ExtendedEvent | null) => void;
+  onEventClick: (event: ExtendedEvent) => void;
+  onEventDelete: (event: calendar_v3.Schema$Event) => void;
 }
 
 // Convert hex to RGB for better color manipulation
@@ -35,7 +36,8 @@ export default function CalendarAllDayEvents({
   events,
   daysOfWeek,
   calendars,
-  setSelectedEvent,
+  onEventClick,
+  onEventDelete,
 }: CalendarAllDayEventsProps) {
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -50,7 +52,7 @@ export default function CalendarAllDayEvents({
   }
 
   const handleEventClick = (event: calendar_v3.Schema$Event) => {
-    setSelectedEvent(event);
+    onEventClick(event);
   };
 
   const getCalendarColor = (calendarId: string | null | undefined) => {
@@ -136,7 +138,7 @@ export default function CalendarAllDayEvents({
                           </ContextMenuTrigger>
                           <ContextMenuContent>
                             <ContextMenuItem
-                              onSelect={() => {}}
+                              onSelect={() => onEventDelete(event)}
                               className="text-destructive focus:text-destructive"
                             >
                               Delete Event
