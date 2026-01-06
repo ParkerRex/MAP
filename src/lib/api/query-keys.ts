@@ -43,6 +43,11 @@ export const queryKeys = {
       ["whoop", "workouts", startDate, endDate] as const,
     all: ["whoop"] as const,
   },
+  appleHealth: {
+    status: ["apple-health", "status"] as const,
+    snapshot: ["apple-health", "snapshot"] as const,
+    all: ["apple-health"] as const,
+  },
   google: {
     status: ["google", "status"] as const,
   },

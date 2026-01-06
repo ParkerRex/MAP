@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { Check, Folder, FolderPlus, MoreHorizontal, Pencil, Plus, Trash2 } from "lucide-react";
+import { Folder, FolderPlus, MoreHorizontal, Pencil, Plus, Trash2 } from "lucide-react";
 import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/components/ui/cn";
@@ -22,12 +22,14 @@ interface FolderSidebarProps {
   folders: FolderType[];
   selectedFolderId: string | null;
   setSelectedFolderId: (id: string | null) => void;
+  allNotesCount: number;
 }
 
 export default function FolderSidebar({
   folders,
   selectedFolderId,
   setSelectedFolderId,
+  allNotesCount,
 }: FolderSidebarProps) {
   const [isCreating, setIsCreating] = useState(false);
   const [newFolderName, setNewFolderName] = useState("");
@@ -45,11 +47,14 @@ export default function FolderSidebar({
       return;
     }
     createFolder.mutate(
-      { name: newFolderName },
+      { name: newFolderName.trim() },
       {
-        onSuccess: () => {
+        onSuccess: (data) => {
           setNewFolderName("");
           setIsCreating(false);
+          if (data?.folder?.id) {
+            setSelectedFolderId(data.folder.id);
+          }
         },
       },
     );
@@ -84,9 +89,33 @@ export default function FolderSidebar({
   };
 
   return (
-    <div className="hidden md:flex flex-col w-52 border-r bg-muted/30">
+    <div className="hidden md:flex flex-col w-60 border-r bg-background/70 backdrop-blur">
       <ScrollArea className="flex-1">
-        <div className="p-3 space-y-1">
+        <div className="p-3 space-y-2">
+          <div
+            className={cn(
+              "group flex items-center gap-2 px-3 py-2 rounded-md cursor-pointer transition-colors",
+              selectedFolderId === null
+                ? "bg-yellow-100 text-yellow-900 dark:bg-yellow-900/40 dark:text-yellow-100"
+                : "hover:bg-muted/60 dark:hover:bg-muted/80",
+            )}
+            onClick={() => setSelectedFolderId(null)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                setSelectedFolderId(null);
+              }
+            }}
+            role="button"
+            tabIndex={0}
+          >
+            <Folder className="h-4 w-4 shrink-0 text-muted-foreground" />
+            <span className="flex-1 text-sm font-medium truncate">All Notes</span>
+            <span className="text-xs text-muted-foreground tabular-nums">{allNotesCount}</span>
+          </div>
+
+          <Separator className="my-2" />
+
           <AnimatePresence initial={false}>
             {folders.map((folder) => (
               <motion.div
@@ -100,8 +129,8 @@ export default function FolderSidebar({
                   className={cn(
                     "group flex items-center gap-2 px-3 py-2 rounded-md cursor-pointer transition-colors",
                     selectedFolderId === folder.id
-                      ? "bg-accent text-accent-foreground"
-                      : "hover:bg-accent/50",
+                      ? "bg-yellow-100 text-yellow-900 dark:bg-yellow-900/40 dark:text-yellow-100"
+                      : "hover:bg-muted/60 dark:hover:bg-muted/80",
                   )}
                   onClick={() => setSelectedFolderId(folder.id)}
                   onKeyDown={(e) => {
@@ -171,7 +200,6 @@ export default function FolderSidebar({
             ))}
           </AnimatePresence>
 
-          {/* New folder input */}
           {isCreating && (
             <motion.div
               initial={{ opacity: 0, height: 0 }}

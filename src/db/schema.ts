@@ -1,6 +1,8 @@
 import { relations } from "drizzle-orm";
 import {
   boolean,
+  date,
+  doublePrecision,
   integer,
   interval,
   pgEnum,
@@ -440,6 +442,51 @@ export const whoopProfiles = pgTable("whoop_profiles", {
   updatedAt: timestamp("updated_at", { withTimezone: true }),
 });
 
+// Apple Health (synced from iOS)
+export const appleHealthConnections = pgTable("apple_health_connections", {
+  userId: uuid("user_id").primaryKey(),
+  deviceId: text("device_id"),
+  deviceName: text("device_name"),
+  lastSyncAt: timestamp("last_sync_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }),
+});
+
+export const appleHealthData = pgTable(
+  "apple_health_data",
+  {
+    userId: uuid("user_id").notNull(),
+    date: date("date").notNull(),
+    steps: doublePrecision("steps"),
+    activeEnergy: doublePrecision("active_energy"),
+    basalEnergy: doublePrecision("basal_energy"),
+    exerciseMinutes: doublePrecision("exercise_minutes"),
+    standMinutes: doublePrecision("stand_minutes"),
+    distanceMiles: doublePrecision("distance_miles"),
+    flightsClimbed: doublePrecision("flights_climbed"),
+    restingHeartRate: doublePrecision("resting_heart_rate"),
+    hrvSDNN: doublePrecision("hrv_sdnn"),
+    walkingHeartRate: doublePrecision("walking_heart_rate"),
+    vo2Max: doublePrecision("vo2_max"),
+    oxygenSaturation: doublePrecision("oxygen_saturation"),
+    respiratoryRate: doublePrecision("respiratory_rate"),
+    bodyWeight: doublePrecision("body_weight"),
+    bodyFatPercentage: doublePrecision("body_fat_percentage"),
+    leanBodyMass: doublePrecision("lean_body_mass"),
+    sleepHours: doublePrecision("sleep_hours"),
+    sleepAwakeHours: doublePrecision("sleep_awake_hours"),
+    sleepRemHours: doublePrecision("sleep_rem_hours"),
+    sleepCoreHours: doublePrecision("sleep_core_hours"),
+    sleepDeepHours: doublePrecision("sleep_deep_hours"),
+    sleepInBedHours: doublePrecision("sleep_in_bed_hours"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }),
+  },
+  (table) => ({
+    pk: primaryKey({ columns: [table.userId, table.date] }),
+  }),
+);
+
 // Types
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
@@ -481,3 +528,7 @@ export type WhoopWorkout = typeof whoopWorkouts.$inferSelect;
 export type NewWhoopWorkout = typeof whoopWorkouts.$inferInsert;
 export type WhoopProfile = typeof whoopProfiles.$inferSelect;
 export type NewWhoopProfile = typeof whoopProfiles.$inferInsert;
+export type AppleHealthConnection = typeof appleHealthConnections.$inferSelect;
+export type NewAppleHealthConnection = typeof appleHealthConnections.$inferInsert;
+export type AppleHealthData = typeof appleHealthData.$inferSelect;
+export type NewAppleHealthData = typeof appleHealthData.$inferInsert;

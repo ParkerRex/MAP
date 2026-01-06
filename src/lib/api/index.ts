@@ -1,4 +1,8 @@
 export type {
+  AppleHealthDataPoint,
+  AppleHealthSnapshot,
+  AppleHealthSnapshotResponse,
+  AppleHealthStatusResponse,
   AuthUser,
   CalendarsResponse,
   ColorsResponse,

@@ -131,6 +131,54 @@ export interface WhoopSyncResponse {
   };
 }
 
+// Apple Health Response Types
+export interface AppleHealthSleepStages {
+  awake: number;
+  rem: number;
+  core: number;
+  deep: number;
+  inBed: number;
+}
+
+export interface AppleHealthDataPoint {
+  date: string;
+  steps?: number | null;
+  activeEnergy?: number | null;
+  basalEnergy?: number | null;
+  exerciseMinutes?: number | null;
+  standMinutes?: number | null;
+  distanceMiles?: number | null;
+  flightsClimbed?: number | null;
+  restingHeartRate?: number | null;
+  hrvSDNN?: number | null;
+  walkingHeartRate?: number | null;
+  vo2Max?: number | null;
+  oxygenSaturation?: number | null;
+  respiratoryRate?: number | null;
+  bodyWeight?: number | null;
+  bodyFatPercentage?: number | null;
+  leanBodyMass?: number | null;
+  sleepHours?: number | null;
+  sleepStages?: AppleHealthSleepStages | null;
+}
+
+export interface AppleHealthSnapshot {
+  timestamp: string;
+  today: AppleHealthDataPoint;
+  history: AppleHealthDataPoint[];
+}
+
+export interface AppleHealthStatusResponse {
+  connected: boolean;
+  lastSyncAt?: string | null;
+  deviceId?: string | null;
+  deviceName?: string | null;
+}
+
+export interface AppleHealthSnapshotResponse extends AppleHealthStatusResponse {
+  snapshot: AppleHealthSnapshot;
+}
+
 // GitHub Response Types
 export interface GitHubActionItem {
   id: string;
@@ -473,6 +521,11 @@ class ApiClient {
       this.request<{ success: boolean }>("/whoop/disconnect", {
         method: "POST",
       }),
+  };
+
+  appleHealth = {
+    status: () => this.request<AppleHealthStatusResponse>("/health/apple-health/status"),
+    snapshot: () => this.request<AppleHealthSnapshotResponse>("/health/apple-health/snapshot"),
   };
 
   claude = {

@@ -1,8 +1,19 @@
 "use client";
 
-import { Activity, Dumbbell, Heart, Moon, RefreshCw, TrendingUp, Unlink, Zap } from "lucide-react";
+import {
+  Activity,
+  Dumbbell,
+  Heart,
+  Moon,
+  RefreshCw,
+  Sun,
+  TrendingUp,
+  Unlink,
+  Zap,
+} from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useMemo, useState } from "react";
+import { formatDistanceToNow } from "date-fns";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -17,6 +28,13 @@ import {
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import type { AppleHealthSleepStages } from "@/lib/api";
+import {
+  calculateTrend,
+  formatHoursMinutes,
+  formatNumber,
+  useAppleHealthSnapshot,
+} from "@/hooks/use-apple-health";
 import {
   formatHrv,
   formatRestingHeartRate,
@@ -139,6 +157,136 @@ function MetricPillSkeleton() {
         <Skeleton className="h-5 w-16" />
       </div>
     </div>
+  );
+}
+
+function TrendBadge({ label, isPositive }: { label: string; isPositive: boolean }) {
+  return (
+    <span
+      className={`rounded-full px-2 py-0.5 text-xs font-medium ${
+        isPositive ? "bg-emerald-500/10 text-emerald-600" : "bg-rose-500/10 text-rose-500"
+      }`}
+    >
+      {label}
+    </span>
+  );
+}
+
+function DataSourceBadge({
+  label,
+  icon: Icon,
+  connected,
+}: {
+  label: string;
+  icon: React.ComponentType<{ className?: string }>;
+  connected: boolean;
+}) {
+  return (
+    <div className="flex items-center gap-2 rounded-full border border-border/60 bg-muted/20 px-3 py-1.5 text-xs">
+      <Icon className="h-3.5 w-3.5 text-muted-foreground" />
+      <span className="text-muted-foreground">{label}</span>
+      <span
+        className={`h-2 w-2 rounded-full ${
+          connected ? "bg-emerald-500" : "bg-orange-400"
+        }`}
+      />
+    </div>
+  );
+}
+
+function MetricTile({
+  label,
+  value,
+  icon: Icon,
+}: {
+  label: string;
+  value: string;
+  icon: React.ComponentType<{ className?: string }>;
+}) {
+  return (
+    <div className="rounded-xl border border-border/60 bg-muted/30 p-4">
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-xs text-muted-foreground">{label}</p>
+          <p className="mt-1 text-lg font-semibold">{value}</p>
+        </div>
+        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-background">
+          <Icon className="h-4 w-4 text-muted-foreground" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function SleepStageTooltipHours({
+  label,
+  hours,
+  percentage,
+}: {
+  label: string;
+  hours: number;
+  percentage: number;
+}) {
+  return (
+    <div className="text-center">
+      <p className="font-medium">{label}</p>
+      <p className="text-sm">{formatHoursMinutes(hours)}</p>
+      <p className="text-xs text-muted-foreground">{Math.round(percentage)}% of sleep</p>
+    </div>
+  );
+}
+
+function AppleSleepStagesBar({ stages }: { stages: AppleHealthSleepStages }) {
+  const total = stages.core + stages.deep + stages.rem;
+  if (total <= 0) return null;
+
+  const lightPct = (stages.core / total) * 100;
+  const deepPct = (stages.deep / total) * 100;
+  const remPct = (stages.rem / total) * 100;
+
+  const segments = [
+    { label: "Light", hours: stages.core, percentage: lightPct, color: "bg-cyan-400" },
+    { label: "Deep", hours: stages.deep, percentage: deepPct, color: "bg-blue-500" },
+    { label: "REM", hours: stages.rem, percentage: remPct, color: "bg-purple-500" },
+  ];
+
+  return (
+    <TooltipProvider>
+      <div className="space-y-3">
+        <div className="flex h-2.5 overflow-hidden rounded-full bg-muted/50">
+          {segments.map((segment) =>
+            segment.percentage > 0 ? (
+              <Tooltip key={segment.label}>
+                <TooltipTrigger asChild>
+                  <div
+                    className={`${segment.color} cursor-pointer transition-opacity hover:opacity-80`}
+                    style={{ width: `${segment.percentage}%` }}
+                  />
+                </TooltipTrigger>
+                <TooltipContent>
+                  <SleepStageTooltipHours
+                    label={`${segment.label} Sleep`}
+                    hours={segment.hours}
+                    percentage={segment.percentage}
+                  />
+                </TooltipContent>
+              </Tooltip>
+            ) : null,
+          )}
+        </div>
+        <div className="flex flex-wrap gap-x-5 gap-y-1">
+          {segments.map((segment) => (
+            <span
+              key={segment.label}
+              className="flex items-center gap-1.5 text-xs text-muted-foreground"
+            >
+              <span className={`h-2 w-2 rounded-full ${segment.color}`} />
+              {segment.label} {Math.round(segment.percentage)}%
+            </span>
+          ))}
+        </div>
+      </div>
+    </TooltipProvider>
   );
 }
 
@@ -285,34 +433,25 @@ function WorkoutCard({
   );
 }
 
-function ConnectWhoopCard() {
-  return (
-    <div className="flex min-h-[70vh] flex-col items-center justify-center px-4 text-center">
-      <div className="rounded-full bg-primary/10 p-6">
-        <Activity className="h-16 w-16 text-primary" />
-      </div>
-      <h2 className="mt-6 text-2xl font-semibold">Connect Your WHOOP</h2>
-      <p className="mt-3 max-w-md text-muted-foreground">
-        Unlock insights about your recovery, strain, sleep, and workouts. Connect your WHOOP to see
-        all your health data in one place.
-      </p>
-      <Button asChild size="lg" className="mt-8">
-        <a href="/api/whoop/auth">Connect WHOOP</a>
-      </Button>
-    </div>
-  );
-}
-
 type TimeRange = 7 | 30 | 90;
 
 function HealthDashboard() {
   const [timeRange, setTimeRange] = useState<TimeRange>(7);
+  const appleSnapshotQuery = useAppleHealthSnapshot();
+  const { data: appleSnapshot, isLoading: isLoadingApple } = appleSnapshotQuery;
+  const { data: whoopProfile } = useWhoopProfile();
   const { data: recovery, isLoading: isLoadingRecovery } = useWhoopRecovery();
   const { data: sleepData, isLoading: isLoadingSleep } = useWhoopSleep();
   const { data: workoutsData, isLoading: isLoadingWorkouts } = useWhoopWorkouts();
   const { data: cyclesData, isLoading: isLoadingCycles } = useWhoopCycles();
   const syncMutation = useWhoopSync();
   const disconnectMutation = useWhoopDisconnect();
+
+  const appleConnected = appleSnapshot?.connected ?? false;
+  const appleLastSyncAt = appleSnapshot?.lastSyncAt ?? null;
+  const appleToday = appleSnapshot?.snapshot?.today;
+  const appleHistory = appleSnapshot?.snapshot?.history ?? [];
+  const whoopConnected = whoopProfile?.connected ?? false;
 
   const latestRecovery = recovery?.latest;
   const latestCycle = recovery?.latestCycle;
@@ -343,27 +482,92 @@ function HealthDashboard() {
     };
   }, [cycles, workouts, timeRange]);
 
+  const appleTrends = useMemo(() => {
+    const historyValues = {
+      steps: appleHistory.map((day) => day.steps),
+      activeEnergy: appleHistory.map((day) => day.activeEnergy),
+      exerciseMinutes: appleHistory.map((day) => day.exerciseMinutes),
+      standMinutes: appleHistory.map((day) => day.standMinutes),
+      sleepHours: appleHistory.map((day) => day.sleepHours),
+      restingHeartRate: appleHistory.map((day) => day.restingHeartRate),
+      hrvSDNN: appleHistory.map((day) => day.hrvSDNN),
+    };
+
+    const recentSleep = appleHistory.slice(-7).map((day) => day.sleepHours ?? 0).filter((v) => v > 0);
+    const recentSteps = appleHistory.slice(-7).map((day) => day.steps ?? 0).filter((v) => v > 0);
+
+    return {
+      stepsTrend: calculateTrend(appleToday?.steps, historyValues.steps),
+      caloriesTrend: calculateTrend(appleToday?.activeEnergy, historyValues.activeEnergy),
+      exerciseTrend: calculateTrend(appleToday?.exerciseMinutes, historyValues.exerciseMinutes),
+      standTrend: calculateTrend(appleToday?.standMinutes, historyValues.standMinutes),
+      sleepTrend: calculateTrend(appleToday?.sleepHours, historyValues.sleepHours),
+      restingHrTrend: calculateTrend(
+        appleToday?.restingHeartRate,
+        historyValues.restingHeartRate,
+        false,
+      ),
+      hrvTrend: calculateTrend(appleToday?.hrvSDNN, historyValues.hrvSDNN),
+      sleepAverage7d:
+        recentSleep.length > 0
+          ? recentSleep.reduce((sum, value) => sum + value, 0) / recentSleep.length
+          : null,
+      stepsAverage7d:
+        recentSteps.length > 0
+          ? recentSteps.reduce((sum, value) => sum + value, 0) / recentSteps.length
+          : null,
+    };
+  }, [appleHistory, appleToday]);
+
+  const appleHasData = useMemo(() => {
+    if (!appleToday) return false;
+    return [
+      appleToday.steps,
+      appleToday.activeEnergy,
+      appleToday.exerciseMinutes,
+      appleToday.standMinutes,
+      appleToday.sleepHours,
+      appleToday.restingHeartRate,
+      appleToday.hrvSDNN,
+    ].some((value) => typeof value === "number" && value > 0);
+  }, [appleToday]);
+
   return (
     <div className="mx-auto w-full max-w-4xl space-y-6 px-4 py-8">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">Health</h1>
-          <p className="text-sm text-muted-foreground">Your daily health metrics from WHOOP</p>
+          <p className="text-sm text-muted-foreground">
+            Your daily health metrics from Apple Health and WHOOP
+          </p>
+          <div className="mt-2 flex flex-wrap gap-2">
+            <DataSourceBadge label="Apple Health" icon={Heart} connected={appleConnected} />
+            <DataSourceBadge label="WHOOP" icon={Zap} connected={whoopConnected} />
+          </div>
+          {appleLastSyncAt ? (
+            <p className="mt-2 text-xs text-muted-foreground">
+              Updated {formatDistanceToNow(new Date(appleLastSyncAt), { addSuffix: true })}
+            </p>
+          ) : null}
         </div>
         <div className="flex gap-2">
           <Button
             variant="outline"
             size="sm"
-            onClick={() => syncMutation.mutate()}
-            disabled={syncMutation.isPending}
+            onClick={() => appleSnapshotQuery.refetch()}
+            disabled={isLoadingApple}
           >
+            <RefreshCw className={`mr-2 h-4 w-4 ${isLoadingApple ? "animate-spin" : ""}`} />
+            Refresh
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => syncMutation.mutate()} disabled={!whoopConnected || syncMutation.isPending}>
             <RefreshCw className={`mr-2 h-4 w-4 ${syncMutation.isPending ? "animate-spin" : ""}`} />
             Sync
           </Button>
           <AlertDialog>
             <AlertDialogTrigger asChild>
-              <Button variant="ghost" size="sm" disabled={disconnectMutation.isPending}>
+              <Button variant="ghost" size="sm" disabled={!whoopConnected || disconnectMutation.isPending}>
                 <Unlink className="h-4 w-4" />
               </Button>
             </AlertDialogTrigger>
@@ -389,213 +593,419 @@ function HealthDashboard() {
         </div>
       </div>
 
-      {/* Hero Recovery Card */}
-      <div className="rounded-xl border bg-card p-6 shadow-sm">
-        <div className="flex flex-col items-center gap-6 sm:flex-row sm:items-start">
-          {isLoadingRecovery ? (
-            <Skeleton className="h-40 w-40 rounded-full" />
-          ) : (
-            <RecoveryRing score={latestRecovery?.recoveryScore} />
-          )}
-          <div className="flex-1 space-y-4">
-            <div>
-              <h2 className="text-lg font-semibold">Today's Readiness</h2>
-              <p className="text-sm text-muted-foreground">
-                {latestRecovery?.recoveryScore !== undefined &&
-                latestRecovery?.recoveryScore !== null
-                  ? latestRecovery.recoveryScore >= 67
-                    ? "You're primed to take on strain today"
-                    : latestRecovery.recoveryScore >= 34
-                      ? "Moderate activity is recommended"
-                      : "Consider prioritizing rest and recovery"
-                  : "Sync your WHOOP to see today's readiness"}
-              </p>
-            </div>
-            <div className="grid gap-3 sm:grid-cols-3">
-              {isLoadingRecovery ? (
-                <>
-                  <MetricPillSkeleton />
-                  <MetricPillSkeleton />
-                  <MetricPillSkeleton />
-                </>
-              ) : (
-                <>
-                  <MetricPill
-                    label="Strain"
-                    value={formatStrain(latestCycle?.strain)}
-                    icon={Zap}
-                    valueClassName={getStrainColor(latestCycle?.strain)}
-                  />
-                  <MetricPill
-                    label="HRV"
-                    value={formatHrv(latestRecovery?.hrvRmssd)}
-                    icon={Heart}
-                  />
-                  <MetricPill
-                    label="Resting HR"
-                    value={formatRestingHeartRate(latestRecovery?.restingHeartRate)}
-                    icon={Activity}
-                  />
-                </>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Sleep Section */}
-      <div className="rounded-xl border bg-card p-6 shadow-sm">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Moon className="h-5 w-5 text-muted-foreground" />
-            <h2 className="text-lg font-semibold">Last Night's Sleep</h2>
-          </div>
-          {latestSleep && (
-            <span className="rounded-full bg-primary/10 px-3 py-1 text-sm font-medium text-primary">
-              {formatSleepPerformance(latestSleep.sleepPerformancePercentage)} performance
-            </span>
-          )}
-        </div>
-        {isLoadingSleep ? (
-          <div className="mt-6 space-y-4">
-            <div className="grid gap-4 sm:grid-cols-3">
-              <Skeleton className="h-16" />
-              <Skeleton className="h-16" />
-              <Skeleton className="h-16" />
-            </div>
-            <Skeleton className="h-3 w-full" />
-          </div>
-        ) : latestSleep ? (
-          <div className="mt-6 space-y-6">
-            <div className="grid gap-4 sm:grid-cols-3">
-              <div className="rounded-lg bg-muted/30 p-4 text-center">
-                <p className="text-2xl font-bold">
-                  {formatSleepDuration(latestSleep.totalInBedTime)}
-                </p>
-                <p className="text-xs text-muted-foreground">Time in bed</p>
-              </div>
-              <div className="rounded-lg bg-muted/30 p-4 text-center">
-                <p className="text-2xl font-bold">
-                  {formatSleepPerformance(latestSleep.sleepEfficiencyPercentage)}
-                </p>
-                <p className="text-xs text-muted-foreground">Efficiency</p>
-              </div>
-              <div className="rounded-lg bg-muted/30 p-4 text-center">
-                <p className="text-2xl font-bold">{latestSleep.sleepCycleCount ?? "--"}</p>
-                <p className="text-xs text-muted-foreground">Sleep cycles</p>
-              </div>
-            </div>
-            <SleepStagesBar
-              light={latestSleep.totalLightSleepTime ?? 0}
-              deep={latestSleep.totalSlowWaveSleepTime ?? 0}
-              rem={latestSleep.totalRemSleepTime ?? 0}
-              awake={latestSleep.totalAwakeTime ?? 0}
-            />
-          </div>
-        ) : (
-          <div className="mt-6 flex flex-col items-center py-8 text-center">
-            <Moon className="h-10 w-10 text-muted-foreground/50" />
-            <p className="mt-3 text-sm text-muted-foreground">No sleep data available</p>
-          </div>
-        )}
-      </div>
-
-      {/* Trends Section */}
-      <div className="rounded-xl border bg-card p-6 shadow-sm">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <TrendingUp className="h-5 w-5 text-muted-foreground" />
-            <h2 className="text-lg font-semibold">Trends</h2>
-          </div>
-          <div className="flex rounded-lg border p-0.5">
-            {([7, 30, 90] as const).map((range) => (
-              <button
-                key={range}
-                type="button"
-                onClick={() => setTimeRange(range)}
-                className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
-                  timeRange === range
-                    ? "bg-primary text-primary-foreground shadow-sm"
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                {range}d
-              </button>
-            ))}
-          </div>
-        </div>
-        {isLoadingCycles ? (
-          <div className="mt-6 grid gap-4 sm:grid-cols-3">
-            <Skeleton className="h-20" />
-            <Skeleton className="h-20" />
-            <Skeleton className="h-20" />
-          </div>
-        ) : (
-          <div className="mt-6 grid gap-4 sm:grid-cols-3">
-            <div className="rounded-lg bg-muted/30 p-4">
-              <p className="text-sm text-muted-foreground">Avg Daily Strain</p>
-              <p className="mt-1 text-2xl font-bold">
-                {trendData.avgStrain !== null ? trendData.avgStrain.toFixed(1) : "--"}
-              </p>
-            </div>
-            <div className="rounded-lg bg-muted/30 p-4">
-              <p className="text-sm text-muted-foreground">Workouts</p>
-              <p className="mt-1 text-2xl font-bold">{trendData.workoutCount}</p>
-            </div>
-            <div className="rounded-lg bg-muted/30 p-4">
-              <p className="text-sm text-muted-foreground">Days Tracked</p>
-              <p className="mt-1 text-2xl font-bold">{trendData.daysTracked}</p>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Recent Workouts */}
-      <div className="rounded-xl border bg-card p-6 shadow-sm">
-        <div className="flex items-center gap-2">
-          <Dumbbell className="h-5 w-5 text-muted-foreground" />
-          <h2 className="text-lg font-semibold">Recent Workouts</h2>
-        </div>
-        {isLoadingWorkouts ? (
-          <div className="mt-4 space-y-3">
+      {/* Apple Health */}
+      {isLoadingApple ? (
+        <div className="rounded-xl border bg-card p-6 shadow-sm">
+          <Skeleton className="h-6 w-32" />
+          <div className="mt-4 grid gap-4 sm:grid-cols-4">
+            <Skeleton className="h-20 rounded-xl" />
             <Skeleton className="h-20 rounded-xl" />
             <Skeleton className="h-20 rounded-xl" />
             <Skeleton className="h-20 rounded-xl" />
           </div>
-        ) : workouts.length > 0 ? (
-          <div className="mt-4 space-y-3">
-            {workouts.slice(0, 5).map((workout) => (
-              <WorkoutCard
-                key={workout.id}
-                sportName={workout.sportName ?? getSportName(workout.sportId ?? 88)}
-                strain={workout.strain ?? "0"}
-                duration={formatSleepDuration(
-                  workout.end && workout.start
-                    ? new Date(workout.end).getTime() - new Date(workout.start).getTime()
-                    : null,
-                )}
-                date={new Date(workout.start).toLocaleDateString(undefined, {
-                  weekday: "short",
-                  month: "short",
-                  day: "numeric",
-                })}
+        </div>
+      ) : !appleConnected || !appleHasData ? (
+        <div className="rounded-xl border bg-card p-6 text-center shadow-sm">
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">
+            <Heart className="h-7 w-7 text-primary" />
+          </div>
+          <h2 className="mt-4 text-lg font-semibold">Connect Apple Health</h2>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Open the iOS app and grant HealthKit access to sync steps, sleep, heart rate, and more
+            to the web dashboard.
+          </p>
+        </div>
+      ) : (
+        <>
+          <div className="rounded-xl border bg-card p-6 shadow-sm">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Sun className="h-5 w-5 text-muted-foreground" />
+                <h2 className="text-lg font-semibold">Today</h2>
+              </div>
+            </div>
+            <div className="mt-5 grid gap-4 sm:grid-cols-4">
+              <MetricTile
+                label="Steps"
+                value={formatNumber(appleToday?.steps)}
+                icon={Activity}
               />
-            ))}
+              <MetricTile
+                label="Calories"
+                value={formatNumber(appleToday?.activeEnergy, " kcal", 0)}
+                icon={Zap}
+              />
+              <MetricTile
+                label="Exercise"
+                value={formatNumber(appleToday?.exerciseMinutes, " min", 0)}
+                icon={Dumbbell}
+              />
+              <MetricTile
+                label="Stand"
+                value={formatNumber(
+                  appleToday?.standMinutes ? appleToday.standMinutes / 60 : null,
+                  " hr",
+                  1,
+                )}
+                icon={Activity}
+              />
+            </div>
+            <div className="mt-6 grid gap-4 md:grid-cols-2">
+              <div className="rounded-xl border border-border/60 bg-muted/20 p-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Moon className="h-4 w-4 text-muted-foreground" />
+                    <p className="text-sm font-medium">Sleep</p>
+                  </div>
+                  {appleTrends.sleepTrend ? (
+                    <TrendBadge
+                      label={appleTrends.sleepTrend.label}
+                      isPositive={appleTrends.sleepTrend.isPositive}
+                    />
+                  ) : null}
+                </div>
+                <div className="mt-3 flex items-baseline gap-2">
+                  <p className="text-2xl font-bold">
+                    {formatHoursMinutes(appleToday?.sleepHours)}
+                  </p>
+                  {appleTrends.sleepAverage7d ? (
+                    <span className="text-xs text-muted-foreground">
+                      avg {formatHoursMinutes(appleTrends.sleepAverage7d)}
+                    </span>
+                  ) : null}
+                </div>
+                {appleToday?.sleepStages ? (
+                  <div className="mt-4">
+                    <AppleSleepStagesBar stages={appleToday.sleepStages} />
+                  </div>
+                ) : null}
+              </div>
+              <div className="rounded-xl border border-border/60 bg-muted/20 p-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Heart className="h-4 w-4 text-muted-foreground" />
+                    <p className="text-sm font-medium">Heart</p>
+                  </div>
+                </div>
+                <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                  <div>
+                    <p className="text-xs text-muted-foreground">Resting HR</p>
+                    <p className="text-2xl font-bold">
+                      {formatNumber(appleToday?.restingHeartRate, " bpm", 0)}
+                    </p>
+                    {appleTrends.restingHrTrend ? (
+                      <TrendBadge
+                        label={appleTrends.restingHrTrend.label}
+                        isPositive={appleTrends.restingHrTrend.isPositive}
+                      />
+                    ) : null}
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">HRV</p>
+                    <p className="text-2xl font-bold">
+                      {formatNumber(appleToday?.hrvSDNN, " ms", 0)}
+                    </p>
+                    {appleTrends.hrvTrend ? (
+                      <TrendBadge
+                        label={appleTrends.hrvTrend.label}
+                        isPositive={appleTrends.hrvTrend.isPositive}
+                      />
+                    ) : null}
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
-        ) : (
-          <div className="mt-6 flex flex-col items-center py-8 text-center">
-            <Dumbbell className="h-10 w-10 text-muted-foreground/50" />
-            <p className="mt-3 text-sm text-muted-foreground">No workouts recorded yet</p>
+
+          <div className="rounded-xl border bg-card p-6 shadow-sm">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <TrendingUp className="h-5 w-5 text-muted-foreground" />
+                <h2 className="text-lg font-semibold">Activity</h2>
+              </div>
+            </div>
+            <div className="mt-5 grid gap-4 sm:grid-cols-4">
+              <MetricTile
+                label="Steps"
+                value={formatNumber(appleToday?.steps)}
+                icon={Activity}
+              />
+              <MetricTile
+                label="Calories"
+                value={formatNumber(appleToday?.activeEnergy, " kcal", 0)}
+                icon={Zap}
+              />
+              <MetricTile
+                label="Exercise"
+                value={formatNumber(appleToday?.exerciseMinutes, " min", 0)}
+                icon={Dumbbell}
+              />
+              <MetricTile
+                label="Stand"
+                value={formatNumber(
+                  appleToday?.standMinutes ? appleToday.standMinutes / 60 : null,
+                  " hr",
+                  1,
+                )}
+                icon={Activity}
+              />
+            </div>
+            <div className="mt-4 flex flex-wrap gap-2">
+              {appleTrends.stepsTrend ? (
+                <TrendBadge
+                  label={`Steps ${appleTrends.stepsTrend.label}`}
+                  isPositive={appleTrends.stepsTrend.isPositive}
+                />
+              ) : null}
+              {appleTrends.caloriesTrend ? (
+                <TrendBadge
+                  label={`Calories ${appleTrends.caloriesTrend.label}`}
+                  isPositive={appleTrends.caloriesTrend.isPositive}
+                />
+              ) : null}
+              {appleTrends.exerciseTrend ? (
+                <TrendBadge
+                  label={`Exercise ${appleTrends.exerciseTrend.label}`}
+                  isPositive={appleTrends.exerciseTrend.isPositive}
+                />
+              ) : null}
+              {appleTrends.standTrend ? (
+                <TrendBadge
+                  label={`Stand ${appleTrends.standTrend.label}`}
+                  isPositive={appleTrends.standTrend.isPositive}
+                />
+              ) : null}
+            </div>
           </div>
-        )}
-      </div>
+        </>
+      )}
+
+      {/* WHOOP */}
+      {!whoopConnected ? (
+        <div className="rounded-xl border bg-card p-6 text-center shadow-sm">
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">
+            <Zap className="h-7 w-7 text-primary" />
+          </div>
+          <h2 className="mt-4 text-lg font-semibold">Connect WHOOP</h2>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Link your WHOOP account to see recovery, strain, sleep, and workouts alongside your
+            Apple Health data.
+          </p>
+          <Button asChild size="sm" className="mt-4">
+            <a href="/api/whoop/auth">Connect WHOOP</a>
+          </Button>
+        </div>
+      ) : (
+        <div className="rounded-xl border bg-card p-6 shadow-sm">
+          <div className="flex flex-col items-center gap-6 sm:flex-row sm:items-start">
+            {isLoadingRecovery ? (
+              <Skeleton className="h-40 w-40 rounded-full" />
+            ) : (
+              <RecoveryRing score={latestRecovery?.recoveryScore} />
+            )}
+            <div className="flex-1 space-y-4">
+              <div>
+                <h2 className="text-lg font-semibold">Today's Readiness</h2>
+                <p className="text-sm text-muted-foreground">
+                  {latestRecovery?.recoveryScore !== undefined &&
+                  latestRecovery?.recoveryScore !== null
+                    ? latestRecovery.recoveryScore >= 67
+                      ? "You're primed to take on strain today"
+                      : latestRecovery.recoveryScore >= 34
+                        ? "Moderate activity is recommended"
+                        : "Consider prioritizing rest and recovery"
+                    : "Sync your WHOOP to see today's readiness"}
+                </p>
+              </div>
+              <div className="grid gap-3 sm:grid-cols-3">
+                {isLoadingRecovery ? (
+                  <>
+                    <MetricPillSkeleton />
+                    <MetricPillSkeleton />
+                    <MetricPillSkeleton />
+                  </>
+                ) : (
+                  <>
+                    <MetricPill
+                      label="Strain"
+                      value={formatStrain(latestCycle?.strain)}
+                      icon={Zap}
+                      valueClassName={getStrainColor(latestCycle?.strain)}
+                    />
+                    <MetricPill
+                      label="HRV"
+                      value={formatHrv(latestRecovery?.hrvRmssd)}
+                      icon={Heart}
+                    />
+                    <MetricPill
+                      label="Resting HR"
+                      value={formatRestingHeartRate(latestRecovery?.restingHeartRate)}
+                      icon={Activity}
+                    />
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {whoopConnected ? (
+        <div className="rounded-xl border bg-card p-6 shadow-sm">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Moon className="h-5 w-5 text-muted-foreground" />
+              <h2 className="text-lg font-semibold">Last Night's Sleep</h2>
+            </div>
+            {latestSleep && (
+              <span className="rounded-full bg-primary/10 px-3 py-1 text-sm font-medium text-primary">
+                {formatSleepPerformance(latestSleep.sleepPerformancePercentage)} performance
+              </span>
+            )}
+          </div>
+          {isLoadingSleep ? (
+            <div className="mt-6 space-y-4">
+              <div className="grid gap-4 sm:grid-cols-3">
+                <Skeleton className="h-16" />
+                <Skeleton className="h-16" />
+                <Skeleton className="h-16" />
+              </div>
+              <Skeleton className="h-3 w-full" />
+            </div>
+          ) : latestSleep ? (
+            <div className="mt-6 space-y-6">
+              <div className="grid gap-4 sm:grid-cols-3">
+                <div className="rounded-lg bg-muted/30 p-4 text-center">
+                  <p className="text-2xl font-bold">
+                    {formatSleepDuration(latestSleep.totalInBedTime)}
+                  </p>
+                  <p className="text-xs text-muted-foreground">Time in bed</p>
+                </div>
+                <div className="rounded-lg bg-muted/30 p-4 text-center">
+                  <p className="text-2xl font-bold">
+                    {formatSleepPerformance(latestSleep.sleepEfficiencyPercentage)}
+                  </p>
+                  <p className="text-xs text-muted-foreground">Efficiency</p>
+                </div>
+                <div className="rounded-lg bg-muted/30 p-4 text-center">
+                  <p className="text-2xl font-bold">{latestSleep.sleepCycleCount ?? "--"}</p>
+                  <p className="text-xs text-muted-foreground">Sleep cycles</p>
+                </div>
+              </div>
+              <SleepStagesBar
+                light={latestSleep.totalLightSleepTime ?? 0}
+                deep={latestSleep.totalSlowWaveSleepTime ?? 0}
+                rem={latestSleep.totalRemSleepTime ?? 0}
+                awake={latestSleep.totalAwakeTime ?? 0}
+              />
+            </div>
+          ) : (
+            <div className="mt-6 flex flex-col items-center py-8 text-center">
+              <Moon className="h-10 w-10 text-muted-foreground/50" />
+              <p className="mt-3 text-sm text-muted-foreground">No sleep data available</p>
+            </div>
+          )}
+        </div>
+      ) : null}
+
+      {whoopConnected ? (
+        <div className="rounded-xl border bg-card p-6 shadow-sm">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <TrendingUp className="h-5 w-5 text-muted-foreground" />
+              <h2 className="text-lg font-semibold">Trends</h2>
+            </div>
+            <div className="flex rounded-lg border p-0.5">
+              {([7, 30, 90] as const).map((range) => (
+                <button
+                  key={range}
+                  type="button"
+                  onClick={() => setTimeRange(range)}
+                  className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
+                    timeRange === range
+                      ? "bg-primary text-primary-foreground shadow-sm"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  {range}d
+                </button>
+              ))}
+            </div>
+          </div>
+          {isLoadingCycles ? (
+            <div className="mt-6 grid gap-4 sm:grid-cols-3">
+              <Skeleton className="h-20" />
+              <Skeleton className="h-20" />
+              <Skeleton className="h-20" />
+            </div>
+          ) : (
+            <div className="mt-6 grid gap-4 sm:grid-cols-3">
+              <div className="rounded-lg bg-muted/30 p-4">
+                <p className="text-sm text-muted-foreground">Avg Daily Strain</p>
+                <p className="mt-1 text-2xl font-bold">
+                  {trendData.avgStrain !== null ? trendData.avgStrain.toFixed(1) : "--"}
+                </p>
+              </div>
+              <div className="rounded-lg bg-muted/30 p-4">
+                <p className="text-sm text-muted-foreground">Workouts</p>
+                <p className="mt-1 text-2xl font-bold">{trendData.workoutCount}</p>
+              </div>
+              <div className="rounded-lg bg-muted/30 p-4">
+                <p className="text-sm text-muted-foreground">Days Tracked</p>
+                <p className="mt-1 text-2xl font-bold">{trendData.daysTracked}</p>
+              </div>
+            </div>
+          )}
+        </div>
+      ) : null}
+
+      {whoopConnected ? (
+        <div className="rounded-xl border bg-card p-6 shadow-sm">
+          <div className="flex items-center gap-2">
+            <Dumbbell className="h-5 w-5 text-muted-foreground" />
+            <h2 className="text-lg font-semibold">Recent Workouts</h2>
+          </div>
+          {isLoadingWorkouts ? (
+            <div className="mt-4 space-y-3">
+              <Skeleton className="h-20 rounded-xl" />
+              <Skeleton className="h-20 rounded-xl" />
+              <Skeleton className="h-20 rounded-xl" />
+            </div>
+          ) : workouts.length > 0 ? (
+            <div className="mt-4 space-y-3">
+              {workouts.slice(0, 5).map((workout) => (
+                <WorkoutCard
+                  key={workout.id}
+                  sportName={workout.sportName ?? getSportName(workout.sportId ?? 88)}
+                  strain={workout.strain ?? "0"}
+                  duration={formatSleepDuration(
+                    workout.end && workout.start
+                      ? new Date(workout.end).getTime() - new Date(workout.start).getTime()
+                      : null,
+                  )}
+                  date={new Date(workout.start).toLocaleDateString(undefined, {
+                    weekday: "short",
+                    month: "short",
+                    day: "numeric",
+                  })}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="mt-6 flex flex-col items-center py-8 text-center">
+              <Dumbbell className="h-10 w-10 text-muted-foreground/50" />
+              <p className="mt-3 text-sm text-muted-foreground">No workouts recorded yet</p>
+            </div>
+          )}
+        </div>
+      ) : null}
     </div>
   );
 }
 
 function HealthPageContent() {
   const searchParams = useSearchParams();
-  const { data: profileData, isLoading: isLoadingProfile } = useWhoopProfile();
+  const { isLoading: isLoadingProfile } = useWhoopProfile();
   const syncMutation = useWhoopSync();
 
   // Handle OAuth callback messages
@@ -628,7 +1038,7 @@ function HealthPageContent() {
     );
   }
 
-  return profileData?.connected ? <HealthDashboard /> : <ConnectWhoopCard />;
+  return <HealthDashboard />;
 }
 
 export default function HealthPage() {

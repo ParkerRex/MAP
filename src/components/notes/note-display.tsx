@@ -1,19 +1,26 @@
 "use client";
 
 import { format } from "date-fns";
-import { Eye, FileText, Pencil } from "lucide-react";
+import { Eye, Folder, Pencil } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import Markdown from "react-markdown";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/components/ui/cn";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Textarea } from "@/components/ui/textarea";
 import { useUpdateNote } from "@/hooks/use-notes";
-import type { Note } from "@/types/notes";
+import type { FolderType, Note } from "@/types/notes";
 
 interface NoteDisplayProps {
   note: Note | null;
+  folders: FolderType[];
 }
 
 function useDebounce<T>(value: T, delay: number): T {
@@ -32,27 +39,28 @@ function useDebounce<T>(value: T, delay: number): T {
   return debouncedValue;
 }
 
-export default function NoteDisplay({ note }: NoteDisplayProps) {
+export default function NoteDisplay({ note, folders }: NoteDisplayProps) {
   const titleInputRef = useRef<HTMLInputElement>(null);
+  const contentAreaRef = useRef<HTMLTextAreaElement>(null);
   const [title, setTitle] = useState(note?.title ?? "");
   const [content, setContent] = useState(note?.content ?? "");
   const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved">("idle");
   const [isPreview, setIsPreview] = useState(false);
+  const [activeFolderId, setActiveFolderId] = useState(note?.folderId ?? "");
 
   const updateNote = useUpdateNote();
 
   const debouncedTitle = useDebounce(title, 500);
   const debouncedContent = useDebounce(content, 500);
 
-  // Sync local state when note changes
   useEffect(() => {
     setTitle(note?.title ?? "");
     setContent(note?.content ?? "");
+    setActiveFolderId(note?.folderId ?? "");
     setSaveStatus("idle");
     setIsPreview(false);
-  }, [note?.id, note?.title, note?.content]);
+  }, [note?.id, note?.title, note?.content, note?.folderId]);
 
-  // Auto-save on debounced changes
   useEffect(() => {
     if (!note) return;
 
@@ -90,32 +98,72 @@ export default function NoteDisplay({ note }: NoteDisplayProps) {
     setSaveStatus("idle");
   }, []);
 
-  // Empty state
+  const handleFolderChange = (folderId: string) => {
+    if (!note) return;
+    setActiveFolderId(folderId);
+    updateNote.mutate({ noteId: note.id, folderId });
+  };
+
+  const insertSnippet = (snippet: string) => {
+    const trimmed = content.trim();
+    const updated = trimmed.length === 0 ? snippet : content.endsWith("\n") ? content + snippet : `${content}\n${snippet}`;
+    setContent(updated);
+    setSaveStatus("idle");
+    requestAnimationFrame(() => {
+      contentAreaRef.current?.focus();
+    });
+  };
+
   if (!note) {
     return (
-      <div className="flex-1 flex flex-col items-center justify-center text-muted-foreground">
-        <FileText className="h-12 w-12 mb-4 opacity-30" />
+      <div className="flex-1 flex flex-col items-center justify-center text-muted-foreground bg-background/60">
+        <Folder className="h-12 w-12 mb-4 opacity-30" />
         <p className="text-lg font-medium">No note selected</p>
         <p className="text-sm mt-1">Select a note to view its content</p>
       </div>
     );
   }
 
+  const activeFolderName =
+    folders.find((folder) => folder.id === activeFolderId)?.name ?? "Folder";
+
   return (
-    <div className="flex-1 flex flex-col min-w-0">
-      {/* Header */}
-      <div className="shrink-0 border-b bg-background/50 p-4 md:p-6">
+    <div className="flex-1 flex flex-col min-w-0 min-h-0 bg-background/60">
+      <div className="shrink-0 border-b bg-background/80 backdrop-blur p-4 md:p-6">
         <div className="flex items-start justify-between gap-4">
-          <div className="flex-1 min-w-0">
+          <div className="flex-1 min-w-0 space-y-2">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  className="rounded-full"
+                  disabled={folders.length === 0}
+                >
+                  <Folder className="h-4 w-4 mr-2" />
+                  {activeFolderName}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-48">
+                {folders.map((folder) => (
+                  <DropdownMenuItem
+                    key={folder.id}
+                    onClick={() => handleFolderChange(folder.id)}
+                  >
+                    {folder.name}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
             <Input
               ref={titleInputRef}
-              className="text-xl md:text-2xl font-semibold border-none shadow-none p-0 h-auto focus-visible:ring-0 bg-transparent"
-              placeholder="Note Title"
+              className="text-2xl font-semibold border-none shadow-none p-0 h-auto focus-visible:ring-0 bg-transparent"
+              placeholder="Title"
               value={title}
               onChange={handleTitleChange}
             />
-            <p className="text-sm text-muted-foreground mt-1">
-              {format(note.updatedAt ?? note.createdAt, "MMMM d, yyyy 'at' h:mm a")}
+            <p className="text-xs text-muted-foreground">
+              Last edited {format(note.updatedAt ?? note.createdAt, "MMMM d, yyyy 'at' h:mm a")}
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -133,8 +181,7 @@ export default function NoteDisplay({ note }: NoteDisplayProps) {
         </div>
       </div>
 
-      {/* Mode toggle */}
-      <div className="shrink-0 border-b px-4 md:px-6 py-2 flex items-center gap-1 bg-muted/30">
+      <div className="shrink-0 border-b px-4 md:px-6 py-2 flex items-center gap-2 bg-muted/30">
         <Button
           variant={isPreview ? "ghost" : "secondary"}
           size="sm"
@@ -155,7 +202,22 @@ export default function NoteDisplay({ note }: NoteDisplayProps) {
         </Button>
       </div>
 
-      {/* Content */}
+      {!isPreview && (
+        <div className="shrink-0 border-b px-4 md:px-6 py-2 bg-background/70">
+          <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide">
+            <MarkdownChip title="H1" onClick={() => insertSnippet("# ")} />
+            <MarkdownChip title="H2" onClick={() => insertSnippet("## ")} />
+            <MarkdownChip title="Bold" onClick={() => insertSnippet("**bold**")} />
+            <MarkdownChip title="Italic" onClick={() => insertSnippet("*italic*")} />
+            <MarkdownChip title="List" onClick={() => insertSnippet("- ")} />
+            <MarkdownChip title="Checklist" onClick={() => insertSnippet("- [ ] ")} />
+            <MarkdownChip title="Quote" onClick={() => insertSnippet("> ")} />
+            <MarkdownChip title="Code" onClick={() => insertSnippet("`code`")} />
+            <MarkdownChip title="Block" onClick={() => insertSnippet("```\ncode\n```")} />
+          </div>
+        </div>
+      )}
+
       <div className="flex-1 overflow-hidden">
         {isPreview ? (
           <ScrollArea className="h-full">
@@ -168,6 +230,7 @@ export default function NoteDisplay({ note }: NoteDisplayProps) {
         ) : (
           <div className="h-full p-4 md:p-6">
             <Textarea
+              ref={contentAreaRef}
               className="w-full h-full resize-none border-none shadow-none focus-visible:ring-0 bg-transparent p-0 text-sm leading-relaxed"
               placeholder="Start typing your note... (Markdown supported)"
               value={content}
@@ -177,5 +240,17 @@ export default function NoteDisplay({ note }: NoteDisplayProps) {
         )}
       </div>
     </div>
+  );
+}
+
+function MarkdownChip({ title, onClick }: { title: string; onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="whitespace-nowrap rounded-full bg-muted px-3 py-1 text-xs font-semibold text-muted-foreground transition hover:bg-muted/80"
+    >
+      {title}
+    </button>
   );
 }
