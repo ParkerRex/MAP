@@ -6,9 +6,9 @@ extension SettingsView {
     var accountSection: some View {
         settingsSection(
             title: "SETTINGS_ACCOUNT_TITLE",
-            subtitle: MapAPIClient.shared.isAuthenticated ? "ACCOUNT_SIGNED_IN" : "ACCOUNT_NOT_SIGNED_IN"
+            subtitle: sessionService.isAuthenticated ? "ACCOUNT_SIGNED_IN" : "ACCOUNT_NOT_SIGNED_IN"
         ) {
-            if MapAPIClient.shared.isAuthenticated {
+            if sessionService.isAuthenticated {
                 HStack(spacing: 12) {
                     if let photoUrl = profileService.profile?.profilePhotoUrl,
                        let url = URL(string: photoUrl) {
@@ -80,7 +80,7 @@ extension SettingsView {
             title: "GitHub",
             subtitle: "Sync contributions, notifications, PRs, and tasks."
         ) {
-            if MapAPIClient.shared.isAuthenticated {
+            if sessionService.isAuthenticated {
                 VStack(alignment: .leading, spacing: 12) {
                     if githubService.isLoading && githubService.connectionStatus == nil {
                         HStack(spacing: 12) {

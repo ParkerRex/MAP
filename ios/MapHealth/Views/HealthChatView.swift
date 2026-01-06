@@ -17,6 +17,7 @@ struct HealthChatView: View {
     @State private var modelSettingRefreshId = UUID()
     @State private var messageTaskId = 0
     @State private var isReauthenticating = false
+    @StateObject private var sessionService = SessionService.shared
 
     var body: some View {
         NavigationStack {
@@ -114,8 +115,7 @@ struct HealthChatView: View {
             }
 
             if let token = components.queryItems?.first(where: { $0.name == "token" })?.value {
-                try KeychainService.shared.saveSessionToken(token)
-                MapAPIClient.shared.setAuthToken(token)
+                try sessionService.setSessionToken(token)
                 return true
             } else if let error = components.queryItems?.first(where: { $0.name == "error" })?.value {
                 throw GoogleSignInError.authFailed(error)

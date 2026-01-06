@@ -15,6 +15,7 @@ struct HomeView: View {
     @StateObject private var calendarService = CalendarService.shared
     @StateObject private var tasksService = TasksService.shared
     @StateObject private var healthService = HealthDataService.shared
+    @StateObject private var sessionService = SessionService.shared
 
     // Weather state
     @State private var weather: WeatherData?
@@ -131,7 +132,7 @@ struct HomeView: View {
 
     private var githubSection: some View {
         Group {
-            if MapAPIClient.shared.isAuthenticated {
+            if sessionService.isAuthenticated {
                 GitHubActivityCard(
                     connectionStatus: githubService.connectionStatus,
                     activity: githubService.activity,
@@ -187,12 +188,12 @@ struct HomeView: View {
     }
 
     private var eventsError: String? {
-        guard MapAPIClient.shared.isAuthenticated else { return nil }
+        guard sessionService.isAuthenticated else { return nil }
         return calendarService.error?.localizedDescription
     }
 
     private var tasksError: String? {
-        guard MapAPIClient.shared.isAuthenticated else { return nil }
+        guard sessionService.isAuthenticated else { return nil }
         return tasksService.error?.localizedDescription
     }
 
@@ -738,7 +739,7 @@ struct HomeView: View {
 
     @MainActor
     private func refreshGitHubIfNeeded() async {
-        guard MapAPIClient.shared.isAuthenticated else { return }
+        guard sessionService.isAuthenticated else { return }
         guard !githubService.isLoading else { return }
         if let lastUpdated = githubService.lastUpdated,
            Date().timeIntervalSince(lastUpdated) < 60 {
@@ -747,14 +748,9 @@ struct HomeView: View {
         await githubService.refresh()
     }
 
+    @MainActor
     private func refreshData() async {
-        // Use withCheckedContinuation to prevent SwiftUI from cancelling our requests
-        await withCheckedContinuation { continuation in
-            Task.detached {
-                await self.performRefresh()
-                continuation.resume()
-            }
-        }
+        await performRefresh()
     }
 
     @MainActor

@@ -10,6 +10,7 @@ struct GoogleSignInView: View {
     @State private var isAuthenticating = false
     @State private var showErrorAlert = false
     @State private var errorMessage = ""
+    @StateObject private var sessionService = SessionService.shared
     let onAuthenticated: () -> Void
 
     var body: some View {
@@ -187,8 +188,7 @@ struct GoogleSignInView: View {
                 }
 
                 if let token = components.queryItems?.first(where: { $0.name == "token" })?.value {
-                    try KeychainService.shared.saveSessionToken(token)
-                    MapAPIClient.shared.setAuthToken(token)
+                    try sessionService.setSessionToken(token)
                     onAuthenticated()
                 } else if let error = components.queryItems?.first(
                     where: { $0.name == "error" }

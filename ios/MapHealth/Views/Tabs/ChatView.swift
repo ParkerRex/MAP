@@ -18,6 +18,7 @@ struct ChatView: View {
     @State private var messageTaskId = 0
     @State private var isReauthenticating = false
     @State private var showLLMSettings = false
+    @StateObject private var sessionService = SessionService.shared
 
     private var selectedModelBinding: Binding<String> {
         Binding(
@@ -225,8 +226,7 @@ struct ChatView: View {
             }
 
             if let token = components.queryItems?.first(where: { $0.name == "token" })?.value {
-                try KeychainService.shared.saveSessionToken(token)
-                MapAPIClient.shared.setAuthToken(token)
+                try sessionService.setSessionToken(token)
                 return true
             } else if let error = components.queryItems?.first(where: { $0.name == "error" })?.value {
                 throw GoogleSignInError.authFailed(error)

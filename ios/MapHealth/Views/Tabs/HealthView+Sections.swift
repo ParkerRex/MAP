@@ -134,7 +134,7 @@ extension HealthView {
                     connected: !healthService.needsPermission,
                     color: Color.accentColor
                 )
-                if apiClient.isAuthenticated {
+                if sessionService.isAuthenticated {
                     dataSourceBadge(
                         icon: "bolt.heart",
                         label: "WHOOP",
@@ -151,7 +151,7 @@ extension HealthView {
                     connected: !healthService.needsPermission,
                     color: Color.accentColor
                 )
-                if apiClient.isAuthenticated {
+                if sessionService.isAuthenticated {
                     dataSourceBadge(
                         icon: "bolt.heart",
                         label: "WHOOP",

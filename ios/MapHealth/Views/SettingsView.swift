@@ -14,6 +14,7 @@ struct SettingsView: View {
 
     @State var showSignOutAlert = false
     @StateObject var profileService = ProfileService.shared
+    @StateObject var sessionService = SessionService.shared
     @StateObject var githubService = GitHubActivityService.shared
     @State var isConnectingGitHub = false
     @State var githubConnectError: String?

@@ -74,7 +74,7 @@ extension SettingsView {
     }
 
     func signOut() {
-        MapAPIClient.shared.signOut()
+        sessionService.signOut()
         profileService.reset()
         githubService.reset()
         onboardingFlowComplete = false

@@ -54,7 +54,7 @@ extension HealthView {
             } else if let error = healthService.error {
                 errorView(error.localizedDescription)
             } else {
-                if apiClient.isAuthenticated {
+                if sessionService.isAuthenticated {
                     section(
                         title: "WHOOP",
                         systemImage: "bolt.heart.fill",
