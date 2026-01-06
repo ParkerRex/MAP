@@ -10,7 +10,7 @@ extension SettingsView {
         ) {
             if MapAPIClient.shared.isAuthenticated {
                 HStack(spacing: 12) {
-                    if let photoUrl = userProfile?.profilePhotoUrl,
+                    if let photoUrl = profileService.profile?.profilePhotoUrl,
                        let url = URL(string: photoUrl) {
                         AsyncImage(url: url) { image in
                             image
@@ -26,11 +26,11 @@ extension SettingsView {
                     }
 
                     VStack(alignment: .leading, spacing: 4) {
-                        if isLoadingProfile {
+                        if profileService.isLoading {
                             Text("GENERIC_LOADING")
                                 .font(.subheadline)
                                 .foregroundStyle(.secondary)
-                        } else if let profile = userProfile {
+                        } else if let profile = profileService.profile {
                             Text(profile.displayName ?? profile.email)
                                 .font(.headline)
                             Text(profile.email)

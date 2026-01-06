@@ -1,7 +1,6 @@
 // swiftlint:disable file_length
 import AuthenticationServices
 import CoreLocation
-import HealthKit
 import MapHealthCore
 import SwiftUI
 
@@ -13,13 +12,9 @@ struct HomeView: View {
     @State private var modelSettingRefreshId = UUID()
 
     // Data state
-    @State private var todayEvents: [CalendarEvent] = []
-    @State private var todayTasks: [MapTask] = []
-    @State private var steps: Double?
-    @State private var sleepHours: Double?
-    @State private var restingHeartRate: Double?
-    @State private var healthNeedsPermission = false
+    @StateObject private var calendarService = CalendarService.shared
     @StateObject private var tasksService = TasksService.shared
+    @StateObject private var healthService = HealthDataService.shared
 
     // Weather state
     @State private var weather: WeatherData?
@@ -39,10 +34,6 @@ struct HomeView: View {
 
     // Loading states - only true on initial load, not refresh
     @State private var isInitialLoad = true
-    @State private var eventsError: String?
-    @State private var tasksError: String?
-
-    private let healthDataFetcher = HealthDataFetcher()
 
     var body: some View {
         NavigationStack {
@@ -169,6 +160,40 @@ struct HomeView: View {
 
     private var githubSectionError: String? {
         githubConnectError ?? githubService.error?.localizedDescription
+    }
+
+    private var todayEvents: [CalendarEvent] {
+        calendarService.todaysEvents
+    }
+
+    private var todayTasks: [MapTask] {
+        tasksService.todaysTasks
+    }
+
+    private var steps: Double? {
+        healthService.snapshot?.today.steps
+    }
+
+    private var sleepHours: Double? {
+        healthService.snapshot?.today.sleepHours
+    }
+
+    private var restingHeartRate: Double? {
+        healthService.snapshot?.today.restingHeartRate
+    }
+
+    private var healthNeedsPermission: Bool {
+        healthService.needsPermission
+    }
+
+    private var eventsError: String? {
+        guard MapAPIClient.shared.isAuthenticated else { return nil }
+        return calendarService.error?.localizedDescription
+    }
+
+    private var tasksError: String? {
+        guard MapAPIClient.shared.isAuthenticated else { return nil }
+        return tasksService.error?.localizedDescription
     }
 
     private func weatherBadge(_ weather: WeatherData) -> some View {
@@ -734,12 +759,9 @@ struct HomeView: View {
 
     @MainActor
     private func performRefresh() async {
-        eventsError = nil
-        tasksError = nil
-
         async let eventsTask: () = loadTodayEvents()
         async let tasksTask: () = loadTodayTasks()
-        async let healthTask: () = loadHealthData()
+        async let healthTask: () = loadHealthData(force: true)
         async let githubTask: () = githubService.refresh()
 
         _ = await (eventsTask, tasksTask, healthTask, githubTask)
@@ -749,64 +771,31 @@ struct HomeView: View {
 
     @MainActor
     private func loadTodayEvents() async {
-        eventsError = nil
-        do {
-            let response = try await MapAPIClient.shared.getEvents(
-                timeMin: Date().startOfDay,
-                timeMax: Date().endOfDay
-            )
-            todayEvents = response.events
-        } catch {
-            eventsError = "Could not load events"
-        }
+        await calendarService.fetchEvents(
+            from: Date().startOfDay,
+            to: Date().endOfDay,
+            calendarId: "primary"
+        )
     }
 
     @MainActor
     private func loadTodayTasks() async {
-        tasksError = nil
-        do {
-            let allTasks = try await MapAPIClient.shared.getTasks()
-            let calendar = Calendar.current
-            todayTasks = allTasks.filter { task in
-                guard let dueAt = task.dueAt else { return false }
-                return calendar.isDateInToday(dueAt)
-            }
-        } catch {
-            tasksError = "Could not load tasks"
-        }
+        await tasksService.fetchTasks()
     }
 
     @MainActor
     private func toggleTask(_ task: MapTask) {
         Task {
-            guard let updated = try? await tasksService.toggleTask(task) else { return }
-            if let index = todayTasks.firstIndex(where: { $0.id == updated.id }) {
-                todayTasks[index] = updated
-            }
+            _ = try? await tasksService.toggleTask(task)
         }
     }
 
     @MainActor
-    private func loadHealthData() async {
-        do {
-            let stepsData = try await healthDataFetcher.fetchLastTwoWeeksStepCount()
-            if let todaySteps = stepsData.last, todaySteps > 0 {
-                steps = todaySteps
-            }
-
-            let sleepData = try await healthDataFetcher.fetchLastTwoWeeksSleep()
-            if let todaySleep = sleepData.last, todaySleep > 0 {
-                sleepHours = todaySleep
-            }
-
-            let heartRateData = try await healthDataFetcher.fetchLastTwoWeeksRestingHeartRate()
-            if let todayHR = heartRateData.last, todayHR > 0 {
-                restingHeartRate = todayHR
-            }
-
-            healthNeedsPermission = false
-        } catch {
-            healthNeedsPermission = true
+    private func loadHealthData(force: Bool = false) async {
+        if force {
+            await healthService.refresh()
+        } else {
+            await healthService.refreshIfNeeded()
         }
     }
 

@@ -7,16 +7,18 @@ struct HealthView: View {
     @StateObject var healthService = HealthDataService.shared
     @Environment(\.openURL) var openURL
 
-    @State var whoopConnected = false
-    @State var whoopRecovery: WhoopRecovery?
-    @State var whoopCycle: WhoopCycle?
-    @State var whoopSleep: WhoopSleep?
-    @State var whoopWorkouts: [WhoopWorkout] = []
-    @State var isLoadingWhoop = false
+    @StateObject var whoopService = WhoopService.shared
 
     let apiClient = MapAPIClient.shared
 
     let gridColumns = [
         GridItem(.adaptive(minimum: 160), spacing: 12)
     ]
+
+    var whoopConnected: Bool { whoopService.isConnected }
+    var whoopRecovery: WhoopRecovery? { whoopService.recovery }
+    var whoopCycle: WhoopCycle? { whoopService.cycle }
+    var whoopSleep: WhoopSleep? { whoopService.sleep }
+    var whoopWorkouts: [WhoopWorkout] { whoopService.workouts }
+    var isLoadingWhoop: Bool { whoopService.isLoading }
 }

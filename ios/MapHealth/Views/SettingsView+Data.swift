@@ -31,17 +31,11 @@ extension SettingsView {
 
     @MainActor
     func loadProfile() async {
-        guard MapAPIClient.shared.isAuthenticated else { return }
-
-        isLoadingProfile = true
-        do {
-            let profile = try await MapAPIClient.shared.getProfile()
-            userProfile = profile
-        } catch {
+        await profileService.refresh()
+        if let error = profileService.error {
             let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "com.yourcompany.app", category: "Settings")
             logger.error("Failed to load profile: \(error.localizedDescription)")
         }
-        isLoadingProfile = false
     }
 
     @MainActor
@@ -81,6 +75,7 @@ extension SettingsView {
 
     func signOut() {
         MapAPIClient.shared.signOut()
+        profileService.reset()
         githubService.reset()
         onboardingFlowComplete = false
         dismiss()

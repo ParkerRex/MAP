@@ -13,8 +13,7 @@ struct SettingsView: View {
     @AppStorage(StorageKeys.appearanceMode) var appearanceModeRaw = StorageKeys.Defaults.appearanceMode
 
     @State var showSignOutAlert = false
-    @State var userProfile: UserProfile?
-    @State var isLoadingProfile = false
+    @StateObject var profileService = ProfileService.shared
     @StateObject var githubService = GitHubActivityService.shared
     @State var isConnectingGitHub = false
     @State var githubConnectError: String?
