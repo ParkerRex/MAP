@@ -1,6 +1,5 @@
 "use client";
 
-import { differenceInDays, format, isPast, isToday, isTomorrow } from "date-fns";
 import { Calendar, Check, Loader2, MoreHorizontal, Tag, Trash2 } from "lucide-react";
 import type { FC } from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -19,7 +18,9 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Textarea } from "@/components/ui/textarea";
 import type { TaskWithTags } from "@/types";
+import { getTaskDueLabel } from "./task-utils";
 
 interface TaskItemProps {
   task: TaskWithTags;
@@ -33,6 +34,8 @@ interface TaskItemProps {
   isSelectMode: boolean;
   isSelected: boolean;
   onToggleSelect: () => void;
+  onOpenDetail?: (task: TaskWithTags) => void;
+  projectColors?: Record<string, string>;
 }
 
 const TaskItem: FC<TaskItemProps> = ({
@@ -47,12 +50,16 @@ const TaskItem: FC<TaskItemProps> = ({
   isSelectMode,
   isSelected,
   onToggleSelect,
+  onOpenDetail,
+  projectColors = {},
 }) => {
   const [isEditing, setIsEditing] = useState(false);
+  const [isQuickEditing, setIsQuickEditing] = useState(false);
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
   const [title, setTitle] = useState(task.title);
-  const [tags, setTags] = useState<string[]>(task.tags?.map((t) => t.title) ?? []);
-  const [availableTags, setAvailableTags] = useState<string[]>([]);
+  const [body, setBody] = useState(task.body ?? "");
+  const [tags, setTags] = useState<string[]>(task.tags?.map((t) => t.id) ?? []);
+  const [availableTags, setAvailableTags] = useState<{ id: string; title: string }[]>([]);
   const [newTag, setNewTag] = useState("");
   const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved">("idle");
   const inputRef = useRef<HTMLInputElement>(null);
@@ -62,11 +69,12 @@ const TaskItem: FC<TaskItemProps> = ({
 
   useEffect(() => {
     setTitle(task.title);
-    setTags(task.tags?.map((t) => t.title) ?? []);
-  }, [task.title, task.tags]);
+    setBody(task.body ?? "");
+    setTags(task.tags?.map((t) => t.id) ?? []);
+  }, [task.title, task.body, task.tags]);
 
   useEffect(() => {
-    getAllTags().then((t) => setAvailableTags(t.map((tag) => tag.title)));
+    getAllTags().then((t) => setAvailableTags(t));
   }, [getAllTags]);
 
   useEffect(() => {
@@ -107,16 +115,22 @@ const TaskItem: FC<TaskItemProps> = ({
 
   const handleDateChange = async (date: Date) => {
     if (task.id) {
-      const formattedDate = format(date, "yyyy-MM-dd'T'HH:mm:ss.SSSxxx");
-      await updateTaskDueDate(task.id, formattedDate);
+      await updateTaskDueDate(task.id, date.toISOString());
       setIsDatePickerOpen(false);
     }
   };
 
-  const handleTagToggle = async (tagTitle: string) => {
-    const updatedTags = tags.includes(tagTitle)
-      ? tags.filter((t) => t !== tagTitle)
-      : [...tags, tagTitle];
+  const handleTagToggle = async (tagId: string) => {
+    if (tagId === "clear") {
+      setTags([]);
+      if (task.id) {
+        await updateTaskTags(task.id, []);
+      }
+      return;
+    }
+    const updatedTags = tags.includes(tagId)
+      ? tags.filter((t) => t !== tagId)
+      : [...tags, tagId];
     setTags(updatedTags);
     if (task.id) {
       await updateTaskTags(task.id, updatedTags);
@@ -124,52 +138,50 @@ const TaskItem: FC<TaskItemProps> = ({
   };
 
   const handleCreateTag = async () => {
-    if (newTag && !tags.includes(newTag)) {
-      if (!availableTags.includes(newTag)) {
-        const created = await createTag(newTag);
-        setAvailableTags([...availableTags, created.title]);
+    const trimmed = newTag.trim();
+    if (trimmed) {
+      const existing = availableTags.find(
+        (tag) => tag.title.toLowerCase() === trimmed.toLowerCase(),
+      );
+      let tagId = existing?.id;
+      if (!tagId) {
+        const created = await createTag(trimmed);
+        tagId = created.id;
+        setAvailableTags([...availableTags, created]);
       }
-      const updatedTags = [...tags, newTag];
+      const updatedTags = tagId && !tags.includes(tagId) ? [...tags, tagId] : tags;
       setTags(updatedTags);
       if (task.id) {
         await updateTaskTags(task.id, updatedTags);
       }
-      setNewTag("");
     }
+    setNewTag("");
   };
 
-  const getDueDateInfo = (dueDate: Date | null | undefined) => {
-    if (!dueDate || isNaN(dueDate.getTime())) return null;
-
-    if (isToday(dueDate)) {
-      return { text: "Today", className: "text-orange-600 dark:text-orange-400" };
-    }
-    if (isTomorrow(dueDate)) {
-      return { text: "Tomorrow", className: "text-yellow-600 dark:text-yellow-400" };
-    }
-    if (isPast(dueDate)) {
-      const days = Math.abs(differenceInDays(dueDate, new Date()));
-      return { text: `${days}d overdue`, className: "text-red-600 dark:text-red-400" };
-    }
-    const days = differenceInDays(dueDate, new Date());
-    if (days <= 7) {
-      return { text: `${days}d`, className: "text-muted-foreground" };
-    }
-    return { text: format(dueDate, "MMM d"), className: "text-muted-foreground" };
-  };
-
-  const dueDateInfo = getDueDateInfo(task.dueAt);
+  const dueDateInfo = getTaskDueLabel(task);
+  const currentTags = tags
+    .map((id) => availableTags.find((tag) => tag.id === id))
+    .filter((tag): tag is { id: string; title: string } => Boolean(tag));
+  const primaryTag = currentTags[0];
+  const primaryColor = primaryTag ? projectColors[primaryTag.id] : undefined;
 
   return (
-    <div
+    <>
+      <div
       className={cn(
         "group flex items-center gap-3 px-3 py-2.5 rounded-lg border bg-card transition-all",
         "hover:shadow-sm hover:border-border/80",
         isSelected && "ring-2 ring-primary bg-primary/5",
         isCompleted && "opacity-60",
       )}
-      onClick={() => isSelectMode && onToggleSelect()}
-    >
+      onClick={() => {
+        if (isSelectMode) {
+          onToggleSelect();
+        } else if (!isEditing && !isQuickEditing) {
+          onOpenDetail?.(task);
+        }
+      }}
+      >
       {/* Checkbox */}
       <Checkbox
         checked={isSelectMode ? isSelected : isCompleted}
@@ -221,29 +233,50 @@ const TaskItem: FC<TaskItemProps> = ({
             {task.title}
           </button>
         )}
+
+        {!isQuickEditing && (primaryTag || dueDateInfo || task.body) && (
+          <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+            {primaryTag && (
+              <span className="inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5">
+                <span
+                  className="h-2 w-2 rounded-full"
+                  style={primaryColor ? { background: primaryColor } : undefined}
+                />
+                <span>{primaryTag.title}</span>
+              </span>
+            )}
+            {dueDateInfo && (
+              <span
+                className={cn(
+                  "font-medium",
+                  dueDateInfo.tone === "overdue" && "text-red-500",
+                  dueDateInfo.tone === "today" && "text-orange-500",
+                  dueDateInfo.tone === "soon" && "text-blue-500",
+                  dueDateInfo.tone === "muted" && "text-muted-foreground",
+                )}
+              >
+                {dueDateInfo.text}
+              </span>
+            )}
+            {task.body && <span className="truncate">{task.body}</span>}
+          </div>
+        )}
       </div>
 
       {/* Tags */}
-      {task.tags && task.tags.length > 0 && (
+      {currentTags.length > 1 && (
         <div className="hidden sm:flex gap-1">
-          {task.tags.slice(0, 2).map((tag) => (
+          {currentTags.slice(0, 2).map((tag) => (
             <Badge key={tag.id} variant="outline" className="text-xs px-1.5 py-0">
               {tag.title}
             </Badge>
           ))}
-          {task.tags.length > 2 && (
+          {currentTags.length > 2 && (
             <Badge variant="outline" className="text-xs px-1.5 py-0">
-              +{task.tags.length - 2}
+              +{currentTags.length - 2}
             </Badge>
           )}
         </div>
-      )}
-
-      {/* Due date */}
-      {dueDateInfo && (
-        <span className={cn("text-xs font-medium whitespace-nowrap", dueDateInfo.className)}>
-          {dueDateInfo.text}
-        </span>
       )}
 
       {/* Actions - visible on hover */}
@@ -283,13 +316,20 @@ const TaskItem: FC<TaskItemProps> = ({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48">
+              <DropdownMenuCheckboxItem
+                checked={tags.length === 0}
+                onCheckedChange={() => handleTagToggle("clear")}
+                className="text-muted-foreground"
+              >
+                No project
+              </DropdownMenuCheckboxItem>
               {availableTags.map((tag) => (
                 <DropdownMenuCheckboxItem
-                  key={tag}
-                  checked={tags.includes(tag)}
-                  onCheckedChange={() => handleTagToggle(tag)}
+                  key={tag.id}
+                  checked={tags.includes(tag.id)}
+                  onCheckedChange={() => handleTagToggle(tag.id)}
                 >
-                  {tag}
+                  {tag.title}
                 </DropdownMenuCheckboxItem>
               ))}
               {availableTags.length > 0 && <DropdownMenuSeparator />}
@@ -323,8 +363,12 @@ const TaskItem: FC<TaskItemProps> = ({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => onOpenDetail?.(task)}>Open details</DropdownMenuItem>
               <DropdownMenuItem onClick={() => toggleTaskCompletion(task)}>
                 {isCompleted ? "Mark incomplete" : "Mark complete"}
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setIsQuickEditing(true)}>
+                Quick edit
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem
@@ -338,7 +382,49 @@ const TaskItem: FC<TaskItemProps> = ({
           </DropdownMenu>
         </div>
       )}
-    </div>
+      </div>
+      {isQuickEditing && (
+        <div className="mt-2 rounded-lg border bg-muted/40 p-3">
+          <div className="space-y-2">
+            <Input
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="Task title"
+            />
+            <Textarea
+              value={body}
+              onChange={(e) => setBody(e.target.value)}
+              placeholder="Notes"
+              rows={3}
+            />
+          </div>
+          <div className="mt-3 flex justify-end gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                setIsQuickEditing(false);
+                setTitle(task.title);
+                setBody(task.body ?? "");
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              size="sm"
+              onClick={async () => {
+                if (task.id) {
+                  await updateTask(task.id, { title: title.trim(), body: body.trim() });
+                }
+                setIsQuickEditing(false);
+              }}
+            >
+              Save
+            </Button>
+          </div>
+        </div>
+      )}
+    </>
   );
 };
 

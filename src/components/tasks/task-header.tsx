@@ -1,45 +1,73 @@
 "use client";
 
-import { Filter, Loader2, Search, X } from "lucide-react";
+import { Crosshair, Loader2, Plus, Search } from "lucide-react";
 import type { FC } from "react";
-import { Badge } from "@/components/ui/badge";
+import { cn } from "@/components/ui/cn";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
-import type { Tag as TagType } from "@/types";
 
 interface TaskListHeaderProps {
+  viewMode: "tasks" | "projects";
+  setViewMode: (mode: "tasks" | "projects") => void;
   searchQuery: string;
   setSearchQuery: (query: string) => void;
   isSearching?: boolean;
-  tags: TagType[];
-  selectedTags: string[];
-  handleTagSelect: (tag: string) => void;
-  onClearTagFilters?: () => void;
+  focusMode: boolean;
+  onToggleFocus: () => void;
+  onCreateProject: () => void;
 }
 
 const TaskListHeader: FC<TaskListHeaderProps> = ({
+  viewMode,
+  setViewMode,
   searchQuery,
   setSearchQuery,
   isSearching = false,
-  tags,
-  selectedTags,
-  handleTagSelect,
-  onClearTagFilters,
+  focusMode,
+  onToggleFocus,
+  onCreateProject,
 }) => {
   return (
     <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="flex flex-col gap-4 py-4 px-4 md:px-6">
-        <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-semibold tracking-tight">Tasks</h1>
+        <div className="flex flex-wrap items-center gap-3 justify-between">
+          <div className="flex items-center gap-3">
+            <h1 className="text-2xl font-semibold tracking-tight">Tasks</h1>
+            <div className="inline-flex items-center rounded-full border bg-muted/40 p-1 text-sm">
+              {(["tasks", "projects"] as const).map((mode) => (
+                <button
+                  key={mode}
+                  type="button"
+                  className={cn(
+                    "px-3 py-1 rounded-full transition-colors",
+                    viewMode === mode
+                      ? "bg-background shadow text-foreground"
+                      : "text-muted-foreground hover:text-foreground",
+                  )}
+                  onClick={() => setViewMode(mode)}
+                >
+                  {mode === "tasks" ? "Tasks" : "Projects"}
+                </button>
+              ))}
+            </div>
+          </div>
           <div className="flex items-center gap-2">
-            {/* Search */}
+            {viewMode === "tasks" && (
+              <Button
+                variant={focusMode ? "secondary" : "ghost"}
+                size="icon"
+                onClick={onToggleFocus}
+                title="Focus mode"
+              >
+                <Crosshair className="h-4 w-4" />
+              </Button>
+            )}
+            {viewMode === "projects" && (
+              <Button variant="outline" size="sm" onClick={onCreateProject}>
+                <Plus className="h-4 w-4 mr-2" />
+                New project
+              </Button>
+            )}
             <div className="relative">
               {isSearching ? (
                 <Loader2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground animate-spin" />
@@ -48,80 +76,14 @@ const TaskListHeader: FC<TaskListHeaderProps> = ({
               )}
               <Input
                 className="w-[200px] md:w-[280px] pl-9 h-9"
-                placeholder="Search tasks..."
+                placeholder={viewMode === "projects" ? "Search projects..." : "Search tasks..."}
                 type="search"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
-
-            {/* Tag Filter */}
-            {tags.length > 0 && (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant={selectedTags.length > 0 ? "secondary" : "outline"}
-                    size="sm"
-                    className="h-9"
-                  >
-                    <Filter className="w-4 h-4 mr-2" />
-                    Filter
-                    {selectedTags.length > 0 && (
-                      <Badge variant="default" className="ml-2 h-5 px-1.5 text-xs">
-                        {selectedTags.length}
-                      </Badge>
-                    )}
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-48">
-                  {selectedTags.length > 0 && (
-                    <>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="w-full justify-start h-8 px-2 text-xs font-normal"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          onClearTagFilters?.();
-                        }}
-                      >
-                        <X className="w-3 h-3 mr-2" />
-                        Clear filters
-                      </Button>
-                      <DropdownMenuSeparator />
-                    </>
-                  )}
-                  {tags.map((tag) => (
-                    <DropdownMenuCheckboxItem
-                      key={tag.id}
-                      checked={selectedTags.includes(tag.title)}
-                      onCheckedChange={() => handleTagSelect(tag.title)}
-                    >
-                      {tag.title}
-                    </DropdownMenuCheckboxItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            )}
           </div>
         </div>
-
-        {/* Selected tag chips */}
-        {selectedTags.length > 0 && (
-          <div className="flex flex-wrap gap-1.5">
-            {selectedTags.map((tag) => (
-              <Badge
-                key={tag}
-                variant="secondary"
-                className="flex items-center gap-1 pl-2 pr-1 cursor-pointer hover:bg-secondary/80"
-                onClick={() => handleTagSelect(tag)}
-              >
-                {tag}
-                <X className="h-3 w-3" />
-              </Badge>
-            ))}
-          </div>
-        )}
       </div>
     </header>
   );
