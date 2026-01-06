@@ -89,15 +89,32 @@ export default function FolderSidebar({
   };
 
   return (
-    <div className="hidden md:flex flex-col w-60 border-r bg-background/70 backdrop-blur">
+    <div className="hidden md:flex flex-col w-64 border-r border-black/10 bg-[#f2f2f7] dark:border-white/10 dark:bg-[#1c1c1e]">
+      <div className="px-4 pt-5 pb-3 flex items-start justify-between">
+        <div>
+          <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+            Folders
+          </p>
+          <h2 className="text-lg font-semibold text-foreground">Folders</h2>
+        </div>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-8 w-8"
+          onClick={() => setIsCreating(true)}
+          disabled={isCreating}
+        >
+          <Plus className="h-4 w-4" />
+        </Button>
+      </div>
       <ScrollArea className="flex-1">
-        <div className="p-3 space-y-2">
+        <div className="px-3 pb-4 space-y-2">
           <div
             className={cn(
-              "group flex items-center gap-2 px-3 py-2 rounded-md cursor-pointer transition-colors",
+              "group flex items-center gap-2 px-3 py-2 rounded-lg cursor-pointer transition-colors",
               selectedFolderId === null
-                ? "bg-yellow-100 text-yellow-900 dark:bg-yellow-900/40 dark:text-yellow-100"
-                : "hover:bg-muted/60 dark:hover:bg-muted/80",
+                ? "bg-white text-foreground shadow-sm dark:bg-[#2c2c2e] dark:text-[#f2f2f7]"
+                : "hover:bg-white/70 dark:hover:bg-[#2a2a2c]",
             )}
             onClick={() => setSelectedFolderId(null)}
             onKeyDown={(e) => {
@@ -114,7 +131,7 @@ export default function FolderSidebar({
             <span className="text-xs text-muted-foreground tabular-nums">{allNotesCount}</span>
           </div>
 
-          <Separator className="my-2" />
+          <Separator className="my-2 bg-black/10 dark:bg-white/10" />
 
           <AnimatePresence initial={false}>
             {folders.map((folder) => (
@@ -127,10 +144,10 @@ export default function FolderSidebar({
               >
                 <div
                   className={cn(
-                    "group flex items-center gap-2 px-3 py-2 rounded-md cursor-pointer transition-colors",
+                    "group flex items-center gap-2 px-3 py-2 rounded-lg cursor-pointer transition-colors",
                     selectedFolderId === folder.id
-                      ? "bg-yellow-100 text-yellow-900 dark:bg-yellow-900/40 dark:text-yellow-100"
-                      : "hover:bg-muted/60 dark:hover:bg-muted/80",
+                      ? "bg-white shadow-sm dark:bg-[#2c2c2e]"
+                      : "hover:bg-white/70 dark:hover:bg-[#2a2a2c]",
                   )}
                   onClick={() => setSelectedFolderId(folder.id)}
                   onKeyDown={(e) => {
@@ -228,20 +245,6 @@ export default function FolderSidebar({
           )}
         </div>
       </ScrollArea>
-
-      <Separator />
-      <div className="p-3">
-        <Button
-          variant="ghost"
-          size="sm"
-          className="w-full justify-start"
-          onClick={() => setIsCreating(true)}
-          disabled={isCreating}
-        >
-          <Plus className="h-4 w-4 mr-2" />
-          New Folder
-        </Button>
-      </div>
     </div>
   );
 }

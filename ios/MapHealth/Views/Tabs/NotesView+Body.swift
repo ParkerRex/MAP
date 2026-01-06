@@ -11,7 +11,7 @@ extension NotesView {
             .listSectionSpacing(12)
             .scrollContentBackground(.hidden)
             .scrollDismissesKeyboard(.interactively)
-            .searchable(text: $searchText, prompt: "Search notes")
+            .searchable(text: $searchText, prompt: "Search")
             .searchScopes($searchScope) {
                 ForEach(SearchScope.allCases, id: \.self) { scope in
                     Text(scope.title).tag(scope)

@@ -3,30 +3,16 @@ import SwiftUI
 
 extension NotesView {
     var filterBar: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 8) {
+        HStack {
+            Picker("Filter", selection: $noteFilter) {
                 ForEach(NoteFilter.allCases, id: \.self) { filter in
-                    Button {
-                        noteFilter = filter
-                    } label: {
-                        Text(filter.title)
-                            .font(.subheadline.weight(.semibold))
-                            .padding(.horizontal, 12)
-                            .padding(.vertical, 6)
-                            .background(
-                                noteFilter == filter
-                                ? Color.yellow.opacity(0.25)
-                                : Color(.secondarySystemGroupedBackground)
-                            )
-                            .foregroundStyle(noteFilter == filter ? .primary : .secondary)
-                            .clipShape(Capsule())
-                    }
-                    .buttonStyle(.plain)
+                    Text(filter.title).tag(filter)
                 }
             }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 8)
+            .pickerStyle(.segmented)
         }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 8)
         .background(Color(.systemGroupedBackground))
     }
 

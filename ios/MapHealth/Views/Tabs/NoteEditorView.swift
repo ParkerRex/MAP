@@ -2,7 +2,6 @@ import MapHealthCore
 import SwiftUI
 
 struct NoteEditorView: View {
-    let note: MapNote?
     @ObservedObject var notesService: NotesService
 
     @Environment(\.dismiss) private var dismiss
@@ -12,10 +11,10 @@ struct NoteEditorView: View {
     @State private var content: String
     @State private var selectedFolderId: String
     @State private var isSaving = false
+    @State private var currentNote: MapNote?
+    @State private var saveTask: Task<Void, Never>?
     @State private var showingDeleteConfirmation = false
     @State private var editorMode: EditorMode = .edit
-
-    private let originalFolderId: String
 
     enum Field {
         case title
@@ -23,46 +22,34 @@ struct NoteEditorView: View {
     }
 
     init(note: MapNote?, notesService: NotesService, initialFolderId: String) {
-        self.note = note
         self.notesService = notesService
         _title = State(initialValue: note?.title ?? "")
         _content = State(initialValue: note?.content ?? "")
         _selectedFolderId = State(initialValue: note?.folderId ?? initialFolderId)
-        self.originalFolderId = note?.folderId ?? initialFolderId
-    }
-
-    private var hasChanges: Bool {
-        let originalTitle = note?.title ?? ""
-        let originalContent = note?.content ?? ""
-        return title.trimmed != originalTitle.trimmed ||
-            content.trimmed != originalContent.trimmed ||
-            selectedFolderId != originalFolderId
+        _currentNote = State(initialValue: note)
     }
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
                 folderPicker
-
-                Picker("Mode", selection: $editorMode) {
-                    Text("Edit").tag(EditorMode.edit)
-                    Text("Preview").tag(EditorMode.preview)
-                }
-                .pickerStyle(.segmented)
-
-                if note != nil {
+                if isSaving {
+                    Text("Saving...")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                } else if currentNote != nil {
                     Text(lastEditedLabel)
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
 
-                TextField("Title", text: $title, axis: .vertical)
-                    .font(.title3.weight(.semibold))
-                    .focused($focusedField, equals: .title)
-                    .lineLimit(1...3)
+        TextField("Title", text: $title, axis: .vertical)
+            .font(.title2.weight(.semibold))
+            .focused($focusedField, equals: .title)
+            .lineLimit(1...3)
+            .disabled(editorMode == .preview)
 
                 if editorMode == .edit {
-                    editorToolbar
                     ZStack(alignment: .topLeading) {
                         if content.trimmed.isEmpty {
                             Text("Note")
@@ -83,32 +70,30 @@ struct NoteEditorView: View {
             .padding(20)
         }
         .background(Color(.systemGroupedBackground))
-        .navigationTitle(note == nil ? "New Note" : "Note")
+        .navigationTitle(currentNote == nil ? "New Note" : "Note")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
-            ToolbarItem(placement: .cancellationAction) {
-                Button("Cancel") { dismiss() }
+            ToolbarItem(placement: .keyboard) {
+                HStack {
+                    if editorMode == .edit {
+                        editorToolbar
+                    }
+                    Spacer()
+                    Button("Done") { focusedField = nil }
+                }
             }
-            ToolbarItem(placement: .confirmationAction) {
-                Button("Save") { saveNote() }
-                    .fontWeight(.semibold)
-                    .disabled(isSaving || !hasChanges || (title.trimmed.isEmpty && content.trimmed.isEmpty))
+            ToolbarItem(placement: .topBarTrailing) {
+                Button(editorMode == .preview ? "Edit" : "Preview") {
+                    editorMode = editorMode == .preview ? .edit : .preview
+                }
             }
-
-            if note != nil {
+            if currentNote != nil {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button(role: .destructive) {
                         showingDeleteConfirmation = true
                     } label: {
                         Image(systemName: "trash")
                     }
-                }
-            }
-
-            ToolbarItem(placement: .keyboard) {
-                HStack {
-                    Spacer()
-                    Button("Done") { focusedField = nil }
                 }
             }
         }
@@ -125,9 +110,22 @@ struct NoteEditorView: View {
             Text("This action cannot be undone.")
         }
         .onAppear {
-            if note == nil {
+            if currentNote == nil {
                 focusedField = .title
+                createDraftNoteIfNeeded()
             }
+        }
+        .onChange(of: title) { _ in
+            scheduleAutoSave()
+        }
+        .onChange(of: content) { _ in
+            scheduleAutoSave()
+        }
+        .onChange(of: selectedFolderId) { _ in
+            scheduleAutoSave()
+        }
+        .onDisappear {
+            saveTask?.cancel()
         }
     }
 
@@ -152,40 +150,73 @@ struct NoteEditorView: View {
         return "Folder"
     }
 
-    private func saveNote() {
-        let trimmedTitle = title.trimmed
-        let trimmedContent = content.trimmed
-        guard !(trimmedTitle.isEmpty && trimmedContent.isEmpty) else { return }
-
+    private func createDraftNoteIfNeeded() {
+        guard currentNote == nil, !isSaving else { return }
         isSaving = true
-        let resolvedTitle = trimmedTitle.isEmpty ? (firstContentLine(from: trimmedContent) ?? "Untitled") : trimmedTitle
-        let contentValue = trimmedContent.isEmpty ? nil : trimmedContent
-
         Task {
             do {
-                if let note {
-                    _ = try await notesService.updateNote(
-                        note,
-                        title: resolvedTitle,
-                        content: contentValue,
-                        folderId: selectedFolderId == originalFolderId ? nil : selectedFolderId
-                    )
-                } else {
-                    _ = try await notesService.createNote(
-                        title: resolvedTitle,
-                        content: contentValue,
-                        folderId: selectedFolderId
-                    )
+                let draft = try await notesService.createNote(
+                    title: "Untitled Note",
+                    content: nil,
+                    folderId: selectedFolderId
+                )
+                await MainActor.run {
+                    currentNote = draft
+                    isSaving = false
+                    if !title.trimmed.isEmpty || !content.trimmed.isEmpty {
+                        scheduleAutoSave()
+                    }
                 }
-                await MainActor.run { dismiss() }
             } catch {
                 await MainActor.run { isSaving = false }
             }
         }
     }
 
+    private func scheduleAutoSave() {
+        guard currentNote != nil else { return }
+        saveTask?.cancel()
+        saveTask = Task { @MainActor in
+            try? await Task.sleep(nanoseconds: 500_000_000)
+            await saveChangesIfNeeded()
+        }
+    }
+
+    private func saveChangesIfNeeded() async {
+        guard let note = currentNote else { return }
+        let trimmedTitle = title.trimmed
+        let trimmedContent = content.trimmed
+        let resolvedTitle = trimmedTitle.isEmpty ? (firstContentLine(from: trimmedContent) ?? "Untitled") : trimmedTitle
+        let contentValue = trimmedContent.isEmpty ? nil : trimmedContent
+
+        if resolvedTitle == (note.title ?? "") &&
+            contentValue == note.content &&
+            selectedFolderId == note.folderId {
+            return
+        }
+
+        isSaving = true
+        do {
+            let updated = try await notesService.updateNote(
+                note,
+                title: resolvedTitle,
+                content: contentValue,
+                folderId: selectedFolderId == note.folderId ? nil : selectedFolderId
+            )
+            await MainActor.run {
+                currentNote = updated
+                if title.trimmed.isEmpty {
+                    title = resolvedTitle
+                }
+                isSaving = false
+            }
+        } catch {
+            await MainActor.run { isSaving = false }
+        }
+    }
+
     private func deleteNote() {
-        guard let note else { return }
+        guard let note = currentNote else { return }
         Task {
             _ = try? await notesService.deleteNote(note)
             await MainActor.run { dismiss() }
@@ -217,7 +248,7 @@ struct NoteEditorView: View {
     }
 
     private var lastEditedLabel: String {
-        guard let note else { return "" }
+        guard let note = currentNote else { return "" }
         let date = note.updatedAt ?? note.createdAt
         let formatter = DateFormatter()
         formatter.dateStyle = .medium

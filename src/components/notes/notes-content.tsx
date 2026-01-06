@@ -2,13 +2,11 @@
 
 import { useDeferredValue, useEffect, useMemo, useState } from "react";
 import { subDays } from "date-fns";
-import { Pencil } from "lucide-react";
 import { useCreateNote, useFolders, useNotes } from "@/hooks/use-notes";
 import type { Note } from "@/types/notes";
 import FolderSidebar from "./folder-sidebar";
 import NoteDisplay from "./note-display";
 import NoteList from "./note-list";
-import NotesHeader from "./notes-header";
 
 export type SortOrder = "lastEdited" | "dateCreated";
 export type NoteFilter = "all" | "pinned" | "recent";
@@ -24,7 +22,6 @@ export function NotesContent() {
   const folders = foldersData?.folders ?? [];
 
   const [selectedFolderId, setSelectedFolderId] = useState<string | null>(null);
-  const [hasAutoSelectedFolder, setHasAutoSelectedFolder] = useState(false);
   const [selectedNote, setSelectedNote] = useState<Note | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const deferredSearchQuery = useDeferredValue(searchQuery);
@@ -76,17 +73,6 @@ export function NotesContent() {
       },
     );
   };
-
-  // Auto-select first folder if none selected
-  useEffect(() => {
-    if (!hasAutoSelectedFolder && !selectedFolderId && folders.length > 0) {
-      setSelectedFolderId(folders[0].id);
-      setHasAutoSelectedFolder(true);
-    }
-    if (selectedFolderId) {
-      setHasAutoSelectedFolder(true);
-    }
-  }, [hasAutoSelectedFolder, selectedFolderId, folders]);
 
   const sortedNotes = useMemo(() => {
     const sorted = [...notes];
@@ -169,62 +155,38 @@ export function NotesContent() {
   };
 
   return (
-    <div className="flex flex-col h-full bg-muted/30">
-      <NotesHeader
+    <div className="flex h-full min-h-0 flex-col lg:flex-row bg-gradient-to-b from-[#f8f8fb] via-[#f4f4f7] to-[#efeff3] text-foreground dark:from-[#1f1f22] dark:via-[#1c1c1e] dark:to-[#1b1b1d]">
+      <FolderSidebar
+        folders={folders}
+        selectedFolderId={selectedFolderId}
+        setSelectedFolderId={setSelectedFolderId}
+        allNotesCount={notes.length}
+      />
+      <NoteList
+        pinnedNotes={pinnedNotes}
+        unpinnedNotes={unpinnedNotes}
+        selectedNote={selectedNote}
+        setSelectedNote={setSelectedNote}
+        folders={folders}
+        selectedFolderId={selectedFolderId}
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
         isSearching={isSearching}
-        selectedFolder={selectedFolder ?? null}
-        setSelectedFolderId={setSelectedFolderId}
-        folders={folders}
         sortOrder={sortOrder}
         setSortOrder={setSortOrder}
         noteFilter={noteFilter}
         setNoteFilter={setNoteFilter}
         searchScope={searchScope}
         setSearchScope={setSearchScope}
+        noteCountLabel={noteCountLabel}
+        listHeaderTitle={listHeaderTitle}
+        pinnedIdSet={pinnedIdSet}
+        onTogglePin={togglePin}
+        onCreateNote={handleCreateNote}
+        hasFolders={folders.length > 0}
+        isCreatingNote={createNote.isPending}
       />
-      <div className="flex flex-1 overflow-hidden flex-col lg:flex-row">
-        <FolderSidebar
-          folders={folders}
-          selectedFolderId={selectedFolderId}
-          setSelectedFolderId={setSelectedFolderId}
-          allNotesCount={notes.length}
-        />
-        <NoteList
-          pinnedNotes={pinnedNotes}
-          unpinnedNotes={unpinnedNotes}
-          selectedNote={selectedNote}
-          setSelectedNote={setSelectedNote}
-          folders={folders}
-          selectedFolderId={selectedFolderId}
-          searchQuery={deferredSearchQuery}
-          noteFilter={noteFilter}
-          noteCountLabel={noteCountLabel}
-          listHeaderTitle={listHeaderTitle}
-          pinnedIdSet={pinnedIdSet}
-          onTogglePin={togglePin}
-          hasFolders={folders.length > 0}
-        />
-        <NoteDisplay
-          note={selectedNote}
-          folders={folders}
-        />
-      </div>
-      <div className="shrink-0 border-t bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="flex items-center justify-between px-4 md:px-6 py-3">
-          <span className="text-xs text-muted-foreground">{noteCountLabel}</span>
-          <button
-            type="button"
-            className="inline-flex items-center gap-2 rounded-full bg-yellow-100 px-3 py-2 text-xs font-semibold text-yellow-900 shadow-sm transition hover:bg-yellow-200 disabled:opacity-60 dark:bg-yellow-900/40 dark:text-yellow-100 dark:hover:bg-yellow-900/60"
-            onClick={handleCreateNote}
-            disabled={!resolvedFolderId || createNote.isPending}
-          >
-            <Pencil className="h-4 w-4" />
-            <span className="hidden sm:inline">New Note</span>
-          </button>
-        </div>
-      </div>
+      <NoteDisplay note={selectedNote} folders={folders} />
     </div>
   );
 }

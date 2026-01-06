@@ -116,7 +116,7 @@ export default function NoteDisplay({ note, folders }: NoteDisplayProps) {
 
   if (!note) {
     return (
-      <div className="flex-1 flex flex-col items-center justify-center text-muted-foreground bg-background/60">
+      <div className="flex-1 flex flex-col items-center justify-center text-muted-foreground bg-white dark:bg-[#1c1c1e]">
         <Folder className="h-12 w-12 mb-4 opacity-30" />
         <p className="text-lg font-medium">No note selected</p>
         <p className="text-sm mt-1">Select a note to view its content</p>
@@ -128,19 +128,19 @@ export default function NoteDisplay({ note, folders }: NoteDisplayProps) {
     folders.find((folder) => folder.id === activeFolderId)?.name ?? "Folder";
 
   return (
-    <div className="flex-1 flex flex-col min-w-0 min-h-0 bg-background/60">
-      <div className="shrink-0 border-b bg-background/80 backdrop-blur p-4 md:p-6">
+    <div className="flex-1 flex flex-col min-w-0 min-h-0 bg-white dark:bg-[#1c1c1e]">
+      <div className="shrink-0 border-b border-black/10 bg-white/90 backdrop-blur p-4 md:p-6 dark:border-white/10 dark:bg-[#1c1c1e]/90">
         <div className="flex items-start justify-between gap-4">
           <div className="flex-1 min-w-0 space-y-2">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
-                  variant="secondary"
+                  variant="ghost"
                   size="sm"
-                  className="rounded-full"
+                  className="rounded-full border border-black/10 bg-white/80 px-3 dark:border-white/10 dark:bg-[#2c2c2e]"
                   disabled={folders.length === 0}
                 >
-                  <Folder className="h-4 w-4 mr-2" />
+                  <Folder className="h-4 w-4 mr-2 text-muted-foreground" />
                   {activeFolderName}
                 </Button>
               </DropdownMenuTrigger>
@@ -157,7 +157,7 @@ export default function NoteDisplay({ note, folders }: NoteDisplayProps) {
             </DropdownMenu>
             <Input
               ref={titleInputRef}
-              className="text-2xl font-semibold border-none shadow-none p-0 h-auto focus-visible:ring-0 bg-transparent"
+              className="text-3xl font-semibold border-none shadow-none p-0 h-auto focus-visible:ring-0 bg-transparent"
               placeholder="Title"
               value={title}
               onChange={handleTitleChange}
@@ -177,33 +177,36 @@ export default function NoteDisplay({ note, folders }: NoteDisplayProps) {
                 {saveStatus === "saving" ? "Saving..." : "Saved"}
               </span>
             )}
+            <div className="flex items-center rounded-full border border-black/10 bg-white p-0.5 dark:border-white/10 dark:bg-[#2c2c2e]">
+              <button
+                type="button"
+                onClick={() => setIsPreview(false)}
+                className={cn(
+                  "inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold transition",
+                  !isPreview ? "bg-[#fff2bf] text-[#6b4c00]" : "text-muted-foreground",
+                )}
+              >
+                <Pencil className="h-3 w-3" />
+                Edit
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsPreview(true)}
+                className={cn(
+                  "inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold transition",
+                  isPreview ? "bg-[#fff2bf] text-[#6b4c00]" : "text-muted-foreground",
+                )}
+              >
+                <Eye className="h-3 w-3" />
+                Preview
+              </button>
+            </div>
           </div>
         </div>
       </div>
 
-      <div className="shrink-0 border-b px-4 md:px-6 py-2 flex items-center gap-2 bg-muted/30">
-        <Button
-          variant={isPreview ? "ghost" : "secondary"}
-          size="sm"
-          onClick={() => setIsPreview(false)}
-          className="h-7 text-xs"
-        >
-          <Pencil className="h-3 w-3 mr-1.5" />
-          Edit
-        </Button>
-        <Button
-          variant={isPreview ? "secondary" : "ghost"}
-          size="sm"
-          onClick={() => setIsPreview(true)}
-          className="h-7 text-xs"
-        >
-          <Eye className="h-3 w-3 mr-1.5" />
-          Preview
-        </Button>
-      </div>
-
       {!isPreview && (
-        <div className="shrink-0 border-b px-4 md:px-6 py-2 bg-background/70">
+        <div className="shrink-0 border-b border-black/10 px-4 md:px-6 py-2 bg-[#f7f7f9] dark:border-white/10 dark:bg-[#2c2c2e]">
           <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide">
             <MarkdownChip title="H1" onClick={() => insertSnippet("# ")} />
             <MarkdownChip title="H2" onClick={() => insertSnippet("## ")} />
@@ -222,7 +225,7 @@ export default function NoteDisplay({ note, folders }: NoteDisplayProps) {
         {isPreview ? (
           <ScrollArea className="h-full">
             <div className="p-4 md:p-6">
-              <article className="prose prose-sm dark:prose-invert max-w-none prose-headings:font-semibold prose-p:leading-relaxed prose-pre:bg-muted prose-pre:border">
+              <article className="prose prose-sm max-w-none prose-headings:font-semibold prose-p:leading-relaxed prose-pre:bg-[#f2f2f7] prose-pre:border dark:prose-invert dark:prose-pre:bg-[#2c2c2e] dark:prose-pre:border-white/10">
                 <Markdown>{content || "*Start writing to see a preview...*"}</Markdown>
               </article>
             </div>
@@ -231,7 +234,7 @@ export default function NoteDisplay({ note, folders }: NoteDisplayProps) {
           <div className="h-full p-4 md:p-6">
             <Textarea
               ref={contentAreaRef}
-              className="w-full h-full resize-none border-none shadow-none focus-visible:ring-0 bg-transparent p-0 text-sm leading-relaxed"
+              className="w-full h-full resize-none border-none shadow-none focus-visible:ring-0 bg-transparent p-0 text-[15px] leading-relaxed"
               placeholder="Start typing your note... (Markdown supported)"
               value={content}
               onChange={handleContentChange}
@@ -248,7 +251,7 @@ function MarkdownChip({ title, onClick }: { title: string; onClick: () => void }
     <button
       type="button"
       onClick={onClick}
-      className="whitespace-nowrap rounded-full bg-muted px-3 py-1 text-xs font-semibold text-muted-foreground transition hover:bg-muted/80"
+      className="whitespace-nowrap rounded-full border border-black/10 bg-white px-3 py-1 text-xs font-semibold text-muted-foreground transition hover:bg-white/90 dark:border-white/10 dark:bg-[#2c2c2e] dark:text-[#b0b0b8]"
     >
       {title}
     </button>

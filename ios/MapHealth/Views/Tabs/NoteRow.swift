@@ -9,7 +9,7 @@ struct NoteRow: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
-            HStack(spacing: 6) {
+            HStack(alignment: .firstTextBaseline, spacing: 6) {
                 Text(noteTitle)
                     .font(.headline)
                     .foregroundStyle(.primary)
@@ -22,30 +22,24 @@ struct NoteRow: View {
                 }
 
                 Spacer(minLength: 0)
-            }
 
-            if !previewText.isEmpty {
-                HStack(alignment: .firstTextBaseline, spacing: 6) {
-                    Text(noteDate)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-
-                    if let previewAttributed {
-                        Text(previewAttributed)
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
-                            .lineLimit(1)
-                    } else {
-                        Text(previewText)
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
-                            .lineLimit(1)
-                    }
-                }
-            } else {
                 Text(noteDate)
                     .font(.caption)
                     .foregroundStyle(.secondary)
+            }
+
+            if !previewText.isEmpty {
+                if let previewAttributed {
+                    Text(previewAttributed)
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                } else {
+                    Text(previewText)
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                }
             }
 
             if showFolder, let folderName, !folderName.isEmpty {
