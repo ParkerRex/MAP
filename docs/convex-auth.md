@@ -15,6 +15,8 @@ This project uses the Convex Better Auth component with Google-only OAuth at lau
 - `BETTER_AUTH_SECRET`
 - `GOOGLE_CLIENT_ID`
 - `GOOGLE_CLIENT_SECRET`
+- `VITE_CONVEX_URL` (web app; Convex deployment URL)
+- `VITE_CONVEX_SITE_URL` (web app; Convex site URL, ends in `.convex.site`)
 
 OAuth redirect URI to configure in Google Cloud:
 

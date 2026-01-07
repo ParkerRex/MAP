@@ -18,6 +18,11 @@ This repo includes the Convex schema + auth integration. You still need to creat
 - LLM keys (OpenAI/Anthropic)
 - Any additional integration API keys used by workflows
 
+## Web App Env (local/.env)
+
+- `VITE_CONVEX_URL` (Convex deployment URL, e.g. `https://<slug>.convex.cloud`)
+- `VITE_CONVEX_SITE_URL` (Convex site URL, e.g. `https://<slug>.convex.site`)
+
 ## OAuth Redirects
 
 Configure Google OAuth redirect URIs to:
