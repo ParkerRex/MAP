@@ -1,12 +1,14 @@
 import { type NextRequest, NextResponse } from "next/server";
 
-const PUBLIC_PATHS = ["/", "/login", "/signup", "/auth/error"];
+const PUBLIC_PATHS = ["/login", "/signup", "/auth/error"];
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Allow public paths
-  if (PUBLIC_PATHS.some((path) => pathname.startsWith(path))) {
+  const isPublicPath =
+    pathname === "/" || PUBLIC_PATHS.some((path) => pathname.startsWith(path));
+  if (isPublicPath) {
     return NextResponse.next();
   }
 

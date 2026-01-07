@@ -1,9 +1,9 @@
 services:
   postgres:
     image: postgres:16-alpine
-    container_name: map-postgres
+    container_name: map-db
     ports:
-      - "5434:5432"
+      - "54324:5432"
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres

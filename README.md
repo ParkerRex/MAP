@@ -48,14 +48,27 @@ bun install
 # Use the repo's Node version
 source ~/.nvm/nvm.sh && nvm use
 
-# Start all dev services (Postgres + web + Cloudflare tunnel + iOS Simulator)
+# Start dev services (Postgres + web)
 bun run dev:all
+
+# Public URL via Cloudflare Tunnel (ephemeral)
+bun run dev:all -- --tunnel try
+
+# Public URL via named tunnel (stable)
+bun run dev:all -- --tunnel named --tunnel-name map-ai
 ```
 
-Dashboard runs on http://localhost:3000 (or next available port if 3000 is taken)
+Dashboard runs on http://localhost:3000 (or pass `--port`)
 
 The `dev:all` script streams logs from each service in one terminal and shuts
-everything down (including Docker) on Ctrl+C.
+everything down on Ctrl+C.
+
+`dev:all` details:
+- Defaults to port 3000 and will exit if the port is already in use (use `--port 3001` or `PORT=3001`).
+- Waits for Postgres health checks, then starts Next.js and waits for HTTP readiness.
+- `--tunnel off|try|named` controls Cloudflare Tunnel (default `off`).
+- `--tunnel-name <name>` sets the named tunnel (default `map-ai`).
+- `NEXT_PUBLIC_APP_URL` defaults to `http://localhost:<port>` if not set.
 
 #### Public URL (Cloudflare Tunnel)
 
@@ -78,6 +91,8 @@ cloudflared tunnel run map-ai
   in Cloudflare (e.g. `https://map-ai.yourdomain.com`).
 - Restart `bun run dev` after changing `NEXT_PUBLIC_APP_URL`.
 - Update Google/WHOOP OAuth redirect URIs to match the tunnel URL.
+- For a named tunnel, ensure the tunnel exists and is configured to route to
+  `http://localhost:<port>` before running `cloudflared tunnel run <name>`.
 
 ### iOS App
 
