@@ -510,6 +510,7 @@ export default defineSchema({
     error: v.optional(v.string()),
     createdAt: v.number(),
     updatedAt: v.optional(v.number()),
+    deletedAt: v.optional(v.number()),
   })
     .index("by_thread", ["threadId"])
     .index("by_user", ["userId"])

@@ -1,20 +1,31 @@
 # Convex Setup (Track A)
 
-This repo now includes the Convex schema and access-control helpers. To finish Track A you still need to create Convex deployments and set secrets.
+This repo includes the Convex schema + auth integration. You still need to create Convex deployments and set secrets.
 
 ## Project + Environments
 
 - Create a Convex project with three deployments: dev, stage, prod.
 - Link the local repo to the dev deployment via the Convex CLI.
 
-## Secrets to Configure (per deployment)
+## Required Secrets (per deployment)
 
-- Google OAuth: client ID + secret
-- WHOOP OAuth: client ID + secret
-- LLM provider keys (OpenAI/Anthropic)
+- `SITE_URL` (public base URL for the web app)
+- `BETTER_AUTH_SECRET` (generated secret for Better Auth)
+- `GOOGLE_CLIENT_ID`
+- `GOOGLE_CLIENT_SECRET`
+- `WHOOP_CLIENT_ID`
+- `WHOOP_CLIENT_SECRET`
+- LLM keys (OpenAI/Anthropic)
 - Any additional integration API keys used by workflows
+
+## OAuth Redirects
+
+Configure Google OAuth redirect URIs to:
+
+- `${SITE_URL}/api/auth/callback/google`
 
 ## Notes
 
 - Use the Convex dashboard or CLI to set secrets.
-- Make sure OAuth redirect URIs match the deployment URL.
+- Ensure `SITE_URL` matches the deployment URL.
+- For local development, use `SITE_URL=http://localhost:3000` (or your TanStack Start dev URL).
