@@ -1,7 +1,7 @@
+import { convexQuery, useConvexMutation } from "@convex-dev/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { convexQuery, useConvexMutation } from "@convex-dev/react-query";
 import { api } from "../../convex/_generated/api";
 import { PageHeader, Panel, Pill } from "../components/start/page";
 
@@ -64,14 +64,18 @@ function Goals() {
       <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
         <Panel title="New goal" subtitle="Define the outcome">
           <div className="space-y-3">
-            <label className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Title</label>
+            <label className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
+              Title
+            </label>
             <input
               value={title}
               onChange={(event) => setTitle(event.target.value)}
               placeholder="Launch Convex migration"
               className="w-full rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 shadow-sm focus:outline-none"
             />
-            <label className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Category</label>
+            <label className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
+              Category
+            </label>
             <select
               value={category}
               onChange={(event) => setCategory(event.target.value)}
@@ -83,7 +87,9 @@ function Goals() {
               <option value="family">Family</option>
               <option value="spiritual">Spiritual</option>
             </select>
-            <label className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Due</label>
+            <label className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
+              Due
+            </label>
             <input
               type="date"
               value={dueAt}
@@ -104,13 +110,17 @@ function Goals() {
             <div className="rounded-2xl border border-slate-100 bg-white px-4 py-4">
               <div className="flex items-center justify-between">
                 <p className="text-sm font-semibold text-slate-900">Active goals</p>
-                <Pill tone="amber">{goals.filter((goal) => goal.status !== "completed").length}</Pill>
+                <Pill tone="amber">
+                  {goals.filter((goal) => goal.status !== "completed").length}
+                </Pill>
               </div>
             </div>
             <div className="rounded-2xl border border-slate-100 bg-white px-4 py-4">
               <div className="flex items-center justify-between">
                 <p className="text-sm font-semibold text-slate-900">Completed</p>
-                <Pill tone="emerald">{goals.filter((goal) => goal.status === "completed").length}</Pill>
+                <Pill tone="emerald">
+                  {goals.filter((goal) => goal.status === "completed").length}
+                </Pill>
               </div>
             </div>
           </div>
@@ -125,14 +135,22 @@ function Goals() {
             </div>
           ) : (
             goals.map((goal) => (
-              <div key={goal._id} className="rounded-2xl border border-slate-100 bg-white px-4 py-4">
+              <div
+                key={goal._id}
+                className="rounded-2xl border border-slate-100 bg-white px-4 py-4"
+              >
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div>
                     <p className="text-sm font-semibold text-slate-900">{goal.title}</p>
-                    <p className="text-xs text-slate-500">{goal.category}</p>
+                    <p className="text-xs text-slate-500">
+                      {goal.category}
+                      {goal.dueAt ? ` · Due ${new Date(goal.dueAt).toLocaleDateString()}` : ""}
+                    </p>
                   </div>
                   <div className="flex flex-wrap gap-2">
-                    <Pill tone={goal.status === "completed" ? "emerald" : "amber"}>{goal.status}</Pill>
+                    <Pill tone={goal.status === "completed" ? "emerald" : "amber"}>
+                      {goal.status}
+                    </Pill>
                     <button
                       type="button"
                       onClick={() => void toggleGoal.mutateAsync({ goalId: goal._id })}
