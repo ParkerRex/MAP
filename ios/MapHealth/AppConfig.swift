@@ -9,6 +9,14 @@ enum AppConfig {
         return "https://app.map.ai"
         #endif
     }()
+
+    static func iosAuthURL() -> URL {
+        var components = URLComponents(string: "\(webBaseURL)/auth/ios")!
+        components.queryItems = [
+            URLQueryItem(name: "redirect", value: "maphealth://auth/callback")
+        ]
+        return components.url! // swiftlint:disable:this force_unwrapping
+    }
 }
 
 enum GitHubOAuth {

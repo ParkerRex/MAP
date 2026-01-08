@@ -99,7 +99,7 @@ struct HealthChatView: View {
         defer { isReauthenticating = false }
 
         do {
-            let authURL = URL(string: "\(AppConfig.webBaseURL)/api/auth/google?platform=ios")!
+            let authURL = AppConfig.iosAuthURL()
             let callbackScheme = "maphealth"
 
             let callbackURL = try await webAuthSession.authenticate(

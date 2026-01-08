@@ -42,11 +42,11 @@ Required Vite env vars for the web app:
 
 Preferred flow:
 
-1. Present an `ASWebAuthenticationSession` to `${SITE_URL}/login` (or a dedicated `/auth/ios` page).
-2. After successful login, redirect back to a custom scheme (`maphealth://auth/callback`) with a token or session payload.
+1. Present an `ASWebAuthenticationSession` to `${SITE_URL}/auth/ios?redirect=maphealth://auth/callback`.
+2. After successful login, redirect back to a custom scheme (`maphealth://auth/callback`) with a `token` query param.
 3. Store the token in Keychain and pass it to the Convex Swift client.
 
-The exact callback payload will be defined when the TanStack Start app login page is implemented.
+The `/auth/ios` route handles Better Auth sign-in and uses `getToken()` to produce the Convex auth token.
 
 ## Account Settings UI
 
