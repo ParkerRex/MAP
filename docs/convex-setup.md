@@ -15,6 +15,7 @@ This repo includes the Convex schema + auth integration. You still need to creat
 - `GOOGLE_CLIENT_SECRET`
 - `WHOOP_CLIENT_ID`
 - `WHOOP_CLIENT_SECRET`
+- `OPENAI_API_KEY` (Convex Agents + streaming chat)
 - LLM keys (OpenAI/Anthropic)
 - Any additional integration API keys used by workflows
 

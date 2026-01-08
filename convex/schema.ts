@@ -42,6 +42,13 @@ const messageStatus = v.union(
   v.literal("error"),
 );
 
+const chatRunStatus = v.union(
+  v.literal("pending"),
+  v.literal("streaming"),
+  v.literal("done"),
+  v.literal("error"),
+);
+
 const filePurpose = v.union(
   v.literal("attachment"),
   v.literal("avatar"),
@@ -485,6 +492,21 @@ export default defineSchema({
   })
     .index("by_user", ["userId"])
     .index("by_user_date", ["userId", "date"]),
+
+  chatRuns: defineTable({
+    userId: v.id("users"),
+    threadId: v.string(),
+    streamId: v.string(),
+    prompt: v.string(),
+    fileIds: v.optional(v.array(v.string())),
+    status: chatRunStatus,
+    error: v.optional(v.string()),
+    createdAt: v.number(),
+    updatedAt: v.optional(v.number()),
+  })
+    .index("by_user", ["userId"])
+    .index("by_thread", ["threadId"])
+    .index("by_stream", ["streamId"]),
 
   chatThreads: defineTable({
     userId: v.id("users"),
