@@ -21,6 +21,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Textarea } from "@/components/ui/textarea";
 import type { TaskWithTags } from "@/types";
 import { getTaskDueLabel } from "./task-utils";
+import { WavyStrikethrough } from "./wavy-strikethrough";
 
 interface TaskItemProps {
   task: TaskWithTags;
@@ -128,9 +129,7 @@ const TaskItem: FC<TaskItemProps> = ({
       }
       return;
     }
-    const updatedTags = tags.includes(tagId)
-      ? tags.filter((t) => t !== tagId)
-      : [...tags, tagId];
+    const updatedTags = tags.includes(tagId) ? tags.filter((t) => t !== tagId) : [...tags, tagId];
     setTags(updatedTags);
     if (task.id) {
       await updateTaskTags(task.id, updatedTags);
@@ -168,220 +167,225 @@ const TaskItem: FC<TaskItemProps> = ({
   return (
     <>
       <div
-      className={cn(
-        "group flex items-center gap-3 px-3 py-2.5 rounded-lg border bg-card transition-all",
-        "hover:shadow-sm hover:border-border/80",
-        isSelected && "ring-2 ring-primary bg-primary/5",
-        isCompleted && "opacity-60",
-      )}
-      onClick={() => {
-        if (isSelectMode) {
-          onToggleSelect();
-        } else if (!isEditing && !isQuickEditing) {
-          onOpenDetail?.(task);
-        }
-      }}
-      >
-      {/* Checkbox */}
-      <Checkbox
-        checked={isSelectMode ? isSelected : isCompleted}
-        onCheckedChange={() => (isSelectMode ? onToggleSelect() : toggleTaskCompletion(task))}
-        onClick={(e) => e.stopPropagation()}
         className={cn(
-          "h-5 w-5 rounded-full border-2",
-          isCompleted && !isSelectMode && "bg-primary border-primary",
+          "group flex items-center gap-3 px-3 py-2.5 rounded-lg border bg-card transition-all",
+          "hover:shadow-sm hover:border-border/80",
+          isSelected && "ring-2 ring-primary bg-primary/5",
+          isCompleted && "opacity-60",
         )}
-      />
+        onClick={() => {
+          if (isSelectMode) {
+            onToggleSelect();
+          } else if (!isEditing && !isQuickEditing) {
+            onOpenDetail?.(task);
+          }
+        }}
+      >
+        {/* Checkbox */}
+        <Checkbox
+          checked={isSelectMode ? isSelected : isCompleted}
+          onCheckedChange={() => (isSelectMode ? onToggleSelect() : toggleTaskCompletion(task))}
+          onClick={(e) => e.stopPropagation()}
+          className={cn(
+            "h-5 w-5 rounded-full border-2",
+            isCompleted && !isSelectMode && "bg-primary border-primary",
+          )}
+        />
 
-      {/* Title */}
-      <div className="flex-1 min-w-0">
-        {isEditing ? (
-          <div className="flex items-center gap-2">
-            <Input
-              ref={inputRef}
-              value={title}
-              onChange={(e) => handleTitleChange(e.target.value)}
-              onBlur={() => setIsEditing(false)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === "Escape") {
-                  setIsEditing(false);
-                }
-              }}
-              className="h-7 text-sm border-none bg-transparent p-0 focus-visible:ring-0"
-            />
-            {saveStatus !== "idle" && (
-              <span className="text-xs text-muted-foreground">
-                {saveStatus === "saving" && <Loader2 className="w-3 h-3 animate-spin" />}
-                {saveStatus === "saved" && <Check className="w-3 h-3 text-green-500" />}
-              </span>
-            )}
-          </div>
-        ) : (
-          <button
-            type="button"
-            onClick={(e) => {
-              if (!isSelectMode) {
-                e.stopPropagation();
-                setIsEditing(true);
-              }
-            }}
-            className={cn(
-              "text-sm font-medium text-left truncate block w-full",
-              isCompleted && "line-through text-muted-foreground",
-            )}
-          >
-            {task.title}
-          </button>
-        )}
-
-        {!isQuickEditing && (primaryTag || dueDateInfo || task.body) && (
-          <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-            {primaryTag && (
-              <span className="inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5">
-                <span
-                  className="h-2 w-2 rounded-full"
-                  style={primaryColor ? { background: primaryColor } : undefined}
-                />
-                <span>{primaryTag.title}</span>
-              </span>
-            )}
-            {dueDateInfo && (
-              <span
+        {/* Title */}
+        <div className="flex-1 min-w-0">
+          {isEditing ? (
+            <div className="flex items-center gap-2">
+              <Input
+                ref={inputRef}
+                value={title}
+                onChange={(e) => handleTitleChange(e.target.value)}
+                onBlur={() => setIsEditing(false)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === "Escape") {
+                    setIsEditing(false);
+                  }
+                }}
+                className="h-7 text-sm border-none bg-transparent p-0 focus-visible:ring-0"
+              />
+              {saveStatus !== "idle" && (
+                <span className="text-xs text-muted-foreground">
+                  {saveStatus === "saving" && <Loader2 className="w-3 h-3 animate-spin" />}
+                  {saveStatus === "saved" && <Check className="w-3 h-3 text-green-500" />}
+                </span>
+              )}
+            </div>
+          ) : (
+            <div className="relative inline-block w-full">
+              <button
+                type="button"
+                onClick={(e) => {
+                  if (!isSelectMode) {
+                    e.stopPropagation();
+                    setIsEditing(true);
+                  }
+                }}
                 className={cn(
-                  "font-medium",
-                  dueDateInfo.tone === "overdue" && "text-red-500",
-                  dueDateInfo.tone === "today" && "text-orange-500",
-                  dueDateInfo.tone === "soon" && "text-blue-500",
-                  dueDateInfo.tone === "muted" && "text-muted-foreground",
+                  "text-sm font-medium text-left truncate block w-full",
+                  isCompleted && "text-muted-foreground",
                 )}
               >
-                {dueDateInfo.text}
-              </span>
-            )}
-            {task.body && <span className="truncate">{task.body}</span>}
-          </div>
-        )}
-      </div>
+                {task.title}
+              </button>
+              <WavyStrikethrough isChecked={isCompleted} />
+            </div>
+          )}
 
-      {/* Tags */}
-      {currentTags.length > 1 && (
-        <div className="hidden sm:flex gap-1">
-          {currentTags.slice(0, 2).map((tag) => (
-            <Badge key={tag.id} variant="outline" className="text-xs px-1.5 py-0">
-              {tag.title}
-            </Badge>
-          ))}
-          {currentTags.length > 2 && (
-            <Badge variant="outline" className="text-xs px-1.5 py-0">
-              +{currentTags.length - 2}
-            </Badge>
+          {!isQuickEditing && (primaryTag || dueDateInfo || task.body) && (
+            <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+              {primaryTag && (
+                <span className="inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5">
+                  <span
+                    className="h-2 w-2 rounded-full"
+                    style={primaryColor ? { background: primaryColor } : undefined}
+                  />
+                  <span>{primaryTag.title}</span>
+                </span>
+              )}
+              {dueDateInfo && (
+                <span
+                  className={cn(
+                    "font-medium",
+                    dueDateInfo.tone === "overdue" && "text-red-500",
+                    dueDateInfo.tone === "today" && "text-orange-500",
+                    dueDateInfo.tone === "soon" && "text-blue-500",
+                    dueDateInfo.tone === "muted" && "text-muted-foreground",
+                  )}
+                >
+                  {dueDateInfo.text}
+                </span>
+              )}
+              {task.body && <span className="truncate">{task.body}</span>}
+            </div>
           )}
         </div>
-      )}
 
-      {/* Actions - visible on hover */}
-      {!isSelectMode && (
-        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-          {/* Date picker */}
-          <Popover open={isDatePickerOpen} onOpenChange={setIsDatePickerOpen}>
-            <PopoverTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-7 w-7"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <Calendar className="h-4 w-4 text-muted-foreground" />
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="end">
-              <DatePicker
-                mode="single"
-                selected={task.dueAt ?? undefined}
-                onSelect={(date) => date && handleDateChange(date)}
-              />
-            </PopoverContent>
-          </Popover>
+        {/* Tags */}
+        {currentTags.length > 1 && (
+          <div className="hidden sm:flex gap-1">
+            {currentTags.slice(0, 2).map((tag) => (
+              <Badge key={tag.id} variant="outline" className="text-xs px-1.5 py-0">
+                {tag.title}
+              </Badge>
+            ))}
+            {currentTags.length > 2 && (
+              <Badge variant="outline" className="text-xs px-1.5 py-0">
+                +{currentTags.length - 2}
+              </Badge>
+            )}
+          </div>
+        )}
 
-          {/* Tag dropdown */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-7 w-7"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <Tag className="h-4 w-4 text-muted-foreground" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48">
-              <DropdownMenuCheckboxItem
-                checked={tags.length === 0}
-                onCheckedChange={() => handleTagToggle("clear")}
-                className="text-muted-foreground"
-              >
-                No project
-              </DropdownMenuCheckboxItem>
-              {availableTags.map((tag) => (
-                <DropdownMenuCheckboxItem
-                  key={tag.id}
-                  checked={tags.includes(tag.id)}
-                  onCheckedChange={() => handleTagToggle(tag.id)}
+        {/* Actions - visible on hover */}
+        {!isSelectMode && (
+          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+            {/* Date picker */}
+            <Popover open={isDatePickerOpen} onOpenChange={setIsDatePickerOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7"
+                  onClick={(e) => e.stopPropagation()}
                 >
-                  {tag.title}
-                </DropdownMenuCheckboxItem>
-              ))}
-              {availableTags.length > 0 && <DropdownMenuSeparator />}
-              <div className="p-2">
-                <Input
-                  placeholder="New tag..."
-                  value={newTag}
-                  onChange={(e) => setNewTag(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      e.preventDefault();
-                      handleCreateTag();
-                    }
-                  }}
-                  className="h-8 text-sm"
+                  <Calendar className="h-4 w-4 text-muted-foreground" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="end">
+                <DatePicker
+                  mode="single"
+                  selected={task.dueAt ?? undefined}
+                  onSelect={(date) => date && handleDateChange(date)}
                 />
-              </div>
-            </DropdownMenuContent>
-          </DropdownMenu>
+              </PopoverContent>
+            </Popover>
 
-          {/* More menu */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-7 w-7"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <MoreHorizontal className="h-4 w-4 text-muted-foreground" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => onOpenDetail?.(task)}>Open details</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => toggleTaskCompletion(task)}>
-                {isCompleted ? "Mark incomplete" : "Mark complete"}
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setIsQuickEditing(true)}>
-                Quick edit
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem
-                className="text-destructive focus:text-destructive"
-                onClick={() => task.id && handleDelete(task.id)}
-              >
-                <Trash2 className="h-4 w-4 mr-2" />
-                Delete
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      )}
+            {/* Tag dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <Tag className="h-4 w-4 text-muted-foreground" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuCheckboxItem
+                  checked={tags.length === 0}
+                  onCheckedChange={() => handleTagToggle("clear")}
+                  className="text-muted-foreground"
+                >
+                  No project
+                </DropdownMenuCheckboxItem>
+                {availableTags.map((tag) => (
+                  <DropdownMenuCheckboxItem
+                    key={tag.id}
+                    checked={tags.includes(tag.id)}
+                    onCheckedChange={() => handleTagToggle(tag.id)}
+                  >
+                    {tag.title}
+                  </DropdownMenuCheckboxItem>
+                ))}
+                {availableTags.length > 0 && <DropdownMenuSeparator />}
+                <div className="p-2">
+                  <Input
+                    placeholder="New tag..."
+                    value={newTag}
+                    onChange={(e) => setNewTag(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        handleCreateTag();
+                      }
+                    }}
+                    className="h-8 text-sm"
+                  />
+                </div>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            {/* More menu */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <MoreHorizontal className="h-4 w-4 text-muted-foreground" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => onOpenDetail?.(task)}>
+                  Open details
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => toggleTaskCompletion(task)}>
+                  {isCompleted ? "Mark incomplete" : "Mark complete"}
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setIsQuickEditing(true)}>
+                  Quick edit
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  className="text-destructive focus:text-destructive"
+                  onClick={() => task.id && handleDelete(task.id)}
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Delete
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        )}
       </div>
       {isQuickEditing && (
         <div className="mt-2 rounded-lg border bg-muted/40 p-3">
