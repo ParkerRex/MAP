@@ -1,19 +1,44 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useState } from "react";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { convexQuery, useConvexMutation } from "@convex-dev/react-query";
+import { api } from "../../convex/_generated/api";
 import { PageHeader, Panel, Pill } from "../components/start/page";
-
-const metrics = [
-  { label: "Recovery", value: "78%", tone: "emerald" as const },
-  { label: "Sleep", value: "6h 42m", tone: "amber" as const },
-  { label: "Strain", value: "12.4", tone: "rose" as const },
-];
-
-const trend = [64, 72, 58, 79, 88, 74, 81];
 
 export const Route = createFileRoute("/health")({
   component: Health,
 });
 
 function Health() {
+  const { data: summary } = useQuery({
+    ...convexQuery(api.health.summary, { days: 7 }),
+  });
+  const { data: recent = [] } = useQuery({
+    ...convexQuery(api.health.listRecent, { limit: 7 }),
+  });
+  const upsert = useMutation({
+    mutationFn: useConvexMutation(api.health.upsert),
+  });
+
+  const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
+  const [steps, setSteps] = useState("");
+  const [sleepHours, setSleepHours] = useState("");
+  const [activeEnergy, setActiveEnergy] = useState("");
+  const [exerciseMinutes, setExerciseMinutes] = useState("");
+
+  const handleAdd = async () => {
+    await upsert.mutateAsync({
+      date,
+      steps: steps ? Number(steps) : undefined,
+      sleepHours: sleepHours ? Number(sleepHours) : undefined,
+      activeEnergy: activeEnergy ? Number(activeEnergy) : undefined,
+      exerciseMinutes: exerciseMinutes ? Number(exerciseMinutes) : undefined,
+    });
+  };
+
+  const avg = summary?.average;
+  const trendMax = Math.max(...recent.map((entry) => entry.steps ?? 0), 1);
+
   return (
     <div className="space-y-10">
       <PageHeader
@@ -28,7 +53,11 @@ function Health() {
             >
               WHOOP sync
             </button>
-            <button type="button" className="rounded-full bg-slate-900 px-4 py-2 text-xs font-semibold text-white">
+            <button
+              type="button"
+              onClick={() => void handleAdd()}
+              className="rounded-full bg-slate-900 px-4 py-2 text-xs font-semibold text-white"
+            >
               Add metric
             </button>
           </>
@@ -36,46 +65,109 @@ function Health() {
       />
 
       <div className="grid gap-6 md:grid-cols-3">
-        {metrics.map((metric) => (
-          <Panel key={metric.label} title={metric.label} subtitle="Daily average">
-            <div className="flex items-center justify-between">
-              <p className="text-3xl font-semibold text-slate-900">{metric.value}</p>
-              <Pill tone={metric.tone}>Stable</Pill>
-            </div>
-            <div className="h-2 w-full overflow-hidden rounded-full bg-slate-100">
-              <div className="h-full w-2/3 rounded-full bg-slate-900" />
-            </div>
-          </Panel>
-        ))}
+        <Panel title="Steps" subtitle="7-day average">
+          <div className="flex items-center justify-between">
+            <p className="text-3xl font-semibold text-slate-900">{avg?.steps ?? "—"}</p>
+            <Pill tone="emerald">Avg</Pill>
+          </div>
+          <div className="h-2 w-full overflow-hidden rounded-full bg-slate-100">
+            <div className="h-full w-2/3 rounded-full bg-slate-900" />
+          </div>
+        </Panel>
+        <Panel title="Sleep" subtitle="Hours/night">
+          <div className="flex items-center justify-between">
+            <p className="text-3xl font-semibold text-slate-900">
+              {avg?.sleepHours ? `${avg.sleepHours}h` : "—"}
+            </p>
+            <Pill tone="amber">Avg</Pill>
+          </div>
+          <div className="h-2 w-full overflow-hidden rounded-full bg-slate-100">
+            <div className="h-full w-1/2 rounded-full bg-slate-900" />
+          </div>
+        </Panel>
+        <Panel title="Active energy" subtitle="kcal/day">
+          <div className="flex items-center justify-between">
+            <p className="text-3xl font-semibold text-slate-900">{avg?.activeEnergy ?? "—"}</p>
+            <Pill tone="rose">Avg</Pill>
+          </div>
+          <div className="h-2 w-full overflow-hidden rounded-full bg-slate-100">
+            <div className="h-full w-1/3 rounded-full bg-slate-900" />
+          </div>
+        </Panel>
       </div>
 
-      <Panel title="Weekly trend" subtitle="Recovery trendline" className="animate-rise-delay-1">
-        <div className="grid grid-cols-7 items-end gap-3">
-          {trend.map((value, index) => (
-            <div key={`${value}-${index}`} className="flex flex-col items-center gap-2">
-              <div className="h-24 w-full rounded-2xl bg-slate-100 p-2">
-                <div
-                  className="w-full rounded-xl bg-slate-900"
-                  style={{ height: `${value}%` }}
-                />
-              </div>
-              <p className="text-xs text-slate-400">{["M", "T", "W", "T", "F", "S", "S"][index]}</p>
-            </div>
-          ))}
+      <Panel title="Log metrics" subtitle="Manual entry until HealthKit sync" className="animate-rise-delay-1">
+        <div className="grid gap-3 md:grid-cols-2">
+          <div className="space-y-2">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Date</p>
+            <input
+              type="date"
+              value={date}
+              onChange={(event) => setDate(event.target.value)}
+              className="w-full rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 shadow-sm focus:outline-none"
+            />
+          </div>
+          <div className="space-y-2">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Steps</p>
+            <input
+              type="number"
+              value={steps}
+              onChange={(event) => setSteps(event.target.value)}
+              className="w-full rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 shadow-sm focus:outline-none"
+            />
+          </div>
+          <div className="space-y-2">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Sleep hours</p>
+            <input
+              type="number"
+              step="0.1"
+              value={sleepHours}
+              onChange={(event) => setSleepHours(event.target.value)}
+              className="w-full rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 shadow-sm focus:outline-none"
+            />
+          </div>
+          <div className="space-y-2">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Active energy</p>
+            <input
+              type="number"
+              value={activeEnergy}
+              onChange={(event) => setActiveEnergy(event.target.value)}
+              className="w-full rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 shadow-sm focus:outline-none"
+            />
+          </div>
+          <div className="space-y-2">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Exercise minutes</p>
+            <input
+              type="number"
+              value={exerciseMinutes}
+              onChange={(event) => setExerciseMinutes(event.target.value)}
+              className="w-full rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 shadow-sm focus:outline-none"
+            />
+          </div>
         </div>
+        <button
+          type="button"
+          onClick={() => void handleAdd()}
+          className="mt-4 rounded-full bg-slate-900 px-4 py-2 text-xs font-semibold text-white"
+        >
+          Save metrics
+        </button>
       </Panel>
 
-      <Panel title="Insights" subtitle="AI surfaced patterns" className="animate-rise-delay-2">
-        <div className="space-y-3">
-          {[
-            "Recovery rises when you end focus sessions by 4:30pm.",
-            "Sleep debt accumulates on Tuesday/Wednesday launches.",
-            "Two hydration reminders improved HRV by 4%.",
-          ].map((insight) => (
-            <div key={insight} className="rounded-2xl border border-slate-100 bg-white px-4 py-4 text-sm text-slate-600">
-              {insight}
-            </div>
-          ))}
+      <Panel title="Weekly trend" subtitle="Steps by day" className="animate-rise-delay-2">
+        <div className="grid grid-cols-7 items-end gap-3">
+          {recent.map((entry) => {
+            const value = entry.steps ?? 0;
+            const height = Math.max((value / trendMax) * 100, 6);
+            return (
+              <div key={entry._id} className="flex flex-col items-center gap-2">
+                <div className="h-24 w-full rounded-2xl bg-slate-100 p-2">
+                  <div className="w-full rounded-xl bg-slate-900" style={{ height: `${height}%` }} />
+                </div>
+                <p className="text-xs text-slate-400">{entry.date.slice(5)}</p>
+              </div>
+            );
+          })}
         </div>
       </Panel>
     </div>
