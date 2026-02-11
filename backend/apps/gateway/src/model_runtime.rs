@@ -82,10 +82,55 @@ fn parse_model(value: &str) -> (String, String) {
 #[cfg(test)]
 mod tests {
     use super::{
-        extract_message_content, is_billing_error, parse_model, should_failover, ProviderError,
+        extract_message_content, generate_with_failover_cancellable, is_billing_error, parse_model,
+        should_failover, ModelGenerationError, ProviderError,
     };
+    use crate::config::AppConfig;
     use crate::provider::normalize_provider_alias;
+    use crate::rate_limit::RateLimiter;
+    use crate::state::{AppState, RunCancellationRegistry};
+    use crate::telemetry::GatewayMetrics;
+    use chrono::Utc;
     use serde_json::json;
+    use sqlx::postgres::PgPoolOptions;
+    use std::collections::HashMap;
+    use std::path::PathBuf;
+    use uuid::Uuid;
+
+    fn build_test_state() -> AppState {
+        AppState {
+            pool: PgPoolOptions::new()
+                .connect_lazy("postgres://postgres:postgres@localhost/map_ai_test")
+                .expect("failed to create lazy postgres pool"),
+            config: AppConfig {
+                host: "127.0.0.1".to_string(),
+                port: 0,
+                database_url: "postgres://postgres:postgres@localhost/map_ai_test".to_string(),
+                agent_id: "main".to_string(),
+                main_key: "main".to_string(),
+                dm_scope: "main".to_string(),
+                openclaw_ref_commit: "test".to_string(),
+                auth_token: None,
+                auth_tokens: Vec::new(),
+                primary_model: "openai:gpt-4o-mini".to_string(),
+                fallback_models: Vec::new(),
+                providers: HashMap::new(),
+                skills_workspace_dir: PathBuf::from("./skills"),
+                skills_managed_dir: PathBuf::from("./skills"),
+                skills_bundled_dir: PathBuf::from("./skills"),
+                cron_poll_interval_secs: 60,
+                http_rate_limit_per_minute: 600,
+                ws_rate_limit_per_minute: 240,
+                ws_resume_max_events: 500,
+                idempotency_ttl_secs: 86_400,
+            },
+            http: reqwest::Client::new(),
+            run_cancellations: RunCancellationRegistry::default(),
+            metrics: GatewayMetrics::default(),
+            rate_limiter: RateLimiter::default(),
+            started_at: Utc::now(),
+        }
+    }
 
     #[test]
     fn parse_model_provider_prefix() {
@@ -195,6 +240,31 @@ mod tests {
             extract_message_content(&payload),
             Some("hello world".to_string())
         );
+    }
+
+    #[tokio::test]
+    async fn cancellation_short_circuits_generation_before_provider_work() {
+        let state = build_test_state();
+        let registry = RunCancellationRegistry::default();
+        let guard = registry.register(Uuid::now_v7());
+        let token = guard.token();
+        token.cancel();
+
+        let result = generate_with_failover_cancellable(
+            &state,
+            "test prompt",
+            Some("openai:gpt-4o-mini".to_string()),
+            None,
+            Some(token),
+        )
+        .await;
+
+        match result {
+            Err(ModelGenerationError::Cancelled { attempts }) => {
+                assert!(attempts.is_empty());
+            }
+            other => panic!("expected cancellation, got {other:?}"),
+        }
     }
 }
 
