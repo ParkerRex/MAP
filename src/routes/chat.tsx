@@ -128,6 +128,23 @@ type CronRun = {
   };
 };
 
+type ChannelsSummaryResponse = {
+  connectors: string[];
+  account_count: number;
+  route_count: number;
+};
+
+type PairingRequest = {
+  id: string;
+  provider: string;
+  peer_key: string;
+  code: string;
+  status: string;
+  expires_at: string;
+  created_at: string;
+  updated_at: string;
+};
+
 const rustGatewayBase = (import.meta.env.VITE_RUST_GATEWAY_URL ?? "http://localhost:18789").replace(
   /\/$/,
   "",
@@ -209,6 +226,20 @@ function Chat() {
     queryKey: ["rust-gateway", "cron", "jobs"],
     queryFn: () => requestJson<CronJob[]>("/v1/cron/jobs"),
     staleTime: 10_000,
+  });
+
+  const channelsSummaryQuery = useQuery({
+    queryKey: ["rust-gateway", "channels", "summary"],
+    queryFn: () => requestJson<ChannelsSummaryResponse>("/v1/channels"),
+    staleTime: 10_000,
+    refetchInterval: 20_000,
+  });
+
+  const pairingQuery = useQuery({
+    queryKey: ["rust-gateway", "channels", "pairing"],
+    queryFn: () => requestJson<PairingRequest[]>("/v1/channels/pairing"),
+    staleTime: 10_000,
+    refetchInterval: 15_000,
   });
 
   const modelOptions = useMemo(() => {
@@ -370,6 +401,38 @@ function Chat() {
       }),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["rust-gateway", "cron", "jobs"] });
+    },
+  });
+
+  const approvePairingMutation = useMutation({
+    mutationFn: (id: string) =>
+      requestJson<{
+        id: string;
+        provider: string;
+        peer_key: string;
+        status: string;
+        allowlisted: boolean;
+      }>(`/v1/channels/pairing/${id}/approve`, {
+        method: "POST",
+      }),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["rust-gateway", "channels", "pairing"] });
+    },
+  });
+
+  const rejectPairingMutation = useMutation({
+    mutationFn: (id: string) =>
+      requestJson<{
+        id: string;
+        provider: string;
+        peer_key: string;
+        status: string;
+        allowlisted: boolean;
+      }>(`/v1/channels/pairing/${id}/reject`, {
+        method: "POST",
+      }),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["rust-gateway", "channels", "pairing"] });
     },
   });
 
@@ -881,6 +944,79 @@ function Chat() {
                   {job.last_error ? (
                     <p className="mt-2 text-xs text-rose-500">Last error: {job.last_error}</p>
                   ) : null}
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+      </Panel>
+
+      <Panel title="Channels + pairing" subtitle="Inbound connector posture and approval queue">
+        <div className="grid gap-6 lg:grid-cols-[0.4fr_0.6fr]">
+          <div className="space-y-3 rounded-2xl border border-slate-100 bg-white px-4 py-4">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
+              Connectors
+            </p>
+            <p className="text-sm text-slate-700">
+              Accounts:{" "}
+              <span className="font-semibold">{channelsSummaryQuery.data?.account_count ?? 0}</span>
+            </p>
+            <p className="text-sm text-slate-700">
+              Routes:{" "}
+              <span className="font-semibold">{channelsSummaryQuery.data?.route_count ?? 0}</span>
+            </p>
+            <div className="flex flex-wrap gap-2 pt-1">
+              {(channelsSummaryQuery.data?.connectors ?? []).slice(0, 10).map((connector) => (
+                <span
+                  key={connector}
+                  className="rounded-full border border-slate-200 bg-white px-2 py-1 text-[11px] text-slate-500"
+                >
+                  {connector}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            {(pairingQuery.data ?? []).length === 0 ? (
+              <p className="rounded-2xl border border-dashed border-slate-200 bg-white/60 px-4 py-3 text-sm text-slate-500">
+                No pairing requests queued.
+              </p>
+            ) : (
+              (pairingQuery.data ?? []).slice(0, 20).map((request) => (
+                <div
+                  key={request.id}
+                  className="rounded-2xl border border-slate-100 bg-white px-4 py-3 text-sm text-slate-700"
+                >
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <div>
+                      <p className="font-semibold text-slate-900">
+                        {request.provider}:{request.peer_key}
+                      </p>
+                      <p className="text-xs text-slate-500">
+                        status={request.status} · code={request.code}
+                      </p>
+                      <p className="text-xs text-slate-500">
+                        expires {new Date(request.expires_at).toLocaleString()}
+                      </p>
+                    </div>
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        onClick={() => void approvePairingMutation.mutateAsync(request.id)}
+                        className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold text-emerald-600"
+                      >
+                        Approve
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => void rejectPairingMutation.mutateAsync(request.id)}
+                        className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold text-rose-500"
+                      >
+                        Reject
+                      </button>
+                    </div>
+                  </div>
                 </div>
               ))
             )}
