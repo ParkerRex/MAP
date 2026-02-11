@@ -110,3 +110,333 @@ pub async fn delete_job(
 
     Ok(Json(serde_json::json!({ "deleted": true })))
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::config::{AppConfig, ProviderConfig};
+    use crate::db;
+    use crate::routes;
+    use crate::state::AppState;
+    use axum::routing::post;
+    use axum::{Json, Router};
+    use reqwest::StatusCode;
+    use serde::Deserialize;
+    use serde_json::{json, Value};
+    use sqlx::PgPool;
+    use std::collections::HashMap;
+    use std::path::PathBuf;
+    use std::time::Duration;
+    use tokio::net::TcpListener;
+    use tokio::task::JoinHandle;
+    use uuid::Uuid;
+
+    fn resolve_test_database_url() -> Option<String> {
+        std::env::var("RUST_GATEWAY_TEST_DATABASE_URL")
+            .ok()
+            .or_else(|| std::env::var("RUST_GATEWAY_DATABASE_URL").ok())
+            .or_else(|| std::env::var("DATABASE_URL").ok())
+    }
+
+    async fn reset_database(pool: &PgPool) {
+        sqlx::query(
+            r#"
+            truncate table
+              auth_usage_stats,
+              auth_profiles,
+              audit_logs,
+              chat_runs,
+              channel_accounts,
+              channel_routes,
+              cron_jobs,
+              cron_runs,
+              node_pairings,
+              nodes,
+              pairing_allowlists,
+              pairing_requests,
+              session_messages,
+              sessions,
+              skills
+            restart identity cascade
+            "#,
+        )
+        .execute(pool)
+        .await
+        .expect("failed to truncate gateway test tables");
+    }
+
+    fn build_test_config(database_url: String, model_base_url: String) -> AppConfig {
+        let mut providers = HashMap::new();
+        providers.insert(
+            "openai".to_string(),
+            ProviderConfig {
+                provider: "openai".to_string(),
+                base_url: model_base_url,
+                env_api_key: Some("test-api-key".to_string()),
+            },
+        );
+        providers.insert(
+            "moonshot".to_string(),
+            ProviderConfig {
+                provider: "moonshot".to_string(),
+                base_url: "http://127.0.0.1:9/v1".to_string(),
+                env_api_key: Some("unused-test-key".to_string()),
+            },
+        );
+
+        AppConfig {
+            host: "127.0.0.1".to_string(),
+            port: 0,
+            database_url,
+            agent_id: "main".to_string(),
+            main_key: "main".to_string(),
+            dm_scope: "main".to_string(),
+            openclaw_ref_commit: "test-openclaw-commit".to_string(),
+            auth_token: None,
+            primary_model: "openai:gpt-4o-mini".to_string(),
+            fallback_models: Vec::new(),
+            providers,
+            skills_workspace_dir: PathBuf::from("./skills"),
+            skills_managed_dir: PathBuf::from("./skills"),
+            skills_bundled_dir: PathBuf::from(".ai/refs/openclaw/skills"),
+            cron_poll_interval_secs: 60,
+        }
+    }
+
+    async fn spawn_http_server(app: Router) -> (String, JoinHandle<()>) {
+        let listener = TcpListener::bind("127.0.0.1:0")
+            .await
+            .expect("failed to bind ephemeral test listener");
+        let address = listener
+            .local_addr()
+            .expect("failed to get listener local address");
+        let base_url = format!("http://{address}");
+
+        let handle = tokio::spawn(async move {
+            let _ = axum::serve(listener, app).await;
+        });
+
+        (base_url, handle)
+    }
+
+    #[derive(Debug, Deserialize)]
+    struct CronRunContract {
+        id: Uuid,
+        cron_job_id: Uuid,
+        status: String,
+        output: Value,
+    }
+
+    #[tokio::test]
+    async fn control_plane_critical_endpoint_contracts() {
+        let Some(database_url) = resolve_test_database_url() else {
+            eprintln!(
+                "skipping gateway endpoint contract tests: set RUST_GATEWAY_TEST_DATABASE_URL, RUST_GATEWAY_DATABASE_URL, or DATABASE_URL"
+            );
+            return;
+        };
+
+        let model_provider_app = Router::new().route(
+            "/v1/chat/completions",
+            post(|| async {
+                Json(json!({
+                    "choices": [{
+                        "message": {
+                            "content": "mock preview output"
+                        }
+                    }]
+                }))
+            }),
+        );
+        let (model_provider_url, model_provider_handle) = spawn_http_server(model_provider_app).await;
+
+        let pool = db::connect_and_migrate(&database_url)
+            .await
+            .expect("failed to connect or migrate gateway test database");
+        reset_database(&pool).await;
+
+        let state = AppState {
+            pool: pool.clone(),
+            config: build_test_config(database_url, format!("{model_provider_url}/v1")),
+            http: reqwest::Client::builder()
+                .timeout(Duration::from_secs(5))
+                .build()
+                .expect("failed to build test http client"),
+        };
+        let (gateway_url, gateway_handle) = spawn_http_server(routes::router(state)).await;
+
+        let client = reqwest::Client::new();
+
+        let preview_response = client
+            .post(format!("{gateway_url}/v1/models/generate"))
+            .json(&json!({
+                "prompt": "Return a short confirmation string.",
+                "model": "openai:gpt-4o-mini",
+                "fallback_models": []
+            }))
+            .send()
+            .await
+            .expect("model preview request failed");
+        assert_eq!(preview_response.status(), StatusCode::OK);
+        let preview_body: Value = preview_response
+            .json()
+            .await
+            .expect("failed to parse model preview response json");
+        assert_eq!(
+            preview_body.get("model_used").and_then(Value::as_str),
+            Some("openai:gpt-4o-mini")
+        );
+        assert_eq!(
+            preview_body.get("output").and_then(Value::as_str),
+            Some("mock preview output")
+        );
+        assert_eq!(
+            preview_body.pointer("/attempts/0/ok").and_then(Value::as_bool),
+            Some(true)
+        );
+
+        let disabled_inbound_response = client
+            .post(format!("{gateway_url}/v1/channels/inbound"))
+            .json(&json!({
+                "provider": "telegram",
+                "peer_kind": "dm",
+                "peer_id": "disabled-peer",
+                "text": "Hello from disabled policy test",
+                "dm_policy": "disabled"
+            }))
+            .send()
+            .await
+            .expect("disabled policy inbound request failed");
+        assert_eq!(disabled_inbound_response.status(), StatusCode::FORBIDDEN);
+        let disabled_inbound_body: Value = disabled_inbound_response
+            .json()
+            .await
+            .expect("failed to parse disabled inbound response json");
+        assert_eq!(
+            disabled_inbound_body
+                .get("accepted")
+                .and_then(Value::as_bool),
+            Some(false)
+        );
+        assert_eq!(
+            disabled_inbound_body
+                .get("requires_pairing")
+                .and_then(Value::as_bool),
+            Some(false)
+        );
+        assert_eq!(
+            disabled_inbound_body.get("reason").and_then(Value::as_str),
+            Some("direct messages are disabled by policy")
+        );
+
+        let pairing_inbound_response = client
+            .post(format!("{gateway_url}/v1/channels/inbound"))
+            .json(&json!({
+                "provider": "telegram",
+                "peer_kind": "dm",
+                "peer_id": "pairing-peer",
+                "text": "Hello from pairing policy test",
+                "dm_policy": "pairing"
+            }))
+            .send()
+            .await
+            .expect("pairing policy inbound request failed");
+        assert_eq!(pairing_inbound_response.status(), StatusCode::FORBIDDEN);
+        let pairing_inbound_body: Value = pairing_inbound_response
+            .json()
+            .await
+            .expect("failed to parse pairing inbound response json");
+        assert_eq!(
+            pairing_inbound_body
+                .get("accepted")
+                .and_then(Value::as_bool),
+            Some(false)
+        );
+        assert_eq!(
+            pairing_inbound_body
+                .get("requires_pairing")
+                .and_then(Value::as_bool),
+            Some(true)
+        );
+        assert_eq!(
+            pairing_inbound_body.get("reason").and_then(Value::as_str),
+            Some("pairing approval required")
+        );
+        let pairing_request_id = pairing_inbound_body
+            .get("pairing_request_id")
+            .and_then(Value::as_str)
+            .expect("pairing_request_id should be present");
+        Uuid::parse_str(pairing_request_id).expect("pairing_request_id should be a valid uuid");
+        assert!(
+            pairing_inbound_body
+                .get("pairing_code")
+                .and_then(Value::as_str)
+                .is_some_and(|value| value.len() == 6),
+            "pairing_code should be a six digit string"
+        );
+
+        let cron_job_id = sqlx::query_scalar::<_, Uuid>(
+            r#"
+            insert into cron_jobs (
+              name,
+              schedule_kind,
+              schedule_expr,
+              timezone,
+              payload,
+              session_target,
+              delivery_mode,
+              enabled
+            )
+            values ($1, $2, $3, $4, $5, $6, $7, true)
+            returning id
+            "#,
+        )
+        .bind("contract-test-job")
+        .bind("cron")
+        .bind("0 * * * *")
+        .bind("UTC")
+        .bind(json!({"source": "contract-test"}))
+        .bind("agent:main:main")
+        .bind("none")
+        .fetch_one(&pool)
+        .await
+        .expect("failed to seed cron job");
+
+        let cron_run_id = sqlx::query_scalar::<_, Uuid>(
+            r#"
+            insert into cron_runs (cron_job_id, status, finished_at, output)
+            values ($1, $2, now(), $3)
+            returning id
+            "#,
+        )
+        .bind(cron_job_id)
+        .bind("done")
+        .bind(json!({"summary": "contract-seeded"}))
+        .fetch_one(&pool)
+        .await
+        .expect("failed to seed cron run");
+
+        let cron_runs_response = client
+            .get(format!("{gateway_url}/v1/cron/runs"))
+            .send()
+            .await
+            .expect("cron run listing request failed");
+        assert_eq!(cron_runs_response.status(), StatusCode::OK);
+        let cron_runs: Vec<CronRunContract> = cron_runs_response
+            .json()
+            .await
+            .expect("failed to parse cron run list response");
+        let inserted_run = cron_runs
+            .iter()
+            .find(|run| run.id == cron_run_id)
+            .expect("seeded cron run should be present in list response");
+        assert_eq!(inserted_run.cron_job_id, cron_job_id);
+        assert_eq!(inserted_run.status, "done");
+        assert_eq!(
+            inserted_run.output.get("summary").and_then(Value::as_str),
+            Some("contract-seeded")
+        );
+
+        gateway_handle.abort();
+        model_provider_handle.abort();
+    }
+}
