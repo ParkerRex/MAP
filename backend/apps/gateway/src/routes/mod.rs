@@ -7,6 +7,7 @@ pub mod nodes;
 pub mod security;
 pub mod sessions;
 pub mod skills;
+pub mod ws;
 
 use crate::auth;
 use crate::state::AppState;
@@ -72,6 +73,7 @@ pub fn router(state: AppState) -> Router {
         .route("/nodes/pair/approve/:id", post(nodes::approve_pairing))
         .route("/nodes/pair/reject/:id", post(nodes::reject_pairing))
         .route("/nodes/verify", post(nodes::verify_node))
+        .route("/ws", get(ws::gateway_ws))
         .layer(middleware::from_fn_with_state(
             state.clone(),
             auth::require_gateway_auth,
