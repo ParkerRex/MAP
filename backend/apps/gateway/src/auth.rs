@@ -204,3 +204,48 @@ pub async fn require_gateway_auth(
 
     Ok(response)
 }
+
+#[cfg(test)]
+mod tests {
+    use super::required_ws_scope;
+
+    #[test]
+    fn ws_scope_matrix_includes_openclaw_surface() {
+        let read_methods = [
+            "logs.tail",
+            "config.get",
+            "config.schema",
+            "agents.list",
+            "agent.wait",
+            "exec.approvals.get",
+            "exec.approvals.node.get",
+            "node.describe",
+        ];
+        for method in read_methods {
+            assert_eq!(
+                required_ws_scope(method),
+                "gateway.read",
+                "expected `{method}` to require gateway.read"
+            );
+        }
+
+        let write_methods = [
+            "agent",
+            "send",
+            "poll",
+            "wake",
+            "channels.logout",
+            "exec.approvals.set",
+            "exec.approvals.node.set",
+            "node.invoke",
+            "node.event",
+        ];
+        for method in write_methods {
+            assert_eq!(
+                required_ws_scope(method),
+                "gateway.write",
+                "expected `{method}` to require gateway.write"
+            );
+        }
+    }
+}
