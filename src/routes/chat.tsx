@@ -18,7 +18,6 @@ import type {
   ChannelAccount,
   ChannelRoute,
   ChannelsSummaryResponse,
-  CreateRunResponse,
   CreateSessionResponse,
   CronJob,
   CronRun,
@@ -35,6 +34,7 @@ import type {
   VerifyNodeResponse,
 } from "../components/chat/types";
 import { PageHeader } from "../components/start/page";
+import { GatewayWsClient, type GatewayChatEvent } from "../lib/gateway-ws-client";
 
 export const Route = createFileRoute("/chat")({
   component: Chat,
@@ -46,35 +46,23 @@ const rustGatewayBase = (import.meta.env.VITE_RUST_GATEWAY_URL ?? "http://localh
 );
 const rustGatewayToken = (import.meta.env.VITE_RUST_GATEWAY_TOKEN ?? "").trim();
 
-async function requestJson<T>(path: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(`${rustGatewayBase}${path}`, {
-    ...init,
-    headers: {
-      "Content-Type": "application/json",
-      ...(rustGatewayToken ? { Authorization: `Bearer ${rustGatewayToken}` } : {}),
-      ...(init?.headers ?? {}),
-    },
-  });
-
-  if (!response.ok) {
-    const fallback = `Request failed (${response.status})`;
-    try {
-      const json = (await response.json()) as { error?: string };
-      throw new Error(json.error ?? fallback);
-    } catch {
-      throw new Error(fallback);
-    }
-  }
-
-  return (await response.json()) as T;
-}
-
 function Chat() {
   const queryClient = useQueryClient();
-  const streamRef = useRef<EventSource | null>(null);
+  const wsClient = useMemo(
+    () =>
+      new GatewayWsClient({
+        baseHttpUrl: rustGatewayBase,
+        token: rustGatewayToken,
+        path: "/v1/ws",
+        clientName: "map-web-chat",
+      }),
+    [],
+  );
 
   const [draft, setDraft] = useState("");
   const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
+  const [activeRunId, setActiveRunId] = useState<string | null>(null);
+  const activeRunIdRef = useRef<string | null>(null);
   const [streamText, setStreamText] = useState("");
   const [isDriving, setIsDriving] = useState(false);
   const [selectedModel, setSelectedModel] = useState("");
@@ -83,79 +71,79 @@ function Chat() {
 
   const sessionsQuery = useQuery({
     queryKey: ["rust-gateway", "sessions"],
-    queryFn: () => requestJson<Session[]>("/v1/sessions"),
+    queryFn: () => wsClient.request<Session[]>("sessions.list"),
     refetchInterval: 5000,
   });
 
   const modelsQuery = useQuery({
     queryKey: ["rust-gateway", "models"],
-    queryFn: () => requestJson<ModelsResponse>("/v1/models"),
+    queryFn: () => wsClient.request<ModelsResponse>("models.list"),
     staleTime: 30_000,
   });
 
   const profilesQuery = useQuery({
     queryKey: ["rust-gateway", "models", "profiles"],
-    queryFn: () => requestJson<AuthProfile[]>("/v1/models/profiles"),
+    queryFn: () => wsClient.request<AuthProfile[]>("models.profiles.list"),
     staleTime: 10_000,
   });
 
   const securityQuery = useQuery({
     queryKey: ["rust-gateway", "security", "audit"],
-    queryFn: () => requestJson<SecurityAuditResponse>("/v1/security/audit"),
+    queryFn: () => wsClient.request<SecurityAuditResponse>("security.audit"),
     staleTime: 10_000,
     refetchInterval: 20_000,
   });
 
   const skillsQuery = useQuery({
     queryKey: ["rust-gateway", "skills"],
-    queryFn: () => requestJson<SkillsResponse>("/v1/skills"),
+    queryFn: () => wsClient.request<SkillsResponse>("skills.list"),
     staleTime: 10_000,
   });
 
   const cronJobsQuery = useQuery({
     queryKey: ["rust-gateway", "cron", "jobs"],
-    queryFn: () => requestJson<CronJob[]>("/v1/cron/jobs"),
+    queryFn: () => wsClient.request<CronJob[]>("cron.jobs.list"),
     staleTime: 10_000,
   });
 
   const cronRunsQuery = useQuery({
     queryKey: ["rust-gateway", "cron", "runs"],
-    queryFn: () => requestJson<CronRun[]>("/v1/cron/runs"),
+    queryFn: () => wsClient.request<CronRun[]>("cron.runs.list"),
     staleTime: 5_000,
     refetchInterval: 10_000,
   });
 
   const channelsSummaryQuery = useQuery({
     queryKey: ["rust-gateway", "channels", "summary"],
-    queryFn: () => requestJson<ChannelsSummaryResponse>("/v1/channels"),
+    queryFn: () => wsClient.request<ChannelsSummaryResponse>("channels.summary"),
     staleTime: 10_000,
     refetchInterval: 20_000,
   });
 
   const channelAccountsQuery = useQuery({
     queryKey: ["rust-gateway", "channels", "accounts"],
-    queryFn: () => requestJson<ChannelAccount[]>("/v1/channels/accounts"),
+    queryFn: () => wsClient.request<ChannelAccount[]>("channels.accounts.list"),
     staleTime: 10_000,
     refetchInterval: 20_000,
   });
 
   const channelRoutesQuery = useQuery({
     queryKey: ["rust-gateway", "channels", "routes"],
-    queryFn: () => requestJson<ChannelRoute[]>("/v1/channels/routes"),
+    queryFn: () => wsClient.request<ChannelRoute[]>("channels.routes.list"),
     staleTime: 10_000,
     refetchInterval: 20_000,
   });
 
   const pairingQuery = useQuery({
     queryKey: ["rust-gateway", "channels", "pairing"],
-    queryFn: () => requestJson<PairingRequest[]>("/v1/channels/pairing"),
+    queryFn: () => wsClient.request<PairingRequest[]>("channels.pairing.list"),
     staleTime: 10_000,
     refetchInterval: 15_000,
   });
 
   const nodesQuery = useQuery({
     queryKey: ["rust-gateway", "nodes"],
-    queryFn: () => requestJson<NodesResponse>("/v1/nodes"),
+    queryFn: () => wsClient.request<NodesResponse>("nodes.list"),
     staleTime: 10_000,
     refetchInterval: 20_000,
   });
@@ -172,6 +160,10 @@ function Chat() {
   const sessions = sessionsQuery.data ?? [];
 
   useEffect(() => {
+    activeRunIdRef.current = activeRunId;
+  }, [activeRunId]);
+
+  useEffect(() => {
     if (!activeSessionId && sessions.length > 0) {
       setActiveSessionId(sessions[0].id);
     }
@@ -183,66 +175,50 @@ function Chat() {
     }
   }, [modelsQuery.data?.primary_model, selectedModel]);
 
-  const messagesQuery = useQuery({
-    queryKey: ["rust-gateway", "sessions", activeSessionId, "messages"],
-    queryFn: () => requestJson<SessionMessage[]>(`/v1/sessions/${activeSessionId}/messages`),
-    enabled: Boolean(activeSessionId),
+  const historyQuery = useQuery({
+    queryKey: ["rust-gateway", "chat", "history", activeSessionId],
+    queryFn: () =>
+      wsClient.request<{
+        session: Session;
+        messages: SessionMessage[];
+        runs: SessionRun[];
+      }>("chat.history", {
+        sessionId: activeSessionId ?? undefined,
+        messageLimit: 500,
+        runLimit: 100,
+      }),
     refetchInterval: isDriving ? 1000 : 3000,
   });
 
-  const runsQuery = useQuery({
-    queryKey: ["rust-gateway", "sessions", activeSessionId, "runs"],
-    queryFn: () => requestJson<SessionRun[]>(`/v1/sessions/${activeSessionId}/runs`),
-    enabled: Boolean(activeSessionId),
-    refetchInterval: isDriving ? 1000 : 3000,
-  });
-
-  const messages = messagesQuery.data ?? [];
-  const runs = runsQuery.data ?? [];
+  const messages = historyQuery.data?.messages ?? [];
+  const runs = historyQuery.data?.runs ?? [];
   const latestRun = runs[0];
   const latestAttempts = latestRun?.metadata?.attempts ?? [];
 
+  useEffect(() => {
+    if (!activeSessionId && historyQuery.data?.session?.id) {
+      setActiveSessionId(historyQuery.data.session.id);
+    }
+  }, [activeSessionId, historyQuery.data?.session?.id]);
+
   const createSessionMutation = useMutation({
-    mutationFn: (title?: string) =>
-      requestJson<CreateSessionResponse>("/v1/sessions", {
-        method: "POST",
-        body: JSON.stringify({ title }),
-      }),
+    mutationFn: (title?: string) => wsClient.request<CreateSessionResponse>("sessions.create", { title }),
     onSuccess: async (session) => {
       setActiveSessionId(session.id);
       setStreamText("");
+      setActiveRunId(null);
       await queryClient.invalidateQueries({ queryKey: ["rust-gateway", "sessions"] });
+      await queryClient.invalidateQueries({ queryKey: ["rust-gateway", "chat", "history"] });
     },
-  });
-
-  const createRunMutation = useMutation({
-    mutationFn: (payload: {
-      sessionId?: string;
-      prompt: string;
-      model?: string;
-      confirmed?: boolean;
-    }) =>
-      requestJson<CreateRunResponse>("/v1/chat/runs", {
-        method: "POST",
-        body: JSON.stringify({
-          session_id: payload.sessionId,
-          prompt: payload.prompt,
-          model: payload.model,
-          confirmed: payload.confirmed,
-        }),
-      }),
   });
 
   const addProfileMutation = useMutation({
     mutationFn: (payload: { provider: string; apiKey: string }) =>
-      requestJson<AuthProfile>("/v1/models/profiles", {
-        method: "POST",
-        body: JSON.stringify({
-          provider: payload.provider,
-          profile_id: `${payload.provider}-${Date.now()}`,
-          profile_type: "api_key",
-          payload: { api_key: payload.apiKey },
-        }),
+      wsClient.request<AuthProfile>("models.profiles.upsert", {
+        provider: payload.provider,
+        profileId: `${payload.provider}-${Date.now()}`,
+        profileType: "api_key",
+        payload: { api_key: payload.apiKey },
       }),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["rust-gateway", "models", "profiles"] });
@@ -252,9 +228,7 @@ function Chat() {
 
   const deleteProfileMutation = useMutation({
     mutationFn: (id: string) =>
-      requestJson<{ deleted: boolean }>(`/v1/models/profiles/${id}`, {
-        method: "DELETE",
-      }),
+      wsClient.request<{ deleted: boolean }>("models.profiles.delete", { id }),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["rust-gateway", "models", "profiles"] });
       await queryClient.invalidateQueries({ queryKey: ["rust-gateway", "models"] });
@@ -262,10 +236,7 @@ function Chat() {
   });
 
   const rescanSkillsMutation = useMutation({
-    mutationFn: () =>
-      requestJson<SkillsResponse>("/v1/skills", {
-        method: "POST",
-      }),
+    mutationFn: () => wsClient.request<SkillsResponse>("skills.rescan"),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["rust-gateway", "skills"] });
     },
@@ -278,17 +249,14 @@ function Chat() {
       scheduleExpr: string;
       message: string;
     }) =>
-      requestJson<CronJob>("/v1/cron/jobs", {
-        method: "POST",
-        body: JSON.stringify({
-          name: payload.name,
-          schedule_kind: payload.scheduleKind,
-          schedule_expr: payload.scheduleExpr,
-          timezone: "UTC",
-          payload: { message: payload.message },
-          session_target: "main",
-          delivery_mode: "append",
-        }),
+      wsClient.request<CronJob>("cron.jobs.create", {
+        name: payload.name,
+        scheduleKind: payload.scheduleKind,
+        scheduleExpr: payload.scheduleExpr,
+        timezone: "UTC",
+        payload: { message: payload.message },
+        sessionTarget: "main",
+        deliveryMode: "append",
       }),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["rust-gateway", "cron", "jobs"] });
@@ -297,27 +265,17 @@ function Chat() {
   });
 
   const runCronJobMutation = useMutation({
-    mutationFn: (id: string) =>
-      requestJson<CronRun>(`/v1/cron/jobs/${id}/run`, {
-        method: "POST",
-      }),
+    mutationFn: (id: string) => wsClient.request<CronRun>("cron.jobs.run", { id }),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["rust-gateway", "cron", "jobs"] });
       await queryClient.invalidateQueries({ queryKey: ["rust-gateway", "cron", "runs"] });
       await queryClient.invalidateQueries({ queryKey: ["rust-gateway", "sessions"] });
-      if (activeSessionId) {
-        await queryClient.invalidateQueries({
-          queryKey: ["rust-gateway", "sessions", activeSessionId, "messages"],
-        });
-      }
+      await queryClient.invalidateQueries({ queryKey: ["rust-gateway", "chat", "history"] });
     },
   });
 
   const deleteCronJobMutation = useMutation({
-    mutationFn: (id: string) =>
-      requestJson<{ deleted: boolean }>(`/v1/cron/jobs/${id}`, {
-        method: "DELETE",
-      }),
+    mutationFn: (id: string) => wsClient.request<{ deleted: boolean }>("cron.jobs.delete", { id }),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["rust-gateway", "cron", "jobs"] });
       await queryClient.invalidateQueries({ queryKey: ["rust-gateway", "cron", "runs"] });
@@ -326,15 +284,13 @@ function Chat() {
 
   const approvePairingMutation = useMutation({
     mutationFn: (id: string) =>
-      requestJson<{
+      wsClient.request<{
         id: string;
         provider: string;
         peer_key: string;
         status: string;
         allowlisted: boolean;
-      }>(`/v1/channels/pairing/${id}/approve`, {
-        method: "POST",
-      }),
+      }>("channels.pairing.approve", { id }),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["rust-gateway", "channels", "pairing"] });
     },
@@ -342,15 +298,13 @@ function Chat() {
 
   const rejectPairingMutation = useMutation({
     mutationFn: (id: string) =>
-      requestJson<{
+      wsClient.request<{
         id: string;
         provider: string;
         peer_key: string;
         status: string;
         allowlisted: boolean;
-      }>(`/v1/channels/pairing/${id}/reject`, {
-        method: "POST",
-      }),
+      }>("channels.pairing.reject", { id }),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["rust-gateway", "channels", "pairing"] });
     },
@@ -362,13 +316,10 @@ function Chat() {
       accountKey: string;
       metadata: Record<string, unknown>;
     }) =>
-      requestJson<ChannelAccount>("/v1/channels/accounts", {
-        method: "POST",
-        body: JSON.stringify({
-          provider: payload.provider,
-          account_key: payload.accountKey,
-          metadata: payload.metadata,
-        }),
+      wsClient.request<ChannelAccount>("channels.accounts.upsert", {
+        provider: payload.provider,
+        accountKey: payload.accountKey,
+        metadata: payload.metadata,
       }),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["rust-gateway", "channels", "summary"] });
@@ -378,9 +329,7 @@ function Chat() {
 
   const deleteChannelAccountMutation = useMutation({
     mutationFn: (id: string) =>
-      requestJson<{ deleted: boolean }>(`/v1/channels/accounts/${id}`, {
-        method: "DELETE",
-      }),
+      wsClient.request<{ deleted: boolean }>("channels.accounts.delete", { id }),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["rust-gateway", "channels", "summary"] });
       await queryClient.invalidateQueries({ queryKey: ["rust-gateway", "channels", "accounts"] });
@@ -395,14 +344,11 @@ function Chat() {
       peerKey: string;
       sessionScope: string;
     }) =>
-      requestJson<ChannelRoute>("/v1/channels/routes", {
-        method: "POST",
-        body: JSON.stringify({
-          provider: payload.provider,
-          account_id: payload.accountId,
-          peer_key: payload.peerKey,
-          session_scope: payload.sessionScope,
-        }),
+      wsClient.request<ChannelRoute>("channels.routes.upsert", {
+        provider: payload.provider,
+        accountId: payload.accountId,
+        peerKey: payload.peerKey,
+        sessionScope: payload.sessionScope,
       }),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["rust-gateway", "channels", "summary"] });
@@ -412,9 +358,7 @@ function Chat() {
 
   const deleteChannelRouteMutation = useMutation({
     mutationFn: (id: string) =>
-      requestJson<{ deleted: boolean }>(`/v1/channels/routes/${id}`, {
-        method: "DELETE",
-      }),
+      wsClient.request<{ deleted: boolean }>("channels.routes.delete", { id }),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["rust-gateway", "channels", "summary"] });
       await queryClient.invalidateQueries({ queryKey: ["rust-gateway", "channels", "routes"] });
@@ -423,15 +367,12 @@ function Chat() {
 
   const requestNodePairingMutation = useMutation({
     mutationFn: (payload: { nodeKey: string; displayName?: string }) =>
-      requestJson<{ request_id: string; node_key: string; code: string; expires_at: string }>(
-        "/v1/nodes/pair/request",
+      wsClient.request<{ request_id: string; node_key: string; code: string; expires_at: string }>(
+        "nodes.pair.request",
         {
-          method: "POST",
-          body: JSON.stringify({
-            node_key: payload.nodeKey,
-            display_name: payload.displayName,
-            capabilities: {},
-          }),
+          nodeKey: payload.nodeKey,
+          displayName: payload.displayName,
+          capabilities: {},
         },
       ),
     onSuccess: async () => {
@@ -441,11 +382,9 @@ function Chat() {
 
   const approveNodePairingMutation = useMutation({
     mutationFn: (id: string) =>
-      requestJson<{ approved: boolean; node_key: string; token: string }>(
-        `/v1/nodes/pair/approve/${id}`,
-        {
-          method: "POST",
-        },
+      wsClient.request<{ approved: boolean; node_key: string; token: string }>(
+        "nodes.pair.approve",
+        { id },
       ),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["rust-gateway", "nodes"] });
@@ -454,9 +393,7 @@ function Chat() {
 
   const rejectNodePairingMutation = useMutation({
     mutationFn: (id: string) =>
-      requestJson<{ rejected: boolean }>(`/v1/nodes/pair/reject/${id}`, {
-        method: "POST",
-      }),
+      wsClient.request<{ rejected: boolean }>("nodes.pair.reject", { id }),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["rust-gateway", "nodes"] });
     },
@@ -464,12 +401,9 @@ function Chat() {
 
   const verifyNodeMutation = useMutation({
     mutationFn: (payload: { nodeKey: string; token: string }) =>
-      requestJson<VerifyNodeResponse>("/v1/nodes/verify", {
-        method: "POST",
-        body: JSON.stringify({
-          node_key: payload.nodeKey,
-          token: payload.token,
-        }),
+      wsClient.request<VerifyNodeResponse>("nodes.verify", {
+        nodeKey: payload.nodeKey,
+        token: payload.token,
       }),
   });
 
@@ -481,16 +415,13 @@ function Chat() {
       text: string;
       dmPolicy: string;
     }) =>
-      requestJson<InboundMessageResponse>("/v1/channels/inbound", {
-        method: "POST",
-        body: JSON.stringify({
-          provider: payload.provider,
-          peer_kind: payload.peerKind,
-          peer_id: payload.peerId,
-          text: payload.text,
-          dm_policy: payload.dmPolicy,
-          model: selectedModel || undefined,
-        }),
+      wsClient.request<InboundMessageResponse>("channels.inbound", {
+        provider: payload.provider,
+        peerKind: payload.peerKind,
+        peerId: payload.peerId,
+        text: payload.text,
+        dmPolicy: payload.dmPolicy,
+        model: selectedModel || undefined,
       }),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["rust-gateway", "channels", "summary"] });
@@ -501,62 +432,65 @@ function Chat() {
 
   const generatePreviewMutation = useMutation({
     mutationFn: (payload: { prompt: string; model?: string }) =>
-      requestJson<GeneratePreviewResponse>("/v1/models/generate", {
-        method: "POST",
-        body: JSON.stringify({
-          prompt: payload.prompt,
-          model: payload.model,
-        }),
+      wsClient.request<GeneratePreviewResponse>("models.generate", {
+        prompt: payload.prompt,
+        model: payload.model,
       }),
   });
 
   useEffect(() => {
-    return () => {
-      streamRef.current?.close();
-      streamRef.current = null;
-    };
-  }, []);
-
-  const startStream = (streamPath: string) => {
-    streamRef.current?.close();
-
-    const streamUrl = rustGatewayToken
-      ? `${rustGatewayBase}${streamPath}${streamPath.includes("?") ? "&" : "?"}token=${encodeURIComponent(rustGatewayToken)}`
-      : `${rustGatewayBase}${streamPath}`;
-    const source = new EventSource(streamUrl);
-    streamRef.current = source;
-    setStreamText("");
-    setIsDriving(true);
-
-    source.onmessage = (event) => {
-      setStreamText((previous) => previous + event.data);
-    };
-
-    source.addEventListener("done", () => {
-      source.close();
-      if (streamRef.current === source) {
-        streamRef.current = null;
+    const unsubscribe = wsClient.onEvent((event, payload) => {
+      if (event !== "chat" || !payload || typeof payload !== "object") {
+        return;
       }
-      setIsDriving(false);
-      void queryClient.invalidateQueries({ queryKey: ["rust-gateway", "sessions"] });
-      if (activeSessionId) {
-        void queryClient.invalidateQueries({
-          queryKey: ["rust-gateway", "sessions", activeSessionId, "messages"],
-        });
-        void queryClient.invalidateQueries({
-          queryKey: ["rust-gateway", "sessions", activeSessionId, "runs"],
-        });
+
+      const chatEvent = payload as GatewayChatEvent;
+      if (chatEvent.kind === "run.started") {
+        setActiveRunId(chatEvent.runId);
+        setActiveSessionId(chatEvent.sessionId);
+        setStreamText("");
+        setIsDriving(true);
+        return;
+      }
+
+      if (chatEvent.kind === "delta") {
+        if (!activeRunIdRef.current || chatEvent.runId === activeRunIdRef.current) {
+          setStreamText((previous) => previous + chatEvent.text);
+          setIsDriving(true);
+        }
+        return;
+      }
+
+      if (chatEvent.kind === "run.finished") {
+        if (!activeRunIdRef.current || chatEvent.runId === activeRunIdRef.current) {
+          setIsDriving(false);
+          setActiveRunId(null);
+          void queryClient.invalidateQueries({ queryKey: ["rust-gateway", "sessions"] });
+          void queryClient.invalidateQueries({ queryKey: ["rust-gateway", "chat", "history"] });
+        }
+        return;
+      }
+
+      if (chatEvent.kind === "run.aborted") {
+        if (!activeRunIdRef.current || chatEvent.runId === activeRunIdRef.current) {
+          setIsDriving(false);
+          setActiveRunId(null);
+          void queryClient.invalidateQueries({ queryKey: ["rust-gateway", "sessions"] });
+          void queryClient.invalidateQueries({ queryKey: ["rust-gateway", "chat", "history"] });
+        }
+        return;
+      }
+
+      if (chatEvent.kind === "injected") {
+        void queryClient.invalidateQueries({ queryKey: ["rust-gateway", "chat", "history"] });
       }
     });
 
-    source.onerror = () => {
-      source.close();
-      if (streamRef.current === source) {
-        streamRef.current = null;
-      }
-      setIsDriving(false);
+    return () => {
+      unsubscribe();
+      wsClient.close();
     };
-  };
+  }, [queryClient, wsClient]);
 
   const handleNewThread = async () => {
     try {
@@ -576,17 +510,23 @@ function Chat() {
       return;
     }
 
-    const run = await createRunMutation.mutateAsync({
-      sessionId: activeSessionId ?? undefined,
-      prompt,
-      model: selectedModel || undefined,
-      confirmed: confirmDestructive,
-    });
+    const run = await wsClient.request<{ runId: string; sessionId: string; status: string }>(
+      "chat.send",
+      {
+        sessionId: activeSessionId ?? undefined,
+        prompt,
+        model: selectedModel || undefined,
+        confirmed: confirmDestructive,
+        idempotencyKey: `web-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+      },
+    );
 
     setDraft("");
     setConfirmDestructive(false);
-    setActiveSessionId(run.session_id);
-    startStream(run.stream_path);
+    setActiveSessionId(run.sessionId);
+    setActiveRunId(run.runId);
+    setStreamText("");
+    setIsDriving(true);
   };
 
   const connectionText = useMemo(() => {
@@ -639,8 +579,8 @@ function Chat() {
 
         <ActiveSessionPanel
           messages={messages}
-          messagesLoading={messagesQuery.isLoading}
-          messagesError={messagesQuery.isError}
+          messagesLoading={historyQuery.isLoading}
+          messagesError={historyQuery.isError}
           latestRun={latestRun}
           latestAttempts={latestAttempts}
           draft={draft}
