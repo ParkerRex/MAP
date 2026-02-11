@@ -27,6 +27,8 @@ type CreateSessionResponse = Session;
 type CreateRunResponse = {
   run_id: string;
   session_id: string;
+  status: string;
+  requires_confirmation: boolean;
   stream_path: string;
 };
 
@@ -78,6 +80,7 @@ function Chat() {
   const [streamText, setStreamText] = useState("");
   const [isDriving, setIsDriving] = useState(false);
   const [selectedModel, setSelectedModel] = useState("");
+  const [confirmDestructive, setConfirmDestructive] = useState(false);
   const streamRef = useRef<EventSource | null>(null);
 
   const sessionsQuery = useQuery({
@@ -137,13 +140,19 @@ function Chat() {
   });
 
   const createRunMutation = useMutation({
-    mutationFn: (payload: { sessionId?: string; prompt: string; model?: string }) =>
+    mutationFn: (payload: {
+      sessionId?: string;
+      prompt: string;
+      model?: string;
+      confirmed?: boolean;
+    }) =>
       requestJson<CreateRunResponse>("/v1/chat/runs", {
         method: "POST",
         body: JSON.stringify({
           session_id: payload.sessionId,
           prompt: payload.prompt,
           model: payload.model,
+          confirmed: payload.confirmed,
         }),
       }),
   });
@@ -207,9 +216,11 @@ function Chat() {
       sessionId: activeSessionId ?? undefined,
       prompt,
       model: selectedModel || undefined,
+      confirmed: confirmDestructive,
     });
 
     setDraft("");
+    setConfirmDestructive(false);
     setActiveSessionId(run.session_id);
     startStream(run.stream_path);
   };
@@ -341,6 +352,18 @@ function Chat() {
                 )}
               </select>
             </div>
+            <label
+              htmlFor="chat-confirm-destructive"
+              className="flex items-center gap-2 text-xs text-slate-500"
+            >
+              <input
+                id="chat-confirm-destructive"
+                type="checkbox"
+                checked={confirmDestructive}
+                onChange={(event) => setConfirmDestructive(event.target.checked)}
+              />
+              Confirm high-impact actions for this message
+            </label>
             <div className="flex justify-end">
               <button
                 type="button"

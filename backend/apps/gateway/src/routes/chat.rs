@@ -20,6 +20,7 @@ pub struct CreateRunRequest {
     pub prompt: String,
     pub model: Option<String>,
     pub fallback_models: Option<Vec<String>>,
+    pub confirmed: Option<bool>,
 }
 
 #[derive(Debug, Serialize)]
@@ -27,6 +28,8 @@ pub struct CreateRunResponse {
     pub run_id: Uuid,
     pub session_id: Uuid,
     pub model_used: String,
+    pub status: String,
+    pub requires_confirmation: bool,
     pub stream_path: String,
 }
 
@@ -40,6 +43,23 @@ pub struct RunRow {
     pub metadata: Value,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
+}
+
+fn requires_confirmation(prompt: &str) -> bool {
+    let normalized = prompt.to_lowercase();
+    let markers = [
+        "rm -rf",
+        "drop table",
+        "truncate table",
+        "delete all",
+        "wipe database",
+        "destroy",
+        "delete production",
+        "revoke",
+        "reset prod",
+    ];
+
+    markers.iter().any(|marker| normalized.contains(marker))
 }
 
 async fn resolve_session_id(state: &AppState, session_id: Option<Uuid>) -> Result<Uuid, ApiError> {
@@ -91,6 +111,56 @@ pub async fn create_run(
     .await?
     .0;
 
+    let confirmation_required = requires_confirmation(prompt) && !payload.confirmed.unwrap_or(false);
+    if confirmation_required {
+        let output = "Confirmation required: this request appears to include destructive or high-impact operations. Re-send with `confirmed: true` to continue.";
+        let status = "needs_confirmation";
+
+        sqlx::query(
+            r#"
+            update chat_runs
+            set status = $2, output = $3, metadata = $4, updated_at = now()
+            where id = $1
+            "#,
+        )
+        .bind(run_id)
+        .bind(status)
+        .bind(output)
+        .bind(serde_json::json!({
+            "model_used": "none",
+            "attempts": [],
+            "requires_confirmation": true
+        }))
+        .execute(&state.pool)
+        .await?;
+
+        sqlx::query(
+            r#"
+            insert into session_messages (session_id, role, text)
+            values ($1, 'user', $2), ($1, 'assistant', $3)
+            "#,
+        )
+        .bind(session_id)
+        .bind(prompt)
+        .bind(output)
+        .execute(&state.pool)
+        .await?;
+
+        sqlx::query("update sessions set updated_at = now() where id = $1")
+            .bind(session_id)
+            .execute(&state.pool)
+            .await?;
+
+        return Ok(Json(CreateRunResponse {
+            run_id,
+            session_id,
+            model_used: "none".to_string(),
+            status: status.to_string(),
+            requires_confirmation: true,
+            stream_path: format!("/v1/chat/runs/{run_id}/stream"),
+        }));
+    }
+
     let generation = model_runtime::generate_with_failover(
         &state,
         prompt,
@@ -122,7 +192,7 @@ pub async fn create_run(
         "#,
     )
     .bind(run_id)
-    .bind(status)
+    .bind(&status)
     .bind(&output)
     .bind(serde_json::json!({
         "model_used": model_used,
@@ -152,6 +222,8 @@ pub async fn create_run(
         run_id,
         session_id,
         model_used,
+        status,
+        requires_confirmation: false,
         stream_path: format!("/v1/chat/runs/{run_id}/stream"),
     }))
 }
@@ -193,4 +265,22 @@ pub async fn stream_run(
     });
 
     Ok(Sse::new(token_stream).keep_alive(KeepAlive::default()))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::requires_confirmation;
+
+    #[test]
+    fn confirmation_required_for_destructive_prompts() {
+        assert!(requires_confirmation("Please drop table users and recreate it"));
+        assert!(requires_confirmation("run rm -rf /tmp/test"));
+        assert!(requires_confirmation("Delete production records now"));
+    }
+
+    #[test]
+    fn confirmation_not_required_for_read_only_prompts() {
+        assert!(!requires_confirmation("Summarize this sprint and suggest priorities"));
+        assert!(!requires_confirmation("Draft release notes for the iOS update"));
+    }
 }
