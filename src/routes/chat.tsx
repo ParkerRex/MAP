@@ -30,6 +30,17 @@ type CreateRunResponse = {
   stream_path: string;
 };
 
+type ModelsResponse = {
+  primary_model: string;
+  fallback_models: string[];
+  providers: Array<{
+    provider: string;
+    base_url: string;
+    env_key_configured: boolean;
+  }>;
+  failover_strategy: string;
+};
+
 const rustGatewayBase = (import.meta.env.VITE_RUST_GATEWAY_URL ?? "http://localhost:18789").replace(
   /\/$/,
   "",
@@ -66,6 +77,7 @@ function Chat() {
   const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
   const [streamText, setStreamText] = useState("");
   const [isDriving, setIsDriving] = useState(false);
+  const [selectedModel, setSelectedModel] = useState("");
   const streamRef = useRef<EventSource | null>(null);
 
   const sessionsQuery = useQuery({
@@ -74,6 +86,20 @@ function Chat() {
     refetchInterval: 5000,
   });
 
+  const modelsQuery = useQuery({
+    queryKey: ["rust-gateway", "models"],
+    queryFn: () => requestJson<ModelsResponse>("/v1/models"),
+    staleTime: 30_000,
+  });
+
+  const modelOptions = useMemo(() => {
+    const payload = modelsQuery.data;
+    if (!payload) {
+      return [];
+    }
+    return Array.from(new Set([payload.primary_model, ...payload.fallback_models]));
+  }, [modelsQuery.data]);
+
   const sessions = sessionsQuery.data ?? [];
 
   useEffect(() => {
@@ -81,6 +107,12 @@ function Chat() {
       setActiveSessionId(sessions[0].id);
     }
   }, [activeSessionId, sessions]);
+
+  useEffect(() => {
+    if (!selectedModel && modelsQuery.data?.primary_model) {
+      setSelectedModel(modelsQuery.data.primary_model);
+    }
+  }, [modelsQuery.data?.primary_model, selectedModel]);
 
   const messagesQuery = useQuery({
     queryKey: ["rust-gateway", "sessions", activeSessionId, "messages"],
@@ -105,10 +137,14 @@ function Chat() {
   });
 
   const createRunMutation = useMutation({
-    mutationFn: (payload: { sessionId?: string; prompt: string }) =>
+    mutationFn: (payload: { sessionId?: string; prompt: string; model?: string }) =>
       requestJson<CreateRunResponse>("/v1/chat/runs", {
         method: "POST",
-        body: JSON.stringify({ session_id: payload.sessionId, prompt: payload.prompt }),
+        body: JSON.stringify({
+          session_id: payload.sessionId,
+          prompt: payload.prompt,
+          model: payload.model,
+        }),
       }),
   });
 
@@ -170,6 +206,7 @@ function Chat() {
     const run = await createRunMutation.mutateAsync({
       sessionId: activeSessionId ?? undefined,
       prompt,
+      model: selectedModel || undefined,
     });
 
     setDraft("");
@@ -279,6 +316,30 @@ function Chat() {
                 rows={3}
                 className="w-full resize-none rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 shadow-sm focus:outline-none"
               />
+            </div>
+            <div className="space-y-2">
+              <label
+                htmlFor="chat-model"
+                className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400"
+              >
+                Model
+              </label>
+              <select
+                id="chat-model"
+                value={selectedModel}
+                onChange={(event) => setSelectedModel(event.target.value)}
+                className="w-full rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 shadow-sm focus:outline-none"
+              >
+                {modelOptions.length === 0 ? (
+                  <option value="">Loading models...</option>
+                ) : (
+                  modelOptions.map((model) => (
+                    <option key={model} value={model}>
+                      {model}
+                    </option>
+                  ))
+                )}
+              </select>
             </div>
             <div className="flex justify-end">
               <button
