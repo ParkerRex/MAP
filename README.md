@@ -214,10 +214,11 @@ OAuth 2.0 integration for health/fitness data.
 | `/api/whoop/workouts` | GET | Workout data |
 | `/api/whoop/disconnect` | POST | Disconnect account |
 
-### Kimi Agent Chat (Convex `/chat`)
+### Kimi Agent Chat (Legacy Convex Path)
 
-Feature-flagged Kimi integration for the Convex agent copilot route (`/chat`), with clawdbot-style
-workspace tools and confirm-before-write behavior.
+Feature-flagged Kimi integration for the legacy Convex agent path, with clawdbot-style
+workspace tools and confirm-before-write behavior. The active web `/chat` UI now targets
+the Rust gateway.
 
 **Behavior:**
 - When `CHAT_KIMI_ENABLED=true`, `/chat` uses Kimi for generation.
@@ -238,6 +239,46 @@ KIMI_EMBEDDING_MODEL=text-embedding-v4
 # Optional embeddings fallback (OpenAI)
 OPENAI_API_KEY=your_openai_api_key
 ```
+
+### Rust Gateway (OpenClaw Parity Rewrite)
+
+`/chat` now targets a Rust gateway intended to replace Convex and become the
+OpenClaw-parity backend control plane (Postgres + Rust).
+
+**Run locally:**
+```bash
+# from repo root
+bun run gateway:dev
+```
+
+**Required env vars:**
+```bash
+RUST_GATEWAY_DATABASE_URL=postgres://...
+# Optional:
+RUST_GATEWAY_HOST=0.0.0.0
+RUST_GATEWAY_PORT=18789
+RUST_GATEWAY_AUTH_TOKEN=
+RUST_GATEWAY_AGENT_ID=main
+RUST_GATEWAY_MAIN_KEY=main
+RUST_GATEWAY_DM_SCOPE=main # main | per-peer | per-channel-peer | per-account-channel-peer
+RUST_GATEWAY_PRIMARY_MODEL=moonshot:kimi-k2-0711-preview
+RUST_GATEWAY_FALLBACK_MODELS=openai:gpt-4o-mini
+RUST_GATEWAY_CRON_POLL_INTERVAL_SECS=10
+RUST_GATEWAY_SKILLS_WORKSPACE_DIR=./skills
+RUST_GATEWAY_SKILLS_MANAGED_DIR=~/.openclaw/skills
+RUST_GATEWAY_SKILLS_BUNDLED_DIR=.ai/refs/openclaw/skills
+OPENCLAW_REF_COMMIT=8c963dc5a680f74cd7a7143263e9ec7d047404c0
+```
+
+**Gateway API coverage includes:**
+- Session APIs (`/v1/sessions`, `/v1/sessions/:id/messages`)
+- Chat run APIs + SSE (`/v1/chat/runs`, `/v1/chat/runs/:id/stream`)
+- Model auth profiles + failover preview (`/v1/models/*`)
+- Skills discovery/rescan (`/v1/skills`)
+- Cron scheduler CRUD/run-now (`/v1/cron/jobs*`)
+- Security audit (`/v1/security/audit`)
+- Node pairing + verification (`/v1/nodes/*`)
+- Channel routing + inbound + pairing (`/v1/channels/*`)
 
 ## API Routes
 
@@ -267,6 +308,8 @@ bun run dev        # Start dev server
 bun run build      # Build for production
 bun run lint       # Lint with Biome
 bun run typecheck  # TypeScript check
+bun run gateway:dev # Run Rust gateway scaffold
+bun run gateway:build # Build Rust gateway
 bun run db:push    # Push schema to database
 bun run db:studio  # Open Drizzle Studio
 ```
@@ -287,6 +330,8 @@ WHOOP_CLIENT_SECRET=your_client_secret
 
 # App
 NEXT_PUBLIC_APP_URL=http://localhost:3000
+VITE_RUST_GATEWAY_URL=http://localhost:18789
+VITE_RUST_GATEWAY_TOKEN=
 
 # Convex /chat Kimi (optional, feature-flagged)
 CHAT_KIMI_ENABLED=false

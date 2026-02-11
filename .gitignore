@@ -38,3 +38,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 .ai/refs/**
+
+# rust backend
+backend/target/

@@ -1,136 +1,194 @@
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import {
-  convexQuery,
-  useConvexAction,
-  useConvexAuth,
-  useConvexMutation,
-} from "@convex-dev/react-query";
-import { useStream } from "@convex-dev/persistent-text-streaming/react";
-import { api } from "../../convex/_generated/api";
-import { PageHeader, Panel, Pill } from "../components/start/page";
+import { PageHeader, Panel } from "../components/start/page";
 
 export const Route = createFileRoute("/chat")({
   component: Chat,
 });
 
+type Session = {
+  id: string;
+  title: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+type SessionMessage = {
+  id: string;
+  session_id: string;
+  role: "user" | "assistant" | string;
+  text: string;
+  created_at: string;
+};
+
+type CreateSessionResponse = Session;
+
+type CreateRunResponse = {
+  run_id: string;
+  session_id: string;
+  stream_path: string;
+};
+
+const rustGatewayBase = (import.meta.env.VITE_RUST_GATEWAY_URL ?? "http://localhost:18789").replace(
+  /\/$/,
+  "",
+);
+const rustGatewayToken = (import.meta.env.VITE_RUST_GATEWAY_TOKEN ?? "").trim();
+
+async function requestJson<T>(path: string, init?: RequestInit): Promise<T> {
+  const response = await fetch(`${rustGatewayBase}${path}`, {
+    ...init,
+    headers: {
+      "Content-Type": "application/json",
+      ...(rustGatewayToken ? { Authorization: `Bearer ${rustGatewayToken}` } : {}),
+      ...(init?.headers ?? {}),
+    },
+  });
+
+  if (!response.ok) {
+    const fallback = `Request failed (${response.status})`;
+    try {
+      const json = (await response.json()) as { error?: string };
+      throw new Error(json.error ?? fallback);
+    } catch {
+      throw new Error(fallback);
+    }
+  }
+
+  return (await response.json()) as T;
+}
+
 function Chat() {
+  const queryClient = useQueryClient();
+
   const [draft, setDraft] = useState("");
-  const [attachments, setAttachments] = useState<
-    { fileId: string; filename: string; contentType: string; url: string }[]
-  >([]);
-  const [activeThreadId, setActiveThreadId] = useState<string | null>(null);
-  const [activeStreamId, setActiveStreamId] = useState<string | undefined>();
+  const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
+  const [streamText, setStreamText] = useState("");
   const [isDriving, setIsDriving] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const streamRef = useRef<EventSource | null>(null);
 
-  const { data: threads = [] } = useQuery({
-    ...convexQuery(api.chat.listThreads, { limit: 20 }),
+  const sessionsQuery = useQuery({
+    queryKey: ["rust-gateway", "sessions"],
+    queryFn: () => requestJson<Session[]>("/v1/sessions"),
+    refetchInterval: 5000,
+  });
+
+  const sessions = sessionsQuery.data ?? [];
+
+  useEffect(() => {
+    if (!activeSessionId && sessions.length > 0) {
+      setActiveSessionId(sessions[0].id);
+    }
+  }, [activeSessionId, sessions]);
+
+  const messagesQuery = useQuery({
+    queryKey: ["rust-gateway", "sessions", activeSessionId, "messages"],
+    queryFn: () => requestJson<SessionMessage[]>(`/v1/sessions/${activeSessionId}/messages`),
+    enabled: Boolean(activeSessionId),
+    refetchInterval: isDriving ? 1000 : 3000,
+  });
+
+  const messages = messagesQuery.data ?? [];
+
+  const createSessionMutation = useMutation({
+    mutationFn: (title?: string) =>
+      requestJson<CreateSessionResponse>("/v1/sessions", {
+        method: "POST",
+        body: JSON.stringify({ title }),
+      }),
+    onSuccess: async (session) => {
+      setActiveSessionId(session.id);
+      setStreamText("");
+      await queryClient.invalidateQueries({ queryKey: ["rust-gateway", "sessions"] });
+    },
+  });
+
+  const createRunMutation = useMutation({
+    mutationFn: (payload: { sessionId?: string; prompt: string }) =>
+      requestJson<CreateRunResponse>("/v1/chat/runs", {
+        method: "POST",
+        body: JSON.stringify({ session_id: payload.sessionId, prompt: payload.prompt }),
+      }),
   });
 
   useEffect(() => {
-    if (!activeThreadId && threads.length > 0) {
-      setActiveThreadId(threads[0]._id);
-    }
-  }, [activeThreadId, threads]);
-
-  const { data: messages = [] } = useQuery({
-    ...convexQuery(
-      api.chat.listMessages,
-      activeThreadId ? { threadId: activeThreadId, limit: 40 } : "skip",
-    ),
-  });
-
-  const createThread = useMutation({
-    mutationFn: useConvexMutation(api.chat.createThread),
-  });
-  const createRun = useMutation({
-    mutationFn: useConvexMutation(api.chat.createRun),
-  });
-  const uploadFile = useMutation({
-    mutationFn: useConvexAction(api.chat.uploadFile),
-  });
-
-  const { isAuthenticated, fetchAccessToken } = useConvexAuth();
-  const [authToken, setAuthToken] = useState<string | null>(null);
-  useEffect(() => {
-    let cancelled = false;
-    if (!isAuthenticated) {
-      setAuthToken(null);
-      return;
-    }
-    void fetchAccessToken().then((token) => {
-      if (!cancelled) setAuthToken(token);
-    });
     return () => {
-      cancelled = true;
+      streamRef.current?.close();
+      streamRef.current = null;
     };
-  }, [fetchAccessToken, isAuthenticated]);
-
-  const streamUrl = useMemo(() => {
-    const base = import.meta.env.VITE_CONVEX_SITE_URL;
-    return new URL(`${base}/chat/stream`);
   }, []);
 
-  const stream = useStream(
-    api.chat.getStreamBody,
-    streamUrl,
-    isDriving,
-    activeStreamId,
-    { authToken },
-  );
+  const startStream = (streamPath: string) => {
+    streamRef.current?.close();
 
-  useEffect(() => {
-    if (isDriving && stream.status === "done") {
+    const streamUrl = rustGatewayToken
+      ? `${rustGatewayBase}${streamPath}${streamPath.includes("?") ? "&" : "?"}token=${encodeURIComponent(rustGatewayToken)}`
+      : `${rustGatewayBase}${streamPath}`;
+    const source = new EventSource(streamUrl);
+    streamRef.current = source;
+    setStreamText("");
+    setIsDriving(true);
+
+    source.onmessage = (event) => {
+      setStreamText((prev) => prev + event.data);
+    };
+
+    source.addEventListener("done", () => {
+      source.close();
+      if (streamRef.current === source) {
+        streamRef.current = null;
+      }
       setIsDriving(false);
-      setActiveStreamId(undefined);
-    }
-  }, [isDriving, stream.status]);
+      void queryClient.invalidateQueries({ queryKey: ["rust-gateway", "sessions"] });
+      if (activeSessionId) {
+        void queryClient.invalidateQueries({
+          queryKey: ["rust-gateway", "sessions", activeSessionId, "messages"],
+        });
+      }
+    });
 
-  const handleNewThread = async () => {
-    const threadId = await createThread.mutateAsync({});
-    setActiveThreadId(threadId);
-    setActiveStreamId(undefined);
-    setIsDriving(false);
+    source.onerror = () => {
+      source.close();
+      if (streamRef.current === source) {
+        streamRef.current = null;
+      }
+      setIsDriving(false);
+    };
   };
 
-  const handleAttach = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(event.target.files ?? []);
-    if (!files.length) return;
-    for (const file of files) {
-      const bytes = new Uint8Array(await file.arrayBuffer());
-      const uploaded = await uploadFile.mutateAsync({
-        filename: file.name,
-        contentType: file.type,
-        bytes,
-      });
-      setAttachments((prev) => [...prev, uploaded]);
-    }
-    event.target.value = "";
+  const handleNewThread = async () => {
+    await createSessionMutation.mutateAsync(undefined);
   };
 
   const handleSend = async () => {
-    const text = draft.trim();
-    if (!text) return;
-    const result = await createRun.mutateAsync({
-      threadId: activeThreadId ?? undefined,
-      prompt: text,
-      fileIds: attachments.map((file) => file.fileId),
+    const prompt = draft.trim();
+    if (!prompt || isDriving) {
+      return;
+    }
+
+    const run = await createRunMutation.mutateAsync({
+      sessionId: activeSessionId ?? undefined,
+      prompt,
     });
+
     setDraft("");
-    setAttachments([]);
-    setActiveThreadId(result.threadId);
-    setActiveStreamId(result.streamId);
-    setIsDriving(true);
+    setActiveSessionId(run.session_id);
+    startStream(run.stream_path);
   };
+
+  const connectionText = useMemo(() => {
+    if (sessionsQuery.isLoading) return "Connecting to Rust gateway...";
+    if (sessionsQuery.isError) return "Rust gateway unavailable";
+    return `Rust gateway: ${rustGatewayBase}`;
+  }, [sessionsQuery.isError, sessionsQuery.isLoading]);
 
   return (
     <div className="space-y-10">
       <PageHeader
         eyebrow="Agent copilot"
         title="Chat with your system"
-        subtitle="Streaming responses + file context, powered by Convex Agents."
+        subtitle="Rust gateway backend with OpenClaw-parity migration in progress."
         actions={
           <button
             type="button"
@@ -142,30 +200,34 @@ function Chat() {
         }
       />
 
+      <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-xs text-slate-500">
+        {connectionText}
+      </div>
+
       <div className="grid gap-6 lg:grid-cols-[0.35fr_0.65fr]">
-        <Panel title="Threads" subtitle="Active conversations">
+        <Panel title="Sessions" subtitle="Rust-backed conversation sessions">
           <div className="space-y-3">
-            {threads.length === 0 ? (
+            {sessions.length === 0 ? (
               <div className="rounded-2xl border border-dashed border-slate-200 bg-white/60 px-4 py-3 text-sm text-slate-500">
-                No threads yet. Start a new one.
+                No sessions yet. Start a new one.
               </div>
             ) : (
-              threads.map((thread) => (
+              sessions.map((session) => (
                 <button
-                  key={thread._id}
+                  key={session.id}
                   type="button"
-                  onClick={() => setActiveThreadId(thread._id)}
+                  onClick={() => setActiveSessionId(session.id)}
                   className={`w-full rounded-2xl border px-4 py-3 text-left transition ${
-                    activeThreadId === thread._id
+                    activeSessionId === session.id
                       ? "border-slate-300 bg-white shadow-[0_12px_30px_-25px_rgba(15,23,42,0.35)]"
                       : "border-slate-100 bg-white/70 hover:border-slate-200"
                   }`}
                 >
                   <p className="text-sm font-semibold text-slate-900">
-                    {thread.title ?? "Untitled thread"}
+                    {session.title ?? "Untitled session"}
                   </p>
                   <p className="text-xs text-slate-500">
-                    {new Date(thread._creationTime).toLocaleDateString()}
+                    {new Date(session.updated_at).toLocaleString()}
                   </p>
                 </button>
               ))
@@ -173,88 +235,59 @@ function Chat() {
           </div>
         </Panel>
 
-        <Panel title="Active thread" subtitle="Live stream preview" className="animate-rise-delay-1">
+        <Panel
+          title="Active session"
+          subtitle="Live stream preview"
+          className="animate-rise-delay-1"
+        >
           <div className="space-y-4">
             {messages.length === 0 ? (
               <div className="rounded-2xl border border-dashed border-slate-200 bg-white/60 px-4 py-3 text-sm text-slate-500">
-                Send a message to start the thread.
+                Send a message to start this session.
               </div>
             ) : (
-              messages.map((message) => {
-                const hasFiles = message.parts?.some(
-                  (part) => part.type === "file" || part.type === "image",
-                );
-                return (
-                  <div
-                    key={message.key}
-                    className={`max-w-[80%] rounded-2xl px-4 py-3 text-sm ${
-                      message.role === "assistant"
-                        ? "bg-slate-900 text-white shadow-[0_18px_40px_-30px_rgba(15,23,42,0.6)]"
-                        : "ml-auto bg-white text-slate-700 shadow-[0_18px_40px_-30px_rgba(15,23,42,0.2)]"
-                    }`}
-                  >
-                    <p>{message.text}</p>
-                    {hasFiles ? (
-                      <div className="mt-2">
-                        <Pill tone="amber">Attachment</Pill>
-                      </div>
-                    ) : null}
-                  </div>
-                );
-              })
+              messages.map((message) => (
+                <div
+                  key={message.id}
+                  className={`max-w-[80%] rounded-2xl px-4 py-3 text-sm ${
+                    message.role === "assistant"
+                      ? "bg-slate-900 text-white shadow-[0_18px_40px_-30px_rgba(15,23,42,0.6)]"
+                      : "ml-auto bg-white text-slate-700 shadow-[0_18px_40px_-30px_rgba(15,23,42,0.2)]"
+                  }`}
+                >
+                  <p>{message.text}</p>
+                </div>
+              ))
             )}
 
-            {isDriving && stream.text ? (
+            {isDriving ? (
               <div className="max-w-[80%] rounded-2xl bg-slate-900 px-4 py-3 text-sm text-white shadow-[0_18px_40px_-30px_rgba(15,23,42,0.6)]">
-                {stream.text}
+                {streamText || "Thinking..."}
               </div>
             ) : null}
           </div>
 
-          <div className="mt-6 flex flex-col gap-3 rounded-2xl border border-slate-200 bg-white/70 p-4 md:flex-row md:items-end">
-            <div className="flex-1 space-y-2">
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Message</p>
+          <div className="mt-6 flex flex-col gap-3 rounded-2xl border border-slate-200 bg-white/70 p-4">
+            <div className="space-y-2">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
+                Message
+              </p>
               <textarea
                 value={draft}
                 onChange={(event) => setDraft(event.target.value)}
-                placeholder="Ask the agent to plan, draft, or query..."
+                placeholder="Ask the assistant to plan, draft, or query..."
                 rows={3}
                 className="w-full resize-none rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 shadow-sm focus:outline-none"
               />
-              {attachments.length > 0 ? (
-                <div className="flex flex-wrap gap-2">
-                  {attachments.map((file) => (
-                    <span
-                      key={file.fileId}
-                      className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs text-slate-500"
-                    >
-                      {file.filename}
-                    </span>
-                  ))}
-                </div>
-              ) : null}
             </div>
-            <div className="flex flex-wrap gap-2">
-              <input
-                ref={fileInputRef}
-                type="file"
-                className="hidden"
-                onChange={handleAttach}
-                multiple
-              />
-              <button
-                type="button"
-                onClick={() => fileInputRef.current?.click()}
-                className="rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-600"
-              >
-                Attach file
-              </button>
+            <div className="flex justify-end">
               <button
                 type="button"
                 onClick={() => void handleSend()}
-                className="rounded-full bg-slate-900 px-4 py-2 text-xs font-semibold text-white"
+                disabled={isDriving || createRunMutation.isPending}
+                className="rounded-full bg-slate-900 px-4 py-2 text-xs font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50"
               >
-                Send
+                {isDriving ? "Streaming" : "Send"}
               </button>
             </div>
           </div>
