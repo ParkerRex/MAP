@@ -50,9 +50,16 @@ struct ProviderError {
     message: String,
 }
 
+fn canonical_provider(provider: &str) -> String {
+    match provider.trim().to_lowercase().as_str() {
+        "kimi" | "moonshot-ai" | "moonshotai" => "moonshot".to_string(),
+        value => value.to_string(),
+    }
+}
+
 fn parse_model(value: &str) -> (String, String) {
     if let Some((provider, model)) = value.split_once(':') {
-        (provider.trim().to_lowercase(), model.trim().to_string())
+        (canonical_provider(provider), model.trim().to_string())
     } else {
         let model = value.trim().to_string();
         let provider = if model.to_lowercase().starts_with("kimi") {
@@ -67,13 +74,21 @@ fn parse_model(value: &str) -> (String, String) {
 #[cfg(test)]
 mod tests {
     use super::{
-        extract_message_content, is_billing_error, parse_model, should_failover, ProviderError,
+        canonical_provider, extract_message_content, is_billing_error, parse_model,
+        should_failover, ProviderError,
     };
     use serde_json::json;
 
     #[test]
     fn parse_model_provider_prefix() {
         let (provider, model) = parse_model("moonshot:kimi-k2");
+        assert_eq!(provider, "moonshot");
+        assert_eq!(model, "kimi-k2");
+    }
+
+    #[test]
+    fn parse_model_normalizes_kimi_alias_prefix() {
+        let (provider, model) = parse_model("kimi:kimi-k2");
         assert_eq!(provider, "moonshot");
         assert_eq!(model, "kimi-k2");
     }
@@ -97,6 +112,13 @@ mod tests {
         let (provider, model) = parse_model("  moonshot : kimi-k2-instruct  ");
         assert_eq!(provider, "moonshot");
         assert_eq!(model, "kimi-k2-instruct");
+    }
+
+    #[test]
+    fn canonical_provider_normalizes_aliases() {
+        assert_eq!(canonical_provider("kimi"), "moonshot");
+        assert_eq!(canonical_provider("moonshot-ai"), "moonshot");
+        assert_eq!(canonical_provider("openai"), "openai");
     }
 
     #[test]
