@@ -523,3 +523,116 @@ fn collect_install_ids(frontmatter: &str) -> BTreeSet<String> {
 
     install_ids
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn parse_bins_params_rejects_unknown_fields() {
+        let parsed = parse_params::<SkillsBinsParams>(json!({ "extra": true }), "skills.bins");
+        assert!(parsed.is_err());
+
+        match parsed.expect_err("expected invalid params error") {
+            WsMethodError::InvalidRequest(message) => {
+                assert_eq!(message, "invalid skills.bins params");
+            }
+            other => panic!("unexpected error variant: {other:?}"),
+        }
+    }
+
+    #[test]
+    fn collect_bins_includes_requires_anybins_and_install_bins() {
+        let skill = r#"---
+name: demo
+metadata:
+  {
+    "openclaw": {
+      "requires": {"bins": ["ffmpeg"], "anyBins": ["uv", "python3"]},
+      "install": [
+        {
+          "id": "uv",
+          "bins": ["tool-a", "tool-b"]
+        }
+      ]
+    }
+  }
+---
+"#;
+
+        let frontmatter = extract_frontmatter(skill).expect("frontmatter expected");
+        let mut bins = collect_array_string_values(frontmatter, &["\"bins\"", "\"anyBins\""]);
+        bins.sort();
+        bins.dedup();
+
+        assert_eq!(bins, vec!["ffmpeg", "python3", "tool-a", "tool-b", "uv"]);
+    }
+
+    #[test]
+    fn collect_install_ids_reads_install_block_ids_only() {
+        let skill = r#"---
+name: demo
+metadata:
+  {
+    "openclaw": {
+      "id": "outside-install-ignored",
+      "install": [
+        {"id": "brew"},
+        {"id": "uv"}
+      ]
+    }
+  }
+---
+"#;
+
+        let frontmatter = extract_frontmatter(skill).expect("frontmatter expected");
+        let ids = collect_install_ids(frontmatter);
+
+        assert_eq!(ids, BTreeSet::from(["brew".to_string(), "uv".to_string()]));
+    }
+
+    #[test]
+    fn apply_update_patch_normalizes_secret_and_env_values() {
+        let params = SkillsUpdateParams {
+            skill_key: "demo".to_string(),
+            enabled: Some(true),
+            api_key: Some("abc\r\ndef".to_string()),
+            env: Some(BTreeMap::from([
+                (" API_KEY ".to_string(), "  value  ".to_string()),
+                ("EMPTY".to_string(), "   ".to_string()),
+            ])),
+        };
+
+        let config = SkillRuntimeConfig {
+            api_key: None,
+            env: BTreeMap::from([
+                ("EMPTY".to_string(), "old".to_string()),
+                ("KEEP".to_string(), "y".to_string()),
+            ]),
+        };
+
+        let updated = apply_update_patch(config, &params);
+        assert_eq!(updated.api_key.as_deref(), Some("abcdef"));
+        assert_eq!(
+            updated.env.get("API_KEY").map(String::as_str),
+            Some("value")
+        );
+        assert_eq!(updated.env.get("KEEP").map(String::as_str), Some("y"));
+        assert!(!updated.env.contains_key("EMPTY"));
+    }
+
+    #[test]
+    fn apply_update_patch_is_idempotent() {
+        let params = SkillsUpdateParams {
+            skill_key: "demo".to_string(),
+            enabled: None,
+            api_key: Some("abc\n123".to_string()),
+            env: Some(BTreeMap::from([("A".to_string(), "B".to_string())])),
+        };
+
+        let once = apply_update_patch(SkillRuntimeConfig::default(), &params);
+        let twice = apply_update_patch(once.clone(), &params);
+
+        assert_eq!(once, twice);
+    }
+}
