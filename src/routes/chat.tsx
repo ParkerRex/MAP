@@ -288,6 +288,13 @@ function Chat() {
     staleTime: 10_000,
   });
 
+  const cronRunsQuery = useQuery({
+    queryKey: ["rust-gateway", "cron", "runs"],
+    queryFn: () => requestJson<CronRun[]>("/v1/cron/runs"),
+    staleTime: 5_000,
+    refetchInterval: 10_000,
+  });
+
   const channelsSummaryQuery = useQuery({
     queryKey: ["rust-gateway", "channels", "summary"],
     queryFn: () => requestJson<ChannelsSummaryResponse>("/v1/channels"),
@@ -442,6 +449,7 @@ function Chat() {
       }),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["rust-gateway", "cron", "jobs"] });
+      await queryClient.invalidateQueries({ queryKey: ["rust-gateway", "cron", "runs"] });
     },
   });
 
@@ -452,6 +460,7 @@ function Chat() {
       }),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["rust-gateway", "cron", "jobs"] });
+      await queryClient.invalidateQueries({ queryKey: ["rust-gateway", "cron", "runs"] });
       await queryClient.invalidateQueries({ queryKey: ["rust-gateway", "sessions"] });
       if (activeSessionId) {
         await queryClient.invalidateQueries({
@@ -468,6 +477,7 @@ function Chat() {
       }),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["rust-gateway", "cron", "jobs"] });
+      await queryClient.invalidateQueries({ queryKey: ["rust-gateway", "cron", "runs"] });
     },
   });
 
@@ -1179,6 +1189,31 @@ function Chat() {
                   </div>
                   {job.last_error ? (
                     <p className="mt-2 text-xs text-rose-500">Last error: {job.last_error}</p>
+                  ) : null}
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+        <div className="mt-4 rounded-2xl border border-slate-100 bg-white px-4 py-4">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
+            Recent runs
+          </p>
+          <div className="mt-3 space-y-2">
+            {(cronRunsQuery.data ?? []).length === 0 ? (
+              <p className="text-xs text-slate-500">No cron runs yet.</p>
+            ) : (
+              (cronRunsQuery.data ?? []).slice(0, 10).map((run) => (
+                <div
+                  key={run.id}
+                  className="rounded-xl border border-slate-100 bg-slate-50 px-3 py-2 text-xs text-slate-600"
+                >
+                  <p>
+                    status=<span className="font-semibold">{run.status}</span> · started{" "}
+                    {new Date(run.started_at).toLocaleString()}
+                  </p>
+                  {run.output?.message ? (
+                    <p className="mt-1">message={run.output.message}</p>
                   ) : null}
                 </div>
               ))

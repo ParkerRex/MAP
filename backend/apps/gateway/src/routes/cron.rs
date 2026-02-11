@@ -36,6 +36,23 @@ pub async fn list_jobs(
     Ok(Json(jobs))
 }
 
+pub async fn list_runs(
+    State(state): State<AppState>,
+) -> Result<Json<Vec<cron_runtime::CronRunRow>>, ApiError> {
+    let runs = sqlx::query_as::<_, cron_runtime::CronRunRow>(
+        r#"
+        select id, cron_job_id, status, started_at, finished_at, output
+        from cron_runs
+        order by started_at desc
+        limit 100
+        "#,
+    )
+    .fetch_all(&state.pool)
+    .await?;
+
+    Ok(Json(runs))
+}
+
 pub async fn create_job(
     State(state): State<AppState>,
     Json(payload): Json<cron_runtime::CronCreateRequest>,

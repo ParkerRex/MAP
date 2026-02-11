@@ -61,6 +61,7 @@ pub fn router(state: AppState) -> Router {
             "/skills",
             get(skills::list_skills).post(skills::rescan_skills),
         )
+        .route("/cron/runs", get(cron::list_runs))
         .route("/cron/jobs", get(cron::list_jobs).post(cron::create_job))
         .route("/cron/jobs/:id", delete(cron::delete_job))
         .route("/cron/jobs/:id/run", post(cron::run_job_now))
