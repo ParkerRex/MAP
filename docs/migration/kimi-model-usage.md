@@ -18,6 +18,8 @@ RUST_GATEWAY_FALLBACK_MODELS=openai:gpt-4o-mini
 - `moonshot:kimi-k2-0711-preview` works directly.
 - `kimi:kimi-k2-0711-preview` is normalized to `moonshot`.
 - Unprefixed `kimi-*` model names auto-route to Moonshot.
+- Profile upsert also normalizes provider aliases:
+  - `provider: "kimi"` is stored as `moonshot`.
 
 ## Chat UI
 
