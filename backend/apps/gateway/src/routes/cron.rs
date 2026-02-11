@@ -247,7 +247,8 @@ mod tests {
                 }))
             }),
         );
-        let (model_provider_url, model_provider_handle) = spawn_http_server(model_provider_app).await;
+        let (model_provider_url, model_provider_handle) =
+            spawn_http_server(model_provider_app).await;
 
         let pool = db::connect_and_migrate(&database_url)
             .await
@@ -290,7 +291,9 @@ mod tests {
             Some("mock preview output")
         );
         assert_eq!(
-            preview_body.pointer("/attempts/0/ok").and_then(Value::as_bool),
+            preview_body
+                .pointer("/attempts/0/ok")
+                .and_then(Value::as_bool),
             Some(true)
         );
 
@@ -320,6 +323,12 @@ mod tests {
         assert_eq!(
             disabled_inbound_body
                 .get("requires_pairing")
+                .and_then(Value::as_bool),
+            Some(false)
+        );
+        assert_eq!(
+            disabled_inbound_body
+                .get("requires_confirmation")
                 .and_then(Value::as_bool),
             Some(false)
         );
@@ -358,6 +367,12 @@ mod tests {
             Some(true)
         );
         assert_eq!(
+            pairing_inbound_body
+                .get("requires_confirmation")
+                .and_then(Value::as_bool),
+            Some(false)
+        );
+        assert_eq!(
             pairing_inbound_body.get("reason").and_then(Value::as_str),
             Some("pairing approval required")
         );
@@ -372,6 +387,271 @@ mod tests {
                 .and_then(Value::as_str)
                 .is_some_and(|value| value.len() == 6),
             "pairing_code should be a six digit string"
+        );
+
+        let destructive_inbound_response = client
+            .post(format!("{gateway_url}/v1/channels/inbound"))
+            .json(&json!({
+                "provider": "telegram",
+                "peer_kind": "dm",
+                "peer_id": "destructive-peer",
+                "text": "Delete production data and reset prod tables",
+                "dm_policy": "open"
+            }))
+            .send()
+            .await
+            .expect("destructive inbound request failed");
+        assert_eq!(destructive_inbound_response.status(), StatusCode::OK);
+        let destructive_inbound_body: Value = destructive_inbound_response
+            .json()
+            .await
+            .expect("failed to parse destructive inbound response json");
+        assert_eq!(
+            destructive_inbound_body
+                .get("accepted")
+                .and_then(Value::as_bool),
+            Some(false)
+        );
+        assert_eq!(
+            destructive_inbound_body
+                .get("requires_pairing")
+                .and_then(Value::as_bool),
+            Some(false)
+        );
+        assert_eq!(
+            destructive_inbound_body
+                .get("requires_confirmation")
+                .and_then(Value::as_bool),
+            Some(true)
+        );
+        assert_eq!(
+            destructive_inbound_body
+                .get("reason")
+                .and_then(Value::as_str),
+            Some("confirmation required")
+        );
+        let destructive_run_id = destructive_inbound_body
+            .get("run_id")
+            .and_then(Value::as_str)
+            .expect("run_id should be present for destructive confirmation flow");
+        Uuid::parse_str(destructive_run_id)
+            .expect("run_id should be a valid uuid for destructive confirmation flow");
+
+        let account_response = client
+            .post(format!("{gateway_url}/v1/channels/accounts"))
+            .json(&json!({
+                "provider": "kimi",
+                "account_key": "contract-account",
+                "metadata": {"source": "contract-test"}
+            }))
+            .send()
+            .await
+            .expect("channel account upsert request failed");
+        assert_eq!(account_response.status(), StatusCode::OK);
+        let account_body: Value = account_response
+            .json()
+            .await
+            .expect("failed to parse channel account response json");
+        assert_eq!(
+            account_body.get("provider").and_then(Value::as_str),
+            Some("moonshot")
+        );
+        let account_id = account_body
+            .get("id")
+            .and_then(Value::as_str)
+            .expect("channel account id should be present");
+        let parsed_account_id = Uuid::parse_str(account_id).expect("account id should be a uuid");
+
+        let route_response = client
+            .post(format!("{gateway_url}/v1/channels/routes"))
+            .json(&json!({
+                "provider": "moonshot-ai",
+                "account_id": account_id,
+                "peer_key": "telegram:contract-peer",
+                "session_scope": "agent:main:main"
+            }))
+            .send()
+            .await
+            .expect("channel route upsert request failed");
+        assert_eq!(route_response.status(), StatusCode::OK);
+        let route_body: Value = route_response
+            .json()
+            .await
+            .expect("failed to parse channel route response json");
+        assert_eq!(
+            route_body.get("provider").and_then(Value::as_str),
+            Some("moonshot")
+        );
+        assert_eq!(
+            route_body.get("account_id").and_then(Value::as_str),
+            Some(account_id)
+        );
+        let route_id = route_body
+            .get("id")
+            .and_then(Value::as_str)
+            .expect("channel route id should be present");
+        Uuid::parse_str(route_id).expect("route id should be a uuid");
+
+        let delete_route_response = client
+            .delete(format!("{gateway_url}/v1/channels/routes/{route_id}"))
+            .send()
+            .await
+            .expect("channel route delete request failed");
+        assert_eq!(delete_route_response.status(), StatusCode::OK);
+        let delete_route_body: Value = delete_route_response
+            .json()
+            .await
+            .expect("failed to parse route delete response json");
+        assert_eq!(
+            delete_route_body.get("deleted").and_then(Value::as_bool),
+            Some(true)
+        );
+
+        let delete_account_response = client
+            .delete(format!(
+                "{gateway_url}/v1/channels/accounts/{parsed_account_id}"
+            ))
+            .send()
+            .await
+            .expect("channel account delete request failed");
+        assert_eq!(delete_account_response.status(), StatusCode::OK);
+        let delete_account_body: Value = delete_account_response
+            .json()
+            .await
+            .expect("failed to parse account delete response json");
+        assert_eq!(
+            delete_account_body.get("deleted").and_then(Value::as_bool),
+            Some(true)
+        );
+
+        let node_pair_request_response = client
+            .post(format!("{gateway_url}/v1/nodes/pair/request"))
+            .json(&json!({
+                "node_key": "contract-node-approved",
+                "display_name": "Contract Node Approved",
+                "capabilities": {}
+            }))
+            .send()
+            .await
+            .expect("node pairing request (approved flow) failed");
+        assert_eq!(node_pair_request_response.status(), StatusCode::OK);
+        let node_pair_request_body: Value = node_pair_request_response
+            .json()
+            .await
+            .expect("failed to parse node pair request response json");
+        let node_pair_request_id = node_pair_request_body
+            .get("request_id")
+            .and_then(Value::as_str)
+            .expect("node pair request id should be present");
+
+        let approve_node_pair_response = client
+            .post(format!(
+                "{gateway_url}/v1/nodes/pair/approve/{node_pair_request_id}"
+            ))
+            .send()
+            .await
+            .expect("node pairing approval request failed");
+        assert_eq!(approve_node_pair_response.status(), StatusCode::OK);
+        let approve_node_pair_body: Value = approve_node_pair_response
+            .json()
+            .await
+            .expect("failed to parse node pairing approval response json");
+        assert_eq!(
+            approve_node_pair_body
+                .get("approved")
+                .and_then(Value::as_bool),
+            Some(true)
+        );
+        assert_eq!(
+            approve_node_pair_body
+                .get("rejected")
+                .and_then(Value::as_bool),
+            Some(false)
+        );
+        assert_eq!(
+            approve_node_pair_body.get("status").and_then(Value::as_str),
+            Some("approved")
+        );
+        assert!(
+            approve_node_pair_body
+                .get("token")
+                .and_then(Value::as_str)
+                .is_some_and(|token| !token.is_empty()),
+            "approved response should include a token"
+        );
+        assert_eq!(
+            approve_node_pair_body
+                .get("node_key")
+                .and_then(Value::as_str),
+            Some("contract-node-approved")
+        );
+        assert_eq!(
+            approve_node_pair_body
+                .get("peer_key")
+                .and_then(Value::as_str),
+            Some("contract-node-approved")
+        );
+
+        let reject_node_pair_request_response = client
+            .post(format!("{gateway_url}/v1/nodes/pair/request"))
+            .json(&json!({
+                "node_key": "contract-node-rejected",
+                "display_name": "Contract Node Rejected",
+                "capabilities": {}
+            }))
+            .send()
+            .await
+            .expect("node pairing request (rejected flow) failed");
+        assert_eq!(reject_node_pair_request_response.status(), StatusCode::OK);
+        let reject_node_pair_request_body: Value = reject_node_pair_request_response
+            .json()
+            .await
+            .expect("failed to parse node pair request response json (rejected flow)");
+        let reject_node_pair_request_id = reject_node_pair_request_body
+            .get("request_id")
+            .and_then(Value::as_str)
+            .expect("node pair request id should be present (rejected flow)");
+
+        let reject_node_pair_response = client
+            .post(format!(
+                "{gateway_url}/v1/nodes/pair/reject/{reject_node_pair_request_id}"
+            ))
+            .send()
+            .await
+            .expect("node pairing rejection request failed");
+        assert_eq!(reject_node_pair_response.status(), StatusCode::OK);
+        let reject_node_pair_body: Value = reject_node_pair_response
+            .json()
+            .await
+            .expect("failed to parse node pairing rejection response json");
+        assert_eq!(
+            reject_node_pair_body
+                .get("approved")
+                .and_then(Value::as_bool),
+            Some(false)
+        );
+        assert_eq!(
+            reject_node_pair_body
+                .get("rejected")
+                .and_then(Value::as_bool),
+            Some(true)
+        );
+        assert_eq!(
+            reject_node_pair_body.get("status").and_then(Value::as_str),
+            Some("rejected")
+        );
+        assert_eq!(reject_node_pair_body.get("token"), Some(&Value::Null));
+        assert_eq!(
+            reject_node_pair_body
+                .get("node_key")
+                .and_then(Value::as_str),
+            Some("contract-node-rejected")
+        );
+        assert_eq!(
+            reject_node_pair_body
+                .get("peer_key")
+                .and_then(Value::as_str),
+            Some("contract-node-rejected")
         );
 
         let cron_job_id = sqlx::query_scalar::<_, Uuid>(
