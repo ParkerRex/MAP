@@ -26,6 +26,10 @@
   - create jobs via `POST /v1/cron/jobs`
   - run now via `POST /v1/cron/jobs/:id/run`
   - delete via `DELETE /v1/cron/jobs/:id`
+- Channels + pairing panel:
+  - connector/account/route summary from `GET /v1/channels`
+  - pending pairing queue from `GET /v1/channels/pairing`
+  - approve/reject actions
 
 ## Confirmation Gate Behavior
 
@@ -57,3 +61,7 @@ Rust gateway now marks certain prompts as high impact if they contain destructiv
 - `POST /v1/cron/jobs`
 - `POST /v1/cron/jobs/:id/run`
 - `DELETE /v1/cron/jobs/:id`
+- `GET /v1/channels`
+- `GET /v1/channels/pairing`
+- `POST /v1/channels/pairing/:id/approve`
+- `POST /v1/channels/pairing/:id/reject`
