@@ -97,6 +97,37 @@ type SkillsResponse = {
   precedence: string[];
 };
 
+type CronJob = {
+  id: string;
+  name: string;
+  schedule_kind: string;
+  schedule_expr: string;
+  timezone: string | null;
+  payload: {
+    message?: string;
+  };
+  session_target: string;
+  delivery_mode: string | null;
+  enabled: boolean;
+  next_run_at: string | null;
+  last_run_at: string | null;
+  last_error: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+type CronRun = {
+  id: string;
+  cron_job_id: string;
+  status: string;
+  started_at: string;
+  finished_at: string | null;
+  output: {
+    session_id?: string;
+    message?: string;
+  };
+};
+
 const rustGatewayBase = (import.meta.env.VITE_RUST_GATEWAY_URL ?? "http://localhost:18789").replace(
   /\/$/,
   "",
@@ -137,6 +168,10 @@ function Chat() {
   const [confirmDestructive, setConfirmDestructive] = useState(false);
   const [newProfileProvider, setNewProfileProvider] = useState("moonshot");
   const [newApiKey, setNewApiKey] = useState("");
+  const [cronName, setCronName] = useState("Daily standup ping");
+  const [cronKind, setCronKind] = useState("every");
+  const [cronExpr, setCronExpr] = useState("3600");
+  const [cronMessage, setCronMessage] = useState("Send a status recap and next action.");
   const streamRef = useRef<EventSource | null>(null);
 
   const sessionsQuery = useQuery({
@@ -167,6 +202,12 @@ function Chat() {
   const skillsQuery = useQuery({
     queryKey: ["rust-gateway", "skills"],
     queryFn: () => requestJson<SkillsResponse>("/v1/skills"),
+    staleTime: 10_000,
+  });
+
+  const cronJobsQuery = useQuery({
+    queryKey: ["rust-gateway", "cron", "jobs"],
+    queryFn: () => requestJson<CronJob[]>("/v1/cron/jobs"),
     staleTime: 10_000,
   });
 
@@ -282,6 +323,56 @@ function Chat() {
     },
   });
 
+  const createCronJobMutation = useMutation({
+    mutationFn: (payload: {
+      name: string;
+      scheduleKind: string;
+      scheduleExpr: string;
+      message: string;
+    }) =>
+      requestJson<CronJob>("/v1/cron/jobs", {
+        method: "POST",
+        body: JSON.stringify({
+          name: payload.name,
+          schedule_kind: payload.scheduleKind,
+          schedule_expr: payload.scheduleExpr,
+          timezone: "UTC",
+          payload: { message: payload.message },
+          session_target: "main",
+          delivery_mode: "append",
+        }),
+      }),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["rust-gateway", "cron", "jobs"] });
+    },
+  });
+
+  const runCronJobMutation = useMutation({
+    mutationFn: (id: string) =>
+      requestJson<CronRun>(`/v1/cron/jobs/${id}/run`, {
+        method: "POST",
+      }),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["rust-gateway", "cron", "jobs"] });
+      await queryClient.invalidateQueries({ queryKey: ["rust-gateway", "sessions"] });
+      if (activeSessionId) {
+        await queryClient.invalidateQueries({
+          queryKey: ["rust-gateway", "sessions", activeSessionId, "messages"],
+        });
+      }
+    },
+  });
+
+  const deleteCronJobMutation = useMutation({
+    mutationFn: (id: string) =>
+      requestJson<{ deleted: boolean }>(`/v1/cron/jobs/${id}`, {
+        method: "DELETE",
+      }),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["rust-gateway", "cron", "jobs"] });
+    },
+  });
+
   useEffect(() => {
     return () => {
       streamRef.current?.close();
@@ -359,6 +450,21 @@ function Chat() {
       return;
     }
     await addProfileMutation.mutateAsync({ provider: newProfileProvider, apiKey });
+  };
+
+  const handleCreateCronJob = async () => {
+    const name = cronName.trim();
+    const scheduleExpr = cronExpr.trim();
+    const message = cronMessage.trim();
+    if (!name || !scheduleExpr || !message) {
+      return;
+    }
+    await createCronJobMutation.mutateAsync({
+      name,
+      scheduleKind: cronKind,
+      scheduleExpr,
+      message,
+    });
   };
 
   const connectionText = useMemo(() => {
@@ -681,6 +787,106 @@ function Chat() {
           </div>
         </Panel>
       </div>
+
+      <Panel title="Cron automation" subtitle="Schedule recurring assistant workflows">
+        <div className="grid gap-6 lg:grid-cols-[0.45fr_0.55fr]">
+          <div className="space-y-3 rounded-2xl border border-slate-100 bg-white px-4 py-4">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
+              Create job
+            </p>
+            <input
+              value={cronName}
+              onChange={(event) => setCronName(event.target.value)}
+              placeholder="Job name"
+              className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700"
+            />
+            <div className="grid gap-2 sm:grid-cols-2">
+              <select
+                value={cronKind}
+                onChange={(event) => setCronKind(event.target.value)}
+                className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700"
+              >
+                <option value="every">every (seconds)</option>
+                <option value="cron">cron expression</option>
+                <option value="at">single timestamp (ISO)</option>
+              </select>
+              <input
+                value={cronExpr}
+                onChange={(event) => setCronExpr(event.target.value)}
+                placeholder={
+                  cronKind === "every"
+                    ? "3600"
+                    : cronKind === "cron"
+                      ? "0 * * * * *"
+                      : "2026-02-11T20:00:00Z"
+                }
+                className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700"
+              />
+            </div>
+            <textarea
+              value={cronMessage}
+              onChange={(event) => setCronMessage(event.target.value)}
+              rows={3}
+              placeholder="Message injected into session when job runs..."
+              className="w-full resize-none rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700"
+            />
+            <button
+              type="button"
+              onClick={() => void handleCreateCronJob()}
+              disabled={createCronJobMutation.isPending}
+              className="rounded-full bg-slate-900 px-4 py-2 text-xs font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              Create cron job
+            </button>
+          </div>
+
+          <div className="space-y-2">
+            {(cronJobsQuery.data ?? []).length === 0 ? (
+              <p className="rounded-2xl border border-dashed border-slate-200 bg-white/60 px-4 py-3 text-sm text-slate-500">
+                No cron jobs configured.
+              </p>
+            ) : (
+              (cronJobsQuery.data ?? []).map((job) => (
+                <div
+                  key={job.id}
+                  className="rounded-2xl border border-slate-100 bg-white px-4 py-3 text-sm text-slate-700"
+                >
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <div>
+                      <p className="font-semibold text-slate-900">{job.name}</p>
+                      <p className="text-xs text-slate-500">
+                        {job.schedule_kind}: {job.schedule_expr}
+                      </p>
+                      <p className="text-xs text-slate-500">
+                        Next: {job.next_run_at ? new Date(job.next_run_at).toLocaleString() : "n/a"}
+                      </p>
+                    </div>
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        onClick={() => void runCronJobMutation.mutateAsync(job.id)}
+                        className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold text-slate-600"
+                      >
+                        Run now
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => void deleteCronJobMutation.mutateAsync(job.id)}
+                        className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold text-rose-500"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+                  {job.last_error ? (
+                    <p className="mt-2 text-xs text-rose-500">Last error: {job.last_error}</p>
+                  ) : null}
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+      </Panel>
     </div>
   );
 }
