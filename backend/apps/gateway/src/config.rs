@@ -3,6 +3,13 @@ use std::env;
 use std::path::PathBuf;
 
 #[derive(Clone, Debug)]
+pub struct AuthTokenConfig {
+    pub token: String,
+    pub subject: String,
+    pub scopes: Vec<String>,
+}
+
+#[derive(Clone, Debug)]
 pub struct ProviderConfig {
     pub provider: String,
     pub base_url: String,
@@ -18,7 +25,9 @@ pub struct AppConfig {
     pub main_key: String,
     pub dm_scope: String,
     pub openclaw_ref_commit: String,
+    #[allow(dead_code)]
     pub auth_token: Option<String>,
+    pub auth_tokens: Vec<AuthTokenConfig>,
     pub primary_model: String,
     pub fallback_models: Vec<String>,
     pub providers: HashMap<String, ProviderConfig>,
@@ -26,6 +35,10 @@ pub struct AppConfig {
     pub skills_managed_dir: PathBuf,
     pub skills_bundled_dir: PathBuf,
     pub cron_poll_interval_secs: u64,
+    pub http_rate_limit_per_minute: u32,
+    pub ws_rate_limit_per_minute: u32,
+    pub ws_resume_max_events: i64,
+    pub idempotency_ttl_secs: i64,
 }
 
 fn parse_csv(value: Option<String>) -> Vec<String> {
@@ -43,6 +56,55 @@ fn normalize_base_url(url: &str) -> String {
     } else {
         url.to_string()
     }
+}
+
+fn parse_scoped_tokens(value: Option<String>) -> Vec<AuthTokenConfig> {
+    let Some(value) = value else {
+        return Vec::new();
+    };
+
+    value
+        .split(';')
+        .map(str::trim)
+        .filter(|entry| !entry.is_empty())
+        .filter_map(|entry| {
+            let mut parts = entry.split('|').map(str::trim);
+            let token = parts.next().unwrap_or_default().to_string();
+            if token.is_empty() {
+                return None;
+            }
+
+            let scopes = parts
+                .next()
+                .map(|scope_csv| {
+                    scope_csv
+                        .split(',')
+                        .map(|scope| scope.trim().to_string())
+                        .filter(|scope| !scope.is_empty())
+                        .collect::<Vec<_>>()
+                })
+                .filter(|scopes| !scopes.is_empty())
+                .unwrap_or_else(|| vec!["*".to_string()]);
+
+            let subject = parts
+                .next()
+                .map(|subject| subject.trim().to_string())
+                .filter(|subject| !subject.is_empty())
+                .unwrap_or_else(|| {
+                    use sha2::{Digest, Sha256};
+                    let mut hasher = Sha256::new();
+                    hasher.update(token.as_bytes());
+                    let digest = hex::encode(hasher.finalize());
+                    format!("token:{}", &digest[..16])
+                });
+
+            Some(AuthTokenConfig {
+                token,
+                subject,
+                scopes,
+            })
+        })
+        .collect()
 }
 
 impl AppConfig {
@@ -84,6 +146,16 @@ impl AppConfig {
             .ok()
             .map(|value| value.trim().to_string())
             .filter(|value| !value.is_empty());
+        let mut auth_tokens = parse_scoped_tokens(env::var("RUST_GATEWAY_AUTH_SCOPED_TOKENS").ok());
+        if auth_tokens.is_empty() {
+            if let Some(token) = auth_token.as_ref() {
+                auth_tokens.push(AuthTokenConfig {
+                    token: token.clone(),
+                    subject: "gateway-legacy-token".to_string(),
+                    scopes: vec!["*".to_string()],
+                });
+            }
+        }
 
         let moonshot_key = env::var("KIMI_API_KEY")
             .ok()
@@ -162,6 +234,24 @@ impl AppConfig {
             .ok()
             .and_then(|value| value.parse::<u64>().ok())
             .unwrap_or(10);
+        let http_rate_limit_per_minute = env::var("RUST_GATEWAY_HTTP_RATE_LIMIT_PER_MINUTE")
+            .ok()
+            .and_then(|value| value.parse::<u32>().ok())
+            .unwrap_or(600);
+        let ws_rate_limit_per_minute = env::var("RUST_GATEWAY_WS_RATE_LIMIT_PER_MINUTE")
+            .ok()
+            .and_then(|value| value.parse::<u32>().ok())
+            .unwrap_or(240);
+        let ws_resume_max_events = env::var("RUST_GATEWAY_WS_RESUME_MAX_EVENTS")
+            .ok()
+            .and_then(|value| value.parse::<i64>().ok())
+            .unwrap_or(500)
+            .clamp(1, 5_000);
+        let idempotency_ttl_secs = env::var("RUST_GATEWAY_IDEMPOTENCY_TTL_SECS")
+            .ok()
+            .and_then(|value| value.parse::<i64>().ok())
+            .unwrap_or(86_400)
+            .max(60);
 
         Ok(Self {
             host,
@@ -172,6 +262,7 @@ impl AppConfig {
             dm_scope,
             openclaw_ref_commit,
             auth_token,
+            auth_tokens,
             primary_model,
             fallback_models,
             providers,
@@ -179,6 +270,10 @@ impl AppConfig {
             skills_managed_dir,
             skills_bundled_dir,
             cron_poll_interval_secs,
+            http_rate_limit_per_minute,
+            ws_rate_limit_per_minute,
+            ws_resume_max_events,
+            idempotency_ttl_secs,
         })
     }
 }

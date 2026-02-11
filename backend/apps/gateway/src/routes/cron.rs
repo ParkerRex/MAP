@@ -113,12 +113,13 @@ pub async fn delete_job(
 
 #[cfg(test)]
 mod tests {
-    use crate::config::{AppConfig, ProviderConfig};
+    use crate::config::{AppConfig, AuthTokenConfig, ProviderConfig};
     use crate::db;
     use crate::routes;
-    use crate::state::AppState;
+    use crate::state::{AppState, RunCancellationRegistry};
     use axum::routing::post;
     use axum::{Json, Router};
+    use chrono::Utc;
     use reqwest::StatusCode;
     use serde::Deserialize;
     use serde_json::{json, Value};
@@ -192,6 +193,7 @@ mod tests {
             dm_scope: "main".to_string(),
             openclaw_ref_commit: "test-openclaw-commit".to_string(),
             auth_token: None,
+            auth_tokens: Vec::<AuthTokenConfig>::new(),
             primary_model: "openai:gpt-4o-mini".to_string(),
             fallback_models: Vec::new(),
             providers,
@@ -199,6 +201,10 @@ mod tests {
             skills_managed_dir: PathBuf::from("./skills"),
             skills_bundled_dir: PathBuf::from(".ai/refs/openclaw/skills"),
             cron_poll_interval_secs: 60,
+            http_rate_limit_per_minute: 600,
+            ws_rate_limit_per_minute: 240,
+            ws_resume_max_events: 500,
+            idempotency_ttl_secs: 86_400,
         }
     }
 
@@ -262,6 +268,10 @@ mod tests {
                 .timeout(Duration::from_secs(5))
                 .build()
                 .expect("failed to build test http client"),
+            run_cancellations: RunCancellationRegistry::default(),
+            metrics: crate::telemetry::GatewayMetrics::default(),
+            rate_limiter: crate::rate_limit::RateLimiter::default(),
+            started_at: Utc::now(),
         };
         let (gateway_url, gateway_handle) = spawn_http_server(routes::router(state)).await;
 

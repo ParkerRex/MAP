@@ -1,6 +1,6 @@
 use crate::error::ApiError;
 use crate::provider::normalize_provider_alias;
-use crate::state::AppState;
+use crate::state::{AppState, RunCancellationToken};
 use chrono::{DateTime, Utc};
 use serde::Serialize;
 use serde_json::Value;
@@ -49,6 +49,20 @@ struct ResolvedProfile {
 struct ProviderError {
     status: Option<u16>,
     message: String,
+}
+
+#[derive(Debug)]
+enum ProviderCallError {
+    Provider(ProviderError),
+    Cancelled,
+}
+
+#[derive(Debug, thiserror::Error)]
+pub enum ModelGenerationError {
+    #[error(transparent)]
+    Api(#[from] ApiError),
+    #[error("run cancelled")]
+    Cancelled { attempts: Vec<ModelAttempt> },
 }
 
 fn parse_model(value: &str) -> (String, String) {
@@ -397,9 +411,10 @@ async fn call_openai_compatible(
     api_key: &str,
     model_name: &str,
     prompt: &str,
-) -> Result<String, ProviderError> {
+    cancellation: Option<&RunCancellationToken>,
+) -> Result<String, ProviderCallError> {
     let url = format!("{base_url}/chat/completions");
-    let response = state
+    let request = state
         .http
         .post(url)
         .bearer_auth(api_key)
@@ -408,17 +423,40 @@ async fn call_openai_compatible(
             "messages": [{"role": "user", "content": prompt}],
             "temperature": 0.2,
         }))
-        .send()
-        .await
-        .map_err(|error| ProviderError {
+        .send();
+
+    let response = match cancellation {
+        Some(cancellation) => {
+            tokio::select! {
+                _ = cancellation.cancelled() => return Err(ProviderCallError::Cancelled),
+                result = request => result,
+            }
+        }
+        None => request.await,
+    }
+    .map_err(|error| {
+        ProviderCallError::Provider(ProviderError {
             status: None,
             message: error.to_string(),
-        })?;
+        })
+    })?;
 
     let status = response.status();
-    let value: Value = response.json().await.map_err(|error| ProviderError {
-        status: Some(status.as_u16()),
-        message: error.to_string(),
+    let response_json = response.json();
+    let value: Value = match cancellation {
+        Some(cancellation) => {
+            tokio::select! {
+                _ = cancellation.cancelled() => return Err(ProviderCallError::Cancelled),
+                result = response_json => result,
+            }
+        }
+        None => response_json.await,
+    }
+    .map_err(|error| {
+        ProviderCallError::Provider(ProviderError {
+            status: Some(status.as_u16()),
+            message: error.to_string(),
+        })
     })?;
 
     if !status.is_success() {
@@ -428,24 +466,27 @@ async fn call_openai_compatible(
             .and_then(Value::as_str)
             .map(ToString::to_string)
             .unwrap_or_else(|| value.to_string());
-        return Err(ProviderError {
+        return Err(ProviderCallError::Provider(ProviderError {
             status: Some(status.as_u16()),
             message,
-        });
+        }));
     }
 
-    extract_message_content(&value).ok_or_else(|| ProviderError {
-        status: Some(status.as_u16()),
-        message: "provider returned empty content".to_string(),
+    extract_message_content(&value).ok_or_else(|| {
+        ProviderCallError::Provider(ProviderError {
+            status: Some(status.as_u16()),
+            message: "provider returned empty content".to_string(),
+        })
     })
 }
 
-pub async fn generate_with_failover(
+pub async fn generate_with_failover_cancellable(
     state: &AppState,
     prompt: &str,
     primary_override: Option<String>,
     fallback_override: Option<Vec<String>>,
-) -> Result<ModelGenerationResult, ApiError> {
+    cancellation: Option<RunCancellationToken>,
+) -> Result<ModelGenerationResult, ModelGenerationError> {
     let mut model_candidates =
         vec![primary_override.unwrap_or_else(|| state.config.primary_model.clone())];
     let fallbacks = fallback_override.unwrap_or_else(|| state.config.fallback_models.clone());
@@ -462,6 +503,14 @@ pub async fn generate_with_failover(
     let mut last_error: Option<String> = None;
 
     for candidate in &model_candidates {
+        if cancellation
+            .as_ref()
+            .map(RunCancellationToken::is_cancelled)
+            .unwrap_or(false)
+        {
+            return Err(ModelGenerationError::Cancelled { attempts });
+        }
+
         let (provider, model_name) = parse_model(candidate);
         let Some(provider_config) = state.config.providers.get(&provider) else {
             attempts.push(ModelAttempt {
@@ -491,12 +540,21 @@ pub async fn generate_with_failover(
         }
 
         for profile in profiles {
+            if cancellation
+                .as_ref()
+                .map(RunCancellationToken::is_cancelled)
+                .unwrap_or(false)
+            {
+                return Err(ModelGenerationError::Cancelled { attempts });
+            }
+
             match call_openai_compatible(
                 state,
                 &provider_config.base_url,
                 &profile.api_key,
                 &model_name,
                 prompt,
+                cancellation.as_ref(),
             )
             .await
             {
@@ -517,7 +575,18 @@ pub async fn generate_with_failover(
                         attempts,
                     });
                 }
-                Err(error) => {
+                Err(ProviderCallError::Cancelled) => {
+                    attempts.push(ModelAttempt {
+                        model: candidate.clone(),
+                        provider: provider.clone(),
+                        profile_id: profile.profile_id,
+                        source: profile.source,
+                        ok: false,
+                        error: Some("run cancelled".to_string()),
+                    });
+                    return Err(ModelGenerationError::Cancelled { attempts });
+                }
+                Err(ProviderCallError::Provider(error)) => {
                     mark_failure(state, profile.id, &error).await?;
                     last_error = Some(error.message.clone());
 
@@ -532,14 +601,39 @@ pub async fn generate_with_failover(
                     });
 
                     if !failover {
-                        return Err(ApiError::BadRequest(error.message));
+                        return Err(ModelGenerationError::Api(ApiError::BadRequest(
+                            error.message,
+                        )));
                     }
                 }
             }
         }
     }
 
-    Err(ApiError::BadRequest(
+    Err(ModelGenerationError::Api(ApiError::BadRequest(
         last_error.unwrap_or_else(|| "all model attempts failed".to_string()),
-    ))
+    )))
+}
+
+pub async fn generate_with_failover(
+    state: &AppState,
+    prompt: &str,
+    primary_override: Option<String>,
+    fallback_override: Option<Vec<String>>,
+) -> Result<ModelGenerationResult, ApiError> {
+    match generate_with_failover_cancellable(
+        state,
+        prompt,
+        primary_override,
+        fallback_override,
+        None,
+    )
+    .await
+    {
+        Ok(result) => Ok(result),
+        Err(ModelGenerationError::Api(error)) => Err(error),
+        Err(ModelGenerationError::Cancelled { .. }) => {
+            Err(ApiError::BadRequest("run cancelled".to_string()))
+        }
+    }
 }

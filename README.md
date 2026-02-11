@@ -258,12 +258,20 @@ RUST_GATEWAY_DATABASE_URL=postgres://...
 RUST_GATEWAY_HOST=0.0.0.0
 RUST_GATEWAY_PORT=18789
 RUST_GATEWAY_AUTH_TOKEN=
+# Optional scoped tokens (overrides single token):
+# token|gateway.read,gateway.write,gateway.ws|subject-a;token2|gateway.read|subject-b
+RUST_GATEWAY_AUTH_SCOPED_TOKENS=
 RUST_GATEWAY_AGENT_ID=main
 RUST_GATEWAY_MAIN_KEY=main
 RUST_GATEWAY_DM_SCOPE=main # main | per-peer | per-channel-peer | per-account-channel-peer
 RUST_GATEWAY_PRIMARY_MODEL=moonshot:kimi-k2-0711-preview
 RUST_GATEWAY_FALLBACK_MODELS=openai:gpt-4o-mini
 RUST_GATEWAY_CRON_POLL_INTERVAL_SECS=10
+RUST_GATEWAY_HTTP_RATE_LIMIT_PER_MINUTE=600
+RUST_GATEWAY_WS_RATE_LIMIT_PER_MINUTE=240
+RUST_GATEWAY_WS_RESUME_MAX_EVENTS=500
+RUST_GATEWAY_IDEMPOTENCY_TTL_SECS=86400
+RUST_GATEWAY_LOG_FORMAT=json # pretty | json
 RUST_GATEWAY_SKILLS_WORKSPACE_DIR=./skills
 RUST_GATEWAY_SKILLS_MANAGED_DIR=~/.openclaw/skills
 RUST_GATEWAY_SKILLS_BUNDLED_DIR=.ai/refs/openclaw/skills
@@ -277,6 +285,7 @@ OPENCLAW_REF_COMMIT=8c963dc5a680f74cd7a7143263e9ec7d047404c0
 - Skills discovery/rescan (`/v1/skills`)
 - Cron scheduler CRUD/run-now (`/v1/cron/jobs*`)
 - Security audit (`/v1/security/audit`)
+- Structured metrics snapshot (`/v1/metrics`)
 - Node pairing + token verification (`/v1/nodes/*`, including `/v1/nodes/verify`) with consistent approve/reject decision payloads
 - Channel account/route CRUD + inbound + pairing (`/v1/channels/*`, including `DELETE /v1/channels/accounts/:id` and `DELETE /v1/channels/routes/:id`)
 - Destructive action confirmation parity across chat and channel inbound flows (`confirmed: true` when required)

@@ -12,6 +12,7 @@ type GatewayWsResponseEnvelope = {
 type GatewayWsEventEnvelope = {
   type: "event";
   event: string;
+  cursor?: number;
   payload: unknown;
 };
 
@@ -81,6 +82,7 @@ export class GatewayWsClient {
   private requestCounter = 0;
   private pending = new Map<string, PendingRequest>();
   private listeners = new Set<(event: string, payload: unknown) => void>();
+  private lastCursor = 0;
 
   constructor(options: GatewayWsClientOptions) {
     const path = options.path ?? "/v1/ws";
@@ -144,6 +146,7 @@ export class GatewayWsClient {
       ws.onopen = () => {
         this.sendRequest("connect", {
           auth: this.token ? { token: this.token } : {},
+          resume: this.lastCursor > 0 ? { afterCursor: this.lastCursor } : undefined,
           client: {
             role: "operator",
             name: this.clientName,
@@ -225,6 +228,9 @@ export class GatewayWsClient {
     }
 
     if (parsed.type === "event") {
+      if (typeof parsed.cursor === "number" && Number.isFinite(parsed.cursor)) {
+        this.lastCursor = Math.max(this.lastCursor, parsed.cursor);
+      }
       for (const listener of this.listeners) {
         listener(parsed.event, parsed.payload);
       }

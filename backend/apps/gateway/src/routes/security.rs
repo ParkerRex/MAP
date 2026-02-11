@@ -30,7 +30,7 @@ pub async fn audit(State(state): State<AppState>) -> Result<Json<SecurityAuditRe
     .await
     .unwrap_or(0);
 
-    let auth_enabled = state.config.auth_token.is_some();
+    let auth_enabled = !state.config.auth_tokens.is_empty();
     let bundled_skills_exists = state.config.skills_bundled_dir.exists();
 
     let checks = vec![
@@ -47,9 +47,13 @@ pub async fn audit(State(state): State<AppState>) -> Result<Json<SecurityAuditRe
             name: "gateway_auth_token".to_string(),
             ok: auth_enabled,
             detail: if auth_enabled {
-                "gateway auth token configured".to_string()
+                format!(
+                    "gateway auth configured with {} scoped token(s)",
+                    state.config.auth_tokens.len()
+                )
             } else {
-                "RUST_GATEWAY_AUTH_TOKEN not configured".to_string()
+                "RUST_GATEWAY_AUTH_TOKEN or RUST_GATEWAY_AUTH_SCOPED_TOKENS not configured"
+                    .to_string()
             },
         },
         SecurityCheck {

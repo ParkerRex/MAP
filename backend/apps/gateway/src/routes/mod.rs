@@ -2,6 +2,7 @@ pub mod channels;
 pub mod chat;
 pub mod cron;
 pub mod health;
+pub mod metrics;
 pub mod models;
 pub mod nodes;
 pub mod security;
@@ -31,6 +32,7 @@ pub fn router(state: AppState) -> Router {
         .route("/chat/runs/:id", get(chat::get_run))
         .route("/chat/runs/:id/stream", get(chat::stream_run))
         .route("/security/audit", get(security::audit))
+        .route("/metrics", get(metrics::metrics))
         .route("/channels", get(channels::list_channels))
         .route(
             "/channels/accounts",
