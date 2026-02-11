@@ -54,7 +54,13 @@ fn parse_model(value: &str) -> (String, String) {
     if let Some((provider, model)) = value.split_once(':') {
         (provider.trim().to_lowercase(), model.trim().to_string())
     } else {
-        ("openai".to_string(), value.trim().to_string())
+        let model = value.trim().to_string();
+        let provider = if model.to_lowercase().starts_with("kimi") {
+            "moonshot"
+        } else {
+            "openai"
+        };
+        (provider.to_string(), model)
     }
 }
 
@@ -77,6 +83,13 @@ mod tests {
         let (provider, model) = parse_model("gpt-4o-mini");
         assert_eq!(provider, "openai");
         assert_eq!(model, "gpt-4o-mini");
+    }
+
+    #[test]
+    fn parse_model_autodetects_kimi_models() {
+        let (provider, model) = parse_model("kimi-k2-0711-preview");
+        assert_eq!(provider, "moonshot");
+        assert_eq!(model, "kimi-k2-0711-preview");
     }
 
     #[test]
