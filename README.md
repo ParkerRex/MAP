@@ -214,6 +214,31 @@ OAuth 2.0 integration for health/fitness data.
 | `/api/whoop/workouts` | GET | Workout data |
 | `/api/whoop/disconnect` | POST | Disconnect account |
 
+### Kimi Agent Chat (Convex `/chat`)
+
+Feature-flagged Kimi integration for the Convex agent copilot route (`/chat`), with clawdbot-style
+workspace tools and confirm-before-write behavior.
+
+**Behavior:**
+- When `CHAT_KIMI_ENABLED=true`, `/chat` uses Kimi for generation.
+- Data-changing actions only run when the user message starts with `confirm:`.
+- If Moonshot embeddings fail and `OPENAI_API_KEY` is set, embeddings retry on OpenAI.
+
+**Environment variables:**
+```bash
+# Enable Kimi for Convex /chat
+CHAT_KIMI_ENABLED=true
+
+# Moonshot (OpenAI-compatible API)
+KIMI_API_KEY=your_moonshot_api_key
+KIMI_BASE_URL=https://api.moonshot.ai/v1
+KIMI_MODEL=kimi-k2-0711-preview
+KIMI_EMBEDDING_MODEL=text-embedding-v4
+
+# Optional embeddings fallback (OpenAI)
+OPENAI_API_KEY=your_openai_api_key
+```
+
 ## API Routes
 
 All routes require authentication except public pages (`/`, `/login`, `/signup`, `/auth/error`)
@@ -262,4 +287,12 @@ WHOOP_CLIENT_SECRET=your_client_secret
 
 # App
 NEXT_PUBLIC_APP_URL=http://localhost:3000
+
+# Convex /chat Kimi (optional, feature-flagged)
+CHAT_KIMI_ENABLED=false
+KIMI_API_KEY=
+KIMI_BASE_URL=https://api.moonshot.ai/v1
+KIMI_MODEL=kimi-k2-0711-preview
+KIMI_EMBEDDING_MODEL=text-embedding-v4
+OPENAI_API_KEY=
 ```

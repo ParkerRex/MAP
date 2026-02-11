@@ -1,20 +1,78 @@
-import { ConvexError, v } from "convex/values";
-import { action, httpAction, internalMutation, mutation, query } from "./_generated/server";
-import { api, components, internal } from "./_generated/api";
 import { Agent, getFile, listUIMessages, storeFile } from "@convex-dev/agent";
-import { PersistentTextStreaming, StreamIdValidator, type StreamId } from "@convex-dev/persistent-text-streaming";
-import { RateLimiter, MINUTE } from "@convex-dev/rate-limiter";
-import { openai } from "@ai-sdk/openai";
-import type { ModelMessage } from "ai";
+import {
+  PersistentTextStreaming,
+  type StreamId,
+  StreamIdValidator,
+} from "@convex-dev/persistent-text-streaming";
+import { MINUTE, RateLimiter } from "@convex-dev/rate-limiter";
+import type { FilePart, ImagePart, ModelMessage, TextPart } from "ai";
+import { ConvexError, v } from "convex/values";
+import { api, components, internal } from "./_generated/api";
+import { action, httpAction, internalMutation, mutation, query } from "./_generated/server";
+import { buildChatTools } from "./chatTools";
 import { requireUser } from "./lib/auth";
+import { createChatRuntimeConfig } from "./lib/chatModel";
 
-const agent = new Agent(components.agent, {
-  name: "Map Copilot",
-  languageModel: openai.chat("gpt-4o-mini"),
-  textEmbeddingModel: openai.embedding("text-embedding-3-small"),
-  instructions:
-    "You are MAP's assistant. Be concise, tactical, and action-oriented. Always propose next steps.",
-});
+const chatRuntime = createChatRuntimeConfig();
+
+const CONFIRM_PREFIX = /^confirm\s*:/i;
+
+function buildAssistantInstructions(toolsEnabled: boolean) {
+  if (!toolsEnabled) {
+    return "You are MAP's assistant. Be concise, tactical, and action-oriented. Always propose next steps.";
+  }
+
+  return [
+    "You are MAP's clawdbot-style workspace operator.",
+    "Be concise, tactical, and action-oriented.",
+    "Prefer tool calls over guessing whenever data is needed.",
+    "When a request implies data changes, provide a brief plan and require explicit confirmation.",
+    "Never execute write actions unless the user's current message starts with `confirm:`.",
+    "If confirmation is missing, explain the exact command to send next using `confirm:`.",
+  ].join(" ");
+}
+
+const assistantInstructions = buildAssistantInstructions(chatRuntime.toolsEnabled);
+
+function createMapAgent(textEmbeddingModel = chatRuntime.textEmbeddingModel) {
+  return new Agent(components.agent, {
+    name: "Map Copilot",
+    languageModel: chatRuntime.languageModel,
+    textEmbeddingModel,
+    instructions: assistantInstructions,
+  });
+}
+
+const agent = createMapAgent(chatRuntime.textEmbeddingModel);
+const fallbackEmbeddingAgent = chatRuntime.fallbackEmbeddingModel
+  ? createMapAgent(chatRuntime.fallbackEmbeddingModel)
+  : null;
+
+function isWriteConfirmationPrompt(prompt: string) {
+  return CONFIRM_PREFIX.test(prompt);
+}
+
+function stripConfirmPrefix(prompt: string) {
+  if (!isWriteConfirmationPrompt(prompt)) {
+    return prompt;
+  }
+  const stripped = prompt.replace(CONFIRM_PREFIX, "").trim();
+  return stripped.length ? stripped : prompt;
+}
+
+function getErrorMessage(error: unknown) {
+  return error instanceof Error ? error.message : String(error);
+}
+
+function isEmbeddingRelatedError(error: unknown) {
+  const message = getErrorMessage(error).toLowerCase();
+  return (
+    message.includes("embedding") ||
+    message.includes("vector") ||
+    message.includes("/embeddings") ||
+    message.includes("dimension")
+  );
+}
 
 const streaming = new PersistentTextStreaming(components.persistentTextStreaming);
 
@@ -29,16 +87,18 @@ const contextOptions = {
   searchOptions: {
     limit: 8,
     textSearch: true,
-    vectorSearch: true,
+    vectorSearch: chatRuntime.vectorSearchEnabled,
   },
 };
 
 type RunQueryCtx = {
-  runQuery: (...args: any[]) => Promise<any>;
+  runQuery: (...args: unknown[]) => Promise<unknown>;
 };
 
 async function assertThreadAccess(ctx: RunQueryCtx, threadId: string, userId: string) {
-  const thread = await ctx.runQuery(components.agent.threads.getThread, { threadId });
+  const thread = (await ctx.runQuery(components.agent.threads.getThread, {
+    threadId,
+  })) as { userId?: string } | null;
   if (!thread || thread.userId !== userId) {
     throw new ConvexError("Forbidden");
   }
@@ -255,12 +315,16 @@ export const streamChat = httpAction(async (ctx, request) => {
         status: "streaming",
       });
 
-      const { thread } = await agent.continueThread(actionCtx, {
-        threadId: run.threadId,
-        userId: String(run.userId),
-      });
+      const writeEnabled = isWriteConfirmationPrompt(run.prompt);
+      const effectivePrompt = stripConfirmPrefix(run.prompt);
+      const tools =
+        chatRuntime.toolsEnabled && chatRuntime.kimiEnabled
+          ? buildChatTools(writeEnabled ? "read-write" : "read-only")
+          : undefined;
 
-      const parts: any[] = [{ type: "text", text: run.prompt }];
+      const parts: Array<TextPart | FilePart | ImagePart> = [
+        { type: "text", text: effectivePrompt },
+      ];
       if (run.fileIds?.length) {
         for (const fileId of run.fileIds) {
           const { filePart, imagePart } = await getFile(actionCtx, components.agent, fileId);
@@ -269,22 +333,45 @@ export const streamChat = httpAction(async (ctx, request) => {
       }
 
       try {
-        const message: ModelMessage = {
-          role: "user",
-          content: parts,
-        };
-        const result = await thread.streamText(
-          {
+        const streamWithAgent = async (activeAgent: Agent) => {
+          const { thread } = await activeAgent.continueThread(actionCtx, {
+            threadId: run.threadId,
+            userId: String(run.userId),
+          });
+          const message: ModelMessage = {
+            role: "user",
+            content: parts,
+          };
+          const streamArgs: {
+            prompt: ModelMessage[];
+            tools?: ReturnType<typeof buildChatTools>;
+          } = {
             prompt: [message],
-          },
-          {
+          };
+          if (tools) {
+            streamArgs.tools = tools;
+          }
+          const result = await thread.streamText(streamArgs as never, {
             contextOptions,
             saveStreamDeltas: false,
-          },
-        );
+          });
 
-        for await (const delta of result.textStream) {
-          await append(delta);
+          for await (const delta of result.textStream) {
+            await append(delta);
+          }
+        };
+
+        try {
+          await streamWithAgent(agent);
+        } catch (error) {
+          if (fallbackEmbeddingAgent && isEmbeddingRelatedError(error)) {
+            console.warn(
+              "[chat] embedding request failed on primary backend, retrying with fallback embeddings",
+            );
+            await streamWithAgent(fallbackEmbeddingAgent);
+          } else {
+            throw error;
+          }
         }
 
         await actionCtx.runMutation(internal.chat.updateRunStatus, {
@@ -295,7 +382,7 @@ export const streamChat = httpAction(async (ctx, request) => {
         await actionCtx.runMutation(internal.chat.updateRunStatus, {
           runId: run._id,
           status: "error",
-          error: error instanceof Error ? error.message : String(error),
+          error: getErrorMessage(error),
         });
         throw error;
       }
