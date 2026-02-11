@@ -1,9 +1,9 @@
-import { betterAuth } from "better-auth/minimal";
+import { type AuthFunctions, createClient } from "@convex-dev/better-auth";
 import { convex } from "@convex-dev/better-auth/plugins";
-import { createClient, type AuthFunctions } from "@convex-dev/better-auth";
+import { betterAuth } from "better-auth/minimal";
 import type { GenericCtx } from "convex/server";
-import type { DataModel } from "./_generated/dataModel";
 import { components, internal } from "./_generated/api";
+import type { DataModel } from "./_generated/dataModel";
 import authConfig from "./auth.config";
 
 const DEFAULT_AUTH_PROVIDER = "google";

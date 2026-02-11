@@ -1,9 +1,7 @@
 "use client";
 
-import { ChevronDown, ChevronUp, Pin, PinOff, Pencil, Trash2 } from "lucide-react";
+import { ChevronDown, ChevronUp, Pencil, Pin, PinOff, Trash2 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -15,6 +13,8 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import type { Tag, TaskWithTags } from "@/types";
 import {
   defaultProjectColors,
@@ -95,7 +95,9 @@ const ProjectsList = ({
   useEffect(() => {
     const ids = new Set(tags.map((tag) => tag.id));
     const normalizedFavorites = favoriteIds.filter((id) => ids.has(id));
-    const normalizedOrder = orderIds.filter((id) => ids.has(id) && !normalizedFavorites.includes(id));
+    const normalizedOrder = orderIds.filter(
+      (id) => ids.has(id) && !normalizedFavorites.includes(id),
+    );
     const missing = tags
       .map((tag) => tag.id)
       .filter((id) => !normalizedFavorites.includes(id) && !normalizedOrder.includes(id));
@@ -152,17 +154,12 @@ const ProjectsList = ({
     return copy;
   };
 
-  const tagById = useMemo(
-    () => new Map(filteredTags.map((tag) => [tag.id, tag])),
-    [filteredTags],
-  );
+  const tagById = useMemo(() => new Map(filteredTags.map((tag) => [tag.id, tag])), [filteredTags]);
 
   const favoriteTags = favoriteIds.map((id) => tagById.get(id)).filter(Boolean) as Tag[];
   const regularTags = [
     ...orderIds.map((id) => tagById.get(id)).filter(Boolean),
-    ...filteredTags.filter(
-      (tag) => !favoriteIds.includes(tag.id) && !orderIds.includes(tag.id),
-    ),
+    ...filteredTags.filter((tag) => !favoriteIds.includes(tag.id) && !orderIds.includes(tag.id)),
   ] as Tag[];
 
   const renderRow = (tag: Tag, listType: "favorite" | "regular", indexHint: number) => {
@@ -228,9 +225,7 @@ const ProjectsList = ({
               <span className="h-2 w-2 rounded-full" style={{ background: color }} />
               <div className="text-sm font-medium">{tag.title}</div>
             </div>
-            <div className="text-xs text-muted-foreground">
-              {taskCountForTag(tag.id)} tasks
-            </div>
+            <div className="text-xs text-muted-foreground">{taskCountForTag(tag.id)} tasks</div>
           </div>
         )}
         {editingTagId !== tag.id && (
@@ -313,8 +308,7 @@ const ProjectsList = ({
   };
 
   const selectedProject = selectedProjectId ? tagById.get(selectedProjectId) : null;
-  const selectedColor =
-    selectedProject && getProjectColor(projectColors, selectedProject.id, 0);
+  const selectedColor = selectedProject && getProjectColor(projectColors, selectedProject.id, 0);
 
   return (
     <div className="p-4 md:p-6 space-y-4">

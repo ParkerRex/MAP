@@ -19,11 +19,11 @@ import {
   useUpdateTaskTags,
 } from "@/hooks/use-tasks";
 import type { TaskWithTags } from "@/types";
-import TaskListHeader from "./task-header";
-import TaskListContainer from "./task-list-container";
+import { getProjectColor, loadProjectColors } from "./project-colors";
 import ProjectsList from "./projects-list";
 import TaskDetailDialog from "./task-detail-dialog";
-import { getProjectColor, loadProjectColors } from "./project-colors";
+import TaskListHeader from "./task-header";
+import TaskListContainer from "./task-list-container";
 import {
   getStartOfToday,
   isTaskOverdue,
@@ -179,7 +179,8 @@ const TaskList: React.FC = () => {
   }, [tasks, selectedProject]);
 
   const dueAtFor = (task: TaskWithTags) => (task.dueAt ? new Date(task.dueAt) : null);
-  const completedAtFor = (task: TaskWithTags) => (task.completedAt ? new Date(task.completedAt) : null);
+  const completedAtFor = (task: TaskWithTags) =>
+    task.completedAt ? new Date(task.completedAt) : null;
 
   const searchedTasks = useMemo(() => {
     const query = deferredSearchQuery.trim().toLowerCase();
@@ -221,8 +222,7 @@ const TaskList: React.FC = () => {
         label: "Today",
         count: projectFilteredTasks.filter(
           (task) => !task.completedAt && isTaskToday(dueAtFor(task)),
-        )
-          .length,
+        ).length,
         tint: "bg-orange-500",
       },
       {
@@ -238,8 +238,7 @@ const TaskList: React.FC = () => {
         label: "Overdue",
         count: projectFilteredTasks.filter(
           (task) => !task.completedAt && isTaskOverdue(dueAtFor(task)),
-        )
-          .length,
+        ).length,
         tint: "bg-red-500",
       },
       {
@@ -300,14 +299,10 @@ const TaskList: React.FC = () => {
         .filter((task) => isTaskUpcoming(dueAtFor(task)))
         .sort((a, b) => (dueAtFor(a)?.getTime() ?? 0) - (dueAtFor(b)?.getTime() ?? 0));
       if (!overdue.length && !today.length && upcoming.length) {
-        return [
-          { title: "Upcoming", tintClass: "bg-blue-500", tasks: upcoming },
-        ];
+        return [{ title: "Upcoming", tintClass: "bg-blue-500", tasks: upcoming }];
       }
       return [
-        ...(overdue.length
-          ? [{ title: "Overdue", tintClass: "bg-red-500", tasks: overdue }]
-          : []),
+        ...(overdue.length ? [{ title: "Overdue", tintClass: "bg-red-500", tasks: overdue }] : []),
         ...(today.length ? [{ title: "Today", tintClass: "bg-orange-500", tasks: today }] : []),
       ];
     }
@@ -355,7 +350,8 @@ const TaskList: React.FC = () => {
       .slice(0, 15);
 
     const sections = [];
-    if (overdue.length) sections.push({ title: "Overdue", tintClass: "bg-red-500", tasks: overdue });
+    if (overdue.length)
+      sections.push({ title: "Overdue", tintClass: "bg-red-500", tasks: overdue });
     if (today.length) sections.push({ title: "Today", tintClass: "bg-orange-500", tasks: today });
     if (upcoming.length)
       sections.push({ title: "Upcoming", tintClass: "bg-blue-500", tasks: upcoming });
@@ -377,22 +373,42 @@ const TaskList: React.FC = () => {
 
   const emptyState = useMemo(() => {
     if (searchQuery.trim()) {
-      return { title: "No matching tasks", message: "Try a different search term.", icon: <Search /> };
+      return {
+        title: "No matching tasks",
+        message: "Try a different search term.",
+        icon: <Search />,
+      };
     }
     if (selectedFilter === "today") {
       return { title: "No tasks today", message: "You are clear for today.", icon: <Sun /> };
     }
     if (selectedFilter === "upcoming") {
-      return { title: "Nothing upcoming", message: "Schedule tasks to see them here.", icon: <Calendar /> };
+      return {
+        title: "Nothing upcoming",
+        message: "Schedule tasks to see them here.",
+        icon: <Calendar />,
+      };
     }
     if (selectedFilter === "overdue") {
-      return { title: "No overdue tasks", message: "Nice work staying on top of things.", icon: <CheckCircle2 /> };
+      return {
+        title: "No overdue tasks",
+        message: "Nice work staying on top of things.",
+        icon: <CheckCircle2 />,
+      };
     }
     if (selectedFilter === "completed") {
-      return { title: "No completed tasks", message: "Complete a task to see it here.", icon: <CheckCircle2 /> };
+      return {
+        title: "No completed tasks",
+        message: "Complete a task to see it here.",
+        icon: <CheckCircle2 />,
+      };
     }
     if (selectedProject === "none") {
-      return { title: "No unassigned tasks", message: "Every task already has a project.", icon: <Filter /> };
+      return {
+        title: "No unassigned tasks",
+        message: "Every task already has a project.",
+        icon: <Filter />,
+      };
     }
     if (selectedProject.startsWith("tag:")) {
       const tagId = selectedProject.replace("tag:", "");
@@ -429,8 +445,9 @@ const TaskList: React.FC = () => {
 
   const handleCreateTaskFromInput = (title: string) => {
     const parsed = parseQuickAdd(title, tags);
-    const fallbackProjectId =
-      selectedProject.startsWith("tag:") ? selectedProject.replace("tag:", "") : null;
+    const fallbackProjectId = selectedProject.startsWith("tag:")
+      ? selectedProject.replace("tag:", "")
+      : null;
     const projectId = selectedNewTaskProjectId ?? parsed.tagId ?? fallbackProjectId;
     const projectTag = projectId ? tags.find((tag) => tag.id === projectId) : null;
     const dueAt = parsed.dueAt ? parsed.dueAt.toISOString() : undefined;

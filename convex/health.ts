@@ -62,9 +62,7 @@ export const summary = query({
           activeEnergy: Math.round(totals.activeEnergy / totals.count),
           exerciseMinutes: Math.round(totals.exerciseMinutes / totals.count),
           sleepHours: Number((totals.sleepHours / totals.count).toFixed(1)),
-          restingHeartRate: Math.round(
-            totals.restingHeartRate / totals.count,
-          ),
+          restingHeartRate: Math.round(totals.restingHeartRate / totals.count),
           hrvSDNN: Math.round(totals.hrvSDNN / totals.count),
         }
       : null;
@@ -92,9 +90,7 @@ export const upsert = mutation({
     const user = await requireUser(ctx);
     const existing = await ctx.db
       .query("appleHealthData")
-      .withIndex("by_user_date", (q) =>
-        q.eq("userId", user._id).eq("date", args.date),
-      )
+      .withIndex("by_user_date", (q) => q.eq("userId", user._id).eq("date", args.date))
       .unique();
 
     const patch = {

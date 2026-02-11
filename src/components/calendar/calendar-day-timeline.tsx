@@ -228,47 +228,50 @@ export default function CalendarDayTimeline({
   return (
     <div className="flex h-full flex-col gap-4">
       <div className="space-y-2">
-          <div className="flex items-center gap-2 text-xs font-semibold uppercase text-muted-foreground">
-            All Day
-            <span className="rounded-full bg-muted/50 px-2 py-0.5 text-[10px]">
-              {allDayEvents.length}
-            </span>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {allDayEvents.map((event) => {
-              const color = getCalendarColor(calendars, event.organizer?.email);
-              const rgb = hexToRgb(color);
-              const bgColor = rgb ? `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.12)` : `${color}1f`;
-              return (
-                <ContextMenu key={event.id}>
-                  <ContextMenuTrigger>
-                    <button
-                      type="button"
-                      onClick={() => onEventClick(event)}
-                      className="flex items-center gap-2 rounded-full px-3 py-1.5 text-sm"
-                      style={{ backgroundColor: bgColor }}
-                    >
-                      <span className="h-2 w-2 rounded-full" style={{ backgroundColor: color }} />
-                      {event.summary ?? "Untitled"}
-                    </button>
-                  </ContextMenuTrigger>
-                  <ContextMenuContent>
-                    <ContextMenuItem onSelect={() => onEventDelete(event)} className="text-destructive">
-                      Delete
-                    </ContextMenuItem>
-                  </ContextMenuContent>
-                </ContextMenu>
-              );
-            })}
-            <button
-              type="button"
-              onClick={onCreateAllDay}
-              className="rounded-full border border-dashed border-border/70 px-3 py-1.5 text-sm text-muted-foreground"
-            >
-              + Add all-day
-            </button>
-          </div>
+        <div className="flex items-center gap-2 text-xs font-semibold uppercase text-muted-foreground">
+          All Day
+          <span className="rounded-full bg-muted/50 px-2 py-0.5 text-[10px]">
+            {allDayEvents.length}
+          </span>
         </div>
+        <div className="flex flex-wrap gap-2">
+          {allDayEvents.map((event) => {
+            const color = getCalendarColor(calendars, event.organizer?.email);
+            const rgb = hexToRgb(color);
+            const bgColor = rgb ? `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.12)` : `${color}1f`;
+            return (
+              <ContextMenu key={event.id}>
+                <ContextMenuTrigger>
+                  <button
+                    type="button"
+                    onClick={() => onEventClick(event)}
+                    className="flex items-center gap-2 rounded-full px-3 py-1.5 text-sm"
+                    style={{ backgroundColor: bgColor }}
+                  >
+                    <span className="h-2 w-2 rounded-full" style={{ backgroundColor: color }} />
+                    {event.summary ?? "Untitled"}
+                  </button>
+                </ContextMenuTrigger>
+                <ContextMenuContent>
+                  <ContextMenuItem
+                    onSelect={() => onEventDelete(event)}
+                    className="text-destructive"
+                  >
+                    Delete
+                  </ContextMenuItem>
+                </ContextMenuContent>
+              </ContextMenu>
+            );
+          })}
+          <button
+            type="button"
+            onClick={onCreateAllDay}
+            className="rounded-full border border-dashed border-border/70 px-3 py-1.5 text-sm text-muted-foreground"
+          >
+            + Add all-day
+          </button>
+        </div>
+      </div>
 
       <div className="flex items-center justify-between">
         <div>
@@ -305,11 +308,17 @@ export default function CalendarDayTimeline({
               key={hour}
               className="relative h-[60px] pr-2 text-right text-[11px] text-muted-foreground"
             >
-              <span className="absolute -top-2 right-2">{format(new Date().setHours(hour, 0), "h a")}</span>
+              <span className="absolute -top-2 right-2">
+                {format(new Date().setHours(hour, 0), "h a")}
+              </span>
             </div>
           ))}
         </div>
-        <div className="relative flex-1 overflow-y-auto" ref={containerRef} onClick={handleGridClick}>
+        <div
+          className="relative flex-1 overflow-y-auto"
+          ref={containerRef}
+          onClick={handleGridClick}
+        >
           <div className="relative h-[1440px]">
             {hours.map((hour) => (
               <div
@@ -339,7 +348,10 @@ export default function CalendarDayTimeline({
               const end = new Date(event.end?.dateTime || "");
               if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) return null;
               const top = ((start.getHours() * 60 + start.getMinutes()) / 60) * HOUR_HEIGHT;
-              const height = Math.max(((end.getTime() - start.getTime()) / 3600000) * HOUR_HEIGHT, 28);
+              const height = Math.max(
+                ((end.getTime() - start.getTime()) / 3600000) * HOUR_HEIGHT,
+                28,
+              );
               const width = `calc(${100 / columns}% - ${TIMELINE_GAP}px)`;
               const left = `calc(${(100 / columns) * column}% + ${TIMELINE_GAP / 2}px)`;
               const color = getCalendarColor(calendars, event.organizer?.email);
@@ -368,14 +380,19 @@ export default function CalendarDayTimeline({
                         onEventClick(event);
                       }}
                     >
-                      <div className="font-semibold line-clamp-2">{event.summary ?? "Untitled"}</div>
+                      <div className="font-semibold line-clamp-2">
+                        {event.summary ?? "Untitled"}
+                      </div>
                       <div className="text-[10px] text-muted-foreground">
                         {format(start, "h:mm a")} - {format(end, "h:mm a")}
                       </div>
                     </div>
                   </ContextMenuTrigger>
                   <ContextMenuContent>
-                    <ContextMenuItem onSelect={() => onEventDelete(event)} className="text-destructive">
+                    <ContextMenuItem
+                      onSelect={() => onEventDelete(event)}
+                      className="text-destructive"
+                    >
                       Delete
                     </ContextMenuItem>
                   </ContextMenuContent>

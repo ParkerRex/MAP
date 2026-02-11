@@ -77,7 +77,9 @@ export default function CalendarMonthView({
             const selected = isSameDay(date, selectedDate);
             const dayEvents = eventsForDate(date);
             const colors = Array.from(
-              new Set(dayEvents.map((event) => getCalendarColor(calendars, event.organizer?.email))),
+              new Set(
+                dayEvents.map((event) => getCalendarColor(calendars, event.organizer?.email)),
+              ),
             ).slice(0, 3);
 
             return (
@@ -106,7 +108,11 @@ export default function CalendarMonthView({
                 </span>
                 <div className="flex h-2 items-center gap-1">
                   {colors.map((color) => (
-                    <span key={color} className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: color }} />
+                    <span
+                      key={color}
+                      className="h-1.5 w-1.5 rounded-full"
+                      style={{ backgroundColor: color }}
+                    />
                   ))}
                 </div>
               </button>
@@ -116,9 +122,7 @@ export default function CalendarMonthView({
       </div>
 
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold">
-          {format(selectedDate, "EEEE, MMM d")}
-        </h3>
+        <h3 className="text-lg font-semibold">{format(selectedDate, "EEEE, MMM d")}</h3>
         <Button size="sm" onClick={onCreateEvent}>
           Add Event
         </Button>
@@ -161,7 +165,9 @@ export default function CalendarMonthView({
                     {start && (
                       <p className="text-xs text-muted-foreground">
                         {event.start?.date ? "All day" : `${format(new Date(start), "h:mm a")}`}
-                        {end && event.start?.dateTime ? ` - ${format(new Date(end), "h:mm a")}` : ""}
+                        {end && event.start?.dateTime
+                          ? ` - ${format(new Date(end), "h:mm a")}`
+                          : ""}
                       </p>
                     )}
                   </div>

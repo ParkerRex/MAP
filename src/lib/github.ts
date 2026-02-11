@@ -219,11 +219,14 @@ export async function fetchGitHubContributionCalendar(
   return calendar;
 }
 
-export async function createGitHubClient(userId: string, integration: {
-  accessToken: string;
-  refreshToken?: string | null;
-  expiresAt?: Date | null;
-}) {
+export async function createGitHubClient(
+  userId: string,
+  integration: {
+    accessToken: string;
+    refreshToken?: string | null;
+    expiresAt?: Date | null;
+  },
+) {
   let accessToken = integration.accessToken;
 
   if (integration.expiresAt && integration.refreshToken) {
@@ -289,7 +292,7 @@ export function mapNotificationsToItems(notifications: GitHubNotification[]) {
     reason: notification.reason,
     url: notification.subject?.url
       ? convertNotificationUrl(notification.subject.url, notification.repository?.full_name)
-      : notification.repository?.html_url ?? null,
+      : (notification.repository?.html_url ?? null),
     updatedAt: notification.updated_at,
   }));
 }
@@ -356,7 +359,7 @@ export async function mapNotificationsToItemsWithState(
         reason: notification.reason,
         url: notification.subject?.url
           ? convertNotificationUrl(notification.subject.url, notification.repository?.full_name)
-          : notification.repository?.html_url ?? null,
+          : (notification.repository?.html_url ?? null),
         updatedAt: notification.updated_at,
         state: state ?? undefined,
       };

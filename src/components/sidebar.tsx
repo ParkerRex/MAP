@@ -9,10 +9,10 @@ import {
   RiHeartLine,
   RiSettings4Line,
 } from "react-icons/ri";
+import { useAuth } from "@/hooks/use-auth";
 import { cn } from "./ui/cn";
 import { Icons } from "./ui/icons";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/tooltip";
-import { useAuth } from "@/hooks/use-auth";
 
 const navItems = [
   { href: "/calendar", label: "Calendar", icon: RiCalendarLine },

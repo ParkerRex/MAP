@@ -3,8 +3,8 @@ import { NextResponse } from "next/server";
 import { db } from "@/db";
 import { users } from "@/db/schema";
 import { handleApiError, unauthorized, validationError } from "@/lib/api/errors";
-import { getUser } from "@/lib/auth";
 import { withAuth } from "@/lib/api/with-auth";
+import { getUser } from "@/lib/auth";
 
 export async function GET() {
   try {
@@ -22,8 +22,7 @@ export async function GET() {
 
 export const PATCH = withAuth(async (user, request) => {
   const body = await request.json().catch(() => ({}));
-  let githubUsername =
-    typeof body.githubUsername === "string" ? body.githubUsername.trim() : null;
+  let githubUsername = typeof body.githubUsername === "string" ? body.githubUsername.trim() : null;
 
   if (githubUsername?.startsWith("@")) {
     githubUsername = githubUsername.slice(1).trim();

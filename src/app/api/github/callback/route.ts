@@ -71,7 +71,9 @@ export async function GET(request: NextRequest) {
 
     const githubUser = await getGitHubUser(tokens.access_token);
 
-    const expiresAt = tokens.expires_in ? new Date(Date.now() + tokens.expires_in * 1000) : undefined;
+    const expiresAt = tokens.expires_in
+      ? new Date(Date.now() + tokens.expires_in * 1000)
+      : undefined;
 
     await calendarDb.upsertIntegration({
       userId,
@@ -82,10 +84,7 @@ export async function GET(request: NextRequest) {
     });
 
     if (githubUser.login) {
-      await db
-        .update(users)
-        .set({ githubUsername: githubUser.login })
-        .where(eq(users.id, userId));
+      await db.update(users).set({ githubUsername: githubUser.login }).where(eq(users.id, userId));
     }
 
     const response = redirectWithSuccess();

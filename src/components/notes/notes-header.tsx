@@ -96,9 +96,7 @@ const NotesHeader: FC<NotesHeaderProps> = ({
         <div className="flex items-end justify-between gap-4">
           <div className="space-y-1">
             <h1 className="text-3xl font-semibold tracking-tight">Notes</h1>
-            <p className="text-sm text-muted-foreground">
-              {selectedFolder?.name ?? "All Notes"}
-            </p>
+            <p className="text-sm text-muted-foreground">{selectedFolder?.name ?? "All Notes"}</p>
           </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>

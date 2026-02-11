@@ -15,7 +15,13 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
 import { useDeleteEvent } from "@/hooks/use-calendar";
 
@@ -124,14 +130,17 @@ export default function EventDetailDialog({
       </AlertDialog>
 
       <Dialog open={open} onOpenChange={onOpenChange}>
-          <DialogContent className="max-w-[520px]">
+        <DialogContent className="max-w-[520px]">
           <DialogHeader>
             <DialogTitle className="text-xl">{event.summary ?? "Untitled Event"}</DialogTitle>
             {startDate && (
               <DialogDescription>
                 {formatDate(startDate)}
                 {endDate && !event.start?.date && (
-                  <> • {formatTime(startDate)}–{formatTime(endDate)}</>
+                  <>
+                    {" "}
+                    • {formatTime(startDate)}–{formatTime(endDate)}
+                  </>
                 )}
               </DialogDescription>
             )}
@@ -152,9 +161,7 @@ export default function EventDetailDialog({
               <Separator className="my-3" />
               <div className="flex items-center justify-between text-sm text-muted-foreground">
                 <span>Color</span>
-                <span className="text-foreground">
-                  {event.colorId ? "Custom" : "None"}
-                </span>
+                <span className="text-foreground">{event.colorId ? "Custom" : "None"}</span>
               </div>
               <Separator className="my-3" />
               <div className="flex items-center justify-between text-sm text-muted-foreground">

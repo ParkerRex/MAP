@@ -50,8 +50,9 @@ export async function GET() {
         : Promise.resolve([]),
     ]);
 
-    let contributionWeeks: Array<{ days: { date: string; count: number; color: string; weekday: number }[] }> =
-      [];
+    let contributionWeeks: Array<{
+      days: { date: string; count: number; color: string; weekday: number }[];
+    }> = [];
     let totalContributions: number | null = null;
 
     if (login) {

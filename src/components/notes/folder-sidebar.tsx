@@ -92,9 +92,7 @@ export default function FolderSidebar({
     <div className="hidden md:flex flex-col w-64 border-r border-black/10 bg-[#f2f2f7] dark:border-white/10 dark:bg-[#1c1c1e]">
       <div className="px-4 pt-5 pb-3 flex items-start justify-between">
         <div>
-          <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
-            Folders
-          </p>
+          <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">Folders</p>
           <h2 className="text-lg font-semibold text-foreground">Folders</h2>
         </div>
         <Button

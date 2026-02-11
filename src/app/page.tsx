@@ -7,7 +7,10 @@ import {
   RiHeartPulseLine,
   RiSparklingLine,
 } from "react-icons/ri";
-import { GitHubContributionGraph, normalizeGithubUsername } from "@/components/github-contribution-graph";
+import {
+  GitHubContributionGraph,
+  normalizeGithubUsername,
+} from "@/components/github-contribution-graph";
 import { Button } from "@/components/ui/button";
 import { Icons } from "@/components/ui/icons";
 import { useAuth } from "@/hooks/use-auth";

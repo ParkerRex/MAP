@@ -13,8 +13,8 @@ import {
 import { AlertTriangle, Calendar, RefreshCw } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useMemo, useState } from "react";
-import CalendarDayTimeline from "@/components/calendar/calendar-day-timeline";
 import ContextPanel from "@/components/calendar/calendar-context-panel";
+import CalendarDayTimeline from "@/components/calendar/calendar-day-timeline";
 import CalendarGrid from "@/components/calendar/calendar-grid";
 import CalendarJumpDialog from "@/components/calendar/calendar-jump-dialog";
 import CalendarMenu from "@/components/calendar/calendar-menu";

@@ -43,9 +43,7 @@ export default function CalendarPickerDialog({
                 />
                 <div className="flex-1">
                   <div className="text-sm font-medium">{calendar.summary ?? "Calendar"}</div>
-                  {calendar.primary && (
-                    <div className="text-xs text-muted-foreground">Primary</div>
-                  )}
+                  {calendar.primary && <div className="text-xs text-muted-foreground">Primary</div>}
                 </div>
                 {selected && <Check className="h-4 w-4 text-primary" />}
               </button>

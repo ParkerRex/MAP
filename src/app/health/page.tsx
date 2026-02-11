@@ -1,5 +1,6 @@
 "use client";
 
+import { formatDistanceToNow } from "date-fns";
 import {
   Activity,
   Dumbbell,
@@ -13,7 +14,6 @@ import {
 } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useMemo, useState } from "react";
-import { formatDistanceToNow } from "date-fns";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -28,7 +28,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import type { AppleHealthSleepStages } from "@/lib/api";
 import {
   calculateTrend,
   formatHoursMinutes,
@@ -51,6 +50,7 @@ import {
   useWhoopSync,
   useWhoopWorkouts,
 } from "@/hooks/use-whoop";
+import type { AppleHealthSleepStages } from "@/lib/api";
 import { getSportName } from "@/lib/whoop-utils";
 
 // Recovery ring component
@@ -185,11 +185,7 @@ function DataSourceBadge({
     <div className="flex items-center gap-2 rounded-full border border-border/60 bg-muted/20 px-3 py-1.5 text-xs">
       <Icon className="h-3.5 w-3.5 text-muted-foreground" />
       <span className="text-muted-foreground">{label}</span>
-      <span
-        className={`h-2 w-2 rounded-full ${
-          connected ? "bg-emerald-500" : "bg-orange-400"
-        }`}
-      />
+      <span className={`h-2 w-2 rounded-full ${connected ? "bg-emerald-500" : "bg-orange-400"}`} />
     </div>
   );
 }
@@ -493,8 +489,14 @@ function HealthDashboard() {
       hrvSDNN: appleHistory.map((day) => day.hrvSDNN),
     };
 
-    const recentSleep = appleHistory.slice(-7).map((day) => day.sleepHours ?? 0).filter((v) => v > 0);
-    const recentSteps = appleHistory.slice(-7).map((day) => day.steps ?? 0).filter((v) => v > 0);
+    const recentSleep = appleHistory
+      .slice(-7)
+      .map((day) => day.sleepHours ?? 0)
+      .filter((v) => v > 0);
+    const recentSteps = appleHistory
+      .slice(-7)
+      .map((day) => day.steps ?? 0)
+      .filter((v) => v > 0);
 
     return {
       stepsTrend: calculateTrend(appleToday?.steps, historyValues.steps),
@@ -561,13 +563,22 @@ function HealthDashboard() {
             <RefreshCw className={`mr-2 h-4 w-4 ${isLoadingApple ? "animate-spin" : ""}`} />
             Refresh
           </Button>
-          <Button variant="outline" size="sm" onClick={() => syncMutation.mutate()} disabled={!whoopConnected || syncMutation.isPending}>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => syncMutation.mutate()}
+            disabled={!whoopConnected || syncMutation.isPending}
+          >
             <RefreshCw className={`mr-2 h-4 w-4 ${syncMutation.isPending ? "animate-spin" : ""}`} />
             Sync
           </Button>
           <AlertDialog>
             <AlertDialogTrigger asChild>
-              <Button variant="ghost" size="sm" disabled={!whoopConnected || disconnectMutation.isPending}>
+              <Button
+                variant="ghost"
+                size="sm"
+                disabled={!whoopConnected || disconnectMutation.isPending}
+              >
                 <Unlink className="h-4 w-4" />
               </Button>
             </AlertDialogTrigger>
@@ -625,11 +636,7 @@ function HealthDashboard() {
               </div>
             </div>
             <div className="mt-5 grid gap-4 sm:grid-cols-4">
-              <MetricTile
-                label="Steps"
-                value={formatNumber(appleToday?.steps)}
-                icon={Activity}
-              />
+              <MetricTile label="Steps" value={formatNumber(appleToday?.steps)} icon={Activity} />
               <MetricTile
                 label="Calories"
                 value={formatNumber(appleToday?.activeEnergy, " kcal", 0)}
@@ -665,9 +672,7 @@ function HealthDashboard() {
                   ) : null}
                 </div>
                 <div className="mt-3 flex items-baseline gap-2">
-                  <p className="text-2xl font-bold">
-                    {formatHoursMinutes(appleToday?.sleepHours)}
-                  </p>
+                  <p className="text-2xl font-bold">{formatHoursMinutes(appleToday?.sleepHours)}</p>
                   {appleTrends.sleepAverage7d ? (
                     <span className="text-xs text-muted-foreground">
                       avg {formatHoursMinutes(appleTrends.sleepAverage7d)}
@@ -725,11 +730,7 @@ function HealthDashboard() {
               </div>
             </div>
             <div className="mt-5 grid gap-4 sm:grid-cols-4">
-              <MetricTile
-                label="Steps"
-                value={formatNumber(appleToday?.steps)}
-                icon={Activity}
-              />
+              <MetricTile label="Steps" value={formatNumber(appleToday?.steps)} icon={Activity} />
               <MetricTile
                 label="Calories"
                 value={formatNumber(appleToday?.activeEnergy, " kcal", 0)}

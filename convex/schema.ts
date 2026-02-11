@@ -17,17 +17,9 @@ const goalCategory = v.union(
   v.literal("spiritual"),
 );
 
-const goalStatus = v.union(
-  v.literal("pending"),
-  v.literal("in_progress"),
-  v.literal("completed"),
-);
+const goalStatus = v.union(v.literal("pending"), v.literal("in_progress"), v.literal("completed"));
 
-const taskStatus = v.union(
-  v.literal("pending"),
-  v.literal("in_progress"),
-  v.literal("completed"),
-);
+const taskStatus = v.union(v.literal("pending"), v.literal("in_progress"), v.literal("completed"));
 
 const chatRole = v.union(
   v.literal("system"),
@@ -36,11 +28,7 @@ const chatRole = v.union(
   v.literal("tool"),
 );
 
-const messageStatus = v.union(
-  v.literal("streaming"),
-  v.literal("complete"),
-  v.literal("error"),
-);
+const messageStatus = v.union(v.literal("streaming"), v.literal("complete"), v.literal("error"));
 
 const chatRunStatus = v.union(
   v.literal("pending"),
@@ -49,11 +37,7 @@ const chatRunStatus = v.union(
   v.literal("error"),
 );
 
-const filePurpose = v.union(
-  v.literal("attachment"),
-  v.literal("avatar"),
-  v.literal("import"),
-);
+const filePurpose = v.union(v.literal("attachment"), v.literal("avatar"), v.literal("import"));
 
 export default defineSchema({
   users: defineTable({

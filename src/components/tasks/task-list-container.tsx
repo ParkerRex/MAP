@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import type { TaskWithTags, Tag } from "@/types";
+import type { Tag, TaskWithTags } from "@/types";
 import TaskItem from "./task-item";
 
 type TaskSection = {
@@ -224,7 +224,9 @@ const TaskListContainer: FC<TaskListContainerProps> = ({
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end" className="w-52">
-                        <div className="px-2 py-1 text-xs text-muted-foreground">Move to project</div>
+                        <div className="px-2 py-1 text-xs text-muted-foreground">
+                          Move to project
+                        </div>
                         <DropdownMenuItem onClick={() => handleBulkAssignProject(null)}>
                           No project
                         </DropdownMenuItem>
@@ -286,20 +288,20 @@ const TaskListContainer: FC<TaskListContainerProps> = ({
                     ))}
                   </DropdownMenuContent>
                 </DropdownMenu>
-              <div className="relative flex-1">
-                <Input
-                  ref={inputRef}
-                  placeholder="Add a task..."
-                  value={newTaskTitle}
-                  onChange={(e) => setNewTaskTitle(e.target.value)}
-                  className="pl-3"
-                />
-              </div>
-              {selectedProjectTitle && (
-                <span className="rounded-full bg-muted px-3 py-1 text-xs font-semibold text-muted-foreground">
-                  {selectedProjectTitle}
-                </span>
-              )}
+                <div className="relative flex-1">
+                  <Input
+                    ref={inputRef}
+                    placeholder="Add a task..."
+                    value={newTaskTitle}
+                    onChange={(e) => setNewTaskTitle(e.target.value)}
+                    className="pl-3"
+                  />
+                </div>
+                {selectedProjectTitle && (
+                  <span className="rounded-full bg-muted px-3 py-1 text-xs font-semibold text-muted-foreground">
+                    {selectedProjectTitle}
+                  </span>
+                )}
                 {newTaskTitle.trim() && (
                   <Button type="submit" size="default">
                     Add

@@ -5,7 +5,10 @@ import { authComponent } from "./auth";
 const DEFAULT_AUTH_PROVIDER = "google";
 const DEFAULT_STATUS = "active";
 
-function buildUserPatch(authUser: { email?: string | null; name?: string | null; image?: string | null }, now: number) {
+function buildUserPatch(
+  authUser: { email?: string | null; name?: string | null; image?: string | null },
+  now: number,
+) {
   const displayName = authUser.name ?? authUser.email ?? undefined;
   return {
     email: authUser.email ?? undefined,

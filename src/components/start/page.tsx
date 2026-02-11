@@ -72,7 +72,9 @@ const toneClasses: Record<NonNullable<PillProps["tone"]>, string> = {
 
 export function Pill({ children, tone = "slate" }: PillProps) {
   return (
-    <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${toneClasses[tone]}`}>
+    <span
+      className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${toneClasses[tone]}`}
+    >
       {children}
     </span>
   );

@@ -11,11 +11,7 @@ const goalCategory = v.union(
   v.literal("spiritual"),
 );
 
-const goalStatus = v.union(
-  v.literal("pending"),
-  v.literal("in_progress"),
-  v.literal("completed"),
-);
+const goalStatus = v.union(v.literal("pending"), v.literal("in_progress"), v.literal("completed"));
 
 export const list = query({
   args: {
@@ -30,21 +26,14 @@ export const list = query({
       .filter((q) => q.eq(q.field("deletedAt"), undefined));
 
     if (args.status) {
-      goalsQuery = goalsQuery.filter((q) =>
-        q.eq(q.field("status"), args.status),
-      );
+      goalsQuery = goalsQuery.filter((q) => q.eq(q.field("status"), args.status));
     }
     if (args.category) {
-      goalsQuery = goalsQuery.filter((q) =>
-        q.eq(q.field("category"), args.category),
-      );
+      goalsQuery = goalsQuery.filter((q) => q.eq(q.field("category"), args.category));
     }
 
     const goals = await goalsQuery.collect();
-    return goals.sort(
-      (a, b) =>
-        (b.updatedAt ?? b.createdAt) - (a.updatedAt ?? a.createdAt),
-    );
+    return goals.sort((a, b) => (b.updatedAt ?? b.createdAt) - (a.updatedAt ?? a.createdAt));
   },
 });
 
@@ -92,8 +81,7 @@ export const update = mutation({
       category: args.category ?? goal.category,
       status,
       dueAt: args.dueAt ?? goal.dueAt,
-      completedAt:
-        status === "completed" ? Date.now() : goal.completedAt ?? undefined,
+      completedAt: status === "completed" ? Date.now() : (goal.completedAt ?? undefined),
       updatedAt: Date.now(),
     });
     return await ctx.db.get(args.goalId);

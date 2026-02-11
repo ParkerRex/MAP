@@ -7,8 +7,8 @@ import {
   getDay,
   isToday,
   isTomorrow,
-  isYesterday,
   isWithinInterval,
+  isYesterday,
   nextMonday,
   set,
   startOfDay,
@@ -45,8 +45,7 @@ export const getStartOfToday = () => startOfDay(new Date());
 
 export const isTaskToday = (date?: Date | null) => !!date && isToday(date);
 
-export const isTaskOverdue = (date?: Date | null) =>
-  !!date && date < getStartOfToday();
+export const isTaskOverdue = (date?: Date | null) => !!date && date < getStartOfToday();
 
 export const isTaskUpcoming = (date?: Date | null) => {
   if (!date) return false;
@@ -144,9 +143,7 @@ const parseProjectToken = (input: string, tags: Tag[]) => {
   if (!match) return { tagId: undefined, projectName: undefined, cleaned: input };
   const token = match[0];
   const name = match[2] ?? "";
-  const existing = tags.find(
-    (tag) => tag.title.toLowerCase() === name.toLowerCase(),
-  );
+  const existing = tags.find((tag) => tag.title.toLowerCase() === name.toLowerCase());
   const cleaned = input.replace(token, "").trim();
   return { tagId: existing?.id, projectName: name || undefined, cleaned };
 };
@@ -189,8 +186,7 @@ export const quickAddSummary = (result: QuickAddResult, tags: Tag[]): string[] |
   return tokens.length ? tokens : null;
 };
 
-export const getTaskProjectTitle = (task: TaskWithTags) =>
-  task.tags?.[0]?.title ?? null;
+export const getTaskProjectTitle = (task: TaskWithTags) => task.tags?.[0]?.title ?? null;
 
 export const getTaskDueLabel = (task: TaskWithTags) => {
   const dueAt = task.dueAt ? new Date(task.dueAt) : null;

@@ -2,8 +2,8 @@
 
 import { Crosshair, Loader2, Plus, Search } from "lucide-react";
 import type { FC } from "react";
-import { cn } from "@/components/ui/cn";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/components/ui/cn";
 import { Input } from "@/components/ui/input";
 
 interface TaskListHeaderProps {

@@ -1,7 +1,7 @@
 "use client";
 
-import { useDeferredValue, useEffect, useMemo, useState } from "react";
 import { subDays } from "date-fns";
+import { useDeferredValue, useEffect, useMemo, useState } from "react";
 import { useCreateNote, useFolders, useNotes } from "@/hooks/use-notes";
 import type { Note } from "@/types/notes";
 import FolderSidebar from "./folder-sidebar";

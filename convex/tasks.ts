@@ -3,11 +3,7 @@ import { mutation, query } from "./_generated/server";
 import { requireUser } from "./lib/auth";
 import { assertOwner } from "./lib/ownership";
 
-const taskStatus = v.union(
-  v.literal("pending"),
-  v.literal("in_progress"),
-  v.literal("completed"),
-);
+const taskStatus = v.union(v.literal("pending"), v.literal("in_progress"), v.literal("completed"));
 
 export const list = query({
   args: {
@@ -22,20 +18,13 @@ export const list = query({
       .filter((q) => q.eq(q.field("deletedAt"), undefined));
 
     if (args.status) {
-      tasksQuery = tasksQuery.filter((q) =>
-        q.eq(q.field("status"), args.status),
-      );
+      tasksQuery = tasksQuery.filter((q) => q.eq(q.field("status"), args.status));
     } else if (args.includeCompleted === false) {
-      tasksQuery = tasksQuery.filter((q) =>
-        q.neq(q.field("status"), "completed"),
-      );
+      tasksQuery = tasksQuery.filter((q) => q.neq(q.field("status"), "completed"));
     }
 
     const tasks = await tasksQuery.collect();
-    return tasks.sort(
-      (a, b) =>
-        (b.updatedAt ?? b.createdAt) - (a.updatedAt ?? a.createdAt),
-    );
+    return tasks.sort((a, b) => (b.updatedAt ?? b.createdAt) - (a.updatedAt ?? a.createdAt));
   },
 });
 

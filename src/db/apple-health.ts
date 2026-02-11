@@ -1,10 +1,10 @@
 import { and, desc, eq, gte, lte } from "drizzle-orm";
 import { db } from "./index";
 import {
-  type NewAppleHealthConnection,
-  type NewAppleHealthData,
   appleHealthConnections,
   appleHealthData,
+  type NewAppleHealthConnection,
+  type NewAppleHealthData,
 } from "./schema";
 
 export const appleHealthDb = {

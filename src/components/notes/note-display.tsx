@@ -106,7 +106,12 @@ export default function NoteDisplay({ note, folders }: NoteDisplayProps) {
 
   const insertSnippet = (snippet: string) => {
     const trimmed = content.trim();
-    const updated = trimmed.length === 0 ? snippet : content.endsWith("\n") ? content + snippet : `${content}\n${snippet}`;
+    const updated =
+      trimmed.length === 0
+        ? snippet
+        : content.endsWith("\n")
+          ? content + snippet
+          : `${content}\n${snippet}`;
     setContent(updated);
     setSaveStatus("idle");
     requestAnimationFrame(() => {
@@ -124,8 +129,7 @@ export default function NoteDisplay({ note, folders }: NoteDisplayProps) {
     );
   }
 
-  const activeFolderName =
-    folders.find((folder) => folder.id === activeFolderId)?.name ?? "Folder";
+  const activeFolderName = folders.find((folder) => folder.id === activeFolderId)?.name ?? "Folder";
 
   return (
     <div className="flex-1 flex flex-col min-w-0 min-h-0 bg-white dark:bg-[#1c1c1e]">
@@ -146,10 +150,7 @@ export default function NoteDisplay({ note, folders }: NoteDisplayProps) {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start" className="w-48">
                 {folders.map((folder) => (
-                  <DropdownMenuItem
-                    key={folder.id}
-                    onClick={() => handleFolderChange(folder.id)}
-                  >
+                  <DropdownMenuItem key={folder.id} onClick={() => handleFolderChange(folder.id)}>
                     {folder.name}
                   </DropdownMenuItem>
                 ))}

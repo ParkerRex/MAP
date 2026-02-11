@@ -47,7 +47,9 @@
       "mcp__XcodeBuildMCP__install_app_sim",
       "mcp__XcodeBuildMCP__launch_app_sim",
       "mcp__XcodeBuildMCP__tap",
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "WebFetch(domain:animate-ui.com)",
+      "WebFetch(domain:github.com)"
     ]
   }
 }

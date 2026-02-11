@@ -21,7 +21,13 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import type { Tag, TaskWithTags } from "@/types";
 
@@ -32,7 +38,10 @@ interface TaskDetailDialogProps {
   tags: Tag[];
   onToggleComplete: (task: TaskWithTags) => void;
   onDelete: (taskId: string) => void;
-  updateTask: (taskId: string, data: { title?: string; body?: string; dueAt?: string | null }) => Promise<void>;
+  updateTask: (
+    taskId: string,
+    data: { title?: string; body?: string; dueAt?: string | null },
+  ) => Promise<void>;
   updateTaskTags: (taskId: string, tags: string[]) => Promise<void>;
   createTag: (title: string) => Promise<{ id: string; title: string }>;
 }
@@ -100,12 +109,20 @@ const TaskDetailDialog = ({
 
         <div className="space-y-4">
           <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Task name" />
-          <Textarea value={body} onChange={(e) => setBody(e.target.value)} placeholder="Notes" rows={4} />
+          <Textarea
+            value={body}
+            onChange={(e) => setBody(e.target.value)}
+            placeholder="Notes"
+            rows={4}
+          />
 
           <div className="grid gap-3 md:grid-cols-2">
             <div className="space-y-2">
               <div className="text-xs font-semibold uppercase text-muted-foreground">Project</div>
-              <Select value={projectId ?? "none"} onValueChange={(value) => setProjectId(value === "none" ? null : value)}>
+              <Select
+                value={projectId ?? "none"}
+                onValueChange={(value) => setProjectId(value === "none" ? null : value)}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="No project" />
                 </SelectTrigger>
@@ -197,7 +214,10 @@ const TaskDetailDialog = ({
                 const tag = tags.find((t) => t.id === id);
                 if (!tag) return null;
                 return (
-                  <span key={id} className="rounded-full bg-muted px-3 py-1 text-xs font-semibold text-muted-foreground">
+                  <span
+                    key={id}
+                    className="rounded-full bg-muted px-3 py-1 text-xs font-semibold text-muted-foreground"
+                  >
                     {tag.title}
                   </span>
                 );

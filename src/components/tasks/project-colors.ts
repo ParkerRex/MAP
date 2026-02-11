@@ -38,11 +38,7 @@ export const getProjectColor = (
   return colors[tagId] ?? defaultProjectColors[fallbackIndex % defaultProjectColors.length];
 };
 
-export const setProjectColor = (
-  colors: Record<string, string>,
-  tagId: string,
-  color: string,
-) => {
+export const setProjectColor = (colors: Record<string, string>, tagId: string, color: string) => {
   const next = { ...colors, [tagId]: color };
   saveProjectColors(next);
   return next;

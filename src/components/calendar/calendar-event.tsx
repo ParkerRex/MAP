@@ -41,11 +41,9 @@ const CalendarEventComponent: React.FC<CalendarEventProps> = ({
   onEventClick,
   onEventDelete,
 }) => {
-
   const handleEventClick = (event: calendar_v3.Schema$Event) => {
     onEventClick(event);
   };
-
 
   const getCalendarColor = (calendarId: string | null | undefined) => {
     const calendar = calendars.find((cal) => cal.id === calendarId);
@@ -238,7 +236,6 @@ const CalendarEventComponent: React.FC<CalendarEventProps> = ({
           );
         })}
       </div>
-
     </>
   );
 };

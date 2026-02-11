@@ -23,8 +23,7 @@ export async function GET() {
         username: githubUser.login ?? null,
         avatarUrl: githubUser.avatar_url ?? null,
         profileUrl: githubUser.html_url ?? null,
-        lastSyncAt:
-          (integration.updatedAt ?? integration.createdAt)?.toISOString() ?? null,
+        lastSyncAt: (integration.updatedAt ?? integration.createdAt)?.toISOString() ?? null,
       });
     } catch (error) {
       console.error("GitHub status error:", error);

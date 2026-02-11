@@ -4,10 +4,7 @@ import { handleApiError, unauthorized } from "@/lib/api/errors";
 import { getUser } from "@/lib/auth";
 import { createGitHubClient } from "@/lib/github";
 
-export async function POST(
-  _request: Request,
-  { params }: { params: { threadId: string } },
-) {
+export async function POST(_request: Request, { params }: { params: { threadId: string } }) {
   try {
     const user = await getUser();
     if (!user) throw unauthorized();

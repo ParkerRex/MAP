@@ -1,8 +1,7 @@
 import { v } from "convex/values";
-import { action, internalMutation, internalQuery } from "./_generated/server";
 import { internal } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
-import { query } from "./_generated/server";
+import { action, internalMutation, internalQuery, query } from "./_generated/server";
 import { requireUser } from "./lib/auth";
 
 // WHOOP API Types
@@ -154,9 +153,7 @@ export const getTokens = internalQuery({
   handler: async (ctx, args) => {
     const integration = await ctx.db
       .query("integrations")
-      .withIndex("by_user_provider", (q) =>
-        q.eq("userId", args.userId).eq("provider", "whoop"),
-      )
+      .withIndex("by_user_provider", (q) => q.eq("userId", args.userId).eq("provider", "whoop"))
       .first();
 
     if (!integration) return null;
@@ -180,9 +177,7 @@ export const updateTokensInternal = internalMutation({
   handler: async (ctx, args) => {
     const integration = await ctx.db
       .query("integrations")
-      .withIndex("by_user_provider", (q) =>
-        q.eq("userId", args.userId).eq("provider", "whoop"),
-      )
+      .withIndex("by_user_provider", (q) => q.eq("userId", args.userId).eq("provider", "whoop"))
       .first();
 
     if (integration) {
@@ -264,9 +259,7 @@ export const upsertCycle = internalMutation({
     const now = Date.now();
     const existing = await ctx.db
       .query("whoopCycles")
-      .withIndex("by_user_start", (q) =>
-        q.eq("userId", args.userId).eq("start", args.start),
-      )
+      .withIndex("by_user_start", (q) => q.eq("userId", args.userId).eq("start", args.start))
       .first();
 
     if (existing) {
@@ -306,9 +299,7 @@ export const getCycleByStart = internalQuery({
   handler: async (ctx, args) => {
     return await ctx.db
       .query("whoopCycles")
-      .withIndex("by_user_start", (q) =>
-        q.eq("userId", args.userId).eq("start", args.start),
-      )
+      .withIndex("by_user_start", (q) => q.eq("userId", args.userId).eq("start", args.start))
       .first();
   },
 });
@@ -394,9 +385,7 @@ export const upsertSleep = internalMutation({
     const now = Date.now();
     const existing = await ctx.db
       .query("whoopSleep")
-      .withIndex("by_user_start", (q) =>
-        q.eq("userId", args.userId).eq("start", args.start),
-      )
+      .withIndex("by_user_start", (q) => q.eq("userId", args.userId).eq("start", args.start))
       .first();
 
     if (existing) {
@@ -481,9 +470,7 @@ export const upsertWorkout = internalMutation({
     const now = Date.now();
     const existing = await ctx.db
       .query("whoopWorkouts")
-      .withIndex("by_user_start", (q) =>
-        q.eq("userId", args.userId).eq("start", args.start),
-      )
+      .withIndex("by_user_start", (q) => q.eq("userId", args.userId).eq("start", args.start))
       .first();
 
     if (existing) {
@@ -607,10 +594,7 @@ async function getValidAccessToken(
 }
 
 // Helper to make WHOOP API requests
-async function whoopFetch<T>(
-  accessToken: string,
-  endpoint: string,
-): Promise<T> {
+async function whoopFetch<T>(accessToken: string, endpoint: string): Promise<T> {
   const response = await fetch(`${WHOOP_API_BASE}${endpoint}`, {
     headers: {
       Authorization: `Bearer ${accessToken}`,
@@ -775,13 +759,9 @@ export const syncRecovery = action({
     const start = new Date();
     start.setDate(start.getDate() - daysBack);
 
-    const recoveries = await whoopFetchAll<WhoopRecovery>(
-      accessToken,
-      "/recovery",
-      {
-        start: start.toISOString(),
-      },
-    );
+    const recoveries = await whoopFetchAll<WhoopRecovery>(accessToken, "/recovery", {
+      start: start.toISOString(),
+    });
 
     let synced = 0;
     for (const recovery of recoveries) {
@@ -789,10 +769,7 @@ export const syncRecovery = action({
       // WHOOP recovery is tied to a cycle via cycle_id
       // First fetch the cycle to get its start time
       try {
-        const cycle = await whoopFetch<WhoopCycle>(
-          accessToken,
-          `/cycle/${recovery.cycle_id}`,
-        );
+        const cycle = await whoopFetch<WhoopCycle>(accessToken, `/cycle/${recovery.cycle_id}`);
         const cycleStart = new Date(cycle.start).getTime();
 
         const cycleRecord = await ctx.runQuery(internal.whoop.getCycleByStart, {
@@ -853,13 +830,9 @@ export const syncSleep = action({
     const start = new Date();
     start.setDate(start.getDate() - daysBack);
 
-    const sleeps = await whoopFetchAll<WhoopSleep>(
-      accessToken,
-      "/activity/sleep",
-      {
-        start: start.toISOString(),
-      },
-    );
+    const sleeps = await whoopFetchAll<WhoopSleep>(accessToken, "/activity/sleep", {
+      start: start.toISOString(),
+    });
 
     let synced = 0;
     for (const sleep of sleeps) {
@@ -881,22 +854,16 @@ export const syncSleep = action({
         totalInBedTime: sleep.score?.stage_summary?.total_in_bed_time_milli,
         totalAwakeTime: sleep.score?.stage_summary?.total_awake_time_milli,
         totalNoDataTime: sleep.score?.stage_summary?.total_no_data_time_milli,
-        totalLightSleepTime:
-          sleep.score?.stage_summary?.total_light_sleep_time_milli,
-        totalSlowWaveSleepTime:
-          sleep.score?.stage_summary?.total_slow_wave_sleep_time_milli,
-        totalRemSleepTime:
-          sleep.score?.stage_summary?.total_rem_sleep_time_milli,
+        totalLightSleepTime: sleep.score?.stage_summary?.total_light_sleep_time_milli,
+        totalSlowWaveSleepTime: sleep.score?.stage_summary?.total_slow_wave_sleep_time_milli,
+        totalRemSleepTime: sleep.score?.stage_summary?.total_rem_sleep_time_milli,
         sleepCycleCount: sleep.score?.stage_summary?.sleep_cycle_count,
         disturbanceCount: sleep.score?.stage_summary?.disturbance_count,
         sleepNeeded,
         respiratoryRate: sleep.score?.respiratory_rate?.toString(),
-        sleepPerformancePercentage:
-          sleep.score?.sleep_performance_percentage?.toString(),
-        sleepConsistencyPercentage:
-          sleep.score?.sleep_consistency_percentage?.toString(),
-        sleepEfficiencyPercentage:
-          sleep.score?.sleep_efficiency_percentage?.toString(),
+        sleepPerformancePercentage: sleep.score?.sleep_performance_percentage?.toString(),
+        sleepConsistencyPercentage: sleep.score?.sleep_consistency_percentage?.toString(),
+        sleepEfficiencyPercentage: sleep.score?.sleep_efficiency_percentage?.toString(),
       });
       synced++;
     }
@@ -934,13 +901,9 @@ export const syncWorkouts = action({
     const start = new Date();
     start.setDate(start.getDate() - daysBack);
 
-    const workouts = await whoopFetchAll<WhoopWorkout>(
-      accessToken,
-      "/activity/workout",
-      {
-        start: start.toISOString(),
-      },
-    );
+    const workouts = await whoopFetchAll<WhoopWorkout>(accessToken, "/activity/workout", {
+      start: start.toISOString(),
+    });
 
     let synced = 0;
     for (const workout of workouts) {
@@ -951,8 +914,7 @@ export const syncWorkouts = action({
         end: workout.end ? new Date(workout.end).getTime() : undefined,
         timezoneOffset: workout.timezone_offset,
         sportId: workout.sport_id,
-        sportName:
-          WHOOP_SPORTS[workout.sport_id] ?? `Sport ${workout.sport_id}`,
+        sportName: WHOOP_SPORTS[workout.sport_id] ?? `Sport ${workout.sport_id}`,
         scoreState: workout.score_state,
         strain: workout.score?.strain?.toString(),
         averageHeartRate: workout.score?.average_heart_rate,

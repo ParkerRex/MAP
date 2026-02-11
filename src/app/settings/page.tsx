@@ -4,18 +4,21 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import type React from "react";
 import { useEffect, useState } from "react";
-import { GitHubContributionGraph, normalizeGithubUsername } from "@/components/github-contribution-graph";
+import {
+  GitHubContributionGraph,
+  normalizeGithubUsername,
+} from "@/components/github-contribution-graph";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { useAuth } from "@/hooks/use-auth";
-import { queryKeys } from "@/lib/api";
 import { useGoogleStatus } from "@/hooks/use-calendar";
 import { useClaudeConnect, useClaudeDisconnect, useClaudeStatus } from "@/hooks/use-claude";
 import { useGitHubDisconnect, useGitHubStatus } from "@/hooks/use-github";
 import { useOpenAIConnect, useOpenAIDisconnect, useOpenAIStatus } from "@/hooks/use-openai";
+import { queryKeys } from "@/lib/api";
 
 function SettingsSection({
   title,

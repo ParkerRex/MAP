@@ -22,19 +22,14 @@ export const list = query({
         .filter((q) => q.eq(q.field("deletedAt"), undefined))
         .collect();
       return notes
-        .sort(
-          (a, b) =>
-            (b.updatedAt ?? b.createdAt) - (a.updatedAt ?? a.createdAt),
-        )
+        .sort((a, b) => (b.updatedAt ?? b.createdAt) - (a.updatedAt ?? a.createdAt))
         .slice(0, limit);
     }
 
     const results = new Map<string, any>();
     const titleMatches = await ctx.db
       .query("notes")
-      .withSearchIndex("search_title", (q) =>
-        q.search("title", searchTerm).eq("userId", user._id),
-      )
+      .withSearchIndex("search_title", (q) => q.search("title", searchTerm).eq("userId", user._id))
       .take(limit);
     for (const note of titleMatches) {
       if (!note.deletedAt) {
@@ -55,10 +50,7 @@ export const list = query({
     }
 
     return Array.from(results.values())
-      .sort(
-        (a, b) =>
-          (b.updatedAt ?? b.createdAt) - (a.updatedAt ?? a.createdAt),
-      )
+      .sort((a, b) => (b.updatedAt ?? b.createdAt) - (a.updatedAt ?? a.createdAt))
       .slice(0, limit);
   },
 });

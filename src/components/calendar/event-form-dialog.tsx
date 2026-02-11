@@ -102,9 +102,7 @@ export function EventFormDialog({
     if (allDay) {
       const startOfDay = new Date(startDate);
       startOfDay.setHours(0, 0, 0, 0);
-      const endOfDay = event?.end?.date
-        ? new Date(event.end.date)
-        : addDays(startOfDay, 1);
+      const endOfDay = event?.end?.date ? new Date(event.end.date) : addDays(startOfDay, 1);
       setDate(toDateInputValue(startOfDay));
       setEndDate(toDateInputValue(endOfDay));
       setStartTime("09:00");

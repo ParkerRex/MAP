@@ -101,8 +101,7 @@ export default function NoteList({
     { value: "content", label: "Content" },
   ];
 
-  const listNotes =
-    noteFilter === "pinned" ? pinnedNotes : [...pinnedNotes, ...unpinnedNotes];
+  const listNotes = noteFilter === "pinned" ? pinnedNotes : [...pinnedNotes, ...unpinnedNotes];
 
   const handleDelete = (noteId: string) => {
     deleteNote.mutate(noteId);
@@ -391,9 +390,7 @@ export default function NoteList({
         <div className="px-4 pt-5 pb-4 space-y-4">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
-              <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
-                Notes
-              </p>
+              <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">Notes</p>
               <h2 className="text-xl font-semibold truncate">{listHeaderTitle}</h2>
             </div>
             <div className="flex items-center gap-1">
