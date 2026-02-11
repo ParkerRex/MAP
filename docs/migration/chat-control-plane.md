@@ -30,6 +30,10 @@
   - connector/account/route summary from `GET /v1/channels`
   - pending pairing queue from `GET /v1/channels/pairing`
   - approve/reject actions
+- Node pairing panel:
+  - request pair codes
+  - approve/reject pending node pair requests
+  - view paired node status and one-time issued token
 
 ## Confirmation Gate Behavior
 
@@ -65,3 +69,7 @@ Rust gateway now marks certain prompts as high impact if they contain destructiv
 - `GET /v1/channels/pairing`
 - `POST /v1/channels/pairing/:id/approve`
 - `POST /v1/channels/pairing/:id/reject`
+- `GET /v1/nodes`
+- `POST /v1/nodes/pair/request`
+- `POST /v1/nodes/pair/approve/:id`
+- `POST /v1/nodes/pair/reject/:id`
