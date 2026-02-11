@@ -282,6 +282,8 @@ OPENCLAW_REF_COMMIT=8c963dc5a680f74cd7a7143263e9ec7d047404c0
 - Session APIs (`/v1/sessions`, `/v1/sessions/:id/messages`)
 - Chat run APIs + SSE (`/v1/chat/runs`, `/v1/chat/runs/:id/stream`)
 - Model auth profiles + failover preview (`/v1/models/*`)
+- WebSocket control-plane parity (`GET /v1/ws`) including `agent`, `agent.wait`, `send`, `poll`, `wake`, `agents.*`, `config.*`, `wizard.*`, `logs.tail`, `channels.logout`, `exec.approvals.*`, and richer `node.*` (`describe`, `invoke`, `event`)
+- OpenClaw RPC alias compatibility across dot and slash forms for control-plane methods (for example `agent.send` and `agent/send`)
 - Skills discovery/rescan (`/v1/skills`)
 - Cron scheduler CRUD/run-now (`/v1/cron/jobs*`)
 - Security audit (`/v1/security/audit`)
