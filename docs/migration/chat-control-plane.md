@@ -1,0 +1,41 @@
+# Chat Control Plane (Rust Gateway)
+
+`/chat` now acts as a lightweight control plane for the Rust gateway chat runtime.
+
+## Available Controls
+
+- Session list and active session selection.
+- Model selection from gateway-configured primary + fallback models.
+- Auth profile management:
+  - list profiles from `GET /v1/models/profiles`
+  - add API key profile via `POST /v1/models/profiles`
+  - delete profile via `DELETE /v1/models/profiles/:id`
+- Confirmation gate toggle for destructive/high-impact prompts.
+- Latest run diagnostics:
+  - status
+  - model used
+  - per-attempt failover trail (provider/model/profile/result)
+
+## Confirmation Gate Behavior
+
+Rust gateway now marks certain prompts as high impact if they contain destructive markers (for example `drop table`, `rm -rf`, `delete production`).
+
+- If the prompt is high impact and not confirmed:
+  - run status becomes `needs_confirmation`
+  - assistant output explains that confirmation is required
+- To proceed:
+  - enable the UI checkbox `Confirm high-impact actions for this message`
+  - resend the prompt
+
+## API Endpoints Used By `/chat`
+
+- `GET /v1/sessions`
+- `POST /v1/sessions`
+- `GET /v1/sessions/:id/messages`
+- `GET /v1/sessions/:id/runs`
+- `POST /v1/chat/runs`
+- `GET /v1/chat/runs/:id/stream`
+- `GET /v1/models`
+- `GET /v1/models/profiles`
+- `POST /v1/models/profiles`
+- `DELETE /v1/models/profiles/:id`
