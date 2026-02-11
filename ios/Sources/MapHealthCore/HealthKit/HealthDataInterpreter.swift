@@ -8,19 +8,23 @@ public final class HealthDataInterpreter: ObservableObject {
     private let healthDataFetcher: HealthDataFetcher
     private let openAIClient: OpenAIClient
     private let claudeClient: ClaudeAPIClient
+    private let gatewayChatService: GatewayChatService
     private var systemPrompt = ""
     private var llmSource: LLMSource = .openai
     private var openAIModel = StorageKeys.Defaults.openAIModel
     private var claudeModel = StorageKeys.Defaults.claudeModel
+    private var gatewaySessionId: String?
 
     public init(
         healthDataFetcher: HealthDataFetcher = HealthDataFetcher(),
         openAIClient: OpenAIClient = OpenAIClient(),
-        claudeClient: ClaudeAPIClient = ClaudeAPIClient()
+        claudeClient: ClaudeAPIClient = ClaudeAPIClient(),
+        gatewayChatService: GatewayChatService = GatewayChatService()
     ) {
         self.healthDataFetcher = healthDataFetcher
         self.openAIClient = openAIClient
         self.claudeClient = claudeClient
+        self.gatewayChatService = gatewayChatService
     }
 
     public func prepareSession(
@@ -33,6 +37,7 @@ public final class HealthDataInterpreter: ObservableObject {
         self.claudeModel = claudeModel
         self.systemPrompt = await generateSystemPrompt()
         self.messages = []
+        self.gatewaySessionId = nil
     }
 
     public func appendUserMessage(_ content: String) {
@@ -54,6 +59,10 @@ public final class HealthDataInterpreter: ObservableObject {
 
         switch llmSource {
         case .openai:
+            if let gatewayResponse = try? await sendGatewayMessage(model: openAIModel) {
+                messages.append(ChatMessage(role: .assistant, content: gatewayResponse))
+                return
+            }
             guard let apiKey = KeychainService.shared.getOpenAIKey() else {
                 throw OpenAIClientError.missingAPIKey
             }
@@ -65,6 +74,10 @@ public final class HealthDataInterpreter: ObservableObject {
             )
             messages.append(ChatMessage(role: .assistant, content: response))
         case .claude:
+            if let gatewayResponse = try? await sendGatewayMessage(model: claudeModel) {
+                messages.append(ChatMessage(role: .assistant, content: gatewayResponse))
+                return
+            }
             let response = try await sendClaudeMessage()
             messages.append(ChatMessage(role: .assistant, content: response))
         case .fog, .local:
@@ -75,6 +88,7 @@ public final class HealthDataInterpreter: ObservableObject {
     public func resetChat() async {
         systemPrompt = await generateSystemPrompt()
         messages = []
+        gatewaySessionId = nil
     }
 
     private func buildOpenAIMessages() -> [OpenAIClient.Message] {
@@ -118,6 +132,40 @@ public final class HealthDataInterpreter: ObservableObject {
             }
             throw ClaudeAPIError.unauthorized
         }
+    }
+
+    private func sendGatewayMessage(model: String) async throws -> String {
+        guard let latestUserMessage = messages.last?.content.trimmingCharacters(in: .whitespacesAndNewlines),
+              !latestUserMessage.isEmpty else {
+            throw GatewayChatError.requestFailed("Prompt is required.")
+        }
+
+        let prompt: String
+        if gatewaySessionId == nil {
+            prompt = """
+            \(systemPrompt)
+
+            User request:
+            \(latestUserMessage)
+            """
+        } else {
+            prompt = latestUserMessage
+        }
+
+        let result = try await gatewayChatService.sendMessage(
+            prompt: prompt,
+            model: model,
+            sessionId: gatewaySessionId,
+            confirmed: false,
+            token: KeychainService.shared.getSessionToken()
+        )
+
+        gatewaySessionId = result.sessionId
+        let text = result.text.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !text.isEmpty else {
+            throw GatewayChatError.requestFailed("Gateway returned an empty response.")
+        }
+        return text
     }
 
     private func generateSystemPrompt() async -> String {
