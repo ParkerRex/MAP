@@ -281,6 +281,7 @@ OPENCLAW_REF_COMMIT=8c963dc5a680f74cd7a7143263e9ec7d047404c0
 **Gateway API coverage includes:**
 - Session APIs (`/v1/sessions`, `/v1/sessions/:id/messages`)
 - Chat run APIs + SSE (`/v1/chat/runs`, `/v1/chat/runs/:id/stream`)
+- WebSocket `chat.abort` that cancels in-flight model generation and emits `run.aborted`
 - Model auth profiles + failover preview (`/v1/models/*`)
 - WebSocket control-plane parity (`GET /v1/ws`) including `agent`, `agent.wait`, `send`, `poll`, `wake`, `agents.*`, `config.*`, `wizard.*`, `logs.tail`, `channels.logout`, `exec.approvals.*`, and richer `node.*` (`describe`, `invoke`, `event`)
 - OpenClaw RPC alias compatibility across dot and slash forms for control-plane methods (for example `agent.send` and `agent/send`)
