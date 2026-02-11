@@ -122,7 +122,7 @@ pub async fn sync_skills_to_db(state: &AppState) -> Result<Vec<SkillRecord>, Api
             do update set
               source_type = excluded.source_type,
               source_path = excluded.source_path,
-              metadata = excluded.metadata,
+              metadata = coalesce(skills.metadata, '{}'::jsonb) || excluded.metadata,
               updated_at = now()
             "#,
         )
