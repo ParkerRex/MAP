@@ -15,7 +15,11 @@ fetch() {
   local path="$1"
   echo ""
   echo "==> GET ${path}"
-  curl -fsS "${auth_header[@]}" "${BASE_URL}${path}" | jq '.'
+  if ((${#auth_header[@]})); then
+    curl -fsS "${auth_header[@]}" "${BASE_URL}${path}" | jq '.'
+  else
+    curl -fsS "${BASE_URL}${path}" | jq '.'
+  fi
 }
 
 fetch "/v1/health"
