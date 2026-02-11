@@ -22,6 +22,13 @@ swift test
 
 Background sync is iOS-only. On macOS builds the BackgroundSyncManager is a no-op so SwiftPM tests can run.
 
+There is also a package-manifest regression guard:
+
+- `PackageManifestRegressionTests.doesNotReferenceLegacyConvexProduct`
+- Ensures `ios/Package.swift` does not reintroduce
+  `.product(name: "Convex", package: "convex-swift")`, which previously broke
+  iOS dependency resolution in CI.
+
 ## Run Xcode tests
 
 Find a scheme first, then run tests through xcodebuild.

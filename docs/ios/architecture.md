@@ -77,6 +77,15 @@ TasksService / CalendarService -> MapAPIClient -> Map backend
 - `BackgroundSyncManager`: iOS background delivery + sync scheduling (no-op on macOS builds).
 - `ClaudeAPIClient`: Claude chat through Map backend.
 
+## Legacy Convex services
+
+`MapHealthCore` still contains legacy Convex-era service files under
+`ios/Sources/MapHealthCore/Services/`, but they are intentionally excluded from
+the active Swift package target in `ios/Package.swift`.
+
+This keeps historical code available for reference while preventing stale
+`convex-swift` product wiring from breaking SwiftPM/Xcode dependency resolution.
+
 ## Feature flags (command-line)
 
 - `--skipOnboarding`
