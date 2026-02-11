@@ -172,6 +172,20 @@ type NodesResponse = {
   pairing_mode: string;
 };
 
+type InboundMessageResponse = {
+  accepted: boolean;
+  requires_pairing: boolean;
+  reason?: string | null;
+  pairing_request_id?: string | null;
+  pairing_code?: string | null;
+  pairing_expires_at?: string | null;
+  session_id?: string | null;
+  session_key?: string | null;
+  run_id?: string | null;
+  model_used?: string | null;
+  output?: string | null;
+};
+
 const rustGatewayBase = (import.meta.env.VITE_RUST_GATEWAY_URL ?? "http://localhost:18789").replace(
   /\/$/,
   "",
@@ -219,6 +233,12 @@ function Chat() {
   const [newNodeKey, setNewNodeKey] = useState("node-local");
   const [newNodeDisplayName, setNewNodeDisplayName] = useState("Local Node");
   const [issuedNodeToken, setIssuedNodeToken] = useState<string | null>(null);
+  const [inboundProvider, setInboundProvider] = useState("telegram");
+  const [inboundPeerKind, setInboundPeerKind] = useState("dm");
+  const [inboundPeerId, setInboundPeerId] = useState("user-123");
+  const [inboundText, setInboundText] = useState("Hey Clawdbot, give me the top priorities.");
+  const [inboundPolicy, setInboundPolicy] = useState("pairing");
+  const [inboundResult, setInboundResult] = useState<InboundMessageResponse | null>(null);
   const streamRef = useRef<EventSource | null>(null);
 
   const sessionsQuery = useQuery({
@@ -517,6 +537,33 @@ function Chat() {
     },
   });
 
+  const inboundMessageMutation = useMutation({
+    mutationFn: (payload: {
+      provider: string;
+      peerKind: string;
+      peerId: string;
+      text: string;
+      dmPolicy: string;
+    }) =>
+      requestJson<InboundMessageResponse>("/v1/channels/inbound", {
+        method: "POST",
+        body: JSON.stringify({
+          provider: payload.provider,
+          peer_kind: payload.peerKind,
+          peer_id: payload.peerId,
+          text: payload.text,
+          dm_policy: payload.dmPolicy,
+          model: selectedModel || undefined,
+        }),
+      }),
+    onSuccess: async (result) => {
+      setInboundResult(result);
+      await queryClient.invalidateQueries({ queryKey: ["rust-gateway", "channels", "summary"] });
+      await queryClient.invalidateQueries({ queryKey: ["rust-gateway", "channels", "pairing"] });
+      await queryClient.invalidateQueries({ queryKey: ["rust-gateway", "sessions"] });
+    },
+  });
+
   useEffect(() => {
     return () => {
       streamRef.current?.close();
@@ -619,6 +666,23 @@ function Chat() {
     await requestNodePairingMutation.mutateAsync({
       nodeKey,
       displayName: newNodeDisplayName.trim() || undefined,
+    });
+  };
+
+  const handleInboundSimulation = async () => {
+    const provider = inboundProvider.trim();
+    const peerKind = inboundPeerKind.trim();
+    const peerId = inboundPeerId.trim();
+    const text = inboundText.trim();
+    if (!provider || !peerKind || !peerId || !text) {
+      return;
+    }
+    await inboundMessageMutation.mutateAsync({
+      provider,
+      peerKind,
+      peerId,
+      text,
+      dmPolicy: inboundPolicy,
     });
   };
 
@@ -1111,6 +1175,92 @@ function Chat() {
                   </div>
                 </div>
               ))
+            )}
+          </div>
+        </div>
+      </Panel>
+
+      <Panel title="Inbound simulator" subtitle="Test channel ingestion and pairing policy">
+        <div className="grid gap-6 lg:grid-cols-[0.45fr_0.55fr]">
+          <div className="space-y-3 rounded-2xl border border-slate-100 bg-white px-4 py-4">
+            <div className="grid gap-2 sm:grid-cols-2">
+              <input
+                value={inboundProvider}
+                onChange={(event) => setInboundProvider(event.target.value)}
+                placeholder="provider (telegram, slack...)"
+                className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700"
+              />
+              <select
+                value={inboundPeerKind}
+                onChange={(event) => setInboundPeerKind(event.target.value)}
+                className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700"
+              >
+                <option value="dm">dm</option>
+                <option value="group">group</option>
+                <option value="channel">channel</option>
+                <option value="thread">thread</option>
+              </select>
+            </div>
+            <input
+              value={inboundPeerId}
+              onChange={(event) => setInboundPeerId(event.target.value)}
+              placeholder="peer id"
+              className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700"
+            />
+            <select
+              value={inboundPolicy}
+              onChange={(event) => setInboundPolicy(event.target.value)}
+              className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700"
+            >
+              <option value="pairing">pairing</option>
+              <option value="allowlist">allowlist</option>
+              <option value="open">open</option>
+              <option value="disabled">disabled</option>
+            </select>
+            <textarea
+              value={inboundText}
+              onChange={(event) => setInboundText(event.target.value)}
+              rows={3}
+              className="w-full resize-none rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700"
+            />
+            <button
+              type="button"
+              onClick={() => void handleInboundSimulation()}
+              disabled={inboundMessageMutation.isPending}
+              className="rounded-full bg-slate-900 px-4 py-2 text-xs font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              Send simulated inbound
+            </button>
+          </div>
+
+          <div className="space-y-2 rounded-2xl border border-slate-100 bg-white px-4 py-4 text-sm text-slate-700">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
+              Result
+            </p>
+            {inboundResult ? (
+              <>
+                <p>
+                  accepted=<span className="font-semibold">{String(inboundResult.accepted)}</span> ·
+                  requires_pairing=
+                  <span className="font-semibold">{String(inboundResult.requires_pairing)}</span>
+                </p>
+                {inboundResult.reason ? <p>reason={inboundResult.reason}</p> : null}
+                {inboundResult.pairing_code ? (
+                  <p>pairing_code={inboundResult.pairing_code}</p>
+                ) : null}
+                {inboundResult.session_id ? <p>session_id={inboundResult.session_id}</p> : null}
+                {inboundResult.run_id ? <p>run_id={inboundResult.run_id}</p> : null}
+                {inboundResult.model_used ? <p>model_used={inboundResult.model_used}</p> : null}
+                {inboundResult.output ? (
+                  <pre className="overflow-auto rounded-xl border border-slate-100 bg-slate-50 p-3 text-xs text-slate-600">
+                    {inboundResult.output}
+                  </pre>
+                ) : null}
+              </>
+            ) : (
+              <p className="text-slate-500">
+                Run a simulation to inspect policy and routing behavior.
+              </p>
             )}
           </div>
         </div>
