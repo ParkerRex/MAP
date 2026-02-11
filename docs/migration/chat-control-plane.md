@@ -73,3 +73,13 @@ Rust gateway now marks certain prompts as high impact if they contain destructiv
 - `POST /v1/nodes/pair/request`
 - `POST /v1/nodes/pair/approve/:id`
 - `POST /v1/nodes/pair/reject/:id`
+
+## Smoke Verification
+
+Run a quick control-plane endpoint check:
+
+```bash
+RUST_GATEWAY_URL=http://localhost:18789 \
+RUST_GATEWAY_TOKEN=... \
+./scripts/smoke-gateway-control-plane.sh
+```
