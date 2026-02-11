@@ -567,7 +567,6 @@ function Chat() {
         kind: "error",
         message: getErrorMessage(error, "Failed to create thread."),
       });
-      throw error;
     }
   };
 
