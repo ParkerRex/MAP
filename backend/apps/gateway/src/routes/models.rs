@@ -9,6 +9,13 @@ use serde_json::Value;
 use sqlx::FromRow;
 use uuid::Uuid;
 
+fn canonical_provider(provider: &str) -> String {
+    match provider.trim().to_lowercase().as_str() {
+        "kimi" | "moonshot-ai" | "moonshotai" => "moonshot".to_string(),
+        value => value.to_string(),
+    }
+}
+
 #[derive(Debug, Serialize)]
 pub struct ModelsResponse {
     pub primary_model: String,
@@ -119,7 +126,7 @@ pub async fn upsert_profile(
         returning id, provider, profile_id, profile_type, payload, created_at, updated_at
         "#,
     )
-    .bind(payload.provider.trim().to_lowercase())
+    .bind(canonical_provider(&payload.provider))
     .bind(payload.profile_id.trim())
     .bind(payload.profile_type.trim().to_lowercase())
     .bind(payload.payload)
@@ -127,6 +134,18 @@ pub async fn upsert_profile(
     .await?;
 
     Ok(Json(row))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::canonical_provider;
+
+    #[test]
+    fn canonical_provider_normalizes_kimi_aliases() {
+        assert_eq!(canonical_provider("kimi"), "moonshot");
+        assert_eq!(canonical_provider("moonshot-ai"), "moonshot");
+        assert_eq!(canonical_provider("openai"), "openai");
+    }
 }
 
 pub async fn delete_profile(
