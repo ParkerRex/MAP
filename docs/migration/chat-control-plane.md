@@ -113,6 +113,9 @@ This behavior now applies to both:
 - `models.generate`
 - `skills.list` / `skills.status`
 - `skills.rescan`
+- `skills.bins`
+- `skills.install`
+- `skills.update`
 - `security.audit`
 - `cron.jobs.list` / `cron.list`
 - `cron.runs.list` / `cron.runs`
@@ -152,6 +155,27 @@ This keeps the websocket handler responsive while generation is in flight.
 Regression coverage:
 
 - `src/ws-chat-send-nonblocking.test.ts`
+
+### Skills Extended WS Methods
+
+The Rust gateway now recognizes and handles the extended OpenClaw skills methods:
+
+- `skills.bins`
+  - Validates an empty params object.
+  - Scans discovered `SKILL.md` frontmatter metadata and returns a deduplicated `bins` list from `requires.bins`, `requires.anyBins`, and installer `bins`.
+- `skills.install`
+  - Validates `name`, `installId`, and optional `timeoutMs >= 1000`.
+  - Validates skill existence and that the requested `installId` is declared by that skill.
+  - Returns structured `unavailable` (installer execution is intentionally stubbed in Rust gateway for now).
+- `skills.update`
+  - Validates `skillKey` and optional `enabled`, `apiKey`, and `env` patch.
+  - Normalizes `apiKey` by stripping embedded CR/LF characters.
+  - Applies idempotent config patching into `skills.metadata.openclaw.config` and returns `{ ok, skillKey, config }`.
+
+Error semantics:
+
+- malformed params return `invalid_request`
+- not-yet-implemented install execution returns `unavailable`
 
 ## Smoke Verification
 
