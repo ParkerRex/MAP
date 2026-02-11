@@ -4,7 +4,7 @@ import { PageHeader, Panel, Pill } from "../components/start/page";
 const focusBlocks = [
   { time: "08:30", title: "Product planning sprint", detail: "Map AI core flows" },
   { time: "11:00", title: "Calendar + task merge", detail: "Shared timeline" },
-  { time: "15:30", title: "Convex agent pass", detail: "Streaming + files" },
+  { time: "15:30", title: "Rust agent pass", detail: "Streaming + tools" },
 ];
 
 const pulse = [
@@ -29,7 +29,7 @@ function Dashboard() {
       <PageHeader
         eyebrow="Mission control"
         title="Today at a glance"
-        subtitle="Convex keeps the live graph; TanStack Start keeps the surface fast."
+        subtitle="Postgres + Rust keep the live graph; TanStack Start keeps the surface fast."
         actions={
           <>
             <button
@@ -92,14 +92,21 @@ function Dashboard() {
         </Panel>
       </div>
 
-      <Panel title="Team lane" subtitle="Fast check-in for what ships next" className="animate-rise-delay-2">
+      <Panel
+        title="Team lane"
+        subtitle="Fast check-in for what ships next"
+        className="animate-rise-delay-2"
+      >
         <div className="grid gap-4 md:grid-cols-3">
           {[
             { label: "Track B", value: "Auth live", detail: "Google OAuth ready" },
             { label: "Track C", value: "Web shell", detail: "Routing + UI scaffolded" },
             { label: "Track D", value: "Agent core", detail: "Streaming + files queued" },
           ].map((card) => (
-            <div key={card.label} className="rounded-2xl border border-slate-100 bg-white px-4 py-4">
+            <div
+              key={card.label}
+              className="rounded-2xl border border-slate-100 bg-white px-4 py-4"
+            >
               <p className="text-xs uppercase tracking-[0.2em] text-slate-400">{card.label}</p>
               <p className="mt-2 text-lg font-semibold text-slate-900">{card.value}</p>
               <p className="text-xs text-slate-500">{card.detail}</p>

@@ -1,11 +1,18 @@
 import { goalsDb } from "@/db/goals";
 import { notFound } from "@/lib/api/errors";
 import { withAuth } from "@/lib/api/with-auth";
+import { parseGoalCategory, parseGoalStatus } from "../validation";
 
 export const PUT = withAuth(async (user, request, { params }) => {
   const { goalId } = await params;
   const body = await request.json();
-  const { completed, title, dueAt } = body;
+  const { completed, title, dueAt, category, status } = body as {
+    completed?: boolean;
+    title?: string;
+    dueAt?: string;
+    category?: string;
+    status?: string;
+  };
 
   // Handle toggle complete
   if (typeof completed === "boolean") {
@@ -18,6 +25,8 @@ export const PUT = withAuth(async (user, request, { params }) => {
   const goal = await goalsDb.updateGoal(goalId, user.id, {
     title,
     dueAt: dueAt ? new Date(dueAt) : undefined,
+    goalCategory: parseGoalCategory(category),
+    goalStatus: parseGoalStatus(status),
   });
 
   if (!goal) {

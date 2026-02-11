@@ -1,23 +1,92 @@
-import { convexQuery, useConvexMutation } from "@convex-dev/react-query";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
-import { api } from "../../convex/_generated/api";
+import { useMemo, useState } from "react";
 import { PageHeader, Panel, Pill } from "../components/start/page";
+import { apiRequest } from "../lib/client-api";
 
 export const Route = createFileRoute("/health")({
   component: Health,
 });
 
+type HealthDay = {
+  date: string;
+  steps: number | null;
+  activeEnergy: number | null;
+  exerciseMinutes: number | null;
+  hrvSDNN: number | null;
+  sleepHours: number | null;
+};
+
+type SnapshotResponse = {
+  connected: boolean;
+  lastSyncAt: string | null;
+  snapshot: {
+    today: HealthDay | null;
+    history: HealthDay[];
+  };
+};
+
+type HealthAverage = {
+  steps: number;
+  sleepHours: number;
+  activeEnergy: number;
+  exerciseMinutes: number;
+  hrvSDNN: number;
+};
+
+function average(values: Array<number | null>): number {
+  const valid = values.filter(
+    (value): value is number => typeof value === "number" && Number.isFinite(value),
+  );
+  if (valid.length === 0) return 0;
+  return Math.round((valid.reduce((sum, value) => sum + value, 0) / valid.length) * 10) / 10;
+}
+
+function buildAverage(days: HealthDay[]): HealthAverage {
+  return {
+    steps: Math.round(average(days.map((day) => day.steps))),
+    sleepHours: average(days.map((day) => day.sleepHours)),
+    activeEnergy: Math.round(average(days.map((day) => day.activeEnergy))),
+    exerciseMinutes: Math.round(average(days.map((day) => day.exerciseMinutes))),
+    hrvSDNN: Math.round(average(days.map((day) => day.hrvSDNN))),
+  };
+}
+
 function Health() {
-  const { data: summary } = useQuery({
-    ...convexQuery(api.health.summary, { days: 7 }),
+  const queryClient = useQueryClient();
+
+  const snapshotQuery = useQuery({
+    queryKey: ["health", "snapshot"],
+    queryFn: () => apiRequest<SnapshotResponse>("/api/health/apple-health/snapshot"),
+    refetchInterval: 30_000,
   });
-  const { data: recent = [] } = useQuery({
-    ...convexQuery(api.health.listRecent, { limit: 7 }),
-  });
+
   const upsert = useMutation({
-    mutationFn: useConvexMutation(api.health.upsert),
+    mutationFn: (payload: {
+      date: string;
+      steps?: number;
+      sleepHours?: number;
+      activeEnergy?: number;
+      exerciseMinutes?: number;
+    }) =>
+      apiRequest<{ success: boolean; recordsProcessed: number }>("/api/health/apple-health/sync", {
+        method: "POST",
+        body: JSON.stringify({
+          syncedAt: new Date().toISOString(),
+          healthData: [
+            {
+              date: payload.date,
+              steps: payload.steps,
+              sleepHours: payload.sleepHours,
+              activeEnergy: payload.activeEnergy,
+              exerciseMinutes: payload.exerciseMinutes,
+            },
+          ],
+        }),
+      }),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["health", "snapshot"] });
+    },
   });
 
   const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
@@ -36,8 +105,15 @@ function Health() {
     });
   };
 
-  const avg = summary?.average;
-  const trendMax = Math.max(...recent.map((entry) => entry.steps ?? 0), 1);
+  const allDays = useMemo(() => {
+    const today = snapshotQuery.data?.snapshot.today;
+    const history = snapshotQuery.data?.snapshot.history ?? [];
+    return [...history, ...(today ? [today] : [])];
+  }, [snapshotQuery.data?.snapshot.history, snapshotQuery.data?.snapshot.today]);
+
+  const recent = allDays.slice(-7);
+  const avg = buildAverage(recent);
+  const trendMax = Math.max(...allDays.map((entry) => entry.steps ?? 0), 1);
 
   return (
     <div className="space-y-10">
@@ -51,7 +127,7 @@ function Health() {
               type="button"
               className="rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-600"
             >
-              WHOOP sync
+              Apple Health sync
             </button>
             <button
               type="button"
@@ -64,10 +140,16 @@ function Health() {
         }
       />
 
+      <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-xs text-slate-500">
+        {snapshotQuery.data?.connected
+          ? `Connected${snapshotQuery.data.lastSyncAt ? ` · Last sync ${new Date(snapshotQuery.data.lastSyncAt).toLocaleString()}` : ""}`
+          : "No Apple Health sync yet"}
+      </div>
+
       <div className="grid gap-6 md:grid-cols-3 lg:grid-cols-5">
         <Panel title="Steps" subtitle="7-day average">
           <div className="flex items-center justify-between">
-            <p className="text-3xl font-semibold text-slate-900">{avg?.steps ?? "—"}</p>
+            <p className="text-3xl font-semibold text-slate-900">{avg.steps || "—"}</p>
             <Pill tone="emerald">Avg</Pill>
           </div>
           <div className="h-2 w-full overflow-hidden rounded-full bg-slate-100">
@@ -77,7 +159,7 @@ function Health() {
         <Panel title="Sleep" subtitle="Hours/night">
           <div className="flex items-center justify-between">
             <p className="text-3xl font-semibold text-slate-900">
-              {avg?.sleepHours ? `${avg.sleepHours}h` : "—"}
+              {avg.sleepHours ? `${avg.sleepHours}h` : "—"}
             </p>
             <Pill tone="amber">Avg</Pill>
           </div>
@@ -87,7 +169,7 @@ function Health() {
         </Panel>
         <Panel title="Active energy" subtitle="kcal/day">
           <div className="flex items-center justify-between">
-            <p className="text-3xl font-semibold text-slate-900">{avg?.activeEnergy ?? "—"}</p>
+            <p className="text-3xl font-semibold text-slate-900">{avg.activeEnergy || "—"}</p>
             <Pill tone="rose">Avg</Pill>
           </div>
           <div className="h-2 w-full overflow-hidden rounded-full bg-slate-100">
@@ -96,25 +178,25 @@ function Health() {
         </Panel>
         <Panel title="Exercise" subtitle="min/day">
           <div className="flex items-center justify-between">
-            <p className="text-3xl font-semibold text-slate-900">{avg?.exerciseMinutes ?? "—"}</p>
-            <Pill tone="sky">Avg</Pill>
+            <p className="text-3xl font-semibold text-slate-900">{avg.exerciseMinutes || "—"}</p>
+            <Pill tone="slate">Avg</Pill>
           </div>
           <div className="h-2 w-full overflow-hidden rounded-full bg-slate-100">
             <div
               className="h-full rounded-full bg-slate-900"
-              style={{ width: `${Math.min(((avg?.exerciseMinutes ?? 0) / 60) * 100, 100)}%` }}
+              style={{ width: `${Math.min((avg.exerciseMinutes / 60) * 100, 100)}%` }}
             />
           </div>
         </Panel>
         <Panel title="HRV" subtitle="ms (SDNN)">
           <div className="flex items-center justify-between">
-            <p className="text-3xl font-semibold text-slate-900">{avg?.hrvSDNN ?? "—"}</p>
-            <Pill tone="violet">Avg</Pill>
+            <p className="text-3xl font-semibold text-slate-900">{avg.hrvSDNN || "—"}</p>
+            <Pill tone="slate">Avg</Pill>
           </div>
           <div className="h-2 w-full overflow-hidden rounded-full bg-slate-100">
             <div
               className="h-full rounded-full bg-slate-900"
-              style={{ width: `${Math.min(((avg?.hrvSDNN ?? 0) / 100) * 100, 100)}%` }}
+              style={{ width: `${Math.min((avg.hrvSDNN / 100) * 100, 100)}%` }}
             />
           </div>
         </Panel>
@@ -194,7 +276,7 @@ function Health() {
             const value = entry.steps ?? 0;
             const height = Math.max((value / trendMax) * 100, 6);
             return (
-              <div key={entry._id} className="flex flex-col items-center gap-2">
+              <div key={entry.date} className="flex flex-col items-center gap-2">
                 <div className="h-24 w-full rounded-2xl bg-slate-100 p-2">
                   <div
                     className="w-full rounded-xl bg-slate-900"

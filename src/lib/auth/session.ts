@@ -75,6 +75,10 @@ async function getSessionId(): Promise<string | null> {
   return cookieStore.get(SESSION_COOKIE_NAME)?.value ?? null;
 }
 
+export async function getCurrentSessionToken(): Promise<string | null> {
+  return getSessionId();
+}
+
 export async function getSession(): Promise<SessionUser | null> {
   const sessionId = await getSessionId();
 

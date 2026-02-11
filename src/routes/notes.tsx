@@ -1,45 +1,121 @@
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { convexQuery, useConvexMutation } from "@convex-dev/react-query";
-import { api } from "../../convex/_generated/api";
 import { PageHeader, Panel, Pill } from "../components/start/page";
+import { apiRequest } from "../lib/client-api";
 
 export const Route = createFileRoute("/notes")({
   component: Notes,
 });
 
+type NoteRecord = {
+  id: string;
+  title: string | null;
+  content: string | null;
+  folderId: string;
+  createdAt: string;
+  updatedAt: string | null;
+};
+
+type FolderRecord = {
+  id: string;
+  name: string;
+};
+
 function Notes() {
+  const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
-  const { data: notes = [] } = useQuery({
-    ...convexQuery(api.notes.list, { query: search }),
+
+  const notesQuery = useQuery({
+    queryKey: ["notes"],
+    queryFn: () => apiRequest<{ notes: NoteRecord[] }>("/api/notes"),
+    refetchInterval: 5_000,
   });
+
+  const coachFolderQuery = useQuery({
+    queryKey: ["notes", "coach-folder"],
+    queryFn: () =>
+      apiRequest<{ folder: FolderRecord }>("/api/folders/coach-notes", { method: "POST" }),
+    staleTime: Number.POSITIVE_INFINITY,
+  });
+
+  const notes = notesQuery.data?.notes ?? [];
+  const filtered = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return notes;
+    return notes.filter((note) => {
+      const title = (note.title ?? "").toLowerCase();
+      const content = (note.content ?? "").toLowerCase();
+      return title.includes(q) || content.includes(q);
+    });
+  }, [notes, search]);
+
   const createNote = useMutation({
-    mutationFn: useConvexMutation(api.notes.create),
+    mutationFn: async (payload: { title: string; content: string }) => {
+      const folder = coachFolderQuery.data?.folder
+        ? coachFolderQuery.data.folder
+        : (
+            await apiRequest<{ folder: FolderRecord }>("/api/folders/coach-notes", {
+              method: "POST",
+            })
+          ).folder;
+
+      return apiRequest<{ note: NoteRecord }>("/api/notes", {
+        method: "POST",
+        body: JSON.stringify({
+          title: payload.title,
+          content: payload.content,
+          folderId: folder.id,
+        }),
+      });
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["notes"] });
+    },
   });
+
   const updateNote = useMutation({
-    mutationFn: useConvexMutation(api.notes.update),
+    mutationFn: (payload: { noteId: string; title: string; content: string }) =>
+      apiRequest<{ note: NoteRecord }>(`/api/notes/${payload.noteId}`, {
+        method: "PUT",
+        body: JSON.stringify({
+          title: payload.title,
+          content: payload.content,
+        }),
+      }),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["notes"] });
+    },
   });
+
   const removeNote = useMutation({
-    mutationFn: useConvexMutation(api.notes.remove),
+    mutationFn: (noteId: string) =>
+      apiRequest<{ success: boolean }>(`/api/notes/${noteId}`, {
+        method: "DELETE",
+      }),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["notes"] });
+    },
   });
 
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [selectedId, setSelectedId] = useState<string | null>(null);
+
   const selectedNote = useMemo(
-    () => notes.find((note) => note._id === selectedId) ?? null,
+    () => notes.find((note) => note.id === selectedId) ?? null,
     [notes, selectedId],
   );
+
   const [editTitle, setEditTitle] = useState("");
   const [editContent, setEditContent] = useState("");
 
   useEffect(() => {
     if (selectedNote) {
-      setEditTitle(selectedNote.title);
-      setEditContent(selectedNote.content);
+      setEditTitle(selectedNote.title ?? "");
+      setEditContent(selectedNote.content ?? "");
     }
-  }, [selectedNote?._id, selectedNote?.updatedAt]);
+  }, [selectedNote?.id, selectedNote?.updatedAt]);
 
   const handleCreate = async () => {
     const trimmedTitle = title.trim();
@@ -47,12 +123,13 @@ function Notes() {
     await createNote.mutateAsync({ title: trimmedTitle, content });
     setTitle("");
     setContent("");
+    await queryClient.invalidateQueries({ queryKey: ["notes"] });
   };
 
   const handleSave = async () => {
     if (!selectedNote) return;
     await updateNote.mutateAsync({
-      noteId: selectedNote._id,
+      noteId: selectedNote.id,
       title: editTitle,
       content: editContent,
     });
@@ -63,7 +140,7 @@ function Notes() {
       <PageHeader
         eyebrow="Idea vault"
         title="Notes you can trust"
-        subtitle="Capture, tag, and resurface insights with real-time search."
+        subtitle="Capture, tag, and resurface insights on Postgres."
         actions={
           <>
             <input
@@ -86,15 +163,27 @@ function Notes() {
       <div className="grid gap-6 lg:grid-cols-[1.05fr_0.95fr]">
         <Panel title="Capture note" subtitle="Save an insight">
           <div className="space-y-3">
-            <label className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Title</label>
+            <label
+              htmlFor="new-note-title"
+              className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400"
+            >
+              Title
+            </label>
             <input
+              id="new-note-title"
               value={title}
               onChange={(event) => setTitle(event.target.value)}
-              placeholder="Convex migration checklist"
+              placeholder="Rust migration checklist"
               className="w-full rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 shadow-sm focus:outline-none"
             />
-            <label className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Content</label>
+            <label
+              htmlFor="new-note-content"
+              className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400"
+            >
+              Content
+            </label>
             <textarea
+              id="new-note-content"
               value={content}
               onChange={(event) => setContent(event.target.value)}
               rows={4}
@@ -112,22 +201,24 @@ function Notes() {
         </Panel>
         <Panel title="Library" subtitle="Realtime notes" className="animate-rise-delay-1">
           <div className="space-y-3">
-            {notes.length === 0 ? (
+            {filtered.length === 0 ? (
               <div className="rounded-2xl border border-dashed border-slate-200 bg-white/60 px-4 py-3 text-sm text-slate-500">
                 No notes yet. Capture your first insight.
               </div>
             ) : (
-              notes.map((note) => (
+              filtered.map((note) => (
                 <button
-                  key={note._id}
+                  key={note.id}
                   type="button"
-                  onClick={() => setSelectedId(note._id)}
+                  onClick={() => setSelectedId(note.id)}
                   className="w-full rounded-2xl border border-slate-100 bg-white px-4 py-4 text-left transition hover:border-slate-200"
                 >
                   <div className="flex items-center justify-between gap-2">
                     <div>
-                      <p className="text-sm font-semibold text-slate-900">{note.title}</p>
-                      <p className="text-xs text-slate-500 line-clamp-2">{note.content}</p>
+                      <p className="text-sm font-semibold text-slate-900">
+                        {note.title ?? "Untitled"}
+                      </p>
+                      <p className="line-clamp-2 text-xs text-slate-500">{note.content}</p>
                     </div>
                     <Pill tone="slate">Open</Pill>
                   </div>
@@ -162,7 +253,11 @@ function Notes() {
               </button>
               <button
                 type="button"
-                onClick={() => selectedNote && void removeNote.mutateAsync({ noteId: selectedNote._id })}
+                onClick={() => {
+                  if (!selectedNote) return;
+                  setSelectedId(null);
+                  void removeNote.mutateAsync(selectedNote.id);
+                }}
                 className="rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-rose-500"
               >
                 Archive

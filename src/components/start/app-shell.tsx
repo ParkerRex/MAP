@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { Link } from "@tanstack/react-router";
 import {
   CalendarDays,
   HeartPulse,
@@ -9,7 +9,7 @@ import {
   StickyNote,
   Target,
 } from "lucide-react";
-import { Link } from "@tanstack/react-router";
+import type { ReactNode } from "react";
 
 const navItems = [
   {
@@ -77,13 +77,11 @@ export function AppShell({ children }: AppShellProps) {
               <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">
                 Map AI
               </p>
-              <h2 className="text-xl font-semibold tracking-tight text-slate-900">
-                Control Room
-              </h2>
+              <h2 className="text-xl font-semibold tracking-tight text-slate-900">Control Room</h2>
             </div>
             <span className="inline-flex items-center gap-2 rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700">
               <span className="h-2 w-2 rounded-full bg-emerald-500" />
-              Convex live
+              Rust gateway live
             </span>
           </div>
           <nav className="grid gap-3 lg:grid-cols-1">
@@ -112,12 +110,8 @@ export function AppShell({ children }: AppShellProps) {
             })}
           </nav>
           <div className="hidden rounded-3xl border border-white/70 bg-white/75 p-4 text-sm text-slate-600 shadow-[0_20px_50px_-40px_rgba(15,23,42,0.45)] backdrop-blur lg:block">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
-              Today
-            </p>
-            <p className="mt-2 text-base font-semibold text-slate-900">
-              Deep work sprint
-            </p>
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Today</p>
+            <p className="mt-2 text-base font-semibold text-slate-900">Deep work sprint</p>
             <p className="mt-1 text-sm text-slate-500">
               Protect 2 focus blocks. Hydrate, then ship.
             </p>
@@ -130,7 +124,7 @@ export function AppShell({ children }: AppShellProps) {
                 Greenfield stack
               </p>
               <p className="text-lg font-semibold text-slate-900">
-                Convex + TanStack Start + iOS
+                Rust + Postgres + TanStack Start
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-2">
