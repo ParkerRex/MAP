@@ -21,6 +21,11 @@
 - Skills panel:
   - list discovered skills and precedence order
   - trigger rescan via `POST /v1/skills`
+- Cron automation panel:
+  - list jobs from `GET /v1/cron/jobs`
+  - create jobs via `POST /v1/cron/jobs`
+  - run now via `POST /v1/cron/jobs/:id/run`
+  - delete via `DELETE /v1/cron/jobs/:id`
 
 ## Confirmation Gate Behavior
 
@@ -48,3 +53,7 @@ Rust gateway now marks certain prompts as high impact if they contain destructiv
 - `GET /v1/security/audit`
 - `GET /v1/skills`
 - `POST /v1/skills`
+- `GET /v1/cron/jobs`
+- `POST /v1/cron/jobs`
+- `POST /v1/cron/jobs/:id/run`
+- `DELETE /v1/cron/jobs/:id`
