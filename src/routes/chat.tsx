@@ -78,6 +78,25 @@ type AuthProfile = {
   updated_at: string;
 };
 
+type SecurityAuditResponse = {
+  status: "ok" | "warning";
+  checks: Array<{
+    name: string;
+    ok: boolean;
+    detail: string;
+  }>;
+};
+
+type SkillsResponse = {
+  skills: Array<{
+    skill_key: string;
+    description: string;
+    source_type: string;
+    source_path: string;
+  }>;
+  precedence: string[];
+};
+
 const rustGatewayBase = (import.meta.env.VITE_RUST_GATEWAY_URL ?? "http://localhost:18789").replace(
   /\/$/,
   "",
@@ -135,6 +154,19 @@ function Chat() {
   const profilesQuery = useQuery({
     queryKey: ["rust-gateway", "models", "profiles"],
     queryFn: () => requestJson<AuthProfile[]>("/v1/models/profiles"),
+    staleTime: 10_000,
+  });
+
+  const securityQuery = useQuery({
+    queryKey: ["rust-gateway", "security", "audit"],
+    queryFn: () => requestJson<SecurityAuditResponse>("/v1/security/audit"),
+    staleTime: 10_000,
+    refetchInterval: 20_000,
+  });
+
+  const skillsQuery = useQuery({
+    queryKey: ["rust-gateway", "skills"],
+    queryFn: () => requestJson<SkillsResponse>("/v1/skills"),
     staleTime: 10_000,
   });
 
@@ -237,6 +269,16 @@ function Chat() {
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["rust-gateway", "models", "profiles"] });
       await queryClient.invalidateQueries({ queryKey: ["rust-gateway", "models"] });
+    },
+  });
+
+  const rescanSkillsMutation = useMutation({
+    mutationFn: () =>
+      requestJson<SkillsResponse>("/v1/skills", {
+        method: "POST",
+      }),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["rust-gateway", "skills"] });
     },
   });
 
@@ -567,6 +609,75 @@ function Chat() {
                 {isDriving ? "Streaming" : "Send"}
               </button>
             </div>
+          </div>
+        </Panel>
+      </div>
+
+      <div className="grid gap-6 lg:grid-cols-2">
+        <Panel
+          title="Security audit"
+          subtitle="Gateway runtime checks"
+          className="animate-rise-delay-1"
+        >
+          <div className="space-y-3">
+            <div className="rounded-xl border border-slate-100 bg-white px-3 py-2 text-xs text-slate-600">
+              Status:{" "}
+              <span
+                className={`font-semibold ${securityQuery.data?.status === "ok" ? "text-emerald-600" : "text-amber-600"}`}
+              >
+                {securityQuery.data?.status ?? "loading"}
+              </span>
+            </div>
+            {(securityQuery.data?.checks ?? []).map((check) => (
+              <div
+                key={check.name}
+                className="rounded-xl border border-slate-100 bg-white px-3 py-2"
+              >
+                <p className="text-xs font-semibold text-slate-900">
+                  {check.name} · {check.ok ? "ok" : "warning"}
+                </p>
+                <p className="mt-1 text-xs text-slate-500">{check.detail}</p>
+              </div>
+            ))}
+          </div>
+        </Panel>
+
+        <Panel
+          title="Skills"
+          subtitle="Discovered OpenClaw/MAP skills"
+          className="animate-rise-delay-2"
+        >
+          <div className="space-y-3">
+            <div className="flex justify-end">
+              <button
+                type="button"
+                onClick={() => void rescanSkillsMutation.mutateAsync()}
+                disabled={rescanSkillsMutation.isPending}
+                className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold text-slate-600 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                Rescan skills
+              </button>
+            </div>
+            <p className="text-xs text-slate-500">
+              Precedence: {(skillsQuery.data?.precedence ?? []).join(" > ")}
+            </p>
+            {(skillsQuery.data?.skills ?? []).length === 0 ? (
+              <p className="text-xs text-slate-500">No skills discovered yet.</p>
+            ) : (
+              <div className="space-y-2">
+                {(skillsQuery.data?.skills ?? []).slice(0, 24).map((skill) => (
+                  <div
+                    key={`${skill.skill_key}-${skill.source_type}`}
+                    className="rounded-xl border border-slate-100 bg-white px-3 py-2"
+                  >
+                    <p className="text-xs font-semibold text-slate-900">{skill.skill_key}</p>
+                    <p className="mt-1 text-xs text-slate-500">
+                      {skill.source_type} · {skill.description || "No description"}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </Panel>
       </div>
