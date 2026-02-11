@@ -60,6 +60,18 @@ pub struct VerifyNodeResponse {
 }
 
 #[derive(Debug, Serialize)]
+pub struct PairingDecisionResponse {
+    pub id: Uuid,
+    pub provider: String,
+    pub peer_key: String,
+    pub node_key: String,
+    pub status: String,
+    pub approved: bool,
+    pub rejected: bool,
+    pub token: Option<String>,
+}
+
+#[derive(Debug, Serialize)]
 pub struct NodesResponse {
     pub nodes: Vec<NodeRow>,
     pub pending_requests: Vec<PairingRequestRow>,
@@ -169,7 +181,7 @@ pub async fn request_pairing(
 pub async fn approve_pairing(
     State(state): State<AppState>,
     Path(request_id): Path<Uuid>,
-) -> Result<Json<Value>, ApiError> {
+) -> Result<Json<PairingDecisionResponse>, ApiError> {
     let request = sqlx::query_as::<_, PairingRequestRow>(
         r#"
         select id, provider, peer_key, code, status, expires_at, created_at, updated_at
@@ -222,17 +234,22 @@ pub async fn approve_pairing(
     .execute(&state.pool)
     .await?;
 
-    Ok(Json(serde_json::json!({
-        "approved": true,
-        "node_key": request.peer_key,
-        "token": token,
-    })))
+    Ok(Json(PairingDecisionResponse {
+        id: request_id,
+        provider: request.provider,
+        peer_key: request.peer_key.clone(),
+        node_key: request.peer_key,
+        status: "approved".to_string(),
+        approved: true,
+        rejected: false,
+        token: Some(token),
+    }))
 }
 
 pub async fn reject_pairing(
     State(state): State<AppState>,
     Path(request_id): Path<Uuid>,
-) -> Result<Json<Value>, ApiError> {
+) -> Result<Json<PairingDecisionResponse>, ApiError> {
     let request = sqlx::query_as::<_, PairingRequestRow>(
         "select id, provider, peer_key, code, status, expires_at, created_at, updated_at from pairing_requests where id = $1 and provider = 'node'",
     )
@@ -251,11 +268,20 @@ pub async fn reject_pairing(
     sqlx::query(
         "update nodes set pairing_status = 'rejected', updated_at = now() where node_key = $1",
     )
-    .bind(request.peer_key)
+    .bind(&request.peer_key)
     .execute(&state.pool)
     .await?;
 
-    Ok(Json(serde_json::json!({"rejected": true})))
+    Ok(Json(PairingDecisionResponse {
+        id: request_id,
+        provider: request.provider,
+        peer_key: request.peer_key.clone(),
+        node_key: request.peer_key,
+        status: "rejected".to_string(),
+        approved: false,
+        rejected: true,
+        token: None,
+    }))
 }
 
 pub async fn verify_node(
