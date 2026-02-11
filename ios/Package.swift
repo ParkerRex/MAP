@@ -10,17 +10,18 @@ let package = Package(
     products: [
         .library(name: "MapHealthCore", targets: ["MapHealthCore"]),
     ],
-    dependencies: [
-        .package(url: "https://github.com/get-convex/convex-swift.git", from: "0.5.0"),
-    ],
+    dependencies: [],
     targets: [
         // MARK: - MapHealthCore (Pure Swift Library)
         .target(
             name: "MapHealthCore",
-            dependencies: [
-                .product(name: "Convex", package: "convex-swift"),
-            ],
-            path: "Sources/MapHealthCore"
+            dependencies: [],
+            path: "Sources/MapHealthCore",
+            exclude: [
+                "Services/ConvexChatService.swift",
+                "Services/ConvexClient.swift",
+                "Services/ConvexHealthSync.swift",
+            ]
         ),
 
         // MARK: - MapHealthCoreTests (Unit Tests)
