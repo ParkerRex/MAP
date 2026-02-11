@@ -15,6 +15,12 @@
   - status
   - model used
   - per-attempt failover trail (provider/model/profile/result)
+- Security panel:
+  - gateway audit status
+  - individual security/runtime checks
+- Skills panel:
+  - list discovered skills and precedence order
+  - trigger rescan via `POST /v1/skills`
 
 ## Confirmation Gate Behavior
 
@@ -39,3 +45,6 @@ Rust gateway now marks certain prompts as high impact if they contain destructiv
 - `GET /v1/models/profiles`
 - `POST /v1/models/profiles`
 - `DELETE /v1/models/profiles/:id`
+- `GET /v1/security/audit`
+- `GET /v1/skills`
+- `POST /v1/skills`
