@@ -35,10 +35,12 @@ pub fn router(state: AppState) -> Router {
             "/channels/accounts",
             get(channels::list_accounts).post(channels::upsert_account),
         )
+        .route("/channels/accounts/:id", delete(channels::delete_account))
         .route(
             "/channels/routes",
             get(channels::list_routes).post(channels::upsert_route),
         )
+        .route("/channels/routes/:id", delete(channels::delete_route))
         .route("/channels/resolve-session", post(channels::resolve_session))
         .route("/channels/inbound", post(channels::inbound_message))
         .route("/channels/pairing", get(channels::list_pairing_requests))

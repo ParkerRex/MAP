@@ -1,4 +1,5 @@
 use crate::error::ApiError;
+use crate::provider::normalize_provider_alias;
 use crate::state::AppState;
 use chrono::{DateTime, Utc};
 use serde::Serialize;
@@ -50,16 +51,9 @@ struct ProviderError {
     message: String,
 }
 
-fn canonical_provider(provider: &str) -> String {
-    match provider.trim().to_lowercase().as_str() {
-        "kimi" | "moonshot-ai" | "moonshotai" => "moonshot".to_string(),
-        value => value.to_string(),
-    }
-}
-
 fn parse_model(value: &str) -> (String, String) {
     if let Some((provider, model)) = value.split_once(':') {
-        (canonical_provider(provider), model.trim().to_string())
+        (normalize_provider_alias(provider), model.trim().to_string())
     } else {
         let model = value.trim().to_string();
         let provider = if model.to_lowercase().starts_with("kimi") {
@@ -74,9 +68,9 @@ fn parse_model(value: &str) -> (String, String) {
 #[cfg(test)]
 mod tests {
     use super::{
-        canonical_provider, extract_message_content, is_billing_error, parse_model,
-        should_failover, ProviderError,
+        extract_message_content, is_billing_error, parse_model, should_failover, ProviderError,
     };
+    use crate::provider::normalize_provider_alias;
     use serde_json::json;
 
     #[test]
@@ -116,9 +110,9 @@ mod tests {
 
     #[test]
     fn canonical_provider_normalizes_aliases() {
-        assert_eq!(canonical_provider("kimi"), "moonshot");
-        assert_eq!(canonical_provider("moonshot-ai"), "moonshot");
-        assert_eq!(canonical_provider("openai"), "openai");
+        assert_eq!(normalize_provider_alias("kimi"), "moonshot");
+        assert_eq!(normalize_provider_alias("moonshot-ai"), "moonshot");
+        assert_eq!(normalize_provider_alias("openai"), "openai");
     }
 
     #[test]
@@ -183,7 +177,10 @@ mod tests {
                 }
             }]
         });
-        assert_eq!(extract_message_content(&payload), Some("hello world".to_string()));
+        assert_eq!(
+            extract_message_content(&payload),
+            Some("hello world".to_string())
+        );
     }
 }
 

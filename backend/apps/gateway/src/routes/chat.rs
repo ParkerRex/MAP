@@ -1,5 +1,6 @@
 use crate::error::ApiError;
 use crate::model_runtime;
+use crate::safety::confirmation_required;
 use crate::state::AppState;
 use async_stream::stream;
 use axum::extract::{Path, State};
@@ -43,23 +44,6 @@ pub struct RunRow {
     pub metadata: Value,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
-}
-
-fn requires_confirmation(prompt: &str) -> bool {
-    let normalized = prompt.to_lowercase();
-    let markers = [
-        "rm -rf",
-        "drop table",
-        "truncate table",
-        "delete all",
-        "wipe database",
-        "destroy",
-        "delete production",
-        "revoke",
-        "reset prod",
-    ];
-
-    markers.iter().any(|marker| normalized.contains(marker))
 }
 
 async fn resolve_session_id(state: &AppState, session_id: Option<Uuid>) -> Result<Uuid, ApiError> {
@@ -111,8 +95,8 @@ pub async fn create_run(
     .await?
     .0;
 
-    let confirmation_required = requires_confirmation(prompt) && !payload.confirmed.unwrap_or(false);
-    if confirmation_required {
+    let needs_confirmation = confirmation_required(prompt, payload.confirmed);
+    if needs_confirmation {
         let output = "Confirmation required: this request appears to include destructive or high-impact operations. Re-send with `confirmed: true` to continue.";
         let status = "needs_confirmation";
 
@@ -269,18 +253,26 @@ pub async fn stream_run(
 
 #[cfg(test)]
 mod tests {
-    use super::requires_confirmation;
+    use crate::safety::requires_destructive_confirmation;
 
     #[test]
     fn confirmation_required_for_destructive_prompts() {
-        assert!(requires_confirmation("Please drop table users and recreate it"));
-        assert!(requires_confirmation("run rm -rf /tmp/test"));
-        assert!(requires_confirmation("Delete production records now"));
+        assert!(requires_destructive_confirmation(
+            "Please drop table users and recreate it"
+        ));
+        assert!(requires_destructive_confirmation("run rm -rf /tmp/test"));
+        assert!(requires_destructive_confirmation(
+            "Delete production records now"
+        ));
     }
 
     #[test]
     fn confirmation_not_required_for_read_only_prompts() {
-        assert!(!requires_confirmation("Summarize this sprint and suggest priorities"));
-        assert!(!requires_confirmation("Draft release notes for the iOS update"));
+        assert!(!requires_destructive_confirmation(
+            "Summarize this sprint and suggest priorities"
+        ));
+        assert!(!requires_destructive_confirmation(
+            "Draft release notes for the iOS update"
+        ));
     }
 }

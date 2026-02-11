@@ -1,5 +1,6 @@
 use crate::error::ApiError;
 use crate::model_runtime;
+use crate::provider::normalize_provider_alias;
 use crate::state::AppState;
 use axum::extract::{Path, State};
 use axum::Json;
@@ -8,13 +9,6 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use sqlx::FromRow;
 use uuid::Uuid;
-
-fn canonical_provider(provider: &str) -> String {
-    match provider.trim().to_lowercase().as_str() {
-        "kimi" | "moonshot-ai" | "moonshotai" => "moonshot".to_string(),
-        value => value.to_string(),
-    }
-}
 
 #[derive(Debug, Serialize)]
 pub struct ModelsResponse {
@@ -126,7 +120,7 @@ pub async fn upsert_profile(
         returning id, provider, profile_id, profile_type, payload, created_at, updated_at
         "#,
     )
-    .bind(canonical_provider(&payload.provider))
+    .bind(normalize_provider_alias(&payload.provider))
     .bind(payload.profile_id.trim())
     .bind(payload.profile_type.trim().to_lowercase())
     .bind(payload.payload)
@@ -138,13 +132,13 @@ pub async fn upsert_profile(
 
 #[cfg(test)]
 mod tests {
-    use super::canonical_provider;
+    use crate::provider::normalize_provider_alias;
 
     #[test]
     fn canonical_provider_normalizes_kimi_aliases() {
-        assert_eq!(canonical_provider("kimi"), "moonshot");
-        assert_eq!(canonical_provider("moonshot-ai"), "moonshot");
-        assert_eq!(canonical_provider("openai"), "openai");
+        assert_eq!(normalize_provider_alias("kimi"), "moonshot");
+        assert_eq!(normalize_provider_alias("moonshot-ai"), "moonshot");
+        assert_eq!(normalize_provider_alias("openai"), "openai");
     }
 }
 

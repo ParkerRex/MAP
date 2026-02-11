@@ -1,5 +1,7 @@
 use crate::error::ApiError;
 use crate::model_runtime;
+use crate::provider::normalize_provider_alias;
+use crate::safety::confirmation_required;
 use crate::state::AppState;
 use axum::extract::{Path, Query, State};
 use axum::http::StatusCode;
@@ -102,6 +104,7 @@ pub struct InboundMessageRequest {
     pub main_key: Option<String>,
     pub model: Option<String>,
     pub fallback_models: Option<Vec<String>>,
+    pub confirmed: Option<bool>,
     pub metadata: Option<Value>,
 }
 
@@ -109,6 +112,7 @@ pub struct InboundMessageRequest {
 pub struct InboundMessageResponse {
     pub accepted: bool,
     pub requires_pairing: bool,
+    pub requires_confirmation: bool,
     pub reason: Option<String>,
     pub pairing_request_id: Option<Uuid>,
     pub pairing_code: Option<String>,
@@ -145,6 +149,13 @@ struct SessionResolution {
     chat_type: String,
 }
 
+#[derive(Debug)]
+struct NormalizedRouteMutation {
+    provider: String,
+    peer_key: String,
+    session_scope: String,
+}
+
 fn normalize_component(input: &str, fallback: &str) -> String {
     let mut out = String::new();
     for ch in input.trim().chars() {
@@ -160,11 +171,57 @@ fn normalize_component(input: &str, fallback: &str) -> String {
     }
 }
 
+fn normalize_provider(input: &str) -> String {
+    normalize_provider_alias(input)
+}
+
+fn normalize_channel_provider(input: &str, fallback: &str) -> String {
+    normalize_component(&normalize_provider(input), fallback)
+}
+
+fn normalize_account_fields(
+    provider: &str,
+    account_key: &str,
+) -> Result<(String, String), ApiError> {
+    let provider = normalize_provider(provider);
+    let account_key = account_key.trim().to_string();
+
+    if provider.is_empty() || account_key.is_empty() {
+        return Err(ApiError::BadRequest(
+            "provider and account_key are required".to_string(),
+        ));
+    }
+
+    Ok((provider, account_key))
+}
+
+fn normalize_route_fields(
+    provider: &str,
+    peer_key: &str,
+    session_scope: &str,
+) -> Result<NormalizedRouteMutation, ApiError> {
+    let provider = normalize_provider(provider);
+    let peer_key = peer_key.trim().to_string();
+    let session_scope = session_scope.trim().to_string();
+
+    if provider.is_empty() || peer_key.is_empty() || session_scope.is_empty() {
+        return Err(ApiError::BadRequest(
+            "provider, peer_key, and session_scope are required".to_string(),
+        ));
+    }
+
+    Ok(NormalizedRouteMutation {
+        provider,
+        peer_key,
+        session_scope,
+    })
+}
+
 fn resolve_session_key(
     config: &AppState,
     request: &ResolveSessionRequest,
 ) -> Result<SessionResolution, ApiError> {
-    let provider = normalize_component(&request.provider.to_lowercase(), "unknown");
+    let provider = normalize_channel_provider(&request.provider, "unknown");
     let peer_kind = request.peer_kind.trim().to_lowercase();
     let peer_id = normalize_component(&request.peer_id, "unknown");
     let account_key = request
@@ -337,6 +394,7 @@ async fn ensure_dm_allowed(
         return Ok(Some(InboundMessageResponse {
             accepted: false,
             requires_pairing: false,
+            requires_confirmation: false,
             reason: Some("direct messages are disabled by policy".to_string()),
             pairing_request_id: None,
             pairing_code: None,
@@ -366,6 +424,7 @@ async fn ensure_dm_allowed(
         return Ok(Some(InboundMessageResponse {
             accepted: false,
             requires_pairing: false,
+            requires_confirmation: false,
             reason: Some("sender is not allowlisted".to_string()),
             pairing_request_id: None,
             pairing_code: None,
@@ -419,6 +478,7 @@ async fn ensure_dm_allowed(
     Ok(Some(InboundMessageResponse {
         accepted: false,
         requires_pairing: true,
+        requires_confirmation: false,
         reason: Some("pairing approval required".to_string()),
         pairing_request_id: Some(request.id),
         pairing_code: Some(request.code),
@@ -483,11 +543,8 @@ pub async fn upsert_account(
     State(state): State<AppState>,
     Json(payload): Json<UpsertChannelAccountRequest>,
 ) -> Result<Json<ChannelAccountRow>, ApiError> {
-    if payload.provider.trim().is_empty() || payload.account_key.trim().is_empty() {
-        return Err(ApiError::BadRequest(
-            "provider and account_key are required".to_string(),
-        ));
-    }
+    let (provider, account_key) =
+        normalize_account_fields(&payload.provider, &payload.account_key)?;
 
     let metadata = payload
         .metadata
@@ -502,13 +559,29 @@ pub async fn upsert_account(
         returning id, provider, account_key, metadata, created_at, updated_at
         "#,
     )
-    .bind(payload.provider.trim().to_lowercase())
-    .bind(payload.account_key.trim())
+    .bind(provider)
+    .bind(account_key)
     .bind(metadata)
     .fetch_one(&state.pool)
     .await?;
 
     Ok(Json(row))
+}
+
+pub async fn delete_account(
+    State(state): State<AppState>,
+    Path(id): Path<Uuid>,
+) -> Result<Json<Value>, ApiError> {
+    let result = sqlx::query("delete from channel_accounts where id = $1")
+        .bind(id)
+        .execute(&state.pool)
+        .await?;
+
+    if result.rows_affected() == 0 {
+        return Err(ApiError::NotFound);
+    }
+
+    Ok(Json(serde_json::json!({ "deleted": true })))
 }
 
 pub async fn list_routes(
@@ -531,18 +604,11 @@ pub async fn upsert_route(
     State(state): State<AppState>,
     Json(payload): Json<UpsertChannelRouteRequest>,
 ) -> Result<Json<ChannelRouteRow>, ApiError> {
-    if payload.provider.trim().is_empty()
-        || payload.peer_key.trim().is_empty()
-        || payload.session_scope.trim().is_empty()
-    {
-        return Err(ApiError::BadRequest(
-            "provider, peer_key, and session_scope are required".to_string(),
-        ));
-    }
-
-    let provider = payload.provider.trim().to_lowercase();
-    let peer_key = payload.peer_key.trim().to_string();
-    let session_scope = payload.session_scope.trim().to_string();
+    let normalized =
+        normalize_route_fields(&payload.provider, &payload.peer_key, &payload.session_scope)?;
+    let provider = normalized.provider;
+    let peer_key = normalized.peer_key;
+    let session_scope = normalized.session_scope;
 
     let row = if let Some(account_id) = payload.account_id {
         sqlx::query_as::<_, ChannelRouteRow>(
@@ -581,6 +647,22 @@ pub async fn upsert_route(
     Ok(Json(row))
 }
 
+pub async fn delete_route(
+    State(state): State<AppState>,
+    Path(id): Path<Uuid>,
+) -> Result<Json<Value>, ApiError> {
+    let result = sqlx::query("delete from channel_routes where id = $1")
+        .bind(id)
+        .execute(&state.pool)
+        .await?;
+
+    if result.rows_affected() == 0 {
+        return Err(ApiError::NotFound);
+    }
+
+    Ok(Json(serde_json::json!({ "deleted": true })))
+}
+
 pub async fn resolve_session(
     State(state): State<AppState>,
     Json(payload): Json<ResolveSessionRequest>,
@@ -607,16 +689,16 @@ pub async fn inbound_message(
     State(state): State<AppState>,
     Json(payload): Json<InboundMessageRequest>,
 ) -> Result<(StatusCode, Json<InboundMessageResponse>), ApiError> {
-    let provider = payload.provider.trim().to_lowercase();
+    let provider = normalize_provider(&payload.provider);
     let peer_kind = payload.peer_kind.trim().to_lowercase();
     let peer_id = payload.peer_id.trim().to_string();
-    let text = payload.text.trim();
+    let text = payload.text.trim().to_string();
     if provider.is_empty() || peer_kind.is_empty() || peer_id.is_empty() {
         return Err(ApiError::BadRequest(
             "provider, peer_kind, and peer_id are required".to_string(),
         ));
     }
-    if text.is_empty() {
+    if text.trim().is_empty() {
         return Err(ApiError::BadRequest("text is required".to_string()));
     }
 
@@ -648,17 +730,6 @@ pub async fn inbound_message(
     let resolution = resolve_session_key(&state, &resolution_request)?;
     let (session_id, _) = ensure_session_for_key(&state, &resolution).await?;
 
-    sqlx::query(
-        r#"
-        insert into session_messages (session_id, role, text)
-        values ($1, 'user', $2)
-        "#,
-    )
-    .bind(session_id)
-    .bind(text)
-    .execute(&state.pool)
-    .await?;
-
     let run_id = sqlx::query_as::<_, (Uuid,)>(
         r#"
         insert into chat_runs (session_id, prompt, status, output, metadata)
@@ -667,14 +738,91 @@ pub async fn inbound_message(
         "#,
     )
     .bind(session_id)
-    .bind(text)
+    .bind(&text)
     .fetch_one(&state.pool)
     .await?
     .0;
 
+    let needs_confirmation = confirmation_required(&text, payload.confirmed);
+    if needs_confirmation {
+        let output = "Confirmation required: this request appears to include destructive or high-impact operations. Re-send with `confirmed: true` to continue.";
+        let status = "needs_confirmation";
+
+        sqlx::query(
+            r#"
+            update chat_runs
+            set status = $2, output = $3, metadata = $4, updated_at = now()
+            where id = $1
+            "#,
+        )
+        .bind(run_id)
+        .bind(status)
+        .bind(output)
+        .bind(serde_json::json!({
+            "source": "channel_inbound",
+            "provider": &provider,
+            "peer_kind": &peer_kind,
+            "peer_id": &peer_id,
+            "thread_id": payload.thread_id.as_ref(),
+            "account_key": payload.account_key.as_ref(),
+            "requires_confirmation": true,
+            "model_used": "none",
+            "attempts": [],
+            "inbound_metadata": payload.metadata.as_ref(),
+        }))
+        .execute(&state.pool)
+        .await?;
+
+        sqlx::query(
+            r#"
+            insert into session_messages (session_id, role, text)
+            values ($1, 'user', $2), ($1, 'assistant', $3)
+            "#,
+        )
+        .bind(session_id)
+        .bind(&text)
+        .bind(output)
+        .execute(&state.pool)
+        .await?;
+
+        sqlx::query("update sessions set updated_at = now() where id = $1")
+            .bind(session_id)
+            .execute(&state.pool)
+            .await?;
+
+        return Ok((
+            StatusCode::OK,
+            Json(InboundMessageResponse {
+                accepted: false,
+                requires_pairing: false,
+                requires_confirmation: true,
+                reason: Some("confirmation required".to_string()),
+                pairing_request_id: None,
+                pairing_code: None,
+                pairing_expires_at: None,
+                session_id: Some(session_id),
+                session_key: Some(resolution.session_key),
+                run_id: Some(run_id),
+                model_used: Some("none".to_string()),
+                output: Some(output.to_string()),
+            }),
+        ));
+    }
+
+    sqlx::query(
+        r#"
+        insert into session_messages (session_id, role, text)
+        values ($1, 'user', $2)
+        "#,
+    )
+    .bind(session_id)
+    .bind(&text)
+    .execute(&state.pool)
+    .await?;
+
     let generation = model_runtime::generate_with_failover(
         &state,
-        text,
+        &text,
         payload.model.clone(),
         payload.fallback_models.clone(),
     )
@@ -746,6 +894,7 @@ pub async fn inbound_message(
             Json(InboundMessageResponse {
                 accepted: false,
                 requires_pairing: false,
+                requires_confirmation: false,
                 reason: Some("model generation failed".to_string()),
                 pairing_request_id: None,
                 pairing_code: None,
@@ -764,6 +913,7 @@ pub async fn inbound_message(
         Json(InboundMessageResponse {
             accepted: true,
             requires_pairing: false,
+            requires_confirmation: false,
             reason: None,
             pairing_request_id: None,
             pairing_code: None,
@@ -784,7 +934,7 @@ pub async fn list_pairing_requests(
     let provider = query
         .provider
         .as_deref()
-        .map(|value| value.trim().to_lowercase())
+        .map(normalize_provider)
         .filter(|value| !value.is_empty());
 
     let rows = if let Some(provider) = provider {
@@ -836,7 +986,7 @@ pub async fn approve_pairing_request(
     if let Some(provider) = payload
         .provider
         .as_deref()
-        .map(|value| value.trim().to_lowercase())
+        .map(normalize_provider)
         .filter(|value| !value.is_empty())
     {
         if request.provider != provider {
@@ -892,7 +1042,7 @@ pub async fn reject_pairing_request(
     if let Some(provider) = payload
         .provider
         .as_deref()
-        .map(|value| value.trim().to_lowercase())
+        .map(normalize_provider)
         .filter(|value| !value.is_empty())
     {
         if request.provider != provider {
@@ -914,4 +1064,57 @@ pub async fn reject_pairing_request(
         status: "rejected".to_string(),
         allowlisted: false,
     }))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{normalize_account_fields, normalize_route_fields};
+    use crate::error::ApiError;
+    use crate::safety::confirmation_required;
+
+    #[test]
+    fn account_mutation_normalizes_provider_alias_and_trims_account_key() {
+        let (provider, account_key) =
+            normalize_account_fields("  kimi  ", "  primary-bot  ").expect("valid payload");
+        assert_eq!(provider, "moonshot");
+        assert_eq!(account_key, "primary-bot");
+    }
+
+    #[test]
+    fn account_mutation_requires_provider_and_account_key() {
+        let error = normalize_account_fields(" ", "acct").expect_err("missing provider");
+        assert!(matches!(
+            error,
+            ApiError::BadRequest(message) if message == "provider and account_key are required"
+        ));
+    }
+
+    #[test]
+    fn route_mutation_normalizes_provider_alias_and_trims_fields() {
+        let normalized = normalize_route_fields("moonshot-ai", "  peer:123  ", "  default  ")
+            .expect("valid payload");
+        assert_eq!(normalized.provider, "moonshot");
+        assert_eq!(normalized.peer_key, "peer:123");
+        assert_eq!(normalized.session_scope, "default");
+    }
+
+    #[test]
+    fn route_mutation_requires_provider_peer_and_scope() {
+        let error = normalize_route_fields(" ", "peer", "scope").expect_err("missing provider");
+        assert!(matches!(
+            error,
+            ApiError::BadRequest(message)
+                if message == "provider, peer_key, and session_scope are required"
+        ));
+    }
+
+    #[test]
+    fn inbound_confirmation_gate_requires_explicit_confirmation() {
+        assert!(confirmation_required("delete production records", None));
+        assert!(!confirmation_required(
+            "delete production records",
+            Some(true)
+        ));
+        assert!(!confirmation_required("summarize latest updates", None));
+    }
 }
