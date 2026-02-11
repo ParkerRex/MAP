@@ -24,9 +24,9 @@ All panel mutations expose explicit loading/error/success feedback in the UI.
 - Session list and active session selection.
 - Model selection from gateway-configured primary + fallback models.
 - Auth profile management:
-  - list profiles from `GET /v1/models/profiles`
-  - add API key profile via `POST /v1/models/profiles`
-  - delete profile via `DELETE /v1/models/profiles/:id`
+  - list profiles via `models.profiles.list`
+  - add/update API key profiles via `models.profiles.upsert`
+  - delete profiles via `models.profiles.delete`
 - Confirmation gate toggle for destructive/high-impact prompts.
 - Latest run diagnostics:
   - status
@@ -37,37 +37,37 @@ All panel mutations expose explicit loading/error/success feedback in the UI.
   - individual security/runtime checks
 - Skills panel:
   - list discovered skills and precedence order
-  - trigger rescan via `POST /v1/skills`
+  - trigger rescan via `skills.rescan`
 - Cron automation panel:
-  - list jobs from `GET /v1/cron/jobs`
-  - list recent runs from `GET /v1/cron/runs`
-  - create jobs via `POST /v1/cron/jobs`
-  - run now via `POST /v1/cron/jobs/:id/run`
-  - delete via `DELETE /v1/cron/jobs/:id`
+  - list jobs via `cron.jobs.list` (alias `cron.list`)
+  - list recent runs via `cron.runs.list` (alias `cron.runs`)
+  - create jobs via `cron.jobs.create` (alias `cron.add`)
+  - run now via `cron.jobs.run` (alias `cron.run`)
+  - delete via `cron.jobs.delete` (alias `cron.remove`)
 - Channels + pairing panel:
-  - connector/account/route summary from `GET /v1/channels`
+  - connector/account/route summary via `channels.summary` / `channels.status`
   - account list/upsert/delete:
-    - `GET /v1/channels/accounts`
-    - `POST /v1/channels/accounts`
-    - `DELETE /v1/channels/accounts/:id`
+    - `channels.accounts.list`
+    - `channels.accounts.upsert`
+    - `channels.accounts.delete`
   - route list/upsert/delete:
-    - `GET /v1/channels/routes`
-    - `POST /v1/channels/routes`
-    - `DELETE /v1/channels/routes/:id`
-  - pending pairing queue from `GET /v1/channels/pairing`
-  - approve/reject actions
+    - `channels.routes.list`
+    - `channels.routes.upsert`
+    - `channels.routes.delete`
+  - pending pairing queue via `channels.pairing.list`
+  - approve/reject via `channels.pairing.approve` / `channels.pairing.reject`
 - Node pairing panel:
   - request pair codes
   - approve/reject pending node pair requests
   - pairing decisions now return consistent payloads (`status`, `approved`, `rejected`, `token`, `node_key`, `peer_key`)
-  - verify issued node token via `POST /v1/nodes/verify`
+  - verify issued node token via `nodes.verify` (alias `node.pair.verify`)
   - view paired node status and one-time issued token
 - Inbound simulator panel:
   - simulate inbound connector events with provider/peer kind/policy
   - validate pairing and destructive-confirmation outcomes (`accepted`, `requires_pairing`, `requires_confirmation`, pairing code)
   - inspect routed session/run/model output metadata
 - Model preview panel:
-  - invoke `POST /v1/models/generate` directly
+  - invoke `models.generate` directly
   - verify selected model/fallback and attempt chain without creating chat session state
 
 ## Confirmation Gate Behavior
@@ -84,44 +84,59 @@ Rust gateway now marks certain prompts as high impact if they contain destructiv
 This behavior now applies to both:
 - `POST /v1/chat/runs`
 - `POST /v1/channels/inbound` (set `confirmed: true` to proceed)
+- `chat.send` (set `confirmed: true`)
+- `channels.inbound` (set `confirmed: true`)
 
 ## API Endpoints Used By `/chat`
 
-- `GET /v1/sessions`
-- `POST /v1/sessions`
-- `GET /v1/sessions/:id/messages`
-- `GET /v1/sessions/:id/runs`
-- `POST /v1/chat/runs`
-- `GET /v1/chat/runs/:id/stream`
-- `GET /v1/models`
-- `GET /v1/models/profiles`
-- `POST /v1/models/profiles`
-- `DELETE /v1/models/profiles/:id`
-- `GET /v1/security/audit`
-- `GET /v1/skills`
-- `POST /v1/skills`
-- `GET /v1/cron/jobs`
-- `GET /v1/cron/runs`
-- `POST /v1/cron/jobs`
-- `POST /v1/cron/jobs/:id/run`
-- `DELETE /v1/cron/jobs/:id`
-- `GET /v1/channels`
-- `GET /v1/channels/accounts`
-- `POST /v1/channels/accounts`
-- `DELETE /v1/channels/accounts/:id`
-- `GET /v1/channels/routes`
-- `POST /v1/channels/routes`
-- `DELETE /v1/channels/routes/:id`
-- `GET /v1/channels/pairing`
-- `POST /v1/channels/pairing/:id/approve`
-- `POST /v1/channels/pairing/:id/reject`
-- `GET /v1/nodes`
-- `POST /v1/nodes/pair/request`
-- `POST /v1/nodes/pair/approve/:id`
-- `POST /v1/nodes/pair/reject/:id`
-- `POST /v1/nodes/verify`
-- `POST /v1/channels/inbound`
-- `POST /v1/models/generate`
+- `GET /v1/ws` (single control-plane transport for chat + panels)
+- `GET /v1/health` (environment health probe)
+
+## WebSocket Control Plane
+
+`/chat` now uses the Rust gateway WebSocket endpoint at `GET /v1/ws` for chat and control-plane parity:
+
+- `connect`
+- `sessions.list`
+- `sessions.create`
+- `sessions.patch`
+- `sessions.reset`
+- `sessions.resolve`
+- `chat.history`
+- `chat.send`
+- `chat.inject`
+- `chat.abort`
+- `models.list`
+- `models.profiles.list`
+- `models.profiles.upsert`
+- `models.profiles.delete`
+- `models.generate`
+- `skills.list` / `skills.status`
+- `skills.rescan`
+- `security.audit`
+- `cron.jobs.list` / `cron.list`
+- `cron.runs.list` / `cron.runs`
+- `cron.jobs.create` / `cron.add`
+- `cron.jobs.run` / `cron.run`
+- `cron.jobs.delete` / `cron.remove`
+- `channels.summary` / `channels.status`
+- `channels.accounts.list` / `channels.accounts.upsert` / `channels.accounts.delete`
+- `channels.routes.list` / `channels.routes.upsert` / `channels.routes.delete`
+- `channels.resolveSession`
+- `channels.inbound`
+- `channels.pairing.list` / `channels.pairing.approve` / `channels.pairing.reject`
+- `nodes.list` / `node.list`
+- `nodes.pair.request` / `node.pair.request`
+- `nodes.pair.approve` / `node.pair.approve`
+- `nodes.pair.reject` / `node.pair.reject`
+- `nodes.verify` / `node.pair.verify`
+
+The gateway emits `chat` events for live run updates:
+
+- `run.started`
+- `delta`
+- `run.finished`
+- `injected`
 
 ## Smoke Verification
 
