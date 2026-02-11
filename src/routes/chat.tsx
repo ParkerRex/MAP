@@ -68,6 +68,16 @@ type ModelsResponse = {
   failover_strategy: string;
 };
 
+type AuthProfile = {
+  id: string;
+  provider: string;
+  profile_id: string;
+  profile_type: string;
+  payload: Record<string, unknown>;
+  created_at: string;
+  updated_at: string;
+};
+
 const rustGatewayBase = (import.meta.env.VITE_RUST_GATEWAY_URL ?? "http://localhost:18789").replace(
   /\/$/,
   "",
@@ -106,6 +116,8 @@ function Chat() {
   const [isDriving, setIsDriving] = useState(false);
   const [selectedModel, setSelectedModel] = useState("");
   const [confirmDestructive, setConfirmDestructive] = useState(false);
+  const [newProfileProvider, setNewProfileProvider] = useState("moonshot");
+  const [newApiKey, setNewApiKey] = useState("");
   const streamRef = useRef<EventSource | null>(null);
 
   const sessionsQuery = useQuery({
@@ -120,6 +132,12 @@ function Chat() {
     staleTime: 30_000,
   });
 
+  const profilesQuery = useQuery({
+    queryKey: ["rust-gateway", "models", "profiles"],
+    queryFn: () => requestJson<AuthProfile[]>("/v1/models/profiles"),
+    staleTime: 10_000,
+  });
+
   const modelOptions = useMemo(() => {
     const payload = modelsQuery.data;
     if (!payload) {
@@ -129,6 +147,7 @@ function Chat() {
   }, [modelsQuery.data]);
 
   const sessions = sessionsQuery.data ?? [];
+  const profiles = profilesQuery.data ?? [];
 
   useEffect(() => {
     if (!activeSessionId && sessions.length > 0) {
@@ -190,6 +209,35 @@ function Chat() {
           confirmed: payload.confirmed,
         }),
       }),
+  });
+
+  const addProfileMutation = useMutation({
+    mutationFn: (payload: { provider: string; apiKey: string }) =>
+      requestJson<AuthProfile>("/v1/models/profiles", {
+        method: "POST",
+        body: JSON.stringify({
+          provider: payload.provider,
+          profile_id: `${payload.provider}-${Date.now()}`,
+          profile_type: "api_key",
+          payload: { api_key: payload.apiKey },
+        }),
+      }),
+    onSuccess: async () => {
+      setNewApiKey("");
+      await queryClient.invalidateQueries({ queryKey: ["rust-gateway", "models", "profiles"] });
+      await queryClient.invalidateQueries({ queryKey: ["rust-gateway", "models"] });
+    },
+  });
+
+  const deleteProfileMutation = useMutation({
+    mutationFn: (id: string) =>
+      requestJson<{ deleted: boolean }>(`/v1/models/profiles/${id}`, {
+        method: "DELETE",
+      }),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["rust-gateway", "models", "profiles"] });
+      await queryClient.invalidateQueries({ queryKey: ["rust-gateway", "models"] });
+    },
   });
 
   useEffect(() => {
@@ -263,6 +311,14 @@ function Chat() {
     startStream(run.stream_path);
   };
 
+  const handleAddProfile = async () => {
+    const apiKey = newApiKey.trim();
+    if (!apiKey) {
+      return;
+    }
+    await addProfileMutation.mutateAsync({ provider: newProfileProvider, apiKey });
+  };
+
   const connectionText = useMemo(() => {
     if (sessionsQuery.isLoading) return "Connecting to Rust gateway...";
     if (sessionsQuery.isError) return "Rust gateway unavailable";
@@ -318,6 +374,79 @@ function Chat() {
                 </button>
               ))
             )}
+          </div>
+          <div className="mt-6 space-y-3 border-t border-slate-100 pt-4">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
+              Model auth profiles
+            </p>
+            <div className="space-y-2">
+              {profiles.length === 0 ? (
+                <p className="text-xs text-slate-500">No saved profiles yet.</p>
+              ) : (
+                profiles.map((profile) => (
+                  <div
+                    key={profile.id}
+                    className="flex items-center justify-between gap-2 rounded-xl border border-slate-100 bg-white px-3 py-2"
+                  >
+                    <div>
+                      <p className="text-xs font-semibold text-slate-900">
+                        {profile.provider}:{profile.profile_id}
+                      </p>
+                      <p className="text-[11px] text-slate-500">{profile.profile_type}</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => void deleteProfileMutation.mutateAsync(profile.id)}
+                      className="rounded-full border border-slate-200 bg-white px-2 py-1 text-[11px] font-semibold text-rose-500"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                ))
+              )}
+            </div>
+            <div className="space-y-2 rounded-xl border border-slate-100 bg-white px-3 py-3">
+              <label
+                htmlFor="profile-provider"
+                className="text-[11px] font-semibold uppercase tracking-[0.15em] text-slate-400"
+              >
+                Provider
+              </label>
+              <select
+                id="profile-provider"
+                value={newProfileProvider}
+                onChange={(event) => setNewProfileProvider(event.target.value)}
+                className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs text-slate-700"
+              >
+                {modelsQuery.data?.providers.map((provider) => (
+                  <option key={provider.provider} value={provider.provider}>
+                    {provider.provider}
+                  </option>
+                )) ?? <option value="moonshot">moonshot</option>}
+              </select>
+              <label
+                htmlFor="profile-api-key"
+                className="text-[11px] font-semibold uppercase tracking-[0.15em] text-slate-400"
+              >
+                API key
+              </label>
+              <input
+                id="profile-api-key"
+                type="password"
+                value={newApiKey}
+                onChange={(event) => setNewApiKey(event.target.value)}
+                placeholder="sk-..."
+                className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs text-slate-700"
+              />
+              <button
+                type="button"
+                onClick={() => void handleAddProfile()}
+                disabled={addProfileMutation.isPending || !newApiKey.trim()}
+                className="w-full rounded-full bg-slate-900 px-3 py-2 text-xs font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                Add profile
+              </button>
+            </div>
           </div>
         </Panel>
 
