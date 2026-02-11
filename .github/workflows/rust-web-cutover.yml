@@ -1,0 +1,89 @@
+name: Rust/Web Cutover Verification
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "backend/**"
+      - "scripts/**"
+      - "src/**/*.test.ts"
+      - "package.json"
+      - "bun.lock"
+      - ".github/workflows/rust-web-cutover.yml"
+  pull_request:
+    paths:
+      - "backend/**"
+      - "scripts/**"
+      - "src/**/*.test.ts"
+      - "package.json"
+      - "bun.lock"
+      - ".github/workflows/rust-web-cutover.yml"
+
+jobs:
+  verify-cutover:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: map_ci
+        options: >-
+          --health-cmd "pg_isready -U postgres -d map_ci"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      RUST_GATEWAY_DATABASE_URL: postgres://postgres:postgres@127.0.0.1:5432/map_ci
+      RUST_GATEWAY_TEST_DATABASE_URL: postgres://postgres:postgres@127.0.0.1:5432/map_ci
+      RUST_GATEWAY_HOST: 127.0.0.1
+      RUST_GATEWAY_PORT: 18889
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: "1.1.16"
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache Rust dependencies
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: backend
+
+      - name: Install JS dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Gateway crate tests
+        run: bun run test:gateway
+
+      - name: Cutover verification script
+        run: bun run verify:rust-cutover
+
+      - name: Gateway control-plane smoke script
+        run: |
+          set -euo pipefail
+          bun run gateway:dev > /tmp/gateway.log 2>&1 &
+          GATEWAY_PID=$!
+          trap 'kill "${GATEWAY_PID}" >/dev/null 2>&1 || true; wait "${GATEWAY_PID}" >/dev/null 2>&1 || true' EXIT
+
+          for _ in $(seq 1 60); do
+            body="$(curl -fsS http://127.0.0.1:18889/v1/health || true)"
+            if echo "${body}" | grep -Eq '"service"\s*:\s*"map-gateway"'; then
+              break
+            fi
+            sleep 1
+          done
+
+          body="$(curl -fsS http://127.0.0.1:18889/v1/health)"
+          echo "${body}" | grep -Eq '"service"\s*:\s*"map-gateway"'
+          RUST_GATEWAY_URL=http://127.0.0.1:18889 bun run verify:gateway:smoke
