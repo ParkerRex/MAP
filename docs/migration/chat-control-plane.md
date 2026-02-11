@@ -138,6 +138,21 @@ The gateway emits `chat` events for live run updates:
 - `run.finished`
 - `injected`
 
+### `chat.send` Non-Blocking Contract
+
+`chat.send` now behaves as an ack-first control-plane call:
+
+1. Gateway resolves/creates the session and creates a run record.
+2. Gateway returns `ok` response with `runId`/`sessionId`/`status=accepted` immediately.
+3. Run execution continues in a background task.
+4. Live progress arrives over `chat` events (`run.started` -> `delta` -> `run.finished`).
+
+This keeps the websocket handler responsive while generation is in flight.
+
+Regression coverage:
+
+- `src/ws-chat-send-nonblocking.test.ts`
+
 ## Smoke Verification
 
 Run a quick control-plane endpoint check:
