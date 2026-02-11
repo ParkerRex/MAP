@@ -4,5 +4,9 @@ import { defineConfig } from "vite";
 import tsconfigPaths from "vite-tsconfig-paths";
 
 export default defineConfig({
-  plugins: [tanstackStart(), react(), tsconfigPaths()],
+  plugins: [
+    tanstackStart(),
+    react(),
+    tsconfigPaths({ projects: ["./tsconfig.json"], ignoreConfigErrors: true }),
+  ],
 });

@@ -1,4 +1,6 @@
 import type { Config } from "tailwindcss";
+import typography from "@tailwindcss/typography";
+import tailwindAnimate from "tailwindcss-animate";
 
 export default {
   darkMode: ["class"],
@@ -8,10 +10,6 @@ export default {
     extend: {
       colors: {
         black: "#212121",
-        fontFamily: {
-          sans: "var(--font-geist-sans)",
-          mono: "var(--font-geist-mono)",
-        },
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
@@ -45,6 +43,10 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+      },
+      fontFamily: {
+        sans: "var(--font-geist-sans)",
+        mono: "var(--font-geist-mono)",
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -158,5 +160,5 @@ export default {
       },
     },
   },
-  plugins: [require("tailwindcss-animate"), require("@tailwindcss/typography")],
+  plugins: [tailwindAnimate, typography],
 } satisfies Config;

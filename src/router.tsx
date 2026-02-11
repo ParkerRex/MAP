@@ -30,6 +30,10 @@ const router = createRouter({
 const routerWithQuery = routerWithQueryClient(router, queryClient);
 setupRouterSsrQueryIntegration({ router: routerWithQuery, queryClient });
 
+export function getRouter() {
+  return routerWithQuery;
+}
+
 declare module "@tanstack/react-router" {
   interface Register {
     router: typeof routerWithQuery;

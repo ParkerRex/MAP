@@ -2,8 +2,8 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap');
 
-@plugin "tailwindcss-animate";
 @import 'tailwindcss';
+@plugin "tailwindcss-animate";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -48,8 +48,25 @@
 @utility step {
   counter-increment: step;
   &:before {
-    @apply absolute w-9 h-9 bg-muted rounded-full font-mono font-medium text-center text-base inline-flex items-center justify-center -indent-px border-4 border-background;
-    @apply ml-[-50px] mt-[-4px];
+    position: absolute;
+    width: 2.25rem;
+    height: 2.25rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: -50px;
+    margin-top: -4px;
+    border-width: 4px;
+    border-style: solid;
+    border-color: hsl(var(--background));
+    border-radius: 9999px;
+    background-color: hsl(var(--muted));
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+      "Liberation Mono", "Courier New", monospace;
+    font-size: 1rem;
+    font-weight: 500;
+    text-align: center;
+    text-indent: -1px;
     content: counter(step);
   }
 }
@@ -138,7 +155,9 @@
   }
 
   .prose .anchor {
-    @apply invisible absolute no-underline;
+    position: absolute;
+    visibility: hidden;
+    text-decoration: none;
     margin-left: -1em;
     padding-right: 0.5em;
     width: 80%;
@@ -147,53 +166,76 @@
   }
 
   .anchor:hover {
-    @apply visible;
+    visibility: visible;
   }
 
   .prose a {
-    @apply decoration-neutral-400 decoration-[0.1em] underline-offset-2 transition-all dark:decoration-neutral-600;
+    text-decoration-color: rgb(156 163 175);
+    text-decoration-thickness: 0.1em;
+    text-underline-offset: 2px;
+    transition: all 150ms ease;
+  }
+
+  .dark .prose a {
+    text-decoration-color: rgb(75 85 99);
   }
 
   .prose .anchor:after {
-    @apply text-neutral-300 dark:text-neutral-700;
+    color: rgb(209 213 219);
     content: '#';
   }
 
+  .dark .prose .anchor:after {
+    color: rgb(55 65 81);
+  }
+
   .prose *:hover > .anchor {
-    @apply visible;
+    visibility: visible;
   }
 
   .prose pre {
-    @apply bg-neutral-50 dark:bg-neutral-900 rounded-lg overflow-x-auto border border-neutral-200 dark:border-neutral-900;
+    overflow-x: auto;
+    border-width: 1px;
+    border-style: solid;
+    border-radius: 0.5rem;
+    background-color: rgb(249 250 251);
+    border-color: rgb(229 231 235);
+  }
+
+  .dark .prose pre {
+    background-color: rgb(17 24 39);
+    border-color: rgb(17 24 39);
   }
 
   .prose code {
-    @apply rounded-lg px-1 py-0.5;
+    border-radius: 0.5rem;
+    padding: 0.125rem 0.25rem;
   }
 
   .prose pre code {
-    @apply p-0;
+    padding: 0;
     border: initial;
     line-height: 1.5;
   }
 
   .prose code span {
-    @apply font-medium;
+    font-weight: 500;
   }
 
   .prose img {
-    @apply m-0;
+    margin: 0;
     border-radius: 0.5rem;
   }
 
   .prose h2,
   h3,
   h4 {
-    @apply font-medium! tracking-tighter!;
+    font-weight: 500 !important;
+    letter-spacing: -0.05em !important;
   }
 
   .prose strong {
-    @apply font-medium;
+    font-weight: 500;
   }
 
   .prose > :first-child {
@@ -314,13 +356,14 @@
 
 @layer base {
   * {
-    @apply border-border;
+    border-color: hsl(var(--border));
   }
   html {
-    @apply scroll-smooth;
+    scroll-behavior: smooth;
   }
   body {
-    @apply bg-background text-foreground;
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
     font-synthesis-weight: none;
     text-rendering: optimizeLegibility;
   }
@@ -329,7 +372,8 @@
 @layer utilities {
   @media (max-width: 640px) {
     .container {
-      @apply px-4;
+      padding-left: 1rem;
+      padding-right: 1rem;
     }
   }
 
@@ -557,10 +601,12 @@
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+    border-color: hsl(var(--border));
+    outline-color: hsl(var(--ring) / 50%);
   }
   body {
-    @apply bg-background text-foreground;
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
   }
 }
 
