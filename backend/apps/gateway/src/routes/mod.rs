@@ -25,6 +25,7 @@ pub fn router(state: AppState) -> Router {
             "/sessions/:id/messages",
             get(sessions::list_session_messages),
         )
+        .route("/sessions/:id/runs", get(sessions::list_session_runs))
         .route("/chat/runs", post(chat::create_run))
         .route("/chat/runs/:id", get(chat::get_run))
         .route("/chat/runs/:id/stream", get(chat::stream_run))

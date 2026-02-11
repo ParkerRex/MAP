@@ -32,6 +32,31 @@ type CreateRunResponse = {
   stream_path: string;
 };
 
+type ModelAttempt = {
+  model: string;
+  provider: string;
+  profile_id: string;
+  source: string;
+  ok: boolean;
+  error?: string | null;
+};
+
+type SessionRun = {
+  id: string;
+  session_id: string;
+  prompt: string;
+  status: string;
+  output: string;
+  metadata: {
+    model_used?: string;
+    attempts?: ModelAttempt[];
+    requires_confirmation?: boolean;
+  };
+  model_used?: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
 type ModelsResponse = {
   primary_model: string;
   fallback_models: string[];
@@ -124,7 +149,17 @@ function Chat() {
     refetchInterval: isDriving ? 1000 : 3000,
   });
 
+  const runsQuery = useQuery({
+    queryKey: ["rust-gateway", "sessions", activeSessionId, "runs"],
+    queryFn: () => requestJson<SessionRun[]>(`/v1/sessions/${activeSessionId}/runs`),
+    enabled: Boolean(activeSessionId),
+    refetchInterval: isDriving ? 1000 : 3000,
+  });
+
   const messages = messagesQuery.data ?? [];
+  const runs = runsQuery.data ?? [];
+  const latestRun = runs[0];
+  const latestAttempts = latestRun?.metadata?.attempts ?? [];
 
   const createSessionMutation = useMutation({
     mutationFn: (title?: string) =>
@@ -189,6 +224,9 @@ function Chat() {
       if (activeSessionId) {
         void queryClient.invalidateQueries({
           queryKey: ["rust-gateway", "sessions", activeSessionId, "messages"],
+        });
+        void queryClient.invalidateQueries({
+          queryKey: ["rust-gateway", "sessions", activeSessionId, "runs"],
         });
       }
     });
@@ -311,6 +349,32 @@ function Chat() {
             {isDriving ? (
               <div className="max-w-[80%] rounded-2xl bg-slate-900 px-4 py-3 text-sm text-white shadow-[0_18px_40px_-30px_rgba(15,23,42,0.6)]">
                 {streamText || "Thinking..."}
+              </div>
+            ) : null}
+
+            {latestRun ? (
+              <div className="rounded-2xl border border-slate-100 bg-white px-4 py-3 text-xs text-slate-600">
+                <p className="font-semibold text-slate-900">Latest run</p>
+                <p className="mt-1">
+                  Status: <span className="font-semibold">{latestRun.status}</span> · Model:{" "}
+                  <span className="font-semibold">
+                    {latestRun.model_used ?? latestRun.metadata.model_used ?? "none"}
+                  </span>
+                </p>
+                <p className="mt-1 text-slate-500">
+                  {new Date(latestRun.updated_at).toLocaleString()} · {latestAttempts.length}{" "}
+                  attempt{latestAttempts.length === 1 ? "" : "s"}
+                </p>
+                {latestAttempts.length > 0 ? (
+                  <div className="mt-2 space-y-1">
+                    {latestAttempts.map((attempt, index) => (
+                      <p key={`${attempt.profile_id}-${index}`} className="text-slate-500">
+                        {attempt.provider}:{attempt.model} via {attempt.profile_id} (
+                        {attempt.ok ? "ok" : "failed"})
+                      </p>
+                    ))}
+                  </div>
+                ) : null}
               </div>
             ) : null}
           </div>

@@ -4,6 +4,7 @@ use axum::extract::{Path, State};
 use axum::Json;
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
+use serde_json::Value;
 use sqlx::FromRow;
 use uuid::Uuid;
 
@@ -27,6 +28,19 @@ pub struct SessionMessageRow {
     pub role: String,
     pub text: String,
     pub created_at: DateTime<Utc>,
+}
+
+#[derive(Debug, Serialize, FromRow)]
+pub struct SessionRunRow {
+    pub id: Uuid,
+    pub session_id: Uuid,
+    pub prompt: String,
+    pub status: String,
+    pub output: String,
+    pub metadata: Value,
+    pub model_used: Option<String>,
+    pub created_at: DateTime<Utc>,
+    pub updated_at: DateTime<Utc>,
 }
 
 pub async fn list_sessions(
@@ -89,6 +103,35 @@ pub async fn list_session_messages(
         from session_messages
         where session_id = $1
         order by created_at asc
+        "#,
+    )
+    .bind(id)
+    .fetch_all(&state.pool)
+    .await?;
+
+    Ok(Json(rows))
+}
+
+pub async fn list_session_runs(
+    State(state): State<AppState>,
+    Path(id): Path<Uuid>,
+) -> Result<Json<Vec<SessionRunRow>>, ApiError> {
+    let rows = sqlx::query_as::<_, SessionRunRow>(
+        r#"
+        select
+          id,
+          session_id,
+          prompt,
+          status,
+          output,
+          metadata,
+          metadata ->> 'model_used' as model_used,
+          created_at,
+          updated_at
+        from chat_runs
+        where session_id = $1
+        order by created_at desc
+        limit 50
         "#,
     )
     .bind(id)
