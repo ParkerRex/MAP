@@ -277,8 +277,10 @@ OPENCLAW_REF_COMMIT=8c963dc5a680f74cd7a7143263e9ec7d047404c0
 - Skills discovery/rescan (`/v1/skills`)
 - Cron scheduler CRUD/run-now (`/v1/cron/jobs*`)
 - Security audit (`/v1/security/audit`)
-- Node pairing + token verification (`/v1/nodes/*`, including `/v1/nodes/verify`)
-- Channel account/route CRUD + inbound + pairing (`/v1/channels/*`)
+- Node pairing + token verification (`/v1/nodes/*`, including `/v1/nodes/verify`) with consistent approve/reject decision payloads
+- Channel account/route CRUD + inbound + pairing (`/v1/channels/*`, including `DELETE /v1/channels/accounts/:id` and `DELETE /v1/channels/routes/:id`)
+- Destructive action confirmation parity across chat and channel inbound flows (`confirmed: true` when required)
+- Centralized provider alias normalization (`kimi`, `moonshot-ai`, `moonshotai` => `moonshot`)
 
 ## API Routes
 

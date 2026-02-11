@@ -59,11 +59,12 @@ All panel mutations expose explicit loading/error/success feedback in the UI.
 - Node pairing panel:
   - request pair codes
   - approve/reject pending node pair requests
+  - pairing decisions now return consistent payloads (`status`, `approved`, `rejected`, `token`, `node_key`, `peer_key`)
   - verify issued node token via `POST /v1/nodes/verify`
   - view paired node status and one-time issued token
 - Inbound simulator panel:
   - simulate inbound connector events with provider/peer kind/policy
-  - validate pairing policy outcomes (`accepted`, `requires_pairing`, pairing code)
+  - validate pairing and destructive-confirmation outcomes (`accepted`, `requires_pairing`, `requires_confirmation`, pairing code)
   - inspect routed session/run/model output metadata
 - Model preview panel:
   - invoke `POST /v1/models/generate` directly
@@ -79,6 +80,10 @@ Rust gateway now marks certain prompts as high impact if they contain destructiv
 - To proceed:
   - enable the UI checkbox `Confirm high-impact actions for this message`
   - resend the prompt
+
+This behavior now applies to both:
+- `POST /v1/chat/runs`
+- `POST /v1/channels/inbound` (set `confirmed: true` to proceed)
 
 ## API Endpoints Used By `/chat`
 
