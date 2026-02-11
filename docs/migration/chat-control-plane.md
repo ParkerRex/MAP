@@ -2,6 +2,23 @@
 
 `/chat` now acts as a lightweight control plane for the Rust gateway chat runtime.
 
+## UI Architecture
+
+The route shell (`src/routes/chat.tsx`) now composes focused panels under
+`src/components/chat/*`:
+
+- `sessions-panel` (session list + model auth profile CRUD)
+- `active-session-panel` (messages, live stream, send form, run diagnostics)
+- `security-panel`
+- `skills-panel`
+- `models-panel` (model preview)
+- `cron-panel`
+- `channels-panel` (summary, pairing queue, account/route CRUD)
+- `inbound-simulator-panel`
+- `nodes-panel` (node pairing + token verification)
+
+All panel mutations expose explicit loading/error/success feedback in the UI.
+
 ## Available Controls
 
 - Session list and active session selection.
@@ -29,11 +46,20 @@
   - delete via `DELETE /v1/cron/jobs/:id`
 - Channels + pairing panel:
   - connector/account/route summary from `GET /v1/channels`
+  - account list/upsert/delete:
+    - `GET /v1/channels/accounts`
+    - `POST /v1/channels/accounts`
+    - `DELETE /v1/channels/accounts/:id`
+  - route list/upsert/delete:
+    - `GET /v1/channels/routes`
+    - `POST /v1/channels/routes`
+    - `DELETE /v1/channels/routes/:id`
   - pending pairing queue from `GET /v1/channels/pairing`
   - approve/reject actions
 - Node pairing panel:
   - request pair codes
   - approve/reject pending node pair requests
+  - verify issued node token via `POST /v1/nodes/verify`
   - view paired node status and one-time issued token
 - Inbound simulator panel:
   - simulate inbound connector events with provider/peer kind/policy
@@ -75,6 +101,12 @@ Rust gateway now marks certain prompts as high impact if they contain destructiv
 - `POST /v1/cron/jobs/:id/run`
 - `DELETE /v1/cron/jobs/:id`
 - `GET /v1/channels`
+- `GET /v1/channels/accounts`
+- `POST /v1/channels/accounts`
+- `DELETE /v1/channels/accounts/:id`
+- `GET /v1/channels/routes`
+- `POST /v1/channels/routes`
+- `DELETE /v1/channels/routes/:id`
 - `GET /v1/channels/pairing`
 - `POST /v1/channels/pairing/:id/approve`
 - `POST /v1/channels/pairing/:id/reject`
@@ -82,6 +114,7 @@ Rust gateway now marks certain prompts as high impact if they contain destructiv
 - `POST /v1/nodes/pair/request`
 - `POST /v1/nodes/pair/approve/:id`
 - `POST /v1/nodes/pair/reject/:id`
+- `POST /v1/nodes/verify`
 - `POST /v1/channels/inbound`
 - `POST /v1/models/generate`
 

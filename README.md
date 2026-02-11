@@ -277,8 +277,8 @@ OPENCLAW_REF_COMMIT=8c963dc5a680f74cd7a7143263e9ec7d047404c0
 - Skills discovery/rescan (`/v1/skills`)
 - Cron scheduler CRUD/run-now (`/v1/cron/jobs*`)
 - Security audit (`/v1/security/audit`)
-- Node pairing + verification (`/v1/nodes/*`)
-- Channel routing + inbound + pairing (`/v1/channels/*`)
+- Node pairing + token verification (`/v1/nodes/*`, including `/v1/nodes/verify`)
+- Channel account/route CRUD + inbound + pairing (`/v1/channels/*`)
 
 ## API Routes
 
