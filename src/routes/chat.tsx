@@ -186,6 +186,12 @@ type InboundMessageResponse = {
   output?: string | null;
 };
 
+type GeneratePreviewResponse = {
+  model_used: string;
+  output: string;
+  attempts: ModelAttempt[];
+};
+
 const rustGatewayBase = (import.meta.env.VITE_RUST_GATEWAY_URL ?? "http://localhost:18789").replace(
   /\/$/,
   "",
@@ -239,6 +245,10 @@ function Chat() {
   const [inboundText, setInboundText] = useState("Hey Clawdbot, give me the top priorities.");
   const [inboundPolicy, setInboundPolicy] = useState("pairing");
   const [inboundResult, setInboundResult] = useState<InboundMessageResponse | null>(null);
+  const [previewPrompt, setPreviewPrompt] = useState(
+    "Summarize the current project migration status.",
+  );
+  const [previewResult, setPreviewResult] = useState<GeneratePreviewResponse | null>(null);
   const streamRef = useRef<EventSource | null>(null);
 
   const sessionsQuery = useQuery({
@@ -564,6 +574,20 @@ function Chat() {
     },
   });
 
+  const generatePreviewMutation = useMutation({
+    mutationFn: (payload: { prompt: string; model?: string }) =>
+      requestJson<GeneratePreviewResponse>("/v1/models/generate", {
+        method: "POST",
+        body: JSON.stringify({
+          prompt: payload.prompt,
+          model: payload.model,
+        }),
+      }),
+    onSuccess: (result) => {
+      setPreviewResult(result);
+    },
+  });
+
   useEffect(() => {
     return () => {
       streamRef.current?.close();
@@ -683,6 +707,17 @@ function Chat() {
       peerId,
       text,
       dmPolicy: inboundPolicy,
+    });
+  };
+
+  const handleGeneratePreview = async () => {
+    const prompt = previewPrompt.trim();
+    if (!prompt) {
+      return;
+    }
+    await generatePreviewMutation.mutateAsync({
+      prompt,
+      model: selectedModel || undefined,
     });
   };
 
@@ -1006,6 +1041,51 @@ function Chat() {
           </div>
         </Panel>
       </div>
+
+      <Panel
+        title="Model preview"
+        subtitle="Direct model generation test without session side effects"
+      >
+        <div className="grid gap-6 lg:grid-cols-[0.45fr_0.55fr]">
+          <div className="space-y-3 rounded-2xl border border-slate-100 bg-white px-4 py-4">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
+              Preview input
+            </p>
+            <textarea
+              value={previewPrompt}
+              onChange={(event) => setPreviewPrompt(event.target.value)}
+              rows={4}
+              className="w-full resize-none rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700"
+            />
+            <button
+              type="button"
+              onClick={() => void handleGeneratePreview()}
+              disabled={generatePreviewMutation.isPending}
+              className="rounded-full bg-slate-900 px-4 py-2 text-xs font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              Run model preview
+            </button>
+          </div>
+          <div className="space-y-2 rounded-2xl border border-slate-100 bg-white px-4 py-4 text-sm text-slate-700">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
+              Result
+            </p>
+            {previewResult ? (
+              <>
+                <p>
+                  model_used=<span className="font-semibold">{previewResult.model_used}</span>
+                </p>
+                <p>attempts={previewResult.attempts.length}</p>
+                <pre className="max-h-56 overflow-auto rounded-xl border border-slate-100 bg-slate-50 p-3 text-xs text-slate-600">
+                  {previewResult.output}
+                </pre>
+              </>
+            ) : (
+              <p className="text-slate-500">Run preview to inspect model/fallback behavior.</p>
+            )}
+          </div>
+        </div>
+      </Panel>
 
       <Panel title="Cron automation" subtitle="Schedule recurring assistant workflows">
         <div className="grid gap-6 lg:grid-cols-[0.45fr_0.55fr]">
