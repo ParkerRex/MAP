@@ -145,6 +145,33 @@ type PairingRequest = {
   updated_at: string;
 };
 
+type NodeRecord = {
+  id: string;
+  node_key: string;
+  display_name: string | null;
+  pairing_status: string;
+  capabilities: Record<string, unknown>;
+  created_at: string;
+  updated_at: string;
+};
+
+type NodePairingRequest = {
+  id: string;
+  provider: string;
+  peer_key: string;
+  code: string;
+  status: string;
+  expires_at: string;
+  created_at: string;
+  updated_at: string;
+};
+
+type NodesResponse = {
+  nodes: NodeRecord[];
+  pending_requests: NodePairingRequest[];
+  pairing_mode: string;
+};
+
 const rustGatewayBase = (import.meta.env.VITE_RUST_GATEWAY_URL ?? "http://localhost:18789").replace(
   /\/$/,
   "",
@@ -189,6 +216,9 @@ function Chat() {
   const [cronKind, setCronKind] = useState("every");
   const [cronExpr, setCronExpr] = useState("3600");
   const [cronMessage, setCronMessage] = useState("Send a status recap and next action.");
+  const [newNodeKey, setNewNodeKey] = useState("node-local");
+  const [newNodeDisplayName, setNewNodeDisplayName] = useState("Local Node");
+  const [issuedNodeToken, setIssuedNodeToken] = useState<string | null>(null);
   const streamRef = useRef<EventSource | null>(null);
 
   const sessionsQuery = useQuery({
@@ -240,6 +270,13 @@ function Chat() {
     queryFn: () => requestJson<PairingRequest[]>("/v1/channels/pairing"),
     staleTime: 10_000,
     refetchInterval: 15_000,
+  });
+
+  const nodesQuery = useQuery({
+    queryKey: ["rust-gateway", "nodes"],
+    queryFn: () => requestJson<NodesResponse>("/v1/nodes"),
+    staleTime: 10_000,
+    refetchInterval: 20_000,
   });
 
   const modelOptions = useMemo(() => {
@@ -436,6 +473,50 @@ function Chat() {
     },
   });
 
+  const requestNodePairingMutation = useMutation({
+    mutationFn: (payload: { nodeKey: string; displayName?: string }) =>
+      requestJson<{
+        request_id: string;
+        node_key: string;
+        code: string;
+        expires_at: string;
+      }>("/v1/nodes/pair/request", {
+        method: "POST",
+        body: JSON.stringify({
+          node_key: payload.nodeKey,
+          display_name: payload.displayName,
+          capabilities: {},
+        }),
+      }),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["rust-gateway", "nodes"] });
+    },
+  });
+
+  const approveNodePairingMutation = useMutation({
+    mutationFn: (id: string) =>
+      requestJson<{ approved: boolean; node_key: string; token: string }>(
+        `/v1/nodes/pair/approve/${id}`,
+        {
+          method: "POST",
+        },
+      ),
+    onSuccess: async (result) => {
+      setIssuedNodeToken(result.token);
+      await queryClient.invalidateQueries({ queryKey: ["rust-gateway", "nodes"] });
+    },
+  });
+
+  const rejectNodePairingMutation = useMutation({
+    mutationFn: (id: string) =>
+      requestJson<{ rejected: boolean }>(`/v1/nodes/pair/reject/${id}`, {
+        method: "POST",
+      }),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["rust-gateway", "nodes"] });
+    },
+  });
+
   useEffect(() => {
     return () => {
       streamRef.current?.close();
@@ -527,6 +608,17 @@ function Chat() {
       scheduleKind: cronKind,
       scheduleExpr,
       message,
+    });
+  };
+
+  const handleRequestNodePairing = async () => {
+    const nodeKey = newNodeKey.trim();
+    if (!nodeKey) {
+      return;
+    }
+    await requestNodePairingMutation.mutateAsync({
+      nodeKey,
+      displayName: newNodeDisplayName.trim() || undefined,
     });
   };
 
@@ -1020,6 +1112,110 @@ function Chat() {
                 </div>
               ))
             )}
+          </div>
+        </div>
+      </Panel>
+
+      <Panel title="Node pairing" subtitle="Approve and verify peer nodes">
+        <div className="grid gap-6 lg:grid-cols-[0.4fr_0.6fr]">
+          <div className="space-y-3 rounded-2xl border border-slate-100 bg-white px-4 py-4">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
+              Request pairing
+            </p>
+            <input
+              value={newNodeKey}
+              onChange={(event) => setNewNodeKey(event.target.value)}
+              placeholder="node key"
+              className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700"
+            />
+            <input
+              value={newNodeDisplayName}
+              onChange={(event) => setNewNodeDisplayName(event.target.value)}
+              placeholder="display name"
+              className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700"
+            />
+            <button
+              type="button"
+              onClick={() => void handleRequestNodePairing()}
+              disabled={requestNodePairingMutation.isPending}
+              className="rounded-full bg-slate-900 px-4 py-2 text-xs font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              Create node pairing request
+            </button>
+            {issuedNodeToken ? (
+              <div className="rounded-xl border border-emerald-100 bg-emerald-50 px-3 py-2 text-xs text-emerald-700">
+                Issued token: <span className="font-semibold">{issuedNodeToken}</span>
+              </div>
+            ) : null}
+            <div className="rounded-xl border border-slate-100 bg-white px-3 py-2 text-xs text-slate-500">
+              Pairing mode: {nodesQuery.data?.pairing_mode ?? "loading"}
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            <div className="space-y-2">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
+                Pending requests
+              </p>
+              {(nodesQuery.data?.pending_requests ?? []).length === 0 ? (
+                <p className="rounded-2xl border border-dashed border-slate-200 bg-white/60 px-4 py-3 text-sm text-slate-500">
+                  No pending node requests.
+                </p>
+              ) : (
+                (nodesQuery.data?.pending_requests ?? []).map((request) => (
+                  <div
+                    key={request.id}
+                    className="rounded-2xl border border-slate-100 bg-white px-4 py-3 text-sm text-slate-700"
+                  >
+                    <p className="font-semibold text-slate-900">{request.peer_key}</p>
+                    <p className="text-xs text-slate-500">
+                      code={request.code} · expires {new Date(request.expires_at).toLocaleString()}
+                    </p>
+                    <div className="mt-2 flex gap-2">
+                      <button
+                        type="button"
+                        onClick={() => void approveNodePairingMutation.mutateAsync(request.id)}
+                        className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold text-emerald-600"
+                      >
+                        Approve
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => void rejectNodePairingMutation.mutateAsync(request.id)}
+                        className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold text-rose-500"
+                      >
+                        Reject
+                      </button>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
+                Nodes
+              </p>
+              {(nodesQuery.data?.nodes ?? []).length === 0 ? (
+                <p className="rounded-2xl border border-dashed border-slate-200 bg-white/60 px-4 py-3 text-sm text-slate-500">
+                  No paired nodes yet.
+                </p>
+              ) : (
+                (nodesQuery.data?.nodes ?? []).map((node) => (
+                  <div
+                    key={node.id}
+                    className="rounded-2xl border border-slate-100 bg-white px-4 py-3 text-sm text-slate-700"
+                  >
+                    <p className="font-semibold text-slate-900">
+                      {node.display_name ?? node.node_key}
+                    </p>
+                    <p className="text-xs text-slate-500">
+                      {node.node_key} · status={node.pairing_status}
+                    </p>
+                  </div>
+                ))
+              )}
+            </div>
           </div>
         </div>
       </Panel>
