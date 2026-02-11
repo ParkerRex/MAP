@@ -23,6 +23,7 @@
   - trigger rescan via `POST /v1/skills`
 - Cron automation panel:
   - list jobs from `GET /v1/cron/jobs`
+  - list recent runs from `GET /v1/cron/runs`
   - create jobs via `POST /v1/cron/jobs`
   - run now via `POST /v1/cron/jobs/:id/run`
   - delete via `DELETE /v1/cron/jobs/:id`
@@ -69,6 +70,7 @@ Rust gateway now marks certain prompts as high impact if they contain destructiv
 - `GET /v1/skills`
 - `POST /v1/skills`
 - `GET /v1/cron/jobs`
+- `GET /v1/cron/runs`
 - `POST /v1/cron/jobs`
 - `POST /v1/cron/jobs/:id/run`
 - `DELETE /v1/cron/jobs/:id`
