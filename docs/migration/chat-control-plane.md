@@ -38,6 +38,9 @@
   - simulate inbound connector events with provider/peer kind/policy
   - validate pairing policy outcomes (`accepted`, `requires_pairing`, pairing code)
   - inspect routed session/run/model output metadata
+- Model preview panel:
+  - invoke `POST /v1/models/generate` directly
+  - verify selected model/fallback and attempt chain without creating chat session state
 
 ## Confirmation Gate Behavior
 
@@ -78,6 +81,7 @@ Rust gateway now marks certain prompts as high impact if they contain destructiv
 - `POST /v1/nodes/pair/approve/:id`
 - `POST /v1/nodes/pair/reject/:id`
 - `POST /v1/channels/inbound`
+- `POST /v1/models/generate`
 
 ## Smoke Verification
 
