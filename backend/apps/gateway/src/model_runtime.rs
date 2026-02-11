@@ -60,7 +60,10 @@ fn parse_model(value: &str) -> (String, String) {
 
 #[cfg(test)]
 mod tests {
-    use super::parse_model;
+    use super::{
+        extract_message_content, is_billing_error, parse_model, should_failover, ProviderError,
+    };
+    use serde_json::json;
 
     #[test]
     fn parse_model_provider_prefix() {
@@ -74,6 +77,78 @@ mod tests {
         let (provider, model) = parse_model("gpt-4o-mini");
         assert_eq!(provider, "openai");
         assert_eq!(model, "gpt-4o-mini");
+    }
+
+    #[test]
+    fn parse_model_trims_provider_and_model() {
+        let (provider, model) = parse_model("  moonshot : kimi-k2-instruct  ");
+        assert_eq!(provider, "moonshot");
+        assert_eq!(model, "kimi-k2-instruct");
+    }
+
+    #[test]
+    fn should_failover_on_retryable_status_codes() {
+        let rate_limited = ProviderError {
+            status: Some(429),
+            message: "rate limited".to_string(),
+        };
+        assert!(should_failover(&rate_limited));
+
+        let unavailable = ProviderError {
+            status: Some(503),
+            message: "service unavailable".to_string(),
+        };
+        assert!(should_failover(&unavailable));
+    }
+
+    #[test]
+    fn should_not_failover_on_non_retryable_client_error() {
+        let bad_request = ProviderError {
+            status: Some(400),
+            message: "invalid request body".to_string(),
+        };
+        assert!(!should_failover(&bad_request));
+    }
+
+    #[test]
+    fn should_failover_when_message_indicates_retryable_condition() {
+        let timeout = ProviderError {
+            status: Some(400),
+            message: "request timeout while contacting upstream".to_string(),
+        };
+        assert!(should_failover(&timeout));
+    }
+
+    #[test]
+    fn billing_detection_catches_insufficient_credit_errors() {
+        let billing = ProviderError {
+            status: Some(402),
+            message: "insufficient credit for this request".to_string(),
+        };
+        assert!(is_billing_error(&billing));
+    }
+
+    #[test]
+    fn extract_message_content_reads_string_payload() {
+        let payload = json!({
+            "choices": [{"message": {"content": "ok"}}]
+        });
+        assert_eq!(extract_message_content(&payload), Some("ok".to_string()));
+    }
+
+    #[test]
+    fn extract_message_content_reads_array_payload_parts() {
+        let payload = json!({
+            "choices": [{
+                "message": {
+                    "content": [
+                        {"type": "text", "text": "hello "},
+                        {"type": "text", "text": "world"}
+                    ]
+                }
+            }]
+        });
+        assert_eq!(extract_message_content(&payload), Some("hello world".to_string()));
     }
 }
 
