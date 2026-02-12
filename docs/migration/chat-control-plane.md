@@ -47,7 +47,7 @@ All panel mutations expose explicit loading/error/success feedback in the UI.
   - runtime status via `cron.status` (alias `cron/status`)
   - update cron job fields via `cron.update` (alias `cron/update`)
   - set talk mode state via `talk.mode` (alias `talk/mode`)
-  - invoke update runtime stub via `update.run` (alias `update/run`, currently returns `unavailable`)
+  - invoke gateway self-update workflow via `update.run` (alias `update/run`, returns `{ ok, result, restart, sentinel }`)
 - Channels + pairing panel:
   - connector/account/route summary via `channels.summary` / `channels.status`
   - account list/upsert/delete:

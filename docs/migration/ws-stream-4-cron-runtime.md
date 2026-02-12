@@ -14,9 +14,9 @@ Implemented in `backend/apps/gateway/src/routes/ws_methods/cron_control.rs` and 
 ## Behavior Summary
 
 - `cron.status`: Returns gateway cron runtime status shape with enabled flag, backend store path, job count, next wake timestamp, and poll interval.
-- `cron.update`: Updates an existing cron job by `id`/`job_id` (UUID), validates patch payloads, and returns the updated DB row.
+- `cron.update`: Updates an existing cron job by `id`/`job_id` (UUID), validates patch payloads, accepts OpenClaw parity patch fields (`description`, `deleteAfterRun`, `wakeMode`, `agentId`, `state`), and returns the updated row with promoted OpenClaw metadata.
 - `talk.mode`: Stores deterministic in-memory talk-mode state and returns `{ enabled, phase, ts }`.
-- `update.run`: Validates request fields and returns structured `unavailable` while runtime update/restart automation is not implemented.
+- `update.run`: Validates request fields, runs gateway update flow (git pull mode), writes a restart sentinel, schedules SIGUSR1 restart, and returns `{ ok, result, restart, sentinel }`.
 
 ## Request Compatibility
 
@@ -35,7 +35,6 @@ Validation and operational failures return WS structured errors via `WsMethodErr
 
 - `invalid_request` for malformed params and invalid patch fields.
 - `not_found` for unknown cron job IDs in `cron.update`.
-- `unavailable` for known-but-unimplemented runtime functionality (`update.run`) and unsupported OpenClaw patch fields (for example `deleteAfterRun`).
 
 No Stream 4 method should surface `method_not_found` when canonical mapping recognizes it.
 
@@ -44,4 +43,4 @@ No Stream 4 method should surface `method_not_found` when canonical mapping reco
 Current coverage includes:
 
 - method matrix alias checks in `routes::ws::tests::ws_method_matrix_supports_map_and_openclaw_aliases`.
-- `update.run` unavailable regression test in `routes::ws_methods::cron_control::tests::update_run_returns_unavailable_for_valid_request`.
+- `update.run` payload regression test in `routes::ws_methods::cron_control::tests::update_run_returns_result_payload_for_valid_request`.
