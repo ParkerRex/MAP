@@ -681,4 +681,22 @@ mod tests {
         };
         assert!(validate_update_run_params(&zero_timeout).is_err());
     }
+
+    #[tokio::test]
+    async fn update_run_returns_unavailable_for_valid_request() {
+        let result = update_run(json!({
+            "sessionKey": "session:main",
+            "note": "run update",
+            "restartDelayMs": 0,
+            "timeoutMs": 10_000
+        }))
+        .await;
+
+        match result {
+            Err(WsMethodError::Unavailable(message)) => {
+                assert!(message.contains("update/restart automation"));
+            }
+            other => panic!("expected unavailable, got {other:?}"),
+        }
+    }
 }
