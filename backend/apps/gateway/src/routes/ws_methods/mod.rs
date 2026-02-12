@@ -1,4 +1,5 @@
 use crate::error::ApiError;
+use serde_json::Value;
 
 pub(crate) mod skills_ext;
 
@@ -6,6 +7,7 @@ pub(crate) mod skills_ext;
 pub(crate) enum WsMethodError {
     InvalidRequest(String),
     Unavailable(String),
+    UnavailableWithPayload { message: String, payload: Value },
     Api(ApiError),
 }
 

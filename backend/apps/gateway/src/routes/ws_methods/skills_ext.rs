@@ -4,9 +4,55 @@ use crate::skills_runtime;
 use crate::state::AppState;
 use serde::de::DeserializeOwned;
 use serde::Deserialize;
+use serde::Serialize;
 use serde_json::{json, Map, Value};
 use std::collections::{BTreeMap, BTreeSet};
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
+use std::process::Stdio;
+use std::time::Duration;
+use tokio::io::AsyncWriteExt;
+use tokio::process::Command;
+
+const SKILLS_INSTALL_TIMEOUT_MS_DEFAULT: u64 = 300_000;
+const SKILLS_INSTALL_TIMEOUT_MS_MAX: u64 = 900_000;
+const SKILLS_INSTALL_LOG_TAIL_MAX_CHARS: usize = 20_000;
+
+#[derive(Debug, Clone)]
+#[allow(dead_code)]
+struct SkillInstallSpec {
+    id: Option<String>,
+    kind: String,
+    label: Option<String>,
+    bins: Vec<String>,
+    os: Vec<String>,
+    formula: Option<String>,
+    package: Option<String>,
+    module: Option<String>,
+    url: Option<String>,
+    archive: Option<String>,
+    extract: Option<bool>,
+    strip_components: Option<i64>,
+    target_dir: Option<String>,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct SkillInstallResult {
+    ok: bool,
+    message: String,
+    stdout: String,
+    stderr: String,
+    code: Option<i32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    warnings: Option<Vec<String>>,
+}
+
+#[derive(Debug)]
+struct InstallCommandOutput {
+    stdout: String,
+    stderr: String,
+    code: Option<i32>,
+}
 
 #[derive(Debug, Default, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
@@ -95,46 +141,77 @@ async fn skills_install(state: &AppState, params: Value) -> Result<Value, WsMeth
         ));
     }
 
-    if let Some(timeout_ms) = params.timeout_ms {
-        if timeout_ms < 1_000 {
-            return Err(WsMethodError::InvalidRequest(
-                "invalid skills.install params: timeoutMs must be >= 1000".to_string(),
-            ));
-        }
-    }
+    let timeout_ms = params
+        .timeout_ms
+        .unwrap_or(SKILLS_INSTALL_TIMEOUT_MS_DEFAULT)
+        .clamp(1_000, SKILLS_INSTALL_TIMEOUT_MS_MAX);
 
-    let Some(record) = skills_runtime::discover_skills(state)
+    let record = skills_runtime::discover_skills(state)
         .into_iter()
-        .find(|record| record.skill_key == name)
-    else {
-        return Err(WsMethodError::InvalidRequest(format!(
-            "invalid skills.install params: unknown skill `{name}`"
-        )));
+        .find(|record| record.skill_key == name);
+
+    let Some(record) = record else {
+        let result = SkillInstallResult {
+            ok: false,
+            message: format!("Skill not found: {name}"),
+            stdout: String::new(),
+            stderr: String::new(),
+            code: None,
+            warnings: None,
+        };
+        let payload = serde_json::to_value(&result)
+            .unwrap_or_else(|_| json!({ "ok": false, "message": result.message }));
+        return Err(WsMethodError::UnavailableWithPayload {
+            message: result.message,
+            payload,
+        });
     };
 
     let skill_file = PathBuf::from(&record.source_path).join("SKILL.md");
-    let install_ids = match tokio::fs::read_to_string(skill_file).await {
-        Ok(content) => extract_frontmatter(&content)
-            .map(collect_install_ids)
-            .unwrap_or_default(),
-        Err(_) => BTreeSet::new(),
+    let content = tokio::fs::read_to_string(&skill_file).await.ok();
+    let specs = content
+        .as_deref()
+        .and_then(extract_frontmatter)
+        .map(parse_openclaw_install_specs)
+        .unwrap_or_default();
+
+    let mut selected_spec: Option<SkillInstallSpec> = None;
+    for (index, spec) in specs.into_iter().enumerate() {
+        if resolve_install_id(&spec, index) == install_id {
+            selected_spec = Some(spec);
+            break;
+        }
+    }
+
+    let Some(spec) = selected_spec else {
+        let result = SkillInstallResult {
+            ok: false,
+            message: format!("Installer not found: {install_id}"),
+            stdout: String::new(),
+            stderr: String::new(),
+            code: None,
+            warnings: None,
+        };
+        let payload = serde_json::to_value(&result)
+            .unwrap_or_else(|_| json!({ "ok": false, "message": result.message }));
+        return Err(WsMethodError::UnavailableWithPayload {
+            message: result.message,
+            payload,
+        });
     };
 
-    if install_ids.is_empty() {
-        return Err(WsMethodError::Unavailable(format!(
-            "`skills.install` is recognized but `{name}` does not expose install metadata"
-        )));
-    }
+    let result = execute_install_spec(&name, &spec, timeout_ms).await;
+    let payload = serde_json::to_value(&result)
+        .unwrap_or_else(|_| json!({ "ok": result.ok, "message": result.message }));
 
-    if !install_ids.contains(&install_id) {
-        return Err(WsMethodError::InvalidRequest(format!(
-            "invalid skills.install params: installId `{install_id}` is not available for `{name}`"
-        )));
+    if result.ok {
+        Ok(payload)
+    } else {
+        Err(WsMethodError::UnavailableWithPayload {
+            message: result.message,
+            payload,
+        })
     }
-
-    Err(WsMethodError::Unavailable(format!(
-        "`skills.install` is recognized but installer execution is not implemented yet (skill `{name}`, installId `{install_id}`)"
-    )))
 }
 
 async fn skills_update(state: &AppState, params: Value) -> Result<Value, WsMethodError> {
@@ -490,38 +567,887 @@ fn collect_array_string_values(frontmatter: &str, keys: &[&str]) -> Vec<String> 
     values
 }
 
-fn collect_install_ids(frontmatter: &str) -> BTreeSet<String> {
-    let mut install_ids = BTreeSet::new();
+fn find_matching_brace(input: &str, start: usize) -> Option<usize> {
+    let bytes = input.as_bytes();
+    if bytes.get(start) != Some(&b'{') {
+        return None;
+    }
 
-    let Some(install_key_index) = frontmatter.find("\"install\"") else {
-        return install_ids;
-    };
-    let Some(array_rel_start) = frontmatter[install_key_index..].find('[') else {
-        return install_ids;
-    };
-    let array_start = install_key_index + array_rel_start;
-    let Some(array_end) = find_matching_bracket(frontmatter, array_start) else {
-        return install_ids;
-    };
-    let install_block = &frontmatter[array_start + 1..array_end];
+    let mut depth = 0i32;
+    let mut in_string = false;
+    let mut quote = b'\0';
+    let mut escaped = false;
 
-    for key in ["\"id\"", "'id'"] {
-        let mut search_start = 0usize;
-        while let Some(found) = install_block[search_start..].find(key) {
-            let key_index = search_start + found + key.len();
-            let Some(colon_rel) = install_block[key_index..].find(':') else {
-                break;
-            };
-            let value_start = key_index + colon_rel + 1;
-            let quoted = parse_quoted_values(&install_block[value_start..]);
-            if let Some(value) = quoted.first() {
-                install_ids.insert(value.clone());
+    for (index, byte) in bytes.iter().enumerate().skip(start) {
+        if in_string {
+            if escaped {
+                escaped = false;
+                continue;
             }
-            search_start = value_start;
+            if *byte == b'\\' {
+                escaped = true;
+                continue;
+            }
+            if *byte == quote {
+                in_string = false;
+            }
+            continue;
+        }
+
+        if *byte == b'\'' || *byte == b'"' {
+            in_string = true;
+            quote = *byte;
+            continue;
+        }
+
+        if *byte == b'{' {
+            depth += 1;
+            continue;
+        }
+
+        if *byte == b'}' {
+            depth -= 1;
+            if depth == 0 {
+                return Some(index);
+            }
         }
     }
 
-    install_ids
+    None
+}
+
+fn extract_metadata_json5(frontmatter: &str) -> Option<String> {
+    let mut offset = 0usize;
+    for line in frontmatter.split_inclusive('\n') {
+        let trimmed = line.trim_start();
+        if !trimmed.starts_with("metadata:") {
+            offset += line.len();
+            continue;
+        }
+
+        let remainder = trimmed.trim_start_matches("metadata:").trim();
+        let search_start = offset + line.len();
+        let candidate = if remainder.contains('{') {
+            // Inline metadata value.
+            let inline_start = offset + (line.len() - trimmed.len()) + trimmed.find('{')?;
+            inline_start
+        } else {
+            // Multiline metadata value.
+            let rel = frontmatter[search_start..].find('{')?;
+            search_start + rel
+        };
+
+        let end = find_matching_brace(frontmatter, candidate)?;
+        return Some(frontmatter[candidate..=end].to_string());
+    }
+
+    None
+}
+
+fn parse_openclaw_install_specs(frontmatter: &str) -> Vec<SkillInstallSpec> {
+    let Some(metadata_raw) = extract_metadata_json5(frontmatter) else {
+        return Vec::new();
+    };
+
+    let parsed: Value = match json5::from_str(&metadata_raw) {
+        Ok(value) => value,
+        Err(_) => return Vec::new(),
+    };
+
+    let Some(openclaw) = parsed.get("openclaw").and_then(Value::as_object) else {
+        return Vec::new();
+    };
+    let install_raw = openclaw.get("install").and_then(Value::as_array);
+    let Some(install_raw) = install_raw else {
+        return Vec::new();
+    };
+
+    install_raw
+        .iter()
+        .filter_map(parse_install_spec)
+        .collect::<Vec<_>>()
+}
+
+fn normalize_string_list(value: Option<&Value>) -> Vec<String> {
+    let Some(value) = value else {
+        return Vec::new();
+    };
+    if let Some(array) = value.as_array() {
+        return array
+            .iter()
+            .filter_map(Value::as_str)
+            .map(|entry| entry.trim().to_string())
+            .filter(|entry| !entry.is_empty())
+            .collect();
+    }
+    if let Some(text) = value.as_str() {
+        return text
+            .split(',')
+            .map(|entry| entry.trim().to_string())
+            .filter(|entry| !entry.is_empty())
+            .collect();
+    }
+    Vec::new()
+}
+
+fn parse_install_spec(value: &Value) -> Option<SkillInstallSpec> {
+    let object = value.as_object()?;
+
+    let kind_raw = object
+        .get("kind")
+        .or_else(|| object.get("type"))
+        .and_then(Value::as_str)?;
+    let kind = kind_raw.trim().to_lowercase();
+    if kind != "brew" && kind != "node" && kind != "go" && kind != "uv" && kind != "download" {
+        return None;
+    }
+
+    let id = object
+        .get("id")
+        .and_then(Value::as_str)
+        .map(|value| value.trim().to_string())
+        .filter(|value| !value.is_empty());
+
+    let label = object
+        .get("label")
+        .and_then(Value::as_str)
+        .map(|value| value.trim().to_string())
+        .filter(|value| !value.is_empty());
+
+    let formula = object
+        .get("formula")
+        .and_then(Value::as_str)
+        .map(|value| value.trim().to_string())
+        .filter(|value| !value.is_empty());
+
+    let package = object
+        .get("package")
+        .and_then(Value::as_str)
+        .map(|value| value.trim().to_string())
+        .filter(|value| !value.is_empty());
+
+    let module = object
+        .get("module")
+        .and_then(Value::as_str)
+        .map(|value| value.trim().to_string())
+        .filter(|value| !value.is_empty());
+
+    let url = object
+        .get("url")
+        .and_then(Value::as_str)
+        .map(|value| value.trim().to_string())
+        .filter(|value| !value.is_empty());
+
+    let archive = object
+        .get("archive")
+        .and_then(Value::as_str)
+        .map(|value| value.trim().to_string())
+        .filter(|value| !value.is_empty());
+
+    let extract = object.get("extract").and_then(Value::as_bool);
+
+    let strip_components = object
+        .get("stripComponents")
+        .and_then(Value::as_i64)
+        .or_else(|| {
+            object
+                .get("stripComponents")
+                .and_then(Value::as_f64)
+                .map(|value| value.floor() as i64)
+        });
+
+    let target_dir = object
+        .get("targetDir")
+        .and_then(Value::as_str)
+        .map(|value| value.trim().to_string())
+        .filter(|value| !value.is_empty());
+
+    Some(SkillInstallSpec {
+        id,
+        kind,
+        label,
+        bins: normalize_string_list(object.get("bins")),
+        os: normalize_string_list(object.get("os")),
+        formula,
+        package,
+        module,
+        url,
+        archive,
+        extract,
+        strip_components,
+        target_dir,
+    })
+}
+
+fn resolve_install_id(spec: &SkillInstallSpec, index: usize) -> String {
+    spec.id
+        .as_deref()
+        .unwrap_or(&format!("{}-{index}", spec.kind))
+        .trim()
+        .to_string()
+}
+
+async fn execute_install_spec(
+    skill_key: &str,
+    spec: &SkillInstallSpec,
+    timeout_ms: u64,
+) -> SkillInstallResult {
+    match spec.kind.as_str() {
+        "download" => install_download_spec(skill_key, spec, timeout_ms).await,
+        _ => install_command_spec(spec, timeout_ms).await,
+    }
+}
+
+async fn install_command_spec(spec: &SkillInstallSpec, timeout_ms: u64) -> SkillInstallResult {
+    let brew_exe = resolve_brew_executable();
+
+    if spec.kind == "brew" && brew_exe.is_none() {
+        return SkillInstallResult {
+            ok: false,
+            message: "brew not installed".to_string(),
+            stdout: String::new(),
+            stderr: String::new(),
+            code: None,
+            warnings: None,
+        };
+    }
+
+    if spec.kind == "uv" && !has_binary("uv") {
+        if let Some(brew) = &brew_exe {
+            let argv = vec![
+                brew.to_string_lossy().to_string(),
+                "install".to_string(),
+                "uv".to_string(),
+            ];
+            let _ = run_command_with_timeout(&argv, None, timeout_ms, None).await;
+        } else {
+            return SkillInstallResult {
+                ok: false,
+                message: "uv not installed (install via brew)".to_string(),
+                stdout: String::new(),
+                stderr: String::new(),
+                code: None,
+                warnings: None,
+            };
+        }
+    }
+
+    if spec.kind == "go" && !has_binary("go") {
+        if let Some(brew) = &brew_exe {
+            let argv = vec![
+                brew.to_string_lossy().to_string(),
+                "install".to_string(),
+                "go".to_string(),
+            ];
+            let _ = run_command_with_timeout(&argv, None, timeout_ms, None).await;
+        } else {
+            return SkillInstallResult {
+                ok: false,
+                message: "go not installed (install via brew)".to_string(),
+                stdout: String::new(),
+                stderr: String::new(),
+                code: None,
+                warnings: None,
+            };
+        }
+    }
+
+    let argv = match build_install_command(spec, brew_exe.as_deref()) {
+        Ok(argv) => argv,
+        Err(message) => {
+            return SkillInstallResult {
+                ok: false,
+                message,
+                stdout: String::new(),
+                stderr: String::new(),
+                code: None,
+                warnings: None,
+            }
+        }
+    };
+
+    let env = if spec.kind == "go" {
+        if let Some(brew) = brew_exe.as_deref() {
+            resolve_brew_bin_dir(timeout_ms, brew)
+                .await
+                .map(|bin| BTreeMap::from([("GOBIN".to_string(), bin)]))
+        } else {
+            None
+        }
+    } else {
+        None
+    };
+
+    let output = run_command_with_timeout(&argv, None, timeout_ms, env.as_ref()).await;
+    let success = output.code == Some(0);
+    SkillInstallResult {
+        ok: success,
+        message: if success {
+            "Installed".to_string()
+        } else {
+            format_install_failure_message(&output)
+        },
+        stdout: output.stdout,
+        stderr: output.stderr,
+        code: output.code,
+        warnings: None,
+    }
+}
+
+fn build_install_command(
+    spec: &SkillInstallSpec,
+    brew_exe: Option<&Path>,
+) -> Result<Vec<String>, String> {
+    match spec.kind.as_str() {
+        "brew" => {
+            let Some(formula) = spec.formula.as_deref() else {
+                return Err("missing brew formula".to_string());
+            };
+            let brew = brew_exe
+                .map(|path| path.to_string_lossy().to_string())
+                .unwrap_or_else(|| "brew".to_string());
+            Ok(vec![brew, "install".to_string(), formula.to_string()])
+        }
+        "node" => {
+            let Some(package) = spec.package.as_deref() else {
+                return Err("missing node package".to_string());
+            };
+            Ok(build_node_install_command(package))
+        }
+        "go" => {
+            let Some(module) = spec.module.as_deref() else {
+                return Err("missing go module".to_string());
+            };
+            Ok(vec![
+                "go".to_string(),
+                "install".to_string(),
+                module.to_string(),
+            ])
+        }
+        "uv" => {
+            let Some(package) = spec.package.as_deref() else {
+                return Err("missing uv package".to_string());
+            };
+            Ok(vec![
+                "uv".to_string(),
+                "tool".to_string(),
+                "install".to_string(),
+                package.to_string(),
+            ])
+        }
+        "download" => Err("download install handled separately".to_string()),
+        _ => Err("unsupported installer".to_string()),
+    }
+}
+
+fn has_binary(bin: &str) -> bool {
+    if bin.trim().is_empty() {
+        return false;
+    }
+
+    let Some(path_var) = std::env::var_os("PATH") else {
+        return false;
+    };
+
+    for entry in std::env::split_paths(&path_var) {
+        if entry.as_os_str().is_empty() {
+            continue;
+        }
+        let candidate = entry.join(bin);
+        if candidate.is_file() {
+            return true;
+        }
+    }
+
+    false
+}
+
+fn resolve_brew_executable() -> Option<PathBuf> {
+    if has_binary("brew") {
+        return Some(PathBuf::from("brew"));
+    }
+
+    for candidate in ["/opt/homebrew/bin/brew", "/usr/local/bin/brew"] {
+        let path = PathBuf::from(candidate);
+        if path.is_file() {
+            return Some(path);
+        }
+    }
+
+    None
+}
+
+async fn resolve_brew_bin_dir(timeout_ms: u64, brew_exe: &Path) -> Option<String> {
+    let argv = vec![
+        brew_exe.to_string_lossy().to_string(),
+        "--prefix".to_string(),
+    ];
+    let output = run_command_with_timeout(&argv, None, timeout_ms.min(30_000), None).await;
+    if output.code == Some(0) {
+        let prefix = output.stdout.trim();
+        if !prefix.is_empty() {
+            return Some(
+                PathBuf::from(prefix)
+                    .join("bin")
+                    .to_string_lossy()
+                    .to_string(),
+            );
+        }
+    }
+
+    if let Ok(prefix) = std::env::var("HOMEBREW_PREFIX") {
+        let prefix = prefix.trim();
+        if !prefix.is_empty() {
+            return Some(
+                PathBuf::from(prefix)
+                    .join("bin")
+                    .to_string_lossy()
+                    .to_string(),
+            );
+        }
+    }
+
+    for candidate in ["/opt/homebrew/bin", "/usr/local/bin"] {
+        if PathBuf::from(candidate).is_dir() {
+            return Some(candidate.to_string());
+        }
+    }
+
+    None
+}
+
+fn build_node_install_command(package_name: &str) -> Vec<String> {
+    if has_binary("pnpm") {
+        return vec![
+            "pnpm".to_string(),
+            "add".to_string(),
+            "-g".to_string(),
+            package_name.to_string(),
+        ];
+    }
+    if has_binary("yarn") {
+        return vec![
+            "yarn".to_string(),
+            "global".to_string(),
+            "add".to_string(),
+            package_name.to_string(),
+        ];
+    }
+    if has_binary("bun") {
+        return vec![
+            "bun".to_string(),
+            "add".to_string(),
+            "-g".to_string(),
+            package_name.to_string(),
+        ];
+    }
+
+    vec![
+        "npm".to_string(),
+        "install".to_string(),
+        "-g".to_string(),
+        package_name.to_string(),
+    ]
+}
+
+async fn install_download_spec(
+    skill_key: &str,
+    spec: &SkillInstallSpec,
+    timeout_ms: u64,
+) -> SkillInstallResult {
+    let Some(url) = spec
+        .url
+        .as_deref()
+        .map(str::trim)
+        .filter(|value| !value.is_empty())
+    else {
+        return SkillInstallResult {
+            ok: false,
+            message: "missing download url".to_string(),
+            stdout: String::new(),
+            stderr: String::new(),
+            code: None,
+            warnings: None,
+        };
+    };
+
+    let filename = resolve_download_filename(url).unwrap_or_else(|| "download".to_string());
+
+    let target_dir = if let Some(target_dir) = spec.target_dir.as_deref() {
+        expand_tilde(target_dir)
+    } else {
+        resolve_openclaw_state_dir().join("tools").join(skill_key)
+    };
+
+    if let Err(error) = tokio::fs::create_dir_all(&target_dir).await {
+        let message = format!("failed to create download directory: {error}");
+        return SkillInstallResult {
+            ok: false,
+            message: message.clone(),
+            stdout: String::new(),
+            stderr: message,
+            code: None,
+            warnings: None,
+        };
+    }
+
+    let archive_path = target_dir.join(&filename);
+    let downloaded_bytes = match download_file(url, &archive_path, timeout_ms).await {
+        Ok(bytes) => bytes,
+        Err(message) => {
+            return SkillInstallResult {
+                ok: false,
+                message: message.clone(),
+                stdout: String::new(),
+                stderr: message,
+                code: None,
+                warnings: None,
+            };
+        }
+    };
+
+    let archive_type = resolve_archive_type(spec, &filename);
+    let should_extract = spec.extract.unwrap_or(archive_type.is_some());
+    if !should_extract {
+        return SkillInstallResult {
+            ok: true,
+            message: format!("Downloaded to {}", archive_path.to_string_lossy()),
+            stdout: format!("downloaded={downloaded_bytes}"),
+            stderr: String::new(),
+            code: Some(0),
+            warnings: None,
+        };
+    }
+
+    let Some(archive_type) = archive_type else {
+        return SkillInstallResult {
+            ok: false,
+            message: "extract requested but archive type could not be detected".to_string(),
+            stdout: String::new(),
+            stderr: String::new(),
+            code: None,
+            warnings: None,
+        };
+    };
+
+    let extract_result = extract_archive(
+        &archive_path,
+        &archive_type,
+        &target_dir,
+        spec.strip_components,
+        timeout_ms,
+    )
+    .await;
+    let success = extract_result.code == Some(0);
+
+    SkillInstallResult {
+        ok: success,
+        message: if success {
+            format!(
+                "Downloaded and extracted to {}",
+                target_dir.to_string_lossy()
+            )
+        } else {
+            format_install_failure_message(&extract_result)
+        },
+        stdout: extract_result.stdout,
+        stderr: extract_result.stderr,
+        code: extract_result.code,
+        warnings: None,
+    }
+}
+
+fn resolve_download_filename(url: &str) -> Option<String> {
+    if let Ok(parsed) = reqwest::Url::parse(url) {
+        let path = parsed.path();
+        if let Some(name) = Path::new(path).file_name().and_then(|value| value.to_str()) {
+            let trimmed = name.trim();
+            if !trimmed.is_empty() {
+                return Some(trimmed.to_string());
+            }
+        }
+    }
+
+    let trimmed = url.trim();
+    let without_query = trimmed.split('?').next().unwrap_or(trimmed);
+    let name = without_query
+        .rsplit('/')
+        .next()
+        .unwrap_or(without_query)
+        .trim();
+    if name.is_empty() {
+        None
+    } else {
+        Some(name.to_string())
+    }
+}
+
+fn resolve_archive_type(spec: &SkillInstallSpec, filename: &str) -> Option<String> {
+    if let Some(explicit) = spec.archive.as_deref() {
+        let explicit = explicit.trim().to_lowercase();
+        if !explicit.is_empty() {
+            if explicit == "zip" {
+                return Some("zip".to_string());
+            }
+            return Some("tar".to_string());
+        }
+    }
+
+    let lower = filename.to_lowercase();
+    if lower.ends_with(".zip") {
+        return Some("zip".to_string());
+    }
+    if lower.ends_with(".tar.gz")
+        || lower.ends_with(".tgz")
+        || lower.ends_with(".tar.bz2")
+        || lower.ends_with(".tbz2")
+        || lower.ends_with(".tar.xz")
+        || lower.ends_with(".txz")
+        || lower.ends_with(".tar")
+    {
+        return Some("tar".to_string());
+    }
+    None
+}
+
+fn resolve_openclaw_state_dir() -> PathBuf {
+    std::env::var("OPENCLAW_STATE_DIR")
+        .ok()
+        .map(PathBuf::from)
+        .unwrap_or_else(|| {
+            dirs::home_dir()
+                .unwrap_or_else(|| PathBuf::from("."))
+                .join(".openclaw")
+        })
+}
+
+fn expand_tilde(value: &str) -> PathBuf {
+    let trimmed = value.trim();
+    if trimmed == "~" {
+        return dirs::home_dir().unwrap_or_else(|| PathBuf::from("."));
+    }
+    if let Some(rest) = trimmed.strip_prefix("~/") {
+        return dirs::home_dir()
+            .unwrap_or_else(|| PathBuf::from("."))
+            .join(rest);
+    }
+    PathBuf::from(trimmed)
+}
+
+async fn download_file(url: &str, dest: &Path, timeout_ms: u64) -> Result<u64, String> {
+    let url = url.to_string();
+    let dest = dest.to_path_buf();
+    let timeout = Duration::from_millis(timeout_ms.max(1));
+
+    tokio::time::timeout(timeout, async move {
+        let client = reqwest::Client::builder()
+            .redirect(reqwest::redirect::Policy::limited(10))
+            .build()
+            .map_err(|error| error.to_string())?;
+
+        let mut response = client
+            .get(url)
+            .send()
+            .await
+            .map_err(|error| error.to_string())?;
+
+        if !response.status().is_success() {
+            return Err(format!("download failed (HTTP {})", response.status()));
+        }
+
+        let mut file = tokio::fs::File::create(&dest)
+            .await
+            .map_err(|error| error.to_string())?;
+
+        let mut bytes: u64 = 0;
+        while let Some(chunk) = response.chunk().await.map_err(|error| error.to_string())? {
+            bytes += chunk.len() as u64;
+            file.write_all(&chunk)
+                .await
+                .map_err(|error| error.to_string())?;
+        }
+        file.flush().await.map_err(|error| error.to_string())?;
+
+        Ok(bytes)
+    })
+    .await
+    .map_err(|_| format!("download timed out after {timeout_ms}ms"))?
+}
+
+async fn extract_archive(
+    archive_path: &Path,
+    archive_type: &str,
+    target_dir: &Path,
+    strip_components: Option<i64>,
+    timeout_ms: u64,
+) -> InstallCommandOutput {
+    if archive_type == "zip" {
+        if !has_binary("unzip") {
+            return InstallCommandOutput {
+                stdout: String::new(),
+                stderr: "unzip not found on PATH".to_string(),
+                code: None,
+            };
+        }
+
+        let argv = vec![
+            "unzip".to_string(),
+            "-q".to_string(),
+            archive_path.to_string_lossy().to_string(),
+            "-d".to_string(),
+            target_dir.to_string_lossy().to_string(),
+        ];
+        return run_command_with_timeout(&argv, None, timeout_ms, None).await;
+    }
+
+    if !has_binary("tar") {
+        return InstallCommandOutput {
+            stdout: String::new(),
+            stderr: "tar not found on PATH".to_string(),
+            code: None,
+        };
+    }
+
+    let mut argv = vec![
+        "tar".to_string(),
+        "xf".to_string(),
+        archive_path.to_string_lossy().to_string(),
+        "-C".to_string(),
+        target_dir.to_string_lossy().to_string(),
+    ];
+    if let Some(strip) = strip_components {
+        let normalized = strip.max(0);
+        argv.push("--strip-components".to_string());
+        argv.push(normalized.to_string());
+    }
+
+    run_command_with_timeout(&argv, None, timeout_ms, None).await
+}
+
+async fn run_command_with_timeout(
+    argv: &[String],
+    cwd: Option<&Path>,
+    timeout_ms: u64,
+    env: Option<&BTreeMap<String, String>>,
+) -> InstallCommandOutput {
+    let Some((program, args)) = argv.split_first() else {
+        return InstallCommandOutput {
+            stdout: String::new(),
+            stderr: "invalid install command".to_string(),
+            code: None,
+        };
+    };
+
+    let mut command = Command::new(program);
+    command
+        .args(args)
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped())
+        .kill_on_drop(true);
+
+    if let Some(cwd) = cwd {
+        command.current_dir(cwd);
+    }
+
+    if let Some(env) = env {
+        for (key, value) in env {
+            command.env(key, value);
+        }
+    }
+
+    let timed =
+        tokio::time::timeout(Duration::from_millis(timeout_ms.max(1)), command.output()).await;
+    match timed {
+        Ok(Ok(output)) => InstallCommandOutput {
+            stdout: trim_log_tail(
+                String::from_utf8_lossy(&output.stdout).as_ref(),
+                SKILLS_INSTALL_LOG_TAIL_MAX_CHARS,
+            )
+            .unwrap_or_default(),
+            stderr: trim_log_tail(
+                String::from_utf8_lossy(&output.stderr).as_ref(),
+                SKILLS_INSTALL_LOG_TAIL_MAX_CHARS,
+            )
+            .unwrap_or_default(),
+            code: output.status.code(),
+        },
+        Ok(Err(error)) => InstallCommandOutput {
+            stdout: String::new(),
+            stderr: error.to_string(),
+            code: None,
+        },
+        Err(_) => InstallCommandOutput {
+            stdout: String::new(),
+            stderr: format!("command timed out after {timeout_ms}ms"),
+            code: None,
+        },
+    }
+}
+
+fn trim_log_tail(input: &str, max_chars: usize) -> Option<String> {
+    let text = input.trim_end();
+    if text.is_empty() {
+        return None;
+    }
+
+    let total_chars = text.chars().count();
+    if total_chars <= max_chars {
+        return Some(text.to_string());
+    }
+
+    let mut reversed = text.chars().rev().take(max_chars).collect::<Vec<_>>();
+    reversed.reverse();
+    let tail = reversed.into_iter().collect::<String>();
+    Some(format!("...{tail}"))
+}
+
+fn summarize_install_output(text: &str) -> Option<String> {
+    let raw = text.trim();
+    if raw.is_empty() {
+        return None;
+    }
+
+    let lines = raw
+        .split('\n')
+        .map(|line| line.trim())
+        .filter(|line| !line.is_empty())
+        .collect::<Vec<_>>();
+    if lines.is_empty() {
+        return None;
+    }
+
+    let preferred = lines
+        .iter()
+        .copied()
+        .find(|line| line.to_lowercase().starts_with("error"))
+        .or_else(|| {
+            lines.iter().copied().find(|line| {
+                line.to_lowercase().contains("error:") || line.to_lowercase().contains("failed")
+            })
+        })
+        .or_else(|| lines.last().copied());
+
+    let preferred = preferred?;
+    let normalized = preferred.split_whitespace().collect::<Vec<_>>().join(" ");
+    let max_len = 200usize;
+    if normalized.chars().count() > max_len {
+        Some(normalized.chars().take(max_len - 1).collect::<String>())
+    } else {
+        Some(normalized)
+    }
+}
+
+fn format_install_failure_message(result: &InstallCommandOutput) -> String {
+    let code = result
+        .code
+        .map(|value| format!("exit {value}"))
+        .unwrap_or_else(|| "unknown exit".to_string());
+    let summary = summarize_install_output(&result.stderr)
+        .or_else(|| summarize_install_output(&result.stdout));
+    match summary {
+        Some(summary) if !summary.is_empty() => format!("Install failed ({code}): {summary}"),
+        _ => format!("Install failed ({code})"),
+    }
 }
 
 #[cfg(test)]
@@ -569,16 +1495,16 @@ metadata:
     }
 
     #[test]
-    fn collect_install_ids_reads_install_block_ids_only() {
+    fn parse_openclaw_install_specs_filters_unknown_kinds_and_supports_fallback_ids() {
         let skill = r#"---
 name: demo
 metadata:
   {
     "openclaw": {
-      "id": "outside-install-ignored",
       "install": [
-        {"id": "brew"},
-        {"id": "uv"}
+        {"id": "brew", "kind": "brew", "formula": "jq"},
+        {"id": "apt", "kind": "apt", "package": "jq"},
+        {"kind": "uv", "package": "nano-pdf"}
       ]
     }
   }
@@ -586,9 +1512,14 @@ metadata:
 "#;
 
         let frontmatter = extract_frontmatter(skill).expect("frontmatter expected");
-        let ids = collect_install_ids(frontmatter);
+        let specs = parse_openclaw_install_specs(frontmatter);
 
-        assert_eq!(ids, BTreeSet::from(["brew".to_string(), "uv".to_string()]));
+        assert_eq!(specs.len(), 2);
+        assert_eq!(specs[0].kind, "brew");
+        assert_eq!(specs[0].id.as_deref(), Some("brew"));
+        assert_eq!(specs[1].kind, "uv");
+        assert_eq!(specs[1].id.as_deref(), None);
+        assert_eq!(resolve_install_id(&specs[1], 1), "uv-1");
     }
 
     #[test]

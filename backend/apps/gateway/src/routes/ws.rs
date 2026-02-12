@@ -4753,6 +4753,9 @@ async fn send_ws_method_error(
         routes::ws_methods::WsMethodError::Unavailable(message) => {
             send_error(socket, id, "unavailable", &message).await
         }
+        routes::ws_methods::WsMethodError::UnavailableWithPayload { message, payload } => {
+            send_error_with_payload(socket, id, "unavailable", &message, payload).await
+        }
         routes::ws_methods::WsMethodError::Api(error) => send_api_error(socket, id, error).await,
     }
 }
@@ -4792,6 +4795,30 @@ async fn send_error(
         "type": "res",
         "id": id,
         "ok": false,
+        "error": {
+            "code": code,
+            "message": message
+        }
+    });
+    let mut writer = socket.lock().await;
+    writer
+        .send(Message::Text(envelope.to_string().into()))
+        .await
+        .map_err(|_| ())
+}
+
+async fn send_error_with_payload(
+    socket: &SharedSocketWriter,
+    id: &str,
+    code: &str,
+    message: &str,
+    payload: Value,
+) -> Result<(), ()> {
+    let envelope = json!({
+        "type": "res",
+        "id": id,
+        "ok": false,
+        "payload": payload,
         "error": {
             "code": code,
             "message": message
