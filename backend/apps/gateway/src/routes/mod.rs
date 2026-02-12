@@ -9,7 +9,6 @@ pub mod security;
 pub mod sessions;
 pub mod skills;
 pub mod ws;
-pub mod ws_methods;
 
 use crate::auth;
 use crate::state::AppState;
