@@ -159,8 +159,9 @@ pub(crate) async fn last_heartbeat(params: Value) -> Result<Value, WsMethodError
 }
 
 pub(crate) async fn set_heartbeats(params: Value) -> Result<Value, WsMethodError> {
-    let params = serde_json::from_value::<SetHeartbeatsParams>(params)
-        .map_err(|_| invalid_request("invalid set-heartbeats params: enabled (boolean) required"))?;
+    let params = serde_json::from_value::<SetHeartbeatsParams>(params).map_err(|_| {
+        invalid_request("invalid set-heartbeats params: enabled (boolean) required")
+    })?;
 
     HEARTBEATS_ENABLED.store(params.enabled, Ordering::SeqCst);
 
@@ -360,7 +361,9 @@ fn sorted_presence_snapshot_locked(store: &HashMap<String, PresenceEntry>) -> Ve
 fn prune_presence_locked(store: &mut HashMap<String, PresenceEntry>) {
     let now = now_ms();
     let gateway_key = resolve_gateway_presence_key();
-    store.retain(|key, value| key == &gateway_key || now.saturating_sub(value.ts) <= PRESENCE_TTL_MS);
+    store.retain(|key, value| {
+        key == &gateway_key || now.saturating_sub(value.ts) <= PRESENCE_TTL_MS
+    });
 
     if store.len() <= PRESENCE_MAX_ENTRIES {
         return;

@@ -774,8 +774,8 @@ fn hash_token(token: &str) -> String {
 mod tests {
     use super::*;
     use crate::db;
-    use sqlx::postgres::PgPoolOptions;
     use serde_json::json;
+    use sqlx::postgres::PgPoolOptions;
 
     fn resolve_test_database_url() -> Option<String> {
         std::env::var("RUST_GATEWAY_TEST_DATABASE_URL")

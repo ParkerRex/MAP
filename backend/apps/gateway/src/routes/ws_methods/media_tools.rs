@@ -415,7 +415,8 @@ async fn convert_with_openai(state: &AppState, text: &str) -> Result<TtsConvertP
 }
 
 async fn convert_with_elevenlabs(text: &str) -> Result<TtsConvertPayload, String> {
-    let api_key = elevenlabs_api_key().ok_or_else(|| "ELEVENLABS_API_KEY is not configured".to_string())?;
+    let api_key =
+        elevenlabs_api_key().ok_or_else(|| "ELEVENLABS_API_KEY is not configured".to_string())?;
     let base_url = std::env::var("ELEVENLABS_BASE_URL")
         .ok()
         .map(|value| value.trim().to_string())
@@ -640,7 +641,9 @@ fn edge_tts_available() -> bool {
 
 async fn load_tts_prefs() -> Result<TtsPrefs, WsMethodError> {
     let path = tts_prefs_path();
-    let loaded = read_json_file::<TtsPrefs>(&path).await.map_err(request_failed)?;
+    let loaded = read_json_file::<TtsPrefs>(&path)
+        .await
+        .map_err(request_failed)?;
     Ok(loaded.unwrap_or_default())
 }
 
@@ -658,7 +661,9 @@ async fn load_voicewake_config() -> Result<VoiceWakeConfig, WsMethodError> {
     Ok(loaded.unwrap_or_default())
 }
 
-async fn set_voicewake_triggers(raw_triggers: Vec<String>) -> Result<VoiceWakeConfig, WsMethodError> {
+async fn set_voicewake_triggers(
+    raw_triggers: Vec<String>,
+) -> Result<VoiceWakeConfig, WsMethodError> {
     let triggers = normalize_voicewake_triggers(raw_triggers);
     let config = VoiceWakeConfig {
         triggers,

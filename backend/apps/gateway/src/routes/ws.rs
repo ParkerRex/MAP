@@ -1913,8 +1913,11 @@ async fn dispatch_request(
         }
 
         "agent.identity.get" => {
-            match routes::ws_methods::system_runtime::agent_identity_get(state, request.params.clone())
-                .await
+            match routes::ws_methods::system_runtime::agent_identity_get(
+                state,
+                request.params.clone(),
+            )
+            .await
             {
                 Ok(payload) => send_ok(socket, &request.id, payload).await,
                 Err(error) => send_ws_method_error(socket, &request.id, error).await,
@@ -2082,16 +2085,14 @@ async fn dispatch_request(
         }
 
         "last-heartbeat" => {
-            match routes::ws_methods::system_runtime::last_heartbeat(request.params.clone()).await
-            {
+            match routes::ws_methods::system_runtime::last_heartbeat(request.params.clone()).await {
                 Ok(payload) => send_ok(socket, &request.id, payload).await,
                 Err(error) => send_ws_method_error(socket, &request.id, error).await,
             }
         }
 
         "set-heartbeats" => {
-            match routes::ws_methods::system_runtime::set_heartbeats(request.params.clone()).await
-            {
+            match routes::ws_methods::system_runtime::set_heartbeats(request.params.clone()).await {
                 Ok(payload) => send_ok(socket, &request.id, payload).await,
                 Err(error) => send_ws_method_error(socket, &request.id, error).await,
             }
@@ -2132,15 +2133,8 @@ async fn dispatch_request(
             }
         }
 
-        "browser.request"
-        | "tts.status"
-        | "tts.providers"
-        | "tts.enable"
-        | "tts.disable"
-        | "tts.convert"
-        | "tts.setProvider"
-        | "voicewake.get"
-        | "voicewake.set" => {
+        "browser.request" | "tts.status" | "tts.providers" | "tts.enable" | "tts.disable"
+        | "tts.convert" | "tts.setProvider" | "voicewake.get" | "voicewake.set" => {
             match routes::ws_methods::media_tools::dispatch(state, method, request.params.clone())
                 .await
             {
