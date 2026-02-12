@@ -926,12 +926,56 @@ async fn run_gateway_update(timeout_override_ms: Option<i64>) -> UpdateRunResult
                 .unwrap_or_else(|| "git pull --ff-only failed".to_string());
             ("error".to_string(), outcome.error.or(Some(fallback)))
         }
+    } else if mode == "bun" {
+        let outcome = run_update_step("deps install", "bun", &["install"], &root, timeout_ms).await;
+        steps.push(outcome.step.clone());
+
+        if outcome.step.exit_code == Some(0) && outcome.error.is_none() {
+            ("ok".to_string(), None)
+        } else {
+            let fallback = outcome
+                .step
+                .stderr_tail
+                .clone()
+                .or(outcome.step.stdout_tail.clone())
+                .unwrap_or_else(|| "bun install failed".to_string());
+            ("error".to_string(), outcome.error.or(Some(fallback)))
+        }
+    } else if mode == "pnpm" {
+        let outcome =
+            run_update_step("deps install", "pnpm", &["install"], &root, timeout_ms).await;
+        steps.push(outcome.step.clone());
+
+        if outcome.step.exit_code == Some(0) && outcome.error.is_none() {
+            ("ok".to_string(), None)
+        } else {
+            let fallback = outcome
+                .step
+                .stderr_tail
+                .clone()
+                .or(outcome.step.stdout_tail.clone())
+                .unwrap_or_else(|| "pnpm install failed".to_string());
+            ("error".to_string(), outcome.error.or(Some(fallback)))
+        }
+    } else if mode == "npm" {
+        let outcome = run_update_step("deps install", "npm", &["install"], &root, timeout_ms).await;
+        steps.push(outcome.step.clone());
+
+        if outcome.step.exit_code == Some(0) && outcome.error.is_none() {
+            ("ok".to_string(), None)
+        } else {
+            let fallback = outcome
+                .step
+                .stderr_tail
+                .clone()
+                .or(outcome.step.stdout_tail.clone())
+                .unwrap_or_else(|| "npm install failed".to_string());
+            ("error".to_string(), outcome.error.or(Some(fallback)))
+        }
     } else {
         (
             "skipped".to_string(),
-            Some(format!(
-                "update mode `{mode}` is recognized but only git pull updates are implemented in MAP Rust gateway"
-            )),
+            Some("no supported update mode detected".to_string()),
         )
     };
 
