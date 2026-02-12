@@ -774,6 +774,7 @@ fn hash_token(token: &str) -> String {
 mod tests {
     use super::*;
     use crate::db;
+    use sqlx::postgres::PgPoolOptions;
     use serde_json::json;
 
     fn resolve_test_database_url() -> Option<String> {
@@ -1124,5 +1125,15 @@ mod tests {
             scopes,
             vec!["gateway.read".to_string(), "gateway.write".to_string()]
         );
+    }
+
+    #[tokio::test]
+    async fn unknown_method_returns_none_without_database_access() {
+        let pool = PgPoolOptions::new()
+            .connect_lazy("postgres://user:pass@127.0.0.1:5432/map_test")
+            .expect("lazy pool creation should succeed");
+
+        let result = dispatch_with_pool(&pool, "stream5.not.real", json!({})).await;
+        assert!(result.is_none());
     }
 }
