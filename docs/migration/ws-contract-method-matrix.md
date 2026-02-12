@@ -14,6 +14,10 @@ Canonical methods may be called by any listed alias:
 - `cron.jobs.create`: `cron.jobs.create`, `cron.add`
 - `cron.jobs.run`: `cron.jobs.run`, `cron.run`
 - `cron.jobs.delete`: `cron.jobs.delete`, `cron.remove`
+- `cron.status`: `cron.status`, `cron/status`
+- `cron.update`: `cron.update`, `cron/update`
+- `talk.mode`: `talk.mode`, `talk/mode`
+- `update.run`: `update.run`, `update/run`
 - `channels.resolveSession`: `channels.resolveSession`, `channels.resolve-session`, `channels.resolve_session`
 - `nodes.list`: `nodes.list`, `node.list`
 - `nodes.pair.request`: `nodes.pair.request`, `node.pair.request`
@@ -31,7 +35,8 @@ WS request params accept both:
 Notable alias groups include:
 
 - Session and chat fields: `session_id`, `session_key`, `message_limit`, `run_limit`, `run_id`, `idempotency_key`
-- Cron fields: `schedule_kind`, `schedule_expr`, `session_target`, `delivery_mode`
+- Cron fields: `job_id`, `schedule_kind`, `schedule_expr`, `session_target`, `delivery_mode`
+- Runtime control fields: `restart_delay_ms`, `timeout_ms`
 - Channel routing fields: `peer_kind`, `peer_id`, `account_key`, `thread_id`, `dm_scope`, `dm_policy`, `identity_key`, `agent_id`, `main_key`
 - Node fields: `node_id`, `node_key`, `display_name`, `request_id`
 

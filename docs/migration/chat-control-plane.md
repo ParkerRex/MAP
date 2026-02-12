@@ -44,6 +44,10 @@ All panel mutations expose explicit loading/error/success feedback in the UI.
   - create jobs via `cron.jobs.create` (alias `cron.add`)
   - run now via `cron.jobs.run` (alias `cron.run`)
   - delete via `cron.jobs.delete` (alias `cron.remove`)
+  - runtime status via `cron.status` (alias `cron/status`)
+  - update cron job fields via `cron.update` (alias `cron/update`)
+  - set talk mode state via `talk.mode` (alias `talk/mode`)
+  - invoke update runtime stub via `update.run` (alias `update/run`, currently returns `unavailable`)
 - Channels + pairing panel:
   - connector/account/route summary via `channels.summary` / `channels.status`
   - account list/upsert/delete:
@@ -122,6 +126,10 @@ This behavior now applies to both:
 - `cron.jobs.create` / `cron.add`
 - `cron.jobs.run` / `cron.run`
 - `cron.jobs.delete` / `cron.remove`
+- `cron.status` / `cron/status`
+- `cron.update` / `cron/update`
+- `talk.mode` / `talk/mode`
+- `update.run` / `update/run`
 - `channels.summary` / `channels.status`
 - `channels.accounts.list` / `channels.accounts.upsert` / `channels.accounts.delete`
 - `channels.routes.list` / `channels.routes.upsert` / `channels.routes.delete`
