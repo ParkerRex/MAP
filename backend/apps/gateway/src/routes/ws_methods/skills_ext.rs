@@ -819,7 +819,17 @@ async fn install_command_spec(spec: &SkillInstallSpec, timeout_ms: u64) -> Skill
                 "install".to_string(),
                 "uv".to_string(),
             ];
-            let _ = run_command_with_timeout(&argv, None, timeout_ms, None).await;
+            let output = run_command_with_timeout(&argv, None, timeout_ms, None).await;
+            if output.code != Some(0) {
+                return SkillInstallResult {
+                    ok: false,
+                    message: "Failed to install uv (brew)".to_string(),
+                    stdout: output.stdout,
+                    stderr: output.stderr,
+                    code: output.code,
+                    warnings: None,
+                };
+            }
         } else {
             return SkillInstallResult {
                 ok: false,
@@ -839,7 +849,17 @@ async fn install_command_spec(spec: &SkillInstallSpec, timeout_ms: u64) -> Skill
                 "install".to_string(),
                 "go".to_string(),
             ];
-            let _ = run_command_with_timeout(&argv, None, timeout_ms, None).await;
+            let output = run_command_with_timeout(&argv, None, timeout_ms, None).await;
+            if output.code != Some(0) {
+                return SkillInstallResult {
+                    ok: false,
+                    message: "Failed to install go (brew)".to_string(),
+                    stdout: output.stdout,
+                    stderr: output.stderr,
+                    code: output.code,
+                    warnings: None,
+                };
+            }
         } else {
             return SkillInstallResult {
                 ok: false,
