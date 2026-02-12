@@ -59,7 +59,24 @@ pub fn required_ws_scope(method: &str) -> &'static str {
         | "nodes.list"
         | "node.describe"
         | "exec.approvals.get"
-        | "exec.approvals.node.get" => "gateway.read",
+        | "exec.approvals.node.get"
+        | "agent.identity.get"
+        | "cron.status"
+        | "device.pair.list"
+        | "last-heartbeat"
+        | "node.pair.list"
+        | "sessions.preview"
+        | "sessions.usage"
+        | "sessions.usage.logs"
+        | "sessions.usage.timeseries"
+        | "skills.bins"
+        | "system-presence"
+        | "tts.providers"
+        | "tts.status"
+        | "usage.cost"
+        | "usage.status"
+        | "voicewake.get"
+        | "web.login.wait" => "gateway.read",
         _ => "gateway.write",
     }
 }
@@ -220,6 +237,22 @@ mod tests {
             "exec.approvals.get",
             "exec.approvals.node.get",
             "node.describe",
+            "agent.identity.get",
+            "cron.status",
+            "device.pair.list",
+            "last-heartbeat",
+            "sessions.preview",
+            "sessions.usage",
+            "sessions.usage.logs",
+            "sessions.usage.timeseries",
+            "skills.bins",
+            "system-presence",
+            "tts.providers",
+            "tts.status",
+            "usage.cost",
+            "usage.status",
+            "voicewake.get",
+            "web.login.wait",
         ];
         for method in read_methods {
             assert_eq!(
@@ -239,6 +272,28 @@ mod tests {
             "exec.approvals.node.set",
             "node.invoke",
             "node.event",
+            "browser.request",
+            "cron.update",
+            "device.pair.approve",
+            "device.pair.reject",
+            "device.token.rotate",
+            "device.token.revoke",
+            "node.invoke.result",
+            "node.rename",
+            "sessions.compact",
+            "sessions.delete",
+            "set-heartbeats",
+            "skills.install",
+            "skills.update",
+            "system-event",
+            "talk.mode",
+            "tts.enable",
+            "tts.disable",
+            "tts.convert",
+            "tts.setProvider",
+            "update.run",
+            "voicewake.set",
+            "web.login.start",
         ];
         for method in write_methods {
             assert_eq!(
