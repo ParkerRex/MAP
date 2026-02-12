@@ -986,6 +986,7 @@ fn canonical_ws_method(method: &str) -> Option<&'static str> {
         "config.schema" => "config.schema",
         "config/set" | "config/apply" | "config/patch" => "config.set",
         "config.set" | "config.apply" | "config.patch" => "config.set",
+        "update.run" | "update/run" => "update.run",
         "wizard/start" => "wizard.start",
         "wizard.start" => "wizard.start",
         "wizard/next" => "wizard.next",
@@ -1017,6 +1018,7 @@ fn canonical_ws_method(method: &str) -> Option<&'static str> {
         "send" => "send",
         "poll" => "poll",
         "wake" => "wake",
+        "talk.mode" | "talk/mode" => "talk.mode",
         "sessions.list" => "sessions.list",
         "sessions.create" => "sessions.create",
         "sessions.patch" => "sessions.patch",
@@ -1040,6 +1042,8 @@ fn canonical_ws_method(method: &str) -> Option<&'static str> {
         "cron.jobs.create" | "cron.add" => "cron.jobs.create",
         "cron.jobs.run" | "cron.run" => "cron.jobs.run",
         "cron.jobs.delete" | "cron.remove" => "cron.jobs.delete",
+        "cron.status" | "cron/status" => "cron.status",
+        "cron.update" | "cron/update" => "cron.update",
         "channels.summary" => "channels.summary",
         "channels.status" => "channels.status",
         "channels/logout" => "channels.logout",
@@ -1277,6 +1281,13 @@ async fn dispatch_request(
                 }),
             )
             .await
+        }
+
+        "update.run" => {
+            match routes::ws_methods::cron_control::update_run(request.params.clone()).await {
+                Ok(payload) => send_ok(socket, &request.id, payload).await,
+                Err(error) => send_ws_method_error(socket, &request.id, error).await,
+            }
         }
 
         "wizard.start" => {
@@ -2061,6 +2072,13 @@ async fn dispatch_request(
             .await
         }
 
+        "talk.mode" => {
+            match routes::ws_methods::cron_control::talk_mode(request.params.clone()).await {
+                Ok(payload) => send_ok(socket, &request.id, payload).await,
+                Err(error) => send_ws_method_error(socket, &request.id, error).await,
+            }
+        }
+
         "sessions.list" => {
             send_api_result(
                 socket,
@@ -2725,6 +2743,22 @@ async fn dispatch_request(
                 routes::security::audit(State(state.clone())).await,
             )
             .await
+        }
+
+        "cron.status" => {
+            match routes::ws_methods::cron_control::cron_status(state, request.params.clone()).await
+            {
+                Ok(payload) => send_ok(socket, &request.id, payload).await,
+                Err(error) => send_ws_method_error(socket, &request.id, error).await,
+            }
+        }
+
+        "cron.update" => {
+            match routes::ws_methods::cron_control::cron_update(state, request.params.clone()).await
+            {
+                Ok(payload) => send_ok(socket, &request.id, payload).await,
+                Err(error) => send_ws_method_error(socket, &request.id, error).await,
+            }
         }
 
         "cron.jobs.list" => {
@@ -4584,6 +4618,22 @@ fn api_error_to_wire(error: &ApiError) -> (&'static str, String) {
 async fn send_api_error(socket: &SharedSocketWriter, id: &str, error: ApiError) -> Result<(), ()> {
     let (code, message) = api_error_to_wire(&error);
     send_error(socket, id, code, &message).await
+}
+
+async fn send_ws_method_error(
+    socket: &SharedSocketWriter,
+    id: &str,
+    error: routes::ws_methods::WsMethodError,
+) -> Result<(), ()> {
+    match error {
+        routes::ws_methods::WsMethodError::InvalidRequest(message) => {
+            send_error(socket, id, "invalid_request", &message).await
+        }
+        routes::ws_methods::WsMethodError::Unavailable(message) => {
+            send_error(socket, id, "unavailable", &message).await
+        }
+        routes::ws_methods::WsMethodError::Api(error) => send_api_error(socket, id, error).await,
+    }
 }
 
 async fn send_api_result<T: Serialize>(
