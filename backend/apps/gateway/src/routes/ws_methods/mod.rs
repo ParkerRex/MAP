@@ -16,7 +16,9 @@ impl From<ApiError> for WsMethodError {
 }
 
 pub(crate) mod cron_control;
+pub(crate) mod media_tools;
 pub(crate) mod nodes_device;
+pub(crate) mod system_runtime;
 
 pub(crate) mod web_login;
 
@@ -67,22 +69,8 @@ pub(crate) fn canonical_ws_method(method: &str) -> Option<&'static str> {
     })
 }
 
+#[cfg_attr(not(test), allow(dead_code))]
 pub(crate) fn is_unavailable_stub_method(method: &str) -> bool {
-    matches!(
-        method,
-        "agent.identity.get"
-            | "browser.request"
-            | "last-heartbeat"
-            | "set-heartbeats"
-            | "system-event"
-            | "system-presence"
-            | "tts.convert"
-            | "tts.disable"
-            | "tts.enable"
-            | "tts.providers"
-            | "tts.setProvider"
-            | "tts.status"
-            | "voicewake.get"
-            | "voicewake.set"
-    )
+    let _ = method;
+    false
 }

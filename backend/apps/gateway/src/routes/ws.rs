@@ -1084,7 +1084,7 @@ fn canonical_ws_method(method: &str) -> Option<&'static str> {
         "nodes.pair.approve" | "node.pair.approve" => "nodes.pair.approve",
         "nodes.pair.reject" | "node.pair.reject" => "nodes.pair.reject",
         "nodes.verify" | "node.pair.verify" => "nodes.verify",
-        _ => return None,
+        _ => return routes::ws_methods::canonical_ws_method(method),
     })
 }
 
@@ -1912,6 +1912,15 @@ async fn dispatch_request(
             }
         }
 
+        "agent.identity.get" => {
+            match routes::ws_methods::system_runtime::agent_identity_get(state, request.params.clone())
+                .await
+            {
+                Ok(payload) => send_ok(socket, &request.id, payload).await,
+                Err(error) => send_ws_method_error(socket, &request.id, error).await,
+            }
+        }
+
         "send" => {
             let params = match serde_json::from_value::<SendParams>(request.params.clone()) {
                 Ok(params) => params,
@@ -2072,10 +2081,84 @@ async fn dispatch_request(
             .await
         }
 
+        "last-heartbeat" => {
+            match routes::ws_methods::system_runtime::last_heartbeat(request.params.clone()).await
+            {
+                Ok(payload) => send_ok(socket, &request.id, payload).await,
+                Err(error) => send_ws_method_error(socket, &request.id, error).await,
+            }
+        }
+
+        "set-heartbeats" => {
+            match routes::ws_methods::system_runtime::set_heartbeats(request.params.clone()).await
+            {
+                Ok(payload) => send_ok(socket, &request.id, payload).await,
+                Err(error) => send_ws_method_error(socket, &request.id, error).await,
+            }
+        }
+
+        "system-presence" => {
+            match routes::ws_methods::system_runtime::system_presence(state, request.params.clone())
+                .await
+            {
+                Ok(payload) => send_ok(socket, &request.id, payload).await,
+                Err(error) => send_ws_method_error(socket, &request.id, error).await,
+            }
+        }
+
+        "system-event" => {
+            match routes::ws_methods::system_runtime::system_event(state, request.params.clone())
+                .await
+            {
+                Ok(outcome) => {
+                    let _ = send_event(
+                        state,
+                        socket,
+                        &auth.subject,
+                        "presence",
+                        outcome.presence_event_payload.clone(),
+                    )
+                    .await;
+                    send_ok(socket, &request.id, outcome.response).await
+                }
+                Err(error) => send_ws_method_error(socket, &request.id, error).await,
+            }
+        }
+
         "talk.mode" => {
             match routes::ws_methods::cron_control::talk_mode(request.params.clone()).await {
                 Ok(payload) => send_ok(socket, &request.id, payload).await,
                 Err(error) => send_ws_method_error(socket, &request.id, error).await,
+            }
+        }
+
+        "browser.request"
+        | "tts.status"
+        | "tts.providers"
+        | "tts.enable"
+        | "tts.disable"
+        | "tts.convert"
+        | "tts.setProvider"
+        | "voicewake.get"
+        | "voicewake.set" => {
+            match routes::ws_methods::media_tools::dispatch(state, method, request.params.clone())
+                .await
+            {
+                Some(Ok(payload)) => {
+                    if method == "voicewake.set" {
+                        let _ = send_event(
+                            state,
+                            socket,
+                            &auth.subject,
+                            "voicewake.changed",
+                            payload.clone(),
+                        )
+                        .await;
+                    }
+                    send_ok(socket, &request.id, payload).await
+                }
+                Some(Err(error)) => send_ws_method_error(socket, &request.id, error).await,
+                None => send_error(socket, &request.id, "method_not_found", "unknown method").await,
             }
         }
 
@@ -2736,6 +2819,15 @@ async fn dispatch_request(
             .await
         }
 
+        "skills.bins" | "skills.install" | "skills.update" => {
+            match routes::ws_methods::skills_ext::dispatch(method, state, request.params.clone())
+                .await
+            {
+                Ok(payload) => send_ok(socket, &request.id, payload).await,
+                Err(error) => send_ws_method_error(socket, &request.id, error).await,
+            }
+        }
+
         "security.audit" => {
             send_api_result(
                 socket,
@@ -2937,6 +3029,24 @@ async fn dispatch_request(
                 }),
             )
             .await
+        }
+
+        "web.login.start" => {
+            match routes::ws_methods::web_login::start(state, &auth.subject, request.params.clone())
+                .await
+            {
+                Ok(payload) => send_ok(socket, &request.id, payload).await,
+                Err(error) => send_error(socket, &request.id, error.code, &error.message).await,
+            }
+        }
+
+        "web.login.wait" => {
+            match routes::ws_methods::web_login::wait(state, &auth.subject, request.params.clone())
+                .await
+            {
+                Ok(payload) => send_ok(socket, &request.id, payload).await,
+                Err(error) => send_error(socket, &request.id, error.code, &error.message).await,
+            }
         }
 
         "channels.accounts.list" => {
@@ -3875,6 +3985,23 @@ async fn dispatch_request(
                 .await,
             )
             .await
+        }
+
+        "node.invoke.result"
+        | "node.pair.list"
+        | "node.rename"
+        | "device.pair.list"
+        | "device.pair.approve"
+        | "device.pair.reject"
+        | "device.token.rotate"
+        | "device.token.revoke" => {
+            match routes::ws_methods::nodes_device::dispatch(state, method, request.params.clone())
+                .await
+            {
+                Some(Ok(payload)) => send_ok(socket, &request.id, payload).await,
+                Some(Err(error)) => send_ws_method_error(socket, &request.id, error).await,
+                None => send_error(socket, &request.id, "method_not_found", "unknown method").await,
+            }
         }
 
         _ => send_error(socket, &request.id, "method_not_found", "unknown method").await,
@@ -4881,6 +5008,75 @@ mod tests {
             ("node.pair.reject", "nodes.pair.reject"),
             ("nodes.verify", "nodes.verify"),
             ("node.pair.verify", "nodes.verify"),
+            ("agent.identity.get", "agent.identity.get"),
+            ("agent/identity/get", "agent.identity.get"),
+            ("browser.request", "browser.request"),
+            ("browser/request", "browser.request"),
+            ("device.pair.list", "device.pair.list"),
+            ("device/pair/list", "device.pair.list"),
+            ("device.pair.approve", "device.pair.approve"),
+            ("device/pair/approve", "device.pair.approve"),
+            ("device.pair.reject", "device.pair.reject"),
+            ("device/pair/reject", "device.pair.reject"),
+            ("device.token.rotate", "device.token.rotate"),
+            ("device/token/rotate", "device.token.rotate"),
+            ("device.token.revoke", "device.token.revoke"),
+            ("device/token/revoke", "device.token.revoke"),
+            ("last-heartbeat", "last-heartbeat"),
+            ("set-heartbeats", "set-heartbeats"),
+            ("node.invoke.result", "node.invoke.result"),
+            ("node/invoke/result", "node.invoke.result"),
+            ("node.pair.list", "node.pair.list"),
+            ("node/pair/list", "node.pair.list"),
+            ("nodes.pair.list", "node.pair.list"),
+            ("node.rename", "node.rename"),
+            ("node/rename", "node.rename"),
+            ("sessions.compact", "sessions.compact"),
+            ("sessions/compact", "sessions.compact"),
+            ("sessions.delete", "sessions.delete"),
+            ("sessions/delete", "sessions.delete"),
+            ("sessions.preview", "sessions.preview"),
+            ("sessions/preview", "sessions.preview"),
+            ("sessions.usage", "sessions.usage"),
+            ("sessions/usage", "sessions.usage"),
+            ("sessions.usage.logs", "sessions.usage.logs"),
+            ("sessions/usage/logs", "sessions.usage.logs"),
+            ("sessions.usage.timeseries", "sessions.usage.timeseries"),
+            ("sessions/usage/timeseries", "sessions.usage.timeseries"),
+            ("skills.bins", "skills.bins"),
+            ("skills/bins", "skills.bins"),
+            ("skills.install", "skills.install"),
+            ("skills/install", "skills.install"),
+            ("skills.update", "skills.update"),
+            ("skills/update", "skills.update"),
+            ("system-event", "system-event"),
+            ("system-presence", "system-presence"),
+            ("tts.status", "tts.status"),
+            ("tts/status", "tts.status"),
+            ("tts.providers", "tts.providers"),
+            ("tts/providers", "tts.providers"),
+            ("tts.enable", "tts.enable"),
+            ("tts/enable", "tts.enable"),
+            ("tts.disable", "tts.disable"),
+            ("tts/disable", "tts.disable"),
+            ("tts.convert", "tts.convert"),
+            ("tts/convert", "tts.convert"),
+            ("tts.setProvider", "tts.setProvider"),
+            ("tts.set-provider", "tts.setProvider"),
+            ("tts.set_provider", "tts.setProvider"),
+            ("tts/setProvider", "tts.setProvider"),
+            ("usage.cost", "usage.cost"),
+            ("usage/cost", "usage.cost"),
+            ("usage.status", "usage.status"),
+            ("usage/status", "usage.status"),
+            ("voicewake.get", "voicewake.get"),
+            ("voicewake/get", "voicewake.get"),
+            ("voicewake.set", "voicewake.set"),
+            ("voicewake/set", "voicewake.set"),
+            ("web.login.start", "web.login.start"),
+            ("web/login/start", "web.login.start"),
+            ("web.login.wait", "web.login.wait"),
+            ("web/login/wait", "web.login.wait"),
         ];
 
         for (method, canonical) in matrix {
@@ -4892,6 +5088,57 @@ mod tests {
         }
 
         assert_eq!(canonical_ws_method("not.a.real.method"), None);
+    }
+
+    #[test]
+    fn openclaw_parity_methods_are_not_unavailable_stubs() {
+        let methods = [
+            "agent.identity.get",
+            "browser.request",
+            "cron.status",
+            "cron.update",
+            "device.pair.list",
+            "device.pair.approve",
+            "device.pair.reject",
+            "device.token.rotate",
+            "device.token.revoke",
+            "last-heartbeat",
+            "node.invoke.result",
+            "node.pair.list",
+            "node.rename",
+            "sessions.compact",
+            "sessions.delete",
+            "sessions.preview",
+            "sessions.usage",
+            "sessions.usage.logs",
+            "sessions.usage.timeseries",
+            "set-heartbeats",
+            "skills.bins",
+            "skills.install",
+            "skills.update",
+            "system-event",
+            "system-presence",
+            "talk.mode",
+            "tts.status",
+            "tts.providers",
+            "tts.enable",
+            "tts.disable",
+            "tts.convert",
+            "tts.setProvider",
+            "usage.cost",
+            "usage.status",
+            "voicewake.get",
+            "voicewake.set",
+            "web.login.start",
+            "web.login.wait",
+        ];
+
+        for method in methods {
+            assert!(
+                !routes::ws_methods::is_unavailable_stub_method(method),
+                "`{method}` should not be marked unavailable after parity implementation"
+            );
+        }
     }
 
     #[test]
