@@ -1,3 +1,8 @@
+Project name: MAP
+One liner: A personal productivity platform that unifies calendar, tasks, notes, and health data in one workspace.
+Stack: Next.js 16 + React/TypeScript, Bun, PostgreSQL + Drizzle ORM, Tailwind CSS + Radix UI, iOS SwiftUI + HealthKit, Rust gateway services.
+Problem: Productivity and health information are fragmented across disconnected tools, making planning and decision-making slower and less informed.
+
 # MAP - Personal Productivity Platform
 
 A personal productivity dashboard integrating calendar, tasks, notes, and health data into one unified interface. Includes a native iOS app for Apple Health sync.
